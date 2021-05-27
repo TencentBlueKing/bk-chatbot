@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+# 工程预装模块
+# 需要额外的python包，可直接在文件后面添加
+# 请确保指定的包和版本号，可通过pip安装
+
+redis==2.10.5
+django==2.2.6
+# blueapps==3.2.7
+gunicorn==19.6.0
+mysqlclient==1.4.4
+MarkupSafe==1.1.1
+Mako==1.0.6
+django-celery==3.2.1
+python-json-logger==0.1.7
+whitenoise==3.3.0
+six==1.11.0
+django-cors-headers==3.5.0
+djangorestframework==3.11.0
+pympler==0.8
+celery==3.1.25
+django-debug-toolbar==1.11
+requests==2.22.0
+django-bulk-update==2.2.0
+pymongo==3.11.0
+PyJWT==1.6.1
+cryptography==3.1.1
+django-filter==2.4.0
+drf-ujson2==1.6.1
+python-dateutil==2.7.5
+werkzeug==0.14.1

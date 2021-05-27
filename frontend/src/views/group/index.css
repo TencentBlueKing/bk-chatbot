@@ -1,0 +1,79 @@
+.main-content {
+    min-height: 300px;
+}
+.app-container {
+    min-width: 1100px;
+}
+.app-header {
+    height: 52px;
+    line-height: 52px;
+    background: #fff;
+    border-bottom: 1px solid #dcdee5;
+    padding-left: 20px;
+    color: #313238;
+    font-size: 16px;
+}
+.app-content {
+    min-height: calc(100vh - 208px);
+    padding: 24px;
+}
+.dot-menu {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.tippy-tooltip.dot-menu-theme {
+    padding: 0;
+}
+.dot-menu-trigger {
+    display: block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 0;
+    cursor: pointer;
+}
+.dot-menu-trigger:hover {
+    color: #3A84FF;
+    background-color: #DCDEE5;
+}
+.dot-menu-trigger:before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: currentColor;
+    box-shadow: 0 -4px 0 currentColor, 0 4px 0 currentColor;
+}
+.dot-menu-list {
+    margin: 0;
+    padding: 5px 0;
+    min-width: 50px;
+    list-style: none;
+}
+.dot-menu-list .dot-menu-item {
+    padding: 0 10px;
+    font-size: 12px;
+    line-height: 26px;
+    cursor: pointer;
+}
+.dot-menu-list .dot-menu-item:hover {
+    background-color: #eaf3ff;
+    color: #3a84ff;
+}
+.bk-grid-container {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+.neo-dropdown-list {
+    width: 500px;
+    max-height: 300px;
+    padding-left: 19px;
+    padding-right: 19px;
+}
+.neo-dot .bk-badge.dot {
+    margin-top: 16px;
+}

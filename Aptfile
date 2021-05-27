@@ -1,0 +1,4 @@
+# you can list packages
+libssl-dev
+default-libmysqlclient-dev
+

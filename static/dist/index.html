@@ -1,0 +1,37 @@
+<!DOCTYPE html><html><head><link rel=icon href="{{ BK_STATIC_URL }}/static/images/favicon.png" type=image/x-icon><link rel="shortcut icon" href="{{ BK_STATIC_URL }}/static/images/favicon.png" type=image/x-icon><meta charset=utf-8><title>OPSBOT</title><link href={{BK_STATIC_URL}}/static/css/chunk-bk-magic-vue.42e2d70efa7d218fd8d2.css rel=stylesheet><link href={{BK_STATIC_URL}}/static/css/main.93cc09876b9b80b374a1.css rel=stylesheet></head><body><div id=app></div><script src="{{ BK_STATIC_URL }}/static/lib.bundle.js"></script><script>window.PROJECT_CONFIG = (function () {
+                const SITE_URL = '{{ SITE_URL }}'
+                const BK_STATIC_URL = '{{ BK_STATIC_URL }}'
+                const REMOTE_STATIC_URL = '{{ BKPAAS_REMOTE_STATIC_URL }}'
+                // 蓝鲸平台访问URL
+                const BKPAAS_URL = '{{ BKPAAS_URL }}'
+                // 当前应用的环境，预发布环境为 stag，正式环境为 prod
+                const BKPAAS_ENVIRONMENT = '{{ BKPAAS_ENVIRONMENT }}'
+                // EngineApp名称，拼接规则：bkapp-{appcode}-{BKPAAS_ENVIRONMENT}
+                const BKPAAS_ENGINE_APP_NAME = '{{ BKPAAS_ENGINE_APP_NAME }}'
+                // MagicBox静态资源URL
+                const BKPAAS_REMOTE_STATIC_URL = '{{ BKPAAS_REMOTE_STATIC_URL }}'
+                // 内部版对应ieod，外部版对应tencent，混合云版对应clouds
+                const BKPAAS_ENGINE_REGION = '{{ BKPAAS_ENGINE_REGION }}'
+                // APP ID
+                const BKPAAS_APP_ID = '{{ BKPAAS_APP_ID }}'
+
+                return {
+                    SITE_URL: SITE_URL,
+                    BK_STATIC_URL: BK_STATIC_URL,
+                    REMOTE_STATIC_URL: REMOTE_STATIC_URL,
+                    BKPAAS_URL: BKPAAS_URL,
+                    BKPAAS_ENVIRONMENT: BKPAAS_ENVIRONMENT,
+                    BKPAAS_ENGINE_APP_NAME: BKPAAS_ENGINE_APP_NAME,
+                    BKPAAS_REMOTE_STATIC_URL: BKPAAS_REMOTE_STATIC_URL,
+                    BKPAAS_ENGINE_REGION: BKPAAS_ENGINE_REGION,
+                    BKPAAS_APP_ID: BKPAAS_APP_ID
+                }
+            })()
+
+            window.onload = function () {
+                let ta = document.createElement('script')
+                ta.src = '//tajs.qq.com/stats?sId=64878578'
+                ta.defer = 'defer'
+                let s = document.getElementsByTagName('script')[0]
+                s.parentNode.insertBefore(ta, s)
+            }</script><script type=text/javascript src={{BK_STATIC_URL}}/static/js/chunk-bk-magic-vue.0cbfe2261c978f6c0c84.js></script><script type=text/javascript src={{BK_STATIC_URL}}/static/js/main.42577096fbb2efc9cef5.js></script><script type=text/javascript src={{BK_STATIC_URL}}/static/js/vendors~main.2936df682c2c2deece49.js></script></body></html>
