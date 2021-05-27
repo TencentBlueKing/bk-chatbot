@@ -12,6 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 REDIS_DB_PASSWORD = ''
 REDIS_DB_PORT = 6379
 REDIS_DB_NAME = ''

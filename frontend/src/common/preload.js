@@ -11,8 +11,6 @@ software distributed under the License is distributed on
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
- * @file 页面公共请求即每切换 router 时都必须要发送的请求
- * @author
  */
 
 // import store from '@/store'

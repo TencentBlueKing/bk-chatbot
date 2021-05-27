@@ -11,12 +11,8 @@
  an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
  either express or implied. See the License for the
  specific language governing permissions and limitations under the License.
- * @file prod server
- * 静态资源
- * 模块渲染输出
- * 注入全局变量
- * 添加html模板引擎
  */
+
 import express from 'express'
 import path from 'path'
 import fs from 'fs'
