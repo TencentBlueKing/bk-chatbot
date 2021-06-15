@@ -17,9 +17,9 @@ import hashlib
 import random
 from typing import Sequence, Callable, Any
 
-from . import OpsBot
-from .exceptions import XWorkError
-from .message import escape
+from .adapter import Bot
+from .exceptions import Error
+from .stdlib import escape
 from .self_typing import Context_T, Message_T, Expression_T
 
 
@@ -38,13 +38,13 @@ def context_id(ctx: Context_T, *,
     :param mode: unique id mode: "default", "group", or "user"
     :param use_hash: use md5 to hash the id or not
     """
-    ctx_id = f'/{ctx["FromUserName"]}/{ctx["ToUserName"]}'
+    ctx_id = f'/{ctx["msg_from_type"]}/{ctx["msg_group_id"]}/{ctx["msg_sender_id"]}'
     if ctx_id and use_hash:
         ctx_id = hashlib.md5(ctx_id.encode('ascii')).hexdigest()
     return ctx_id
 
 
-async def send(bot: OpsBot, ctx: Context_T,
+async def send(bot: Bot, ctx: Context_T,
                message: Message_T, *,
                ensure_private: bool = False,
                ignore_failure: bool = True,
@@ -53,8 +53,9 @@ async def send(bot: OpsBot, ctx: Context_T,
     try:
         if ensure_private:
             ctx = ctx.copy()
+            ctx['msg_from_type'] = 'single'
         return await bot.send(ctx, message, **kwargs)
-    except XWorkError:
+    except Error:
         if not ignore_failure:
             raise
         return None

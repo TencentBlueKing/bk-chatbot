@@ -61,6 +61,7 @@ from opsbot.default_config import *
 
 RTX_NAME = '我的机器人'
 COMMAND_START = ['', re.compile(r'[/!]+')]
+API_ROOT = 'http://qyapi.weixin.qq.com/cgi-bin'
 ```
 > 编辑启动文件 server.py, 设置启动Host和Port, 注：该端口要与企业微信应用回调相对应
 ```
@@ -71,7 +72,7 @@ import config
 
 
 if __name__ == '__main__':
-    opsbot.init(config)
+    opsbot.init('xwork', config)
     opsbot.load_plugins(path.join(path.dirname(__file__), intent', 'plugins'), 'intent.plugins')
     # service on 0.0.0.0:8888
     opsbot.run(host='0.0.0.0', port=8888)
@@ -123,7 +124,15 @@ BK_REFRESH_TOKEN_URL = ""  # 目前不需要
 BK_CC_ROOT = ""            # 访问蓝鲸cc的根路径 你的domain + /api/c/compapi/v2/cc/  
 BK_JOB_ROOT = ""           # 访问蓝鲸JOB的根路径 你的domain + /api/c/compapi/v2/jobv3/
 BK_SOPS_ROOT = ""          # 访问蓝鲸SOPS的根路径 你的domain + /api/c/compapi/v2/sops/
+BK_DEVOPS_ROOT = ""        # 访问蓝盾的根路径
 BACKEND_ROOT = ""          # 访问bk-chatbot的根路径 你的domain + /o/bk-chatbot/
+
+"""
+REDIS 路径
+"""
+REDIS_DB_PASSWORD = '' # 访问密码
+REDIS_DB_PORT = 6379   # 默认端口
+REDIS_DB_NAME = ''     # redis 启动的地址
 ```
 
 > 任务执行插件配置
@@ -133,13 +142,6 @@ cd release && vim intent/plugins/task/settings.py
 ```
 
 ```
-"""
-REDIS 路径
-"""
-REDIS_DB_PASSWORD = '' # 访问密码
-REDIS_DB_PORT = 6379   # 默认端口
-REDIS_DB_NAME = ''     # redis 启动的地址
-
 """
 交互配置
 """

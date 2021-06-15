@@ -13,13 +13,15 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import asyncio
+import importlib
 from typing import Iterable, Optional, Callable, Union, NamedTuple
 
-from . import OpsBot, permission as perm
+import asyncio
+
+from . import permission as perm
+from .adapter import Bot
 from .command import call_command
 from .log import logger
-from .message import Message
 from .session import BaseSession
 from .self_typing import Context_T, CommandName_T, CommandArgs_T
 
@@ -76,15 +78,13 @@ def on_natural_language(keywords: Union[Optional[Iterable], str, Callable] = Non
 
 
 class NLPSession(BaseSession):
-    """
-    todo adapt xwork
-    """
     __slots__ = ('msg', 'msg_text', 'msg_images')
 
-    def __init__(self, bot: OpsBot, ctx: Context_T, msg: str):
+    def __init__(self, bot: Bot, ctx: Context_T, msg: str):
         super().__init__(bot, ctx)
         self.msg = msg
-        tmp_msg = Message(msg)
+        protocol = importlib.import_module(f'protocol.{self.bot.type}')
+        tmp_msg = protocol.Message(msg)
         self.msg_text = tmp_msg.extract_plain_text()
         self.msg_images = [s.data['url'] for s in tmp_msg
                            if s.type == 'image' and 'url' in s.data]
@@ -115,13 +115,13 @@ class IntentCommand(NamedTuple):
     current_arg: str = ''
 
 
-async def handle_natural_language(bot: OpsBot, ctx: Context_T) -> bool:
+async def handle_natural_language(bot: Bot, ctx: Context_T) -> bool:
     """
     Handle a message as natural language.
 
     This function is typically called by "handle_message".
 
-    :param bot: OpsBot instance
+    :param bot: Bot instance
     :param ctx: message context
     :return: the message is handled as natural language
     """
@@ -144,7 +144,7 @@ async def handle_natural_language(bot: OpsBot, ctx: Context_T) -> bool:
         if p.only_to_me and not ctx['to_me']:
             continue
 
-        should_run = await perm.check_permission(bot, ctx, p.permission)
+        should_run = await bot.check_permission(ctx, p.permission)
         if should_run and p.keywords:
             for kw in p.keywords:
                 if kw in session.msg_text:

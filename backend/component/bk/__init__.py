@@ -16,14 +16,15 @@ specific language governing permissions and limitations under the License.
 import json
 import urllib
 
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
 import aiohttp
 
 from component.exceptions import *
 from component.api import Api
 from component.config import (
     BK_APP_ID, BK_APP_SECRET, BK_CC_ROOT,
-    BK_JOB_ROOT, BK_SOPS_ROOT, BACKEND_ROOT
+    BK_JOB_ROOT, BK_SOPS_ROOT, BACKEND_ROOT,
+    BK_DEVOPS_ROOT
 )
 
 _token = {}  # type: Dict[str, Any]
@@ -59,7 +60,7 @@ class BKApi(Api):
 
     def _handle_api_result(self, result: Optional[Dict[str, Any]]) -> Any:
         if isinstance(result, dict):
-            if not result.get('result'):
+            if not result.get('result', True) or result.get('code', 0) != 0 or result.get('status', 0) != 0:
                 raise ActionFailed(retcode=result.get('code'))
             return result.get('data')
 
@@ -71,7 +72,7 @@ class BKApi(Api):
             raise TokenNotAvailable
 
         url = f"{self._api_root}/{action}?{self._access_token}"
-        params.get('json', {}).update(bk_app_code=BK_APP_ID, bk_app_secret=BK_APP_SECRET)
+
         try:
             async with aiohttp.request(method, url, **params) as resp:
                 if 200 <= resp.status < 300:
@@ -119,7 +120,7 @@ class JOB:
         bk_supplier_account
         bk_username
         """
-        return await self.bk_cc_api.call_action('execute_job_plan/', 'POST', json=params)
+        return await self.bk_cc_api.call_action('jobv3/execute_job_plan/', 'POST', json=params)
 
 
 class SOPS:
@@ -130,15 +131,16 @@ class SOPS:
     def __init__(self):
         self.bk_cc_api = BKApi(BK_SOPS_ROOT)
 
-    async def get_template_info(self, **params) -> Dict:
+    async def get_template_info(self, bk_biz_id, template_id, **params) -> Dict:
         """
         -params:
         template_id
         bk_biz_id
         """
-        return await self.bk_cc_api.call_action(f'get_template_info/', 'GET', params=params)
+        return await self.bk_cc_api.call_action(f'get_template_info/{template_id}/{bk_biz_id}/',
+                                                'GET', params=params)
 
-    async def create_task(self, **params) -> Dict:
+    async def create_task(self, bk_biz_id, template_id, **params) -> Dict:
         """
         -params:
         template_id
@@ -150,9 +152,10 @@ class SOPS:
         bk_supplier_account
         bk_username
         """
-        return await self.bk_cc_api.call_action(f'create_task/', 'POST', json=params)
+        return await self.bk_cc_api.call_action(f'create_task/{template_id}/{bk_biz_id}/',
+                                                'POST', json=params)
 
-    async def start_task(self, **params) -> Dict:
+    async def start_task(self, bk_biz_id, task_id, **params) -> Dict:
         """
         -params:
         task_id
@@ -161,7 +164,34 @@ class SOPS:
         bk_supplier_account
         bk_username
         """
-        return await self.bk_cc_api.call_action(f'start_task/', 'POST', json=params)
+        return await self.bk_cc_api.call_action(f'start_task/{task_id}/{bk_biz_id}/',
+                                                'POST', json=params)
+
+
+class DevOps:
+    """
+    devops api shortcut
+    """
+
+    def __init__(self):
+        self.bk_devops_api = BKApi(BK_DEVOPS_ROOT)
+
+    async def v3_app_project_list(self, bk_username) -> List:
+        return await self.bk_devops_api.call_action(f'projects/',
+                                                    'GET', headers={'X-DEVOPS-UID': bk_username})
+
+    async def v3_app_pipeline_list(self, project_id, bk_username) -> Dict:
+        return await self.bk_devops_api.call_action(f'projects/{project_id}/pipelines/',
+                                                    'GET', headers={'X-DEVOPS-UID': bk_username})
+
+    async def v3_app_build_start_info(self, project_id, pipeline_id, bk_username) -> Dict:
+        return await self.bk_devops_api.call_action(
+            f'projects/{project_id}/pipelines/{pipeline_id}/builds/manualStartupInfo', 'GET',
+            headers={'X-DEVOPS-UID': bk_username})
+
+    async def v3_app_build_start(self, project_id, pipeline_id, bk_username, **params) -> Dict:
+        return await self.bk_devops_api.call_action(f'projects/{project_id}/pipelines/{pipeline_id}/builds/start',
+                                                    'POST', headers={'X-DEVOPS-UID': bk_username}, json=params)
 
 
 class Backend:

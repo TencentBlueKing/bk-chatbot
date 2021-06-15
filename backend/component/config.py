@@ -13,6 +13,11 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+"""
+ALL Component Config
+Include: BK(APP_ID, APP_SECRET)
+"""
+
 BK_APP_ID = ""
 BK_APP_SECRET = ""
 BK_GET_TOKEN_URL = ""
@@ -21,4 +26,9 @@ BK_REFRESH_TOKEN_URL = ""
 BK_CC_ROOT = ""
 BK_JOB_ROOT = ""
 BK_SOPS_ROOT = ""
+BK_DEVOPS_ROOT = ""
 BACKEND_ROOT = ""
+
+REDIS_DB_PASSWORD = ''
+REDIS_DB_PORT = 50117
+REDIS_DB_NAME = ''

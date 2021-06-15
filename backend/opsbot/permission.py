@@ -13,15 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from collections import namedtuple
-
-from aiocache import cached
-
-from . import OpsBot
-from .exceptions import XWorkError
-from .self_typing import Context_T
-
-
 PRIVATE_FRIEND = 0x0001
 PRIVATE_GROUP = 0x0002
 PRIVATE_DISCUSS = 0x0004
@@ -48,45 +39,4 @@ IS_GROUP_OWNER = GROUP_ADMIN | GROUP_OWNER
 IS_GROUP = GROUP
 IS_SUPERUSER = 0xFFFF
 
-_min_context_fields = (
-    'Type',
-    'Id',
-    'Sender',
-    'DeviceType',
-)
 
-_MinContext = namedtuple('MinContext', _min_context_fields)
-
-
-async def check_permission(bot: OpsBot,
-                           ctx: Context_T,
-                           permission_required: int) -> bool:
-    """
-    Check if the context has the permission required.
-
-    :param bot: OpsBot instance
-    :param ctx: message context
-    :param permission_required: permission required
-    :return: the context has the permission
-    """
-    min_ctx_kwargs = {}
-    for field in _min_context_fields:
-        if field in ctx:
-            min_ctx_kwargs[field] = ctx[field]
-        else:
-            min_ctx_kwargs[field] = None
-    min_ctx = _MinContext(**min_ctx_kwargs)
-    return await _check(bot, min_ctx, permission_required)
-
-
-@cached(ttl=2 * 60)  # cache the result for 2 minute
-async def _check(bot: OpsBot,
-                 min_ctx: _MinContext,
-                 permission_required: int) -> bool:
-    permission = 0
-    if min_ctx.FromUserName in bot.config.SUPERUSERS:
-        permission |= IS_SUPERUSER
-    else:
-        permission |= IS_PRIVATE
-
-    return bool(permission & permission_required)

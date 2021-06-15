@@ -13,15 +13,13 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import asyncio
+import importlib
 import logging
 from typing import Any, Optional
 
-import xhttp.message
-from xhttp import XWorkHttp
-
 from .log import logger
 from .sched import Scheduler
+from .adapter import Bot
 
 if Scheduler:
     scheduler = Scheduler()
@@ -29,46 +27,10 @@ else:
     scheduler = None
 
 
-class OpsBot(XWorkHttp):
-    def __init__(self, config_object: Optional[Any] = None):
-        if config_object is None:
-            from . import default_config as config_object
-
-        config_dict = {k: v for k, v in config_object.__dict__.items()
-                       if k.isupper() and not k.startswith('_')}
-        logger.debug(f'Loaded configurations: {config_dict}')
-        super().__init__(message_class=xhttp.message.Message,
-                         **{k.lower(): v for k, v in config_dict.items()})
-
-        self.config = config_object
-        self.asgi.debug = self.config.DEBUG
-
-        from .message import handle_message
-        from .event import handle_event
-
-        @self.on_text
-        async def _(ctx):
-            asyncio.ensure_future(handle_message(self, ctx))
-
-        @self.on_event
-        async def _(ctx):
-            asyncio.ensure_future(handle_event(self, ctx))
-
-    def run(self, host: Optional[str] = None, port: Optional[int] = None,
-            *args, **kwargs) -> None:
-        host = host or self.config.HOST
-        port = port or self.config.PORT
-        if 'debug' not in kwargs:
-            kwargs['debug'] = self.config.DEBUG
-
-        logger.info(f'Running on {host}:{port}')
-        super().run(host=host, port=port, *args, **kwargs)
+_bot: Optional[Bot] = None
 
 
-_bot: Optional[OpsBot] = None
-
-
-def init(config_object: Optional[Any] = None) -> None:
+def init(name: str, config_object: Optional[Any] = None) -> None:
     """
     Initialize OpsBot instance.
 
@@ -76,10 +38,12 @@ def init(config_object: Optional[Any] = None) -> None:
     otherwise the get_bot() function will return None and nothing
     is gonna work properly.
 
+    :param name: name for one protocol
     :param config_object: configuration object
     """
     global _bot
-    _bot = OpsBot(config_object)
+    protocol = importlib.import_module(f'protocol.{name}')
+    _bot = protocol.Bot(config_object)
 
     if _bot.config.DEBUG:
         logger.setLevel(logging.DEBUG)
@@ -96,7 +60,7 @@ def _start_scheduler():
         logger.info('Scheduler started')
 
 
-def get_bot() -> OpsBot:
+def get_bot() -> Bot:
     """
     Get the OpsBot instance.
 
@@ -115,13 +79,15 @@ def run(host: Optional[str] = None, port: Optional[int] = None,
     """
     Run the OpsBot instance.
     """
-    get_bot().run(host=host, port=port, *args, **kwargs)
+    bot = get_bot()
+    host = host or bot.config.HOST
+    port = port or bot.config.PORT
+    bot.run(host=host, port=port, *args, **kwargs)
 
 
 from .exceptions import *
 from .plugin import (load_plugin, load_plugins, load_builtin_plugins,
                      get_loaded_plugins)
-from .message import message_preprocessor, Message, MessageSegment
 from .command import on_command, CommandSession, CommandGroup
 from .natural_language import (on_natural_language, NLPSession, NLPResult,
                                 IntentCommand)
@@ -129,14 +95,10 @@ from .event import EventSession
 from .helpers import context_id
 
 __all__ = [
-    'OpsBot', 'scheduler', 'init', 'get_bot', 'run',
-
-    'XWorkError',
+    'Bot', 'scheduler', 'init', 'get_bot', 'run',
 
     'load_plugin', 'load_plugins', 'load_builtin_plugins',
     'get_loaded_plugins',
-
-    'message_preprocessor', 'Message', 'MessageSegment',
 
     'on_command', 'CommandSession', 'CommandGroup',
 

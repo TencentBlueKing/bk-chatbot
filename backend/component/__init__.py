@@ -13,9 +13,11 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from .bk import BKApi, CC, JOB, SOPS, Backend
+from .bk import BKApi, CC, JOB, SOPS, DevOps, Backend
 from .nlp import fetch_slot, fetch_intent
+from .public import RedisClient
 
 
-__all__ = ['BKApi', 'CC', 'JOB', 'SOPS', 'Backend',
-           'fetch_slot', 'fetch_intent']
+__all__ = ['BKApi', 'CC', 'JOB', 'SOPS', 'DevOps', 'Backend',
+           'fetch_slot', 'fetch_intent',
+           'RedisClient']

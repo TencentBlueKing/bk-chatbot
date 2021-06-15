@@ -13,7 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from . import OpsBot
+from .adapter import Bot
 from .helpers import send
 from .self_typing import Context_T, Message_T
 
@@ -21,7 +21,7 @@ from .self_typing import Context_T, Message_T
 class BaseSession:
     __slots__ = ('bot', 'ctx')
 
-    def __init__(self, bot: OpsBot, ctx: Context_T):
+    def __init__(self, bot: Bot, ctx: Context_T):
         self.bot = bot
         self.ctx = ctx
 

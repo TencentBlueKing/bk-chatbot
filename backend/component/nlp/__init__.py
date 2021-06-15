@@ -12,14 +12,15 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import os
 import json
 import io
 import re
-import requests
 import jieba
 from gensim import corpora, models, similarities
-from component.config import BACKEND_ROOT, BK_APP_ID, BK_APP_SECRET
+
+from component import Backend
 
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 BASE_DICT_PATH = os.path.join(CUR_PATH, 'word_manage', 'base_dict.txt')
@@ -29,18 +30,15 @@ similar_word = json.load(open(SIMILAR_WORD_PATH))
 jieba.load_userdict(BASE_DICT_PATH)
 
 
-def get_slots(intent_id):
-    url = f'{BACKEND_ROOT}api/v1/exec/admin_describe_tasks'
-    req = json.dumps({"data": {'index_id': intent_id}, 'app_code': BK_APP_ID, 'app_secret': BK_APP_SECRET})
+async def get_slots(intent_id):
     slot_list = []
     try:
-        r = requests.post(url, data=req)
-        task_list = json.loads(r.text)
-        slots = task_list['data'][0]['slots']
+        task_list = await Backend().describe('tasks', index_id=intent_id)
+        slots = task_list[0]['slots']
         for slot in slots:
             slot['value'] = ''
             slot_list.append(slot)
-    except:
+    except IndexError:
         return slot_list
     else:
         return slot_list
@@ -75,36 +73,34 @@ def get_slot_data(msg, reglist):
     return reglist
 
 
-def fetch_slot(msg_content, intent_id):
+async def fetch_slot(msg_content, intent_id):
     """
     获取slot值，
     :param msg_content: 用户语句
     :param intent_id: 意图id
     :return:
     """
-    slot_list = get_slots(intent_id)
+    slot_list = await get_slots(intent_id)
     reg_list = get_slot_data(msg_content, slot_list)
     return reg_list
 
 
-def get_corpus_text(biz_id=None, user_id=None):
+async def get_corpus_text(biz_id=None, user_id=None):
     """
     获取语料，
     :param biz_id: 业务id，业务纬度，内部群聊场景
     :param user_id: 用户id，单聊的场景
     :return:
     """
-    url = f'{BACKEND_ROOT}api/v1/exec/admin_describe_intents'
+    backend = Backend()
     if biz_id:
-        req = json.dumps({"data": {'biz_id': biz_id}, 'app_code': BK_APP_ID, 'app_secret': BK_APP_SECRET})
+        db_intents = await backend.describe('intents', biz_id=biz_id)
     else:
-        user_list = [user_id]
-        req = json.dumps({"data": {'available_user': user_list}, 'app_code': BK_APP_ID, 'app_secret': BK_APP_SECRET})
-    r = requests.post(url, data=req)
-    db_results = json.loads(r.text)
-    if len(db_results['data']) > 0:
+        db_intents = await backend.describe('intents', available_user=[user_id])
+
+    if len(db_intents) > 0:
         intent_list = []
-        for intent in db_results['data']:
+        for intent in db_intents:
             intent_id = intent['id']
             intent_name = intent['intent_name']
             is_commit = intent['is_commit']
@@ -112,14 +108,10 @@ def get_corpus_text(biz_id=None, user_id=None):
             available_user = intent['available_user']
             available_group = intent['available_group']
             biz_id = intent['biz_id']
-            # 获取技能对应的意图
-            url1 = f'{BACKEND_ROOT}api/v1/exec/admin_describe_utterances'
-            req1 = json.dumps(
-                {"data": {'index_id': intent_id}, 'app_code': BK_APP_ID, 'app_secret': BK_APP_SECRET})
-            r1 = requests.post(url1, data=req1)
-            db_results1 = json.loads(r1.text)
-            if len(db_results1['data']) > 0:
-                utterance_list = db_results1['data'][0]['content']
+            # todo decrease check db frequently
+            db_utterances = await backend.describe('utterances', index_id=intent_id)
+            if len(db_utterances) > 0:
+                utterance_list = db_utterances[0]['content']
                 for utterance in utterance_list:
                     intent_list.append(
                         {'intent_id': intent_id, 'intent_name': intent_name, 'is_commit': is_commit, 'status': status,
@@ -266,9 +258,9 @@ def train_model(biz_data_list, stop_word_list):
     return tfidf, index, dictionary
 
 
-def fetch_intent(msg_content, biz_id=None, user_id=None):
+async def fetch_intent(msg_content, biz_id=None, user_id=None):
     # 获取语料
-    biz_data_list = get_corpus_text(biz_id, user_id)
+    biz_data_list = await get_corpus_text(biz_id, user_id)
     # 对输入内容进行分词
     cut_word_res = jieba.lcut(msg_content.lower())
     # 停用词列表

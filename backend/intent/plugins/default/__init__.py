@@ -18,4 +18,5 @@ from opsbot import on_command, CommandSession
 
 @on_command('group_id', aliases=('群ID', '群id', '查看企业微信ID', '查看企业微信id'))
 async def _(session: CommandSession):
-    await session.send('企业微信不支持该技能')
+    if session.ctx['msg_from_type'] == 'group':
+        await session.send(session.ctx['msg_group_id'])

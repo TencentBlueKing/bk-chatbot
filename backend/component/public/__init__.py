@@ -13,18 +13,4 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-EXPR_DONT_UNDERSTAND = (
-    '无法理解你的意图...',
-    '请确认是该群里的意图...'
-)
-
-SESSISON_FINISHED_MSG = '本次会话结束，您可以开启新的会话'
-SESSISON_FINISHED_CMD = '结束'
-
-TASK_ALLOW_CMD = '是'
-TASK_REFUSE_CMD = '否'
-TASK_EXEC_SUCCESS = '任务启动成功'
-TASK_EXEC_FAIL = '任务启动失败'
-
-PATTERN_IP = '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}'
-PATTERN_DYNAMIC_GROUP = '.*-.*-.*-.*-.*'
+from .db import RedisClient

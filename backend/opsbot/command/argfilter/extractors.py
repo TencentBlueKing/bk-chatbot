@@ -14,24 +14,24 @@ specific language governing permissions and limitations under the License.
 """
 
 import re
+import importlib
 from typing import List
 
-from opsbot.message import Message
+from opsbot.adapter import Bot
 from opsbot.self_typing import Message_T
 
 
-def _extract_text(arg: Message_T) -> str:
+def _extract_text(bot: Bot, arg: Message_T) -> str:
     """Extract all plain text segments from a message-like object."""
-    arg_as_msg = Message(arg)
+    protocol = importlib.import_module(f'protocol.{bot.type}')
+    arg_as_msg = protocol.Message(arg)
     return arg_as_msg.extract_plain_text()
 
 
-def _extract_image_urls(arg: Message_T) -> List[str]:
-    """
-    todo adapt xwork
-    Extract all image urls from a message-like object.
-    """
-    arg_as_msg = Message(arg)
+def _extract_image_urls(bot: Bot, arg: Message_T) -> List[str]:
+    """Extract all image urls from a message-like object."""
+    protocol = importlib.import_module(f'protocol.{bot.type}')
+    arg_as_msg = protocol.Message(arg)
     return [s.data['url'] for s in arg_as_msg
             if s.type == 'image' and 'url' in s.data]
 

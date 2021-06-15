@@ -53,12 +53,12 @@ class BKTask:
             bk_biz_id=self._intent.get('biz_id'),
             job_plan_id=int(task.get('task_id')),
             global_var_list=global_var_list,
-            bk_username=task.get('created_by')
+            bk_username=self._user_id
         )
 
     async def _bk_sops(self, task: Dict):
         biz_id = self._intent.get('biz_id')
-        created_by = task.get('created_by')
+        user_id = self._user_id
         source = task.get('source', {})
         activities = [k
             for k, v in source.get('pipeline_tree', {}).get('activities').items()
@@ -68,19 +68,20 @@ class BKTask:
             itertools.chain(*[json.loads(node['data']) for node in task.get('activities', [])])
         )
         exclude_task_nodes_id = list(
-            set(activities).difference(set(task.get('activities')))
+            set(activities).difference(set(select_group))
         ) if select_group else []
         constants = {slot['id']: slot['value'] for slot in self._slots}
+
         sops = SOPS()
-        response = await sops.create_task(bk_biz_id=biz_id,
-                                          template_id=task.get('task_id'),
+        response = await sops.create_task(biz_id,
+                                          task.get('task_id'),
                                           name=source.get('name'),
-                                          bk_username=created_by,
+                                          bk_username=user_id,
                                           exclude_task_nodes_id=exclude_task_nodes_id,
                                           constants=constants)
 
         task_id = response.get('task_id')
-        await sops.start_task(bk_biz_id=biz_id, task_id=task_id, bk_username=created_by)
+        await sops.start_task(biz_id, task_id, bk_username=user_id)
 
 
 def _validate_pattern(pattern, msg):
@@ -99,7 +100,9 @@ async def parse_slots(slots: List, session: CommandSession):
         if slot['value']:
             continue
 
-        param, _ = session.get(slot['name'], prompt=slot['prompt'])
+        param, ctx = session.get(slot['name'], prompt=slot['prompt'])
+        if ctx['message'].extract_plain_text().find(session.bot.config.RTX_NAME) != -1:
+            session.switch(param)
 
         if param == SESSISON_FINISHED_CMD:
             await session.send(SESSISON_FINISHED_MSG)
@@ -120,7 +123,7 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
     if intent.get('is_commit', True):
         prompt = summary_statement(intent, slots, '可否执行，请输入 是/否')
         while True:
-            is_commit, _ = session.get('is_commit', prompt=prompt)
+            is_commit, ctx = session.get('is_commit', prompt=prompt)
             if is_commit not in [TASK_ALLOW_CMD, TASK_REFUSE_CMD]:
                 del session.state['is_commit']
             else:

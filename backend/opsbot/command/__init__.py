@@ -15,6 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import asyncio
 import re
+import importlib
 import shlex
 from datetime import datetime
 from typing import (
@@ -22,11 +23,12 @@ from typing import (
     Awaitable
 )
 
-from opsbot import OpsBot, permission as perm
+from opsbot import permission as perm
+from opsbot.adapter import Bot
 from opsbot.command.argfilter import ValidateError
 from opsbot.helpers import context_id, send, render_expression
 from opsbot.log import logger
-from opsbot.message import Message
+from opsbot.adapter import Message
 from opsbot.session import BaseSession
 from opsbot.self_typing import (
     Context_T,
@@ -148,8 +150,7 @@ class Command:
         :param session: CommandSession object
         :return: the session has the permission
         """
-        return await perm.check_permission(session.bot, session.ctx,
-                                           self.permission)
+        return await session.bot.check_permission(session.ctx, self.permission)
 
 
 class CommandFunc:
@@ -276,9 +277,9 @@ class CommandSession(BaseSession):
     __slots__ = ('cmd',
                  'current_key', 'current_arg_filters', '_current_send_kwargs',
                  'current_arg', '_current_arg_text', '_current_arg_images',
-                 '_state', '_last_interaction', '_running')
+                 '_state', '_last_interaction', '_running', '_protocol')
 
-    def __init__(self, bot: OpsBot, ctx: Context_T, cmd: Command, *,
+    def __init__(self, bot: Bot, ctx: Context_T, cmd: Command, *,
                  current_arg: str = '', args: Optional[CommandArgs_T] = None):
         super().__init__(bot, ctx)
         self.cmd = cmd  # Command object
@@ -303,6 +304,7 @@ class CommandSession(BaseSession):
 
         self._last_interaction = None  # last interaction time of this session
         self._running = False
+        self._protocol = importlib.import_module(f'protocol.{self.bot.type}')
 
     @property
     def state(self) -> State_T:
@@ -352,19 +354,18 @@ class CommandSession(BaseSession):
         Plain text part in the current argument, without any CQ codes.
         """
         if self._current_arg_text is None:
-            self._current_arg_text = Message(
+            self._current_arg_text = self._protocol.Message(
                 self.current_arg).extract_plain_text()
         return self._current_arg_text
 
     @property
     def current_arg_images(self) -> List[str]:
         """
-        todo adapt xwork replace to MediaId
         Images (as list of urls) in the current argument.
         """
         if self._current_arg_images is None:
             self._current_arg_images = [
-                s.data['url'] for s in Message(self.current_arg)
+                s.data['url'] for s in self._protocol.Message(self.current_arg)
                 if s.type == 'image' and 'url' in s.data
             ]
         return self._current_arg_images
@@ -442,7 +443,7 @@ class CommandSession(BaseSession):
         The user may send another command (or another intention as natural
         language) when interacting with the current session. In this case,
         the session may not understand what the user is saying, so it
-        should call this method and pass in that message, then OpsBot will
+        should call this method and pass in that message, then Bot will
         handle the situation properly.
         """
         if self.is_first_run:
@@ -451,16 +452,16 @@ class CommandSession(BaseSession):
             raise _FinishException(result=False)
 
         if not isinstance(new_ctx_message, Message):
-            new_ctx_message = Message(new_ctx_message)
+            new_ctx_message = self._protocol.Message(new_ctx_message)
         raise SwitchException(new_ctx_message)
 
 
-def parse_command(bot: OpsBot,
+def parse_command(bot: Bot,
                   cmd_string: str) -> Tuple[Optional[Command], Optional[str]]:
     """
     Parse a command string (typically from a message).
 
-    :param bot: OpsBot instance
+    :param bot: Bot instance
     :param cmd_string: command string
     :return: (Command object, current arg string)
     """
@@ -527,13 +528,13 @@ def parse_command(bot: OpsBot,
     return cmd, ''.join(cmd_remained)
 
 
-async def handle_command(bot: OpsBot, ctx: Context_T) -> bool:
+async def handle_command(bot: Bot, ctx: Context_T) -> bool:
     """
     Handle a message as a command.
 
     This function is typically called by "handle_message".
 
-    :param bot: OpsBot instance
+    :param bot: Bot instance
     :param ctx: message context
     :return: the message is handled as a command
     """
@@ -597,7 +598,7 @@ async def handle_command(bot: OpsBot, ctx: Context_T) -> bool:
                                    disable_interaction=disable_interaction)
 
 
-async def call_command(bot: OpsBot, ctx: Context_T,
+async def call_command(bot: Bot, ctx: Context_T,
                        name: Union[str, CommandName_T], *,
                        current_arg: str = '',
                        args: Optional[CommandArgs_T] = None,
@@ -614,7 +615,7 @@ async def call_command(bot: OpsBot, ctx: Context_T,
     being called here does not need further interaction (a.k.a asking
     the user for more info).
 
-    :param bot: OpsBot instance
+    :param bot: Bot instance
     :param ctx: message context
     :param name: command name
     :param current_arg: command current argument string
