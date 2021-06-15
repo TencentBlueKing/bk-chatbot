@@ -26,7 +26,7 @@ For example:
 >>> PORT = 9090
 >>> DEBUG = False
 >>> SUPERUSERS.add(123456)
->>> NICKNAME = 'SAB'
+>>> NICKNAME = 'SB'
 """
 
 from datetime import timedelta
@@ -34,7 +34,7 @@ from typing import Container, Union, Iterable, Pattern, Optional, Dict, Any
 
 from .self_typing import Expression_T
 
-API_ROOT: str = 'https://qyapi.weixin.qq.com/cgi-bin'
+API_ROOT: str = ''
 ACCESS_TOKEN: str = ''
 SECRET: str = ''
 HOST: str = '127.0.0.1'

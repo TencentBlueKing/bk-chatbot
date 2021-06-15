@@ -15,12 +15,11 @@ specific language governing permissions and limitations under the License.
 
 from typing import Optional, Callable, Union
 
-from xhttp.bus import EventBus
-from . import OpsBot
+from .proxy.bus import EventBus
+from .adapter import Bot
 from .session import BaseSession
 from .self_typing import Context_T
 from .log import logger
-from .exceptions import XWorkError
 
 _bus = EventBus()
 
@@ -46,7 +45,7 @@ def _make_event_deco(post_type: str) -> Callable:
 class EventSession(BaseSession):
     __slots__ = ()
 
-    def __init__(self, bot: OpsBot, ctx: Context_T):
+    def __init__(self, bot: Bot, ctx: Context_T):
         super().__init__(bot, ctx)
 
 
@@ -54,12 +53,12 @@ on_event_click = _make_event_deco('Event.click')
 on_event_enter_chat = _make_event_deco('Event.enter_chat')
 
 
-async def handle_event(bot: OpsBot, ctx: Context_T) -> None:
+async def handle_event(bot: Bot, ctx: Context_T) -> None:
     """
     todo parse detailed_type, classify and deal
     """
-    post_type = ctx.get("Msg", {}).get("MsgType")
-    detailed_type = ctx.get("Msg", {}).get("Event", "")
+    post_type = ctx.get('msg_type')
+    detailed_type = ctx.get('event')
     event = f"{post_type}.{detailed_type}"
 
     _log_event(ctx)

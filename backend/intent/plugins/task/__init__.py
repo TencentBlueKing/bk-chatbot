@@ -17,10 +17,9 @@ from opsbot import on_command, CommandSession
 from opsbot import on_natural_language, NLPSession, IntentCommand
 from opsbot.log import logger
 from opsbot.helpers import render_expression
-from component.nlp import fetch_slot, fetch_intent
+from component import fetch_intent, fetch_slot, RedisClient
 
 from .api import BKTask, parse_slots, wait_commit, summary_statement
-from .stdlib import parse_entity, RedisClient
 from .settings import EXPR_DONT_UNDERSTAND, TASK_EXEC_SUCCESS, TASK_EXEC_FAIL
 
 
@@ -52,10 +51,24 @@ async def task(session: CommandSession):
 
 @on_natural_language
 async def _(session: NLPSession):
-    user_id = session.ctx['FromUserName']
+    if session.bot.type == 'in_xwork':
+        if session.ctx['msg_from_type'] == 'single':
+            await session.send('暂不支持单聊')
+            return
+
+        biz_id = RedisClient(env="prod").hash_get("chat_group_biz", session.ctx['msg_group_id'])
+        if not biz_id or str(biz_id) == '-1':
+            return
+
+        r = await session.bot.call_action('tencent/user/convert_to_name',
+                                          userid_list=[session.ctx['msg_sender_id']])
+        user_id = r.get('user_list')[0]['name'] if r.get('user_list') else ''
+    else:
+        biz_id = None
+        user_id = session.ctx['msg_sender_id']
 
     stripped_msg = session.msg_text.strip()
-    intents = fetch_intent(stripped_msg, user_id=user_id)
+    intents = await fetch_intent(stripped_msg, biz_id=int(biz_id), user_id=user_id)
     if not intents:
         await session.send(render_expression(EXPR_DONT_UNDERSTAND))
         return
@@ -65,12 +78,8 @@ async def _(session: NLPSession):
         await session.send(render_expression('该技能未开启'))
         return
 
-    if user_id not in intent.get('available_user'):
-        await session.send(render_expression('你没有执行权限'))
-        return
-
     await session.send(f'识别到技能：{intent.get("intent_name")}\r\n输入 [结束] 终止会话')
-    slots = fetch_slot(stripped_msg, intent.get('intent_id'))
+    slots = await fetch_slot(stripped_msg, intent.get('intent_id'))
 
     return IntentCommand(intent.get('similar', 0) * 100,
                          'opsbot_task',
@@ -78,5 +87,5 @@ async def _(session: NLPSession):
                              'intent': intent,
                              'slots': slots,
                              'user_id': user_id,
-                             'group_id': ''
+                             'group_id': session.ctx['msg_group_id']
                         })

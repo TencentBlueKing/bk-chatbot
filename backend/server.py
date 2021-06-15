@@ -13,10 +13,12 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from os import path
+
 import opsbot
 
 
 if __name__ == '__main__':
-    opsbot.init()
-    opsbot.load_builtin_plugins()
-    opsbot.run(host='127.0.0.1', port=8080)
+    opsbot.init('xwork')
+    opsbot.load_plugins(path.join(path.dirname(__file__), 'intent', 'plugins'), 'intent.plugins')
+    opsbot.run()

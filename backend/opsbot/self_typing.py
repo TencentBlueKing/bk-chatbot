@@ -22,3 +22,12 @@ CommandName_T = Tuple[str, ...]
 CommandArgs_T = Dict[str, Any]
 State_T = Dict[str, Any]
 Filter_T = Callable[[Any], Union[Any, Awaitable[Any]]]
+
+
+def overrides(interface_class: object):
+
+    def overrider(func: Callable) -> Callable:
+        assert func.__name__ in dir(interface_class), f"Error method: {func.__name__}"
+        return func
+
+    return overrider

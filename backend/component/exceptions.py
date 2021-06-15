@@ -13,9 +13,9 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from xhttp import Error as ComponentError
-from xhttp import (
-    ApiNotAvailable, HttpFailed, NetworkError, ActionFailed
+from opsbot.exceptions import (
+    ApiNotAvailable, HttpFailed, NetworkError, ActionFailed,
+    Error as ComponentError
 )
 
 
