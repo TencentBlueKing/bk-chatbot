@@ -58,6 +58,21 @@ class JOB:
         """
         return await self.bk_cc_api.call_action('jobv3/execute_job_plan/', 'POST', json=params)
 
+    async def get_job_plan_list(self, **params) -> Any:
+        """
+        -params:
+        bk_biz_id long
+        """
+        return await self.bk_cc_api.call_action('jobv3/get_job_plan_list/', 'GET', params=params)
+
+    async def get_job_plan_detail(self, **params) -> Any:
+        """
+        -params:
+        bk_biz_id long
+        job_plan_id long
+        """
+        return await self.bk_cc_api.call_action('jobv3/get_job_plan_detail/', 'GET', params=params)
+
 
 class SOPS:
     """
@@ -75,6 +90,22 @@ class SOPS:
         """
         return await self.bk_cc_api.call_action(f'get_template_info/{template_id}/{bk_biz_id}/',
                                                 'GET', params=params)
+
+    async def get_template_schemes(self, bk_biz_id, template_id, **params) -> Dict:
+        """
+        -params:
+        template_id
+        bk_biz_id
+        """
+        return await self.bk_cc_api.call_action(f'get_template_schemes/{bk_biz_id}/{template_id}/',
+                                                'GET', params=params)
+
+    async def get_template_list(self, bk_biz_id, **params) -> Dict:
+        """
+        -params:
+        bk_biz_id
+        """
+        return await self.bk_cc_api.call_action(f'get_template_list/{bk_biz_id}/', 'GET', params=params)
 
     async def create_task(self, bk_biz_id, template_id, **params) -> Dict:
         """
