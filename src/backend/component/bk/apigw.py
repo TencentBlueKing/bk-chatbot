@@ -59,3 +59,10 @@ class Backend:
 
     async def delete_timer(self, timer_id: int) -> Dict:
         return await self.bk_backend_api.call_action(f'api/v1/manage/timer/{timer_id}/', 'DELETE')
+
+
+class Plugin:
+    """
+    User plugin system
+    """
+    pass
