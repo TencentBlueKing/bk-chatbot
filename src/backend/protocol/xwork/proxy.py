@@ -101,8 +101,8 @@ class Proxy(BaseProxy):
         context['msg_type'] = context.get("MsgType")
         context['msg_from_type'] = 'single'
         context['msg_id'] = context.get("MsgId")
-        context['msg_sender_id'] = context.get("FromUserName")
-        context['msg_sender'] = await self.convert_to_name(context['msg_sender_id'])
+        context['msg_sender_code'] = context.get("FromUserName")
+        context['msg_sender_id'] = await self.convert_to_name(context['msg_sender_code'])
         context['msg_group_id'] = 'anonymous'
         context['create_time'] = context.get("CreateTime")
 
@@ -117,8 +117,8 @@ class Proxy(BaseProxy):
 
     async def convert_to_name(self, msg_sender_id) -> str:
         try:
-            r = self._api.call_action('user/get', userid=msg_sender_id)
-            return r.get('userid')
+            r = await self._api.call_action('user/get', method='GET', params={'userid': msg_sender_id})
+            return r.get('alias')
         except (HttpFailed, ActionFailed, IndexError):
             return msg_sender_id
 
