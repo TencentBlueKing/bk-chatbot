@@ -137,42 +137,41 @@ class Proxy(BaseProxy):
 
 
 class HttpApi(BaseApi):
-     def __init__(self, api_root: Optional[str], api_config: Dict, *args, **kwargs):
-         super().__init__(*args, **kwargs)
-         self._api_config = api_config
-         self._api_root = api_root.rstrip('/') if api_root else None
+    def __init__(self, api_root: Optional[str], api_config: Dict, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._api_config = api_config
+        self._api_root = api_root.rstrip('/') if api_root else None
 
-     def _get_access_token(self, token_root) -> Any:
-         try:
-             response = requests.get(
-                 f"{token_root}/gettoken?corpid={self._api_config['CORPID']}&corpsecret={self._api_config['SECRET']}"
-             ).json()
-         except TypeError:
-             return ""
+    def _get_access_token(self, token_root) -> Any:
+        try:
+            response = requests.get(
+                f"{token_root}/gettoken?corpid={self._api_config['CORPID']}&corpsecret={self._api_config['SECRET']}"
+            ).json()
+        except TypeError:
+            return ""
 
-         return response['access_token'] if response['errcode'] == 0 else ""
+        return response['access_token'] if response['errcode'] == 0 else ""
 
-     def _handle_api_result(self, result: Optional[Dict[str, Any]]) -> Any:
-         if isinstance(result, dict):
-             if result.get('errcode') != 0:
-                 raise ActionFailed(retcode=result.get('errcode'))
-             return result
+    def _handle_api_result(self, result: Optional[Dict[str, Any]]) -> Any:
+        if isinstance(result, dict):
+            if result.get('errcode') != 0:
+                raise ActionFailed(retcode=result.get('errcode'))
+            return result
 
-     async def call_action(self, action: str, **params) -> Optional[Dict[str, Any]]:
-         if not self._is_available():
-             raise ApiNotAvailable
+    async def call_action(self, action: str, **params) -> Optional[Dict[str, Any]]:
+        if not self._is_available():
+            raise ApiNotAvailable
 
-         url = f"{self._api_root}/{action}?access_token={self._get_access_token(self._api_root)}"
-         print(url)
-         try:
-             async with aiohttp.request('POST', url, json=params) as resp:
-                 if 200 <= resp.status < 300:
-                     return self._handle_api_result(json.loads(await resp.text()))
-                 raise HttpFailed(resp.status)
-         except aiohttp.InvalidURL:
-             raise NetworkError('API root url invalid')
-         except aiohttp.ClientError:
-             raise NetworkError('HTTP request failed with client error')
+        url = f"{self._api_root}/{action}?access_token={self._get_access_token(self._api_root)}"
+        try:
+            async with aiohttp.request('POST', url, json=params) as resp:
+                if 200 <= resp.status < 300:
+                    return self._handle_api_result(json.loads(await resp.text()))
+                raise HttpFailed(resp.status)
+        except aiohttp.InvalidURL:
+            raise NetworkError('API root url invalid')
+        except aiohttp.ClientError:
+            raise NetworkError('HTTP request failed with client error')
 
-     def _is_available(self) -> bool:
-         return bool(self._api_root)
+    def _is_available(self) -> bool:
+        return bool(self._api_root)
