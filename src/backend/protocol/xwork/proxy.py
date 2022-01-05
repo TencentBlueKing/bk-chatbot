@@ -110,15 +110,15 @@ class Proxy(BaseProxy):
         return jsonify(results[0]) if results else ''
 
     async def call_action(self, action: str, **params) -> Any:
-        return await self._api.call_action(action=action, **params)
+        return await self._api.call_action(action=action, json=params)
 
     def run(self, host=None, port=None, *args, **kwargs):
         self._server_app.run(host=host, port=port, *args, **kwargs)
 
     async def convert_to_name(self, msg_sender_id) -> str:
         try:
-            r = await self.call_action('tencent/user/convert_to_name', userid_list=[msg_sender_id])
-            return r.get('user_list')[0]['name']
+            r = self._api.call_action('user/get', userid=msg_sender_id)
+            return r.get('userid')
         except (HttpFailed, ActionFailed, IndexError):
             return msg_sender_id
 
@@ -158,13 +158,13 @@ class HttpApi(BaseApi):
                 raise ActionFailed(retcode=result.get('errcode'))
             return result
 
-    async def call_action(self, action: str, **params) -> Optional[Dict[str, Any]]:
+    async def call_action(self, action: str, method='POST', **params) -> Optional[Dict[str, Any]]:
         if not self._is_available():
             raise ApiNotAvailable
 
         url = f"{self._api_root}/{action}?access_token={self._get_access_token(self._api_root)}"
         try:
-            async with aiohttp.request('POST', url, json=params) as resp:
+            async with aiohttp.request(method, url, **params) as resp:
                 if 200 <= resp.status < 300:
                     return self._handle_api_result(json.loads(await resp.text()))
                 raise HttpFailed(resp.status)
