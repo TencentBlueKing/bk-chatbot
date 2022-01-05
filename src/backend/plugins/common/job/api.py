@@ -29,12 +29,12 @@ class Flow:
         else:
             self.biz_id = self._redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
 
-    async def _get_job_plan_list(self):
-        data = await self._job.get_job_plan_list()
+    async def _get_job_plan_list(self, **params):
+        data = await self._job.get_job_plan_list(**params)
         return data
 
-    async def _get_job_plan_detail(self):
-        data = await self._job.get_job_plan_detail()
+    async def _get_job_plan_detail(self, **params):
+        data = await self._job.get_job_plan_detail(**params)
         return data
 
     async def render_job_plan_list(self):
