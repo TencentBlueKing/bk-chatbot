@@ -101,7 +101,8 @@ class Proxy(BaseProxy):
         context['msg_type'] = context.get("MsgType")
         context['msg_from_type'] = 'single'
         context['msg_id'] = context.get("MsgId")
-        context['msg_sender_id'] = context['msg_sender'] = context.get("FromUserName")
+        context['msg_sender_id'] = context.get("FromUserName")
+        context['msg_sender'] = await self.convert_to_name(context['msg_sender_id'])
         context['msg_group_id'] = 'anonymous'
         context['create_time'] = context.get("CreateTime")
 
@@ -113,6 +114,13 @@ class Proxy(BaseProxy):
 
     def run(self, host=None, port=None, *args, **kwargs):
         self._server_app.run(host=host, port=port, *args, **kwargs)
+
+    async def convert_to_name(self, msg_sender_id) -> str:
+        try:
+            r = await self.call_action('tencent/user/convert_to_name', userid_list=[msg_sender_id])
+            return r.get('user_list')[0]['name']
+        except (HttpFailed, ActionFailed, IndexError):
+            return msg_sender_id
 
     async def send(self, context: Dict[str, Any],
                    message: Union[str, Dict[str, Any], List[Dict[str, Any]]],
