@@ -24,8 +24,9 @@ class Flow:
         self._session = session
         self._job = JOB()
         self._redis_client = RedisClient(env='prod')
+        self.user_id = self._session.ctx['msg_sender_id']
         if self._session.ctx['msg_from_type'] == 'single':
-            self.biz_id = self._redis_client.hash_get("chat_single_biz", self._session.ctx['msg_sender_id'])
+            self.biz_id = self._redis_client.hash_get("chat_single_biz", self.user_id)
         else:
             self.biz_id = self._redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
 
@@ -41,7 +42,7 @@ class Flow:
         if not self.biz_id:
             return None
 
-        bk_job_plans = self._get_job_plan_list(bk_biz_id=self.biz_id)
+        bk_job_plans = await self._get_job_plan_list(bk_biz_id=self.biz_id)
         template_card = {
             'card_type': 'multiple_interaction',
             'main_title': {
