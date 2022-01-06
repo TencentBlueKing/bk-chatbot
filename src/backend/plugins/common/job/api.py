@@ -54,12 +54,10 @@ class Flow:
                 'desc': '请选择JOB执行方案'
             },
             'task_id': str(int(time.time() * 100000)),
-            'checkbox': [
-                {
-                    'question_key': 'bk_job_plan_id',
-                    'option_list': bk_job_plans
-                }
-            ],
+            'checkbox': {
+                'question_key': 'bk_job_plan_id',
+                'option_list': bk_job_plans
+            },
             'submit_button': {
                 'text': '提交',
                 'key': 'select_bk_job_plan'

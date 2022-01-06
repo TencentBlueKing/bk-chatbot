@@ -28,4 +28,4 @@ async def list_job_plan(session: CommandSession):
 
 @on_command('select_bk_job_plan')
 async def select_bk_job_plan(session: CommandSession):
-    pass
+    logger.info(session.ctx)
