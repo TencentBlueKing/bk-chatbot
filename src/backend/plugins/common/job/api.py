@@ -72,19 +72,19 @@ class Flow:
             },
             'submit_button': {
                 'text': '提交',
-                'key': 'select_bk_job_plan'
+                'key': 'bk_job_plan_select'
             }
         }
         return template_card
 
     async def render_job_plan_detail(self):
         try:
-            job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['QuestionKey']['OptionIds']['OptionId']
+            job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
         except KeyError:
             return None
 
-        bk_job_plan_detail = self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
-                                                       job_plan_id=job_plan_id)
+        bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
+                                                             job_plan_id=job_plan_id)
         global_var_list = [{'keyname': var['name'], 'value': var['value']}
                            for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
 
@@ -94,7 +94,23 @@ class Flow:
                 'desc': 'JOB',
                 'desc_color': 1
             },
+            'main_title': {
+                'title': 'JOB执行方案确认'
+            },
+            'task_id': str(int(time.time() * 100000)),
             'sub_title_text': '参数确认',
-            'horizontal_content_list': global_var_list
+            'horizontal_content_list': global_var_list,
+            'button_list': [
+                {
+                    "text": "确认",
+                    "style": 1,
+                    "key": "button_key_1"
+                },
+                {
+                    "text": "结束",
+                    "style": 2,
+                    "key": "button_key_2"
+                }
+            ]
         }
         return template_card

@@ -39,6 +39,6 @@ async def search_job_plan(session: CommandSession):
 @on_command('bk_job_plan_select')
 async def select_bk_job_plan(session: CommandSession):
     logger.info(session.ctx)
-    msg = Flow(session).render_job_plan_detail()
+    msg = await Flow(session).render_job_plan_detail()
     if msg:
         await session.send('', msgtype='template_card', template_card=msg)
