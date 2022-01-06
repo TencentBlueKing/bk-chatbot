@@ -32,7 +32,8 @@ class Flow:
 
     async def _get_job_plan_list(self, **params):
         data = await self._job.get_job_plan_list(**params)
-        return data.get('data', [])
+        bk_job_plans = data.get('data', []).sort(key=lambda x: x['last_modify_time'], reverse=True)
+        return bk_job_plans[:20]
 
     async def _get_job_plan_detail(self, **params):
         data = await self._job.get_job_plan_detail(**params)
@@ -42,18 +43,18 @@ class Flow:
         if not self.biz_id:
             return None
 
-        bk_job_plans = await self._get_job_plan_list(bk_biz_id=self.biz_id)
+        bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id)
         template_card = {
-            'card_type': 'multiple_interaction',
+            'card_type': 'vote_interaction',
             'main_title': {
                 'title': '欢迎使用JOB平台',
                 'desc': '请选择JOB执行方案'
             },
             'task_id': str(int(time.time() * 100000)),
-            'select_list': [
+            'checkbox': [
                 {
                     'question_key': 'bk_job_plan_id',
-                    'option_list': [{'id': job_plan['id'], 'text': job_plan['name']}
+                    'option_list': [{'id': job_plan['id'], 'text': job_plan['name'], 'is_checked': False}
                                     for job_plan in bk_job_plans]
                 }
             ],
