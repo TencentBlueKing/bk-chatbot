@@ -32,8 +32,10 @@ class Flow:
 
     async def _get_job_plan_list(self, **params):
         data = await self._job.get_job_plan_list(**params)
-        bk_job_plans = data.get('data', []).sort(key=lambda x: x['last_modify_time'], reverse=True)
-        return bk_job_plans[:20]
+        bk_job_plans = data.get('data', [])
+        bk_job_plans.sort(key=lambda x: x['last_modify_time'], reverse=True)
+        return [{'id': job_plan['id'], 'text': job_plan['name'], 'is_checked': False}
+                for job_plan in bk_job_plans[:20]]
 
     async def _get_job_plan_detail(self, **params):
         data = await self._job.get_job_plan_detail(**params)
@@ -43,7 +45,8 @@ class Flow:
         if not self.biz_id:
             return None
 
-        bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id)
+        bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
+                                                     length=100)
         template_card = {
             'card_type': 'vote_interaction',
             'main_title': {
@@ -54,8 +57,7 @@ class Flow:
             'checkbox': [
                 {
                     'question_key': 'bk_job_plan_id',
-                    'option_list': [{'id': job_plan['id'], 'text': job_plan['name'], 'is_checked': False}
-                                    for job_plan in bk_job_plans]
+                    'option_list': bk_job_plans
                 }
             ],
             'submit_button': {
