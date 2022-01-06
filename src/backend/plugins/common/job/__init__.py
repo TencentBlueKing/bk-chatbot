@@ -24,3 +24,8 @@ async def list_job_plan(session: CommandSession):
     msg = await Flow(session).render_job_plan_list()
     if msg:
         session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('select_bk_job_plan')
+async def select_bk_job_plan(session: CommandSession):
+    pass

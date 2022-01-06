@@ -32,7 +32,7 @@ class Flow:
 
     async def _get_job_plan_list(self, **params):
         data = await self._job.get_job_plan_list(**params)
-        return data
+        return data.get('data', [])
 
     async def _get_job_plan_detail(self, **params):
         data = await self._job.get_job_plan_detail(**params)
@@ -53,9 +53,8 @@ class Flow:
             'select_list': [
                 {
                     'question_key': 'bk_job_plan_id',
-                    'title': '选择执行方案',
                     'option_list': [{'id': job_plan['id'], 'text': job_plan['name']}
-                                    for job_plan in bk_job_plans.get('data', [])]
+                                    for job_plan in bk_job_plans]
                 }
             ],
             'submit_button': {
