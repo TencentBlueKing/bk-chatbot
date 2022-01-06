@@ -41,14 +41,26 @@ class Flow:
         data = await self._job.get_job_plan_detail(**params)
         return data
 
-    async def render_job_plan_list(self):
+    async def render_job_plan_list(self, **params):
         if not self.biz_id:
             return None
 
         bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
-                                                     length=100)
+                                                     length=100, **params)
         template_card = {
             'card_type': 'vote_interaction',
+            'source': {
+                'desc': 'JOB',
+                'desc_color': 1
+            },
+            'action_menu': {
+                'desc': '更多操作',
+                'action_list': [
+                    {'text': '正序', 'key': 'bk_job_plan_sort|asc'},
+                    {"text": '倒序', 'key': 'bk_job_plan_sort|desc'},
+                    {"text": '查找', 'key': 'bk_job_plan_search'}
+                ]
+            },
             'main_title': {
                 'title': '欢迎使用JOB平台',
                 'desc': '请选择JOB执行方案'
@@ -65,3 +77,24 @@ class Flow:
         }
         return template_card
 
+    async def render_job_plan_detail(self):
+        try:
+            job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['QuestionKey']['OptionIds']['OptionId']
+        except KeyError:
+            return None
+
+        bk_job_plan_detail = self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
+                                                       job_plan_id=job_plan_id)
+        global_var_list = [{'keyname': var['name'], 'value': var['value']}
+                           for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
+
+        template_card = {
+            'card_type': 'button_interaction',
+            'source': {
+                'desc': 'JOB',
+                'desc_color': 1
+            },
+            'sub_title_text': '参数确认',
+            'horizontal_content_list': global_var_list
+        }
+        return template_card

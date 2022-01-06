@@ -26,6 +26,19 @@ async def list_job_plan(session: CommandSession):
         await session.send('', msgtype='template_card', template_card=msg)
 
 
-@on_command('select_bk_job_plan')
+@on_command('bk_job_plan_sort')
+async def sort_job_plan(session: CommandSession):
+    pass
+
+
+@on_command('bk_job_plan_search')
+async def search_job_plan(session: CommandSession):
+    pass
+
+
+@on_command('bk_job_plan_select')
 async def select_bk_job_plan(session: CommandSession):
     logger.info(session.ctx)
+    msg = Flow(session).render_job_plan_detail()
+    if msg:
+        await session.send('', msgtype='template_card', template_card=msg)

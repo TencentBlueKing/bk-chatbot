@@ -115,9 +115,7 @@ class Bot(BaseBot, XworkProxy):
             return
 
     async def handle_event(self, ctx: Context_T):
-        if ctx['event'] == 'template_card_event':
-            if 'SelectedItems' in ctx:
-                ctx['select_items'] = dict(ctx['SelectedItems'])
+        if ctx['event'] in ['template_card_event', 'template_card_menu_event']:
             ctx['message'] = self._message_class(ctx['event_key'].split('|')[0])
             ctx['to_me'] = True
             await self.handle_message(ctx)
