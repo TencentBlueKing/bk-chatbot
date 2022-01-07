@@ -130,7 +130,7 @@ class Flow:
                 global_var_list=global_var_list,
                 bk_username=self.user_id
             )
-            msg = f'{job_plan_id} {global_var_list} 启动成功'
+            msg = f'{job_plan_id} {global_var_list} 任务启动成功'
             return True, msg
         except ActionFailed as e:
             msg = f'{job_plan_id} {global_var_list}, error: 参数有误 {e}'

@@ -54,7 +54,8 @@ async def _(session: CommandSession):
         return
     global_var_list = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
     result, msg = await Flow(session).run_job_plan(job_plan_id, global_var_list)
-    content = f'><font color="{"info" if result else "warning"}">{msg}</font>'
+    content = f'''>**JOB TIP** 
+    ><font color="{"info" if result else "warning"}">{msg}</font>'''
     await session.send('', msgtype='markdown', markdown={'content': content})
 
 
@@ -66,7 +67,8 @@ async def _(session: CommandSession):
         session.state['job_plan_name'] = job_plan_name
         session.state['global_var_list'] = json.loads(global_var_list)
 
-    content = '>请顺序输入参数，<font color=red>换行分隔</font>'
+    content = f'''>**JOB TIP**
+    >请顺序输入参数，**换行分隔**'''
     params, _ = session.get('params', prompt='...', msgtype='markdown', markdown={'content': content})
     params = params.split('\n')
     for i, item in enumerate(params):
@@ -80,7 +82,7 @@ async def _(session: CommandSession):
 @on_command('bk_job_plan_cancel')
 async def _(session: CommandSession):
     _, bk_job_plan_name = session.ctx['event_key'].split('|')
-    content = f'''>**注意** 
+    content = f'''>**JOB TIP** 
     ><font color=\"info\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
     '''
     await session.send('', msgtype='markdown', markdown={'content': content})
