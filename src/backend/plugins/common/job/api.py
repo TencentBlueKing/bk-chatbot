@@ -34,7 +34,7 @@ class Flow:
         data = await self._job.get_job_plan_list(**params)
         bk_job_plans = data.get('data', [])
         bk_job_plans.sort(key=lambda x: x['last_modify_time'], reverse=True)
-        return [{'id': job_plan['id'], 'text': job_plan['name'], 'is_checked': False}
+        return [{'id': str(job_plan['id']), 'text': job_plan['name'], 'is_checked': False}
                 for job_plan in bk_job_plans[:20]]
 
     async def _get_job_plan_detail(self, **params):
@@ -48,23 +48,23 @@ class Flow:
         bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                      length=100, **params)
         template_card = {
-            "card_type": "vote_interaction",
-            "source": {
-                "desc": "JOB"
+            'card_type': 'vote_interaction',
+            'source': {
+                'desc': 'JOB',
+                'desc_color': 1
             },
-            "main_title": {
-                "title": "欢迎使用JOB平台",
-                "desc": "请选择JOB执行方案"
+            'main_title': {
+                'title': '欢迎使用JOB平台',
+                'desc': '请选择JOB执行方案'
             },
-            "task_id": str(int(time.time() * 100000)),
-            "checkbox": {
-                "question_key": "bk_job_plan_id",
-                "option_list": bk_job_plans,
-                "mode": 1
+            'task_id': str(int(time.time() * 100000)),
+            'checkbox': {
+                'question_key': 'bk_job_plan_id',
+                'option_list': bk_job_plans
             },
-            "submit_button": {
-                "text": "提交",
-                "key": "bk_job_plan_select"
+            'submit_button': {
+                'text': '提交',
+                'key': 'bk_job_plan_select'
             }
         }
         return template_card
@@ -76,7 +76,7 @@ class Flow:
             return None
 
         bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
-                                                             job_plan_id=job_plan_id)
+                                                             job_plan_id=int(job_plan_id))
         global_var_list = [{'keyname': var['name'], 'value': var['value']}
                            for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
 

@@ -42,39 +42,3 @@ async def select_bk_job_plan(session: CommandSession):
     msg = await Flow(session).render_job_plan_detail()
     if msg:
         await session.send('', msgtype='template_card', template_card=msg)
-
-
-@on_command('bk_job_debug')
-async def _(session: CommandSession):
-    msg = {
-        "card_type": "vote_interaction",
-        "source": {
-            "desc": "企业微信"
-        },
-        "main_title": {
-            "title": "欢迎使用企业微信",
-            "desc": "您的好友正在邀请您加入企业微信"
-        },
-        "task_id": "task_id",
-        "checkbox": {
-            "question_key": "question_key1",
-            "option_list": [
-                {
-                    "id": "option_id1",
-                    "text": "选择题选项1",
-                    "is_checked": True
-                },
-                {
-                    "id": "option_id2",
-                    "text": "选择题选项2",
-                    "is_checked": False
-                }
-            ],
-            "mode": 1
-        },
-        "submit_button": {
-            "text": "提交",
-            "key": "key"
-        }
-    }
-    await session.send('', msgtype='template_card', template_card=msg)
