@@ -16,12 +16,11 @@ specific language governing permissions and limitations under the License.
 import json
 
 from opsbot import on_command, CommandSession
-from opsbot.log import logger
 
 from .api import Flow
 
 
-@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', ))
+@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', 'bk_job'))
 async def list_job_plan(session: CommandSession):
     msg = await Flow(session).render_job_plan_list()
     if msg:

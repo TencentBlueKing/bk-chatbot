@@ -28,8 +28,17 @@ from .settings import (
 class Flow:
     def __init__(self, session: CommandSession):
         self._session = session
+        self.user_id = self._session.ctx['msg_sender_id']
 
-    def render_welcome_msg(self):
+    async def _search_business(self):
+        response = await CC().search_business(bk_username=self.user_id, fields=["bk_biz_id", "bk_biz_name"])
+        data = [{'id': str(biz['bk_biz_id']), 'text': biz['bk_biz_name'], 'is_checked': False}
+                for biz in response.get('info')[:20]]
+        return data
+
+    async def render_welcome_msg(self):
+        bk_biz_id = RedisClient(env="prod").hash_get('chat_single_biz', self.user_id)
+        data = await self._search_business()
         template_card = {
             'card_type': 'button_interaction',
             'source': {
@@ -38,10 +47,18 @@ class Flow:
             'main_title': {
                 'title': '欢迎使用蓝鲸信息流'
             },
+            'task_id': str(int(time.time() * 100000)),
+            'button_selection': {
+                'question_key': 'bk_biz_id',
+                'title': '业务',
+                'option_list': data[:10],
+                'selected_id': bk_biz_id if bk_biz_id else ''
+            },
             'action_menu': {
                 'desc': '更多操作',
                 'action_list': [
-                    {'text': '查找任务', 'key': 'bk_app_task_filter'}
+                    {'text': '查找任务', 'key': 'bk_app_task_filter'},
+                    {'text': '绑定业务', 'key': 'bk_cc_biz_bind'}
                 ]
             },
             'horizontal_content_list': [
@@ -49,7 +66,7 @@ class Flow:
                     "type": 3,
                     "keyname": "员工信息",
                     "value": "点击查看",
-                    "userid": self._session.ctx['msg_sender_id']
+                    "userid": self.user_id
                 }
             ],
             'button_list': [
@@ -76,6 +93,41 @@ class Flow:
             ]
         }
         return template_card
+
+    async def render_biz_msg(self):
+        data = await self._search_business()
+        if not data:
+            return None
+
+        template_card = {
+            'card_type': 'vote_interaction',
+            'source': {
+                'desc': 'CC'
+            },
+            'main_title': {
+                'title': '欢迎使用配置平台',
+                'desc': '请选择业务'
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'checkbox': {
+                'question_key': 'bk_biz_id',
+                'option_list': data
+            },
+            'submit_button': {
+                'text': '提交',
+                'key': 'bk_cc_biz_select'
+            }
+        }
+        return template_card
+
+    def bind_cc_biz(self):
+        try:
+            bk_biz_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        except KeyError:
+            return None
+
+        RedisClient(env="prod").hash_set('chat_single_biz', self.user_id, bk_biz_id)
+        return bk_biz_id
 
 
 def is_cache_visit(user_id: str, redis_client: RedisClient) -> bool:

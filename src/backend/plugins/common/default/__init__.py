@@ -17,6 +17,7 @@ import copy
 
 from opsbot import on_command, CommandSession, on_natural_language
 from opsbot.exceptions import HttpFailed
+from opsbot.log import logger
 from component import RedisClient
 from .api import (
     render_welcome_msg, render_biz_msg, render_default_intent, is_cache_visit,
@@ -43,29 +44,25 @@ async def _(session: CommandSession):
     await session.send('', msgtype='template_card', template_card=msg)
 
 
-@on_command('biz_list', aliases=DEFAULT_BIND_BIZ_ALIAS)
+@on_command('bk_cc_biz_bind', aliases=DEFAULT_BIND_BIZ_ALIAS)
 async def _(session: CommandSession):
-    rich_text = await render_biz_msg(session.ctx['msg_sender_id'])
-    if rich_text:
-        await session.send('', msgtype='rich_text', rich_text=rich_text)
+    msg = await Flow(session).render_biz_msg()
+    if msg:
+        await session.send('', msgtype='template_card', template_card=msg)
     else:
-        await session.send(DEFAULT_BIND_BIZ_TIP)
+        logger.info('no biz')
 
 
-@on_command('bind_biz', aliases=('bind_biz', ))
+@on_command('bk_cc_biz_select')
 async def _(session: CommandSession):
-    _, biz_id, user_id = session.ctx['event_key'].split('|')
-    redis_client = RedisClient(env="prod")
-    if session.ctx['msg_from_type'] == 'group':
-        try:
-            await bind_group_biz(session.ctx['msg_group_id'], int(biz_id))
-        except HttpFailed:
-            await session.send(DEFAULT_BIZ_BIND_FAIL)
-            return
-    else:
-        redis_client.hash_set('chat_single_biz', user_id, biz_id)
-    rich_text = await render_welcome_msg(session, redis_client)
-    await session.send('', msgtype='rich_text', rich_text=rich_text)
+    flow = Flow(session)
+    bk_biz_id = flow.bind_cc_biz()
+    if not bk_biz_id:
+        logger.info('bind biz error')
+        return
+
+    msg = flow.render_welcome_msg()
+    await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('opsbot_help', aliases=('opsbot_help', ))
