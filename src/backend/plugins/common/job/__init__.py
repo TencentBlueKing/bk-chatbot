@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 
-from opsbot import on_command, CommandSession, RedisClient
+from opsbot import on_command, CommandSession
 
 from .api import Flow
 
