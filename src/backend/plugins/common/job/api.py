@@ -131,9 +131,12 @@ class Flow:
                 bk_username=self.user_id
             )
             msg = f'{job_plan_id} {global_var_list} 启动成功'
+            return True, msg
         except ActionFailed as e:
             msg = f'{job_plan_id} {global_var_list}, error: 参数有误 {e}'
         except HttpFailed as e:
             msg = f'{job_plan_id} {global_var_list}, error: 第三方服务异常 {e}'
         finally:
             logger.info(msg)
+
+        return False, msg

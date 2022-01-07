@@ -53,7 +53,9 @@ async def _(session: CommandSession):
     except json.JSONDecodeError:
         return
     global_var_list = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
-    await Flow(session).run_job_plan(job_plan_id, global_var_list)
+    result, msg = await Flow(session).run_job_plan(job_plan_id, global_var_list)
+    content = f'><font color="{"info" if result else "warning"}">{msg}</font>'
+    await session.send('', msgtype='markdown', markdown={'content': content})
 
 
 @on_command('bk_job_plan_update')
@@ -64,11 +66,11 @@ async def _(session: CommandSession):
         session.state['job_plan_name'] = job_plan_name
         session.state['global_var_list'] = json.loads(global_var_list)
 
-    content = '>请顺序输入参数，<font color=\"red\">换行分隔</font>'
+    content = '>请顺序输入参数，<font color=red>换行分隔</font>'
     params, _ = session.get('params', prompt='...', msgtype='markdown', markdown={'content': content})
     params = params.split('\n')
     for i, item in enumerate(params):
-        global_var_list[i]['value'] = item
+        session.state['global_var_list'][i]['value'] = item
 
     msg = await Flow(session).render_job_plan_detail()
     if msg:
