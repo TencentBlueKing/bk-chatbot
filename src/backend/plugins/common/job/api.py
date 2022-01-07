@@ -20,7 +20,7 @@ from typing import Dict, Union
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
-from component import JOB, RedisClient
+from component import JOB, RedisClient, BK_JOB_DOMAIN
 
 
 class Flow:
@@ -106,7 +106,7 @@ class Flow:
                 {
                     "text": "执行",
                     "style": 1,
-                    "key": f"bk_job_plan_execute|{job_plan_id}|{json.dumps(global_var_list)}"
+                    "key": f"bk_job_plan_execute|{job_plan_id}|{job_plan_name}|{json.dumps(global_var_list)}"
                 },
                 {
                     "text": "修改",
@@ -131,12 +131,31 @@ class Flow:
                 bk_username=self.user_id
             )
             msg = f'{job_plan_id} {global_var_list} 任务启动成功'
-            return True, msg
+            return True
         except ActionFailed as e:
-            msg = f'{job_plan_id} {global_var_list}, error: 参数有误 {e}'
+            msg = f'{job_plan_id} {global_var_list} error: 参数有误 {e}'
         except HttpFailed as e:
-            msg = f'{job_plan_id} {global_var_list}, error: 第三方服务异常 {e}'
+            msg = f'{job_plan_id} {global_var_list} error: 第三方服务异常 {e}'
         finally:
             logger.info(msg)
 
-        return False, msg
+        return False
+
+    @classmethod
+    def render_job_plan_execute_msg(cls, result, job_plan_name, global_var_list):
+        template_card = {
+            'card_type': 'text_notice',
+            'source': {
+                'desc': 'JOB'
+            },
+            'main_title': {
+                'title': f'{job_plan_name}启动成功' if result else f'{job_plan_name}启动失败'
+            },
+            'horizontal_content_list': global_var_list,
+            'task_id': str(int(time.time() * 100000)),
+            'card_action': {
+                'type': 1,
+                'url': BK_JOB_DOMAIN
+            }
+        }
+        return template_card

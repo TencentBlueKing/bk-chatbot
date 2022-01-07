@@ -47,16 +47,17 @@ async def select_bk_job_plan(session: CommandSession):
 
 @on_command('bk_job_plan_execute')
 async def _(session: CommandSession):
-    _, job_plan_id, global_var_list = session.ctx['event_key'].split('|')
+    _, job_plan_id, job_plan_name, global_var_list = session.ctx['event_key'].split('|')
     try:
         global_var_list = json.loads(global_var_list)
     except json.JSONDecodeError:
         return
-    global_var_list = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
-    result, msg = await Flow(session).run_job_plan(job_plan_id, global_var_list)
-    content = f'''>**JOB TIP** 
-    ><font color="{"info" if result else "warning"}">{msg}</font>'''
-    await session.send('', msgtype='markdown', markdown={'content': content})
+
+    flow = Flow(session)
+    params = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
+    result = await flow.run_job_plan(job_plan_id, params)
+    msg = flow.render_job_plan_execute_msg(result, job_plan_name, global_var_list)
+    await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('bk_job_plan_update')
