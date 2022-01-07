@@ -53,14 +53,6 @@ class Flow:
                 'desc': 'JOB',
                 'desc_color': 1
             },
-            'action_menu': {
-                'desc': '更多操作',
-                'action_list': [
-                    {'text': '正序', 'key': 'bk_job_plan_sort|asc'},
-                    {"text": '倒序', 'key': 'bk_job_plan_sort|desc'},
-                    {"text": '查找', 'key': 'bk_job_plan_search'}
-                ]
-            },
             'main_title': {
                 'title': '欢迎使用JOB平台',
                 'desc': '请选择JOB执行方案'
