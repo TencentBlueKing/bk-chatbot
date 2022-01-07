@@ -47,13 +47,13 @@ async def select_bk_job_plan(session: CommandSession):
 @on_command('bk_job_debug')
 async def _(session: CommandSession):
     msg = {
-        "card_type" : "vote_interaction",
-        "source" : {
+        "card_type": "vote_interaction",
+        "source": {
             "desc": "企业微信"
         },
-        "main_title" : {
-            "title" : "欢迎使用企业微信",
-            "desc" : "您的好友正在邀请您加入企业微信"
+        "main_title": {
+            "title": "欢迎使用企业微信",
+            "desc": "您的好友正在邀请您加入企业微信"
         },
         "task_id": "task_id",
         "checkbox": {

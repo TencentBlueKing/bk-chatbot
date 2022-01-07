@@ -48,23 +48,23 @@ class Flow:
         bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                      length=100, **params)
         template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': 'JOB',
-                'desc_color': 1
+            "card_type": "vote_interaction",
+            "source": {
+                "desc": "JOB"
             },
-            'main_title': {
-                'title': '欢迎使用JOB平台',
-                'desc': '请选择JOB执行方案'
+            "main_title": {
+                "title": "欢迎使用JOB平台",
+                "desc": "请选择JOB执行方案"
             },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_job_plan_id',
-                'option_list': bk_job_plans
+            "task_id": str(int(time.time() * 100000)),
+            "checkbox": {
+                "question_key": "bk_job_plan_id",
+                "option_list": bk_job_plans,
+                "mode": 1
             },
-            'submit_button': {
-                'text': '提交',
-                'key': 'bk_job_plan_select'
+            "submit_button": {
+                "text": "提交",
+                "key": "bk_job_plan_select"
             }
         }
         return template_card
