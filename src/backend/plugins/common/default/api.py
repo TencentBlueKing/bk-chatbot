@@ -25,6 +25,59 @@ from .settings import (
 )
 
 
+class Flow:
+    def __init__(self, session: CommandSession):
+        self._session = session
+
+    def render_welcome_msg(self):
+        template_card = {
+            'card_type': 'button_interaction',
+            'source': {
+                'desc': 'BKCHAT'
+            },
+            'main_title': {
+                'title': '欢迎使用蓝鲸信息流'
+            },
+            'action_menu': {
+                'desc': '更多操作',
+                'action_list': [
+                    {'text': '查找任务', 'key': 'bk_app_task_filter'}
+                ]
+            },
+            'horizontal_content_list': [
+                {
+                    "type": 3,
+                    "keyname": "员工信息",
+                    "value": "点击查看",
+                    "userid": self._session.ctx['msg_sender_id']
+                }
+            ],
+            'button_list': [
+                {
+                    "text": "CI",
+                    "style": 1,
+                    "key": "bk_devops"
+                },
+                {
+                    "text": "JOB",
+                    "style": 1,
+                    "key": "bk_job"
+                },
+                {
+                    "text": "SOPS",
+                    "style": 1,
+                    "key": "bk_sops"
+                },
+                {
+                    "text": "ITSM",
+                    "style": 1,
+                    "key": "bk_itsm"
+                }
+            ]
+        }
+        return template_card
+
+
 def is_cache_visit(user_id: str, redis_client: RedisClient) -> bool:
     key = f'enter_chat_{user_id}'
     is_exist = redis_client.get(key)

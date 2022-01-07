@@ -20,7 +20,7 @@ from opsbot.exceptions import HttpFailed
 from component import RedisClient
 from .api import (
     render_welcome_msg, render_biz_msg, render_default_intent, is_cache_visit,
-    bind_group_biz
+    bind_group_biz, Flow
 )
 from .settings import (
     DEFAULT_SHOW_GROUP_ID_ALIAS, DEFAULT_BIND_BIZ_ALIAS, DEFAULT_BIND_BIZ_TIP,
@@ -39,8 +39,8 @@ async def _(session: CommandSession):
     if 'event_key' in session.ctx:
         return
 
-    rich_text = await render_welcome_msg(session, RedisClient(env="prod"))
-    await session.send('', msgtype='rich_text', rich_text=rich_text)
+    msg = Flow(session).render_welcome_msg()
+    await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('biz_list', aliases=DEFAULT_BIND_BIZ_ALIAS)
