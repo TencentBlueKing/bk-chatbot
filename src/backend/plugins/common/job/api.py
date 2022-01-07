@@ -15,8 +15,11 @@ specific language governing permissions and limitations under the License.
 
 import json
 import time
+from typing import Dict, Union
 
 from opsbot import CommandSession
+from opsbot.exceptions import ActionFailed, HttpFailed
+from opsbot.log import logger
 from component import JOB, RedisClient
 
 
@@ -113,3 +116,19 @@ class Flow:
             ]
         }
         return template_card
+
+    async def run_job_plan(self, job_plan_id: Union[str, int], global_var_list: Dict):
+        try:
+            await JOB().execute_job_plan(
+                bk_biz_id=self.biz_id,
+                job_plan_id=int(job_plan_id),
+                global_var_list=global_var_list,
+                bk_username=self.user_id
+            )
+            msg = f'{job_plan_id} {global_var_list} 启动成功'
+        except ActionFailed as e:
+            msg = f'{job_plan_id} {global_var_list}, error: 参数有误 {e}'
+        except HttpFailed as e:
+            msg = f'{job_plan_id} {global_var_list}, error: 第三方服务异常 {e}'
+        finally:
+            logger.info(msg)
