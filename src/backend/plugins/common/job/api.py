@@ -73,8 +73,8 @@ class Flow:
         }
         return template_card
 
-    async def render_job_plan_detail(self, **params):
-        if not params:
+    async def render_job_plan_detail(self):
+        if self._session.is_first_run:
             try:
                 job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
             except KeyError:
@@ -86,9 +86,9 @@ class Flow:
                                for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
             job_plan_name = bk_job_plan_detail["name"]
         else:
-            global_var_list = params['global_var_list']
-            job_plan_name = params['job_plan_name']
-            job_plan_id = params['job_plan_id']
+            job_plan_id = self._session.state['job_plan_id']
+            job_plan_name = self._session.state['job_plan_name']
+            global_var_list = self._session.state['global_var_list']
 
         template_card = {
             'card_type': 'button_interaction',
