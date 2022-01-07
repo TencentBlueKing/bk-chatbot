@@ -60,15 +60,25 @@ async def _(session: CommandSession):
 @on_command('bk_job_plan_update')
 async def _(session: CommandSession):
     if 'event_key' in session.ctx:
-        _, job_plan_id, global_var_list = session.ctx['event_key'].split('|')
+        _, job_plan_id, job_plan_name, global_var_list = session.ctx['event_key'].split('|')
         session.state['job_plan_id'] = job_plan_id
+        session.state['job_plan_name'] = job_plan_name
         session.state['global_var_list'] = json.loads(global_var_list)
     else:
         job_plan_id = session.state['job_plan_id']
+        job_plan_name = session.state['job_plan_name']
         global_var_list = session.state['global_var_list']
 
-    params, _ = session.get('params', prompt='请顺序输入参数，换行分隔')
-    logger.info(params)
+    content = '>请顺序输入参数，<font color=\"red\">换行分隔</font>'
+    params, _ = session.get('params', prompt='...', msgtype='markdown', markdown={'content': content})
+    params = params.split('\n')
+    for i, item in enumerate(params):
+        global_var_list[i]['value'] = item
+        
+    msg = await Flow(session).render_job_plan_detail(job_plan_id=job_plan_id, job_plan_name=job_plan_name,
+                                                     global_var_list=global_var_list)
+    if msg:
+        await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('bk_job_plan_cancel')

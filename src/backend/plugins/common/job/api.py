@@ -73,17 +73,22 @@ class Flow:
         }
         return template_card
 
-    async def render_job_plan_detail(self):
-        try:
-            job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
-            return None
+    async def render_job_plan_detail(self, **params):
+        if not params:
+            try:
+                job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+            except KeyError:
+                return None
 
-        bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
-                                                             job_plan_id=int(job_plan_id))
-        global_var_list = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
-                           for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
-        bk_job_plan_name = bk_job_plan_detail["name"]
+            bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
+                                                                 job_plan_id=int(job_plan_id))
+            global_var_list = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
+                               for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
+            job_plan_name = bk_job_plan_detail["name"]
+        else:
+            global_var_list = params['global_var_list']
+            job_plan_name = params['job_plan_name']
+            job_plan_id = params['job_plan_id']
 
         template_card = {
             'card_type': 'button_interaction',
@@ -92,7 +97,7 @@ class Flow:
                 'desc_color': 1
             },
             'main_title': {
-                'title': f'JOB执行方案_{bk_job_plan_name}'
+                'title': f'JOB执行方案_{job_plan_name}'
             },
             'task_id': str(int(time.time() * 100000)),
             'sub_title_text': '参数确认',
@@ -106,12 +111,12 @@ class Flow:
                 {
                     "text": "修改",
                     "style": 2,
-                    "key": f"bk_job_plan_update|{job_plan_id}|{json.dumps(global_var_list)}"
+                    "key": f"bk_job_plan_update|{job_plan_id}|{job_plan_name}|{json.dumps(global_var_list)}"
                 },
                 {
                     "text": "取消",
                     "style": 3,
-                    "key": f"bk_job_plan_cancel|{bk_job_plan_name}"
+                    "key": f"bk_job_plan_cancel|{job_plan_name}"
                 }
             ]
         }
