@@ -24,15 +24,19 @@ from component import JOB, RedisClient, BK_JOB_DOMAIN
 
 
 class Flow:
-    def __init__(self, session: CommandSession):
+    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
         self._session = session
         self._job = JOB()
         self._redis_client = RedisClient(env='prod')
         self.user_id = self._session.ctx['msg_sender_id']
-        if self._session.ctx['msg_from_type'] == 'single':
-            self.biz_id = self._redis_client.hash_get("chat_single_biz", self.user_id)
+        if bk_biz_id:
+            self.biz_id = bk_biz_id
+            self._redis_client.hash_set('chat_single_biz', self.user_id)
         else:
-            self.biz_id = self._redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
+            if self._session.ctx['msg_from_type'] == 'single':
+                self.biz_id = self._redis_client.hash_get("chat_single_biz", self.user_id)
+            else:
+                self.biz_id = self._redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
 
     async def _get_job_plan_list(self, **params):
         data = await self._job.get_job_plan_list(**params)

@@ -15,14 +15,19 @@ specific language governing permissions and limitations under the License.
 
 import json
 
-from opsbot import on_command, CommandSession
+from opsbot import on_command, CommandSession, RedisClient
 
 from .api import Flow
 
 
 @on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', 'bk_job'))
 async def list_job_plan(session: CommandSession):
-    msg = await Flow(session).render_job_plan_list()
+    try:
+        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+    except KeyError:
+        bk_biz_id = None
+
+    msg = await Flow(session, bk_biz_id).render_job_plan_list()
     if msg:
         await session.send('', msgtype='template_card', template_card=msg)
 
