@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import json
 import time
 
 from opsbot import CommandSession
@@ -77,8 +78,9 @@ class Flow:
 
         bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                              job_plan_id=int(job_plan_id))
-        global_var_list = [{'keyname': var['name'], 'value': var['value']}
+        global_var_list = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
                            for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
+        bk_job_plan_name = bk_job_plan_detail["name"]
 
         template_card = {
             'card_type': 'button_interaction',
@@ -87,21 +89,26 @@ class Flow:
                 'desc_color': 1
             },
             'main_title': {
-                'title': 'JOB执行方案确认'
+                'title': f'JOB执行方案_{bk_job_plan_name}'
             },
             'task_id': str(int(time.time() * 100000)),
             'sub_title_text': '参数确认',
             'horizontal_content_list': global_var_list,
             'button_list': [
                 {
-                    "text": "确认",
+                    "text": "执行",
                     "style": 1,
-                    "key": "button_key_1"
+                    "key": f"bk_job_plan_execute|{job_plan_id}|{json.dumps(global_var_list)}"
                 },
                 {
-                    "text": "结束",
+                    "text": "修改",
                     "style": 2,
-                    "key": "button_key_2"
+                    "key": f"bk_job_plan_update|{job_plan_id}"
+                },
+                {
+                    "text": "取消",
+                    "style": 3,
+                    "key": f"bk_job_plan_cancel|{bk_job_plan_name}"
                 }
             ]
         }

@@ -13,6 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import json
+
 from opsbot import on_command, CommandSession
 from opsbot.log import logger
 
@@ -42,3 +44,31 @@ async def select_bk_job_plan(session: CommandSession):
     msg = await Flow(session).render_job_plan_detail()
     if msg:
         await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_job_plan_execute')
+async def _(session: CommandSession):
+    pass
+
+
+@on_command('bk_job_plan_update')
+async def _(session: CommandSession):
+    if 'event_key' in session.ctx:
+        _, job_plan_id, global_var_list = session.ctx['event_key'].split('|')
+        session.state['job_plan_id'] = job_plan_id
+        session.state['global_var_list'] = json.loads(global_var_list)
+    else:
+        job_plan_id = session.state['job_plan_id']
+        global_var_list = session.state['global_var_list']
+
+    reply, _ = session.get('reply', prompt='')
+    logger.info(reply)
+
+
+@on_command('bk_job_plan_cancel')
+async def _(session: CommandSession):
+    _, bk_job_plan_name = session.ctx['event_key'].split('|')
+    content = f'''>**注意** 
+    ><font color=\"info\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
+    '''
+    await session.send('', msgtype='markdown', markdown={'content': content})
