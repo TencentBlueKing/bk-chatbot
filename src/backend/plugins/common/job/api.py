@@ -31,7 +31,7 @@ class Flow:
         self.user_id = self._session.ctx['msg_sender_id']
         if bk_biz_id:
             self.biz_id = bk_biz_id
-            self._redis_client.hash_set('chat_single_biz', self.user_id)
+            self._redis_client.hash_set('chat_single_biz', self.user_id, bk_biz_id)
         else:
             if self._session.ctx['msg_from_type'] == 'single':
                 self.biz_id = self._redis_client.hash_get("chat_single_biz", self.user_id)
