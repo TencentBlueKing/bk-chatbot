@@ -67,8 +67,8 @@ async def _(session: CommandSession):
         job_plan_id = session.state['job_plan_id']
         global_var_list = session.state['global_var_list']
 
-    reply, _ = session.get('reply', prompt='')
-    logger.info(reply)
+    params, _ = session.get('params', prompt='请顺序输入参数，换行分隔')
+    logger.info(params)
 
 
 @on_command('bk_job_plan_cancel')

@@ -106,7 +106,7 @@ class Flow:
                 {
                     "text": "修改",
                     "style": 2,
-                    "key": f"bk_job_plan_update|{job_plan_id}"
+                    "key": f"bk_job_plan_update|{job_plan_id}|{json.dumps(global_var_list)}"
                 },
                 {
                     "text": "取消",
