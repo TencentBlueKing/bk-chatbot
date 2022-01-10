@@ -31,7 +31,7 @@ class SopsTask(GenericTask):
         self._sops = SOPS()
 
     async def _get_sops_template_list(self, **params):
-        data = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id)
+        data = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id, **params)
         data.sort(key=lambda x: x['edit_time'], reverse=True)
         return [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
                 for template in data[:20]]
