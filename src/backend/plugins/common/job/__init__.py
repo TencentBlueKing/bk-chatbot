@@ -17,7 +17,7 @@ import json
 
 from opsbot import on_command, CommandSession
 
-from .api import Flow
+from .api import Task
 
 
 @on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', 'bk_job'))
@@ -27,7 +27,7 @@ async def list_job_plan(session: CommandSession):
     except KeyError:
         bk_biz_id = None
 
-    msg = await Flow(session, bk_biz_id).render_job_plan_list()
+    msg = await Task(session, bk_biz_id).render_job_plan_list()
     if msg:
         await session.send('', msgtype='template_card', template_card=msg)
 
@@ -44,7 +44,7 @@ async def search_job_plan(session: CommandSession):
 
 @on_command('bk_job_plan_select')
 async def select_bk_job_plan(session: CommandSession):
-    msg = await Flow(session).render_job_plan_detail()
+    msg = await Task(session).render_job_plan_detail()
     if msg:
         await session.send('', msgtype='template_card', template_card=msg)
 
@@ -57,7 +57,7 @@ async def _(session: CommandSession):
     except json.JSONDecodeError:
         return
 
-    flow = Flow(session)
+    flow = Task(session)
     params = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
     result = await flow.run_job_plan(job_plan_id, params)
     msg = flow.render_job_plan_execute_msg(result, job_plan_name, global_var_list)
@@ -79,7 +79,7 @@ async def _(session: CommandSession):
     for i, item in enumerate(params):
         session.state['global_var_list'][i]['value'] = item
 
-    msg = await Flow(session).render_job_plan_detail()
+    msg = await Task(session).render_job_plan_detail()
     if msg:
         await session.send('', msgtype='template_card', template_card=msg)
 

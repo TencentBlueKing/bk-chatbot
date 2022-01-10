@@ -55,14 +55,6 @@ class Flow:
                     {'text': '绑定业务', 'key': 'bk_cc_biz_bind'}
                 ]
             },
-            'horizontal_content_list': [
-                {
-                    "type": 3,
-                    "keyname": "员工信息",
-                    "value": "点击查看",
-                    "userid": self.user_id
-                }
-            ],
             'button_list': [
                 {
                     "text": "CI",

@@ -23,7 +23,7 @@ from opsbot.log import logger
 from component import JOB, RedisClient, BK_JOB_DOMAIN
 
 
-class Flow:
+class Task:
     def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
         self._session = session
         self._job = JOB()
