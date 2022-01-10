@@ -69,6 +69,9 @@ class RedisClient:
     def hash_get(self, name, key):
         return self.redis_client.hget(name, key)
 
+    def hash_del(self, name, key):
+        return self.redis_client.hdel(name, key)
+
     def pipe_set(self, data):
         with self.redis_client.pipeline(transaction=False) as pipe:
             for k, v in data.items():

@@ -12,3 +12,42 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
+from opsbot import on_command, CommandSession
+from opsbot.log import logger
+
+from .api import SopsTask
+
+
+@on_command('bk_sops_template_list', aliases=('标准运维', 'sops', 'bk_sops'))
+async def list_sops_template(session: CommandSession):
+    try:
+        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+    except KeyError:
+        bk_biz_id = None
+
+    msg = await SopsTask(session, bk_biz_id).render_sops_template_list()
+    if msg:
+        await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_sops_template_select')
+async def select_sops_template(session: CommandSession):
+    msg = await SopsTask(session).render_sops_template_info()
+    if msg:
+        await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_sops_template_execute')
+async def execute_sops_template(session: CommandSession):
+    logger.info(session.ctx)
+
+
+@on_command('bk_sops_template_update')
+async def update_sops_template(session: CommandSession):
+    pass
+
+
+@on_command('bk_sops_template_cancel')
+async def _(session: CommandSession):
+    pass

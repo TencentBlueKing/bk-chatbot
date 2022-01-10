@@ -20,11 +20,11 @@ from typing import Union, List
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
-from opsbot.template import GenericTask
+from opsbot.plugins import GenericTask
 from component import JOB, RedisClient, BK_JOB_DOMAIN
 
 
-class Task(GenericTask):
+class JobTask(GenericTask):
     def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
         self._job = JOB()
@@ -62,7 +62,7 @@ class Task(GenericTask):
                 'option_list': bk_job_plans
             },
             'submit_button': {
-                'text': '提交',
+                'text': '确认',
                 'key': 'bk_job_plan_select'
             }
         }
