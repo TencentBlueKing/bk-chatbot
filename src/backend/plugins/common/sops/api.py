@@ -20,10 +20,11 @@ from typing import Union, List
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
+from opsbot.plugins import GenericTask
 from component import SOPS, RedisClient, BK_SOPS_DOMAIN
 
 
-class SopsTask:
+class SopsTask(GenericTask):
     def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
         self._redis_client = RedisClient(env='prod')
         super().__init__(session, bk_biz_id, self._redis_client)
@@ -52,7 +53,7 @@ class SopsTask:
         if not self.biz_id:
             return None
 
-        bk_sops_templates = self._get_sops_template_list(**params)
+        bk_sops_templates = await self._get_sops_template_list(**params)
         template_card = {
             'card_type': 'vote_interaction',
             'source': {
@@ -81,7 +82,7 @@ class SopsTask:
             except KeyError:
                 return None
 
-            bk_sops_template = self._get_sops_template_info(int(bk_sops_template_id))
+            bk_sops_template = await self._get_sops_template_info(int(bk_sops_template_id))
             self._redis_client.hash_set('plugins:bk_sops', self._session["TaskId"], bk_sops_template)
             bk_sops_template_schemas = bk_sops_template['bk_sops_template_schemes']
 
