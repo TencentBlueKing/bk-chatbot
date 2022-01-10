@@ -37,11 +37,11 @@ class SopsTask(GenericTask):
 
     async def _get_sops_template_info(self, template_id: int):
         bk_sops_template_info = await self._sops.get_template_info(self.biz_id, template_id, bk_username=self.user_id)
-        bk_sops_template_schemes = await self._sops.get_template_schemes(self.biz_id, template_id,
+        bk_sops_template_schemas = await self._sops.get_template_schemes(self.biz_id, template_id,
                                                                          bk_username=self.user_id)
         return {
             'bk_sops_template_info': bk_sops_template_info,
-            'bk_sops_template_schemas': bk_sops_template_schemes
+            'bk_sops_template_schemas': bk_sops_template_schemas
         }
 
     async def render_sops_template_list(self, **params):
@@ -74,12 +74,12 @@ class SopsTask(GenericTask):
         if self._session.is_first_run:
             try:
                 bk_sops_template_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-            except KeyError:
+            except (KeyError, TypeError):
                 return None
 
             bk_sops_template = await self._get_sops_template_info(int(bk_sops_template_id))
             bk_sops_template_info = bk_sops_template['bk_sops_template_info']
-            bk_sops_template_schemas = bk_sops_template['bk_sops_template_schemes']
+            bk_sops_template_schemas = bk_sops_template['bk_sops_template_schemas']
             template_name = bk_sops_template_info['name']
             activities = [k for k, v in bk_sops_template_info.get('pipeline_tree', {}).get('activities').items()
                           if v['optional']]
@@ -130,7 +130,8 @@ class SopsTask(GenericTask):
             template_card['button_selection'] = {
                 'question_key': 'bk_sops_template_schema_id',
                 'title': '分组',
-                'option_list': bk_sops_template_schemas
+                'option_list': [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
+                                for template in bk_sops_template_schemas[:10]]
             }
         return template_card
 

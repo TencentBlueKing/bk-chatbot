@@ -40,7 +40,7 @@ ACCESS_TOKEN: str = ''
 SECRET: str = ''
 HOST: str = os.getenv('HOST', '127.0.0.1')
 PORT: int = os.getenv('PORT', 8080)
-DEBUG: bool = False
+DEBUG: bool = True
 
 SUPERUSERS: Container[int] = set(os.getenv('SUPERUSERS', '').split(','))
 NICKNAME: Union[str, Iterable[str]] = os.getenv('NICKNAME', '')
