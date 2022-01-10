@@ -31,19 +31,15 @@ class SopsTask(GenericTask):
         self._sops = SOPS()
 
     async def _get_sops_template_list(self, **params):
-        data = await self._sops.get_template_info(self.biz_id, **params)
+        data = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id)
         data.sort(key=lambda x: x['edit_time'], reverse=True)
         return [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
                 for template in data[:20]]
 
-    async def _get_sops_template_schemes(self, template_id: int, **params):
-        data = await self._sops.get_template_schemes(self.biz_id, template_id, **params)
-        return [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
-                for template in data[:10]]
-
     async def _get_sops_template_info(self, template_id: int):
-        bk_sops_template_info = await self._sops.get_template_info(self.biz_id, template_id)
-        bk_sops_template_schemes = await self._sops.get_template_schemes(self.biz_id, template_id)
+        bk_sops_template_info = await self._sops.get_template_info(self.biz_id, template_id, bk_username=self.user_id)
+        bk_sops_template_schemes = await self._sops.get_template_schemes(self.biz_id, template_id,
+                                                                         bk_username=self.user_id)
         return {
             'bk_sops_template_info': bk_sops_template_info,
             'bk_sops_template_schemas': bk_sops_template_schemes
