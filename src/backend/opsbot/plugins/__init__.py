@@ -13,5 +13,5 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from .template.api import Action
+from .template.api import GenericTask
 from .template.stdlib import ParamParser

@@ -15,28 +15,19 @@ specific language governing permissions and limitations under the License.
 
 import json
 import time
-from typing import Dict, Union
+from typing import Union, List
 
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
+from opsbot.template import GenericTask
 from component import JOB, RedisClient, BK_JOB_DOMAIN
 
 
-class Task:
+class Task(GenericTask):
     def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
-        self._session = session
+        super().__init__(session, bk_biz_id, RedisClient(env='prod'))
         self._job = JOB()
-        self._redis_client = RedisClient(env='prod')
-        self.user_id = self._session.ctx['msg_sender_id']
-        if bk_biz_id:
-            self.biz_id = bk_biz_id
-            self._redis_client.hash_set('chat_single_biz', self.user_id, bk_biz_id)
-        else:
-            if self._session.ctx['msg_from_type'] == 'single':
-                self.biz_id = self._redis_client.hash_get("chat_single_biz", self.user_id)
-            else:
-                self.biz_id = self._redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
 
     async def _get_job_plan_list(self, **params):
         data = await self._job.get_job_plan_list(**params)
@@ -126,7 +117,7 @@ class Task:
         }
         return template_card
 
-    async def run_job_plan(self, job_plan_id: Union[str, int], global_var_list: Dict):
+    async def execute_task(self, job_plan_id: Union[str, int], global_var_list: List):
         try:
             await JOB().execute_job_plan(
                 bk_biz_id=self.biz_id,
@@ -145,21 +136,5 @@ class Task:
 
         return False
 
-    @classmethod
-    def render_job_plan_execute_msg(cls, result, job_plan_name, global_var_list):
-        template_card = {
-            'card_type': 'text_notice',
-            'source': {
-                'desc': 'JOB'
-            },
-            'main_title': {
-                'title': f'{job_plan_name}启动成功' if result else f'{job_plan_name}启动失败'
-            },
-            'horizontal_content_list': global_var_list,
-            'task_id': str(int(time.time() * 100000)),
-            'card_action': {
-                'type': 1,
-                'url': BK_JOB_DOMAIN
-            }
-        }
-        return template_card
+    def render_job_plan_execute_msg(self, result, job_plan_name, global_var_list):
+        return self.render_execute_msg('JOB', result, job_plan_name, global_var_list, BK_JOB_DOMAIN)

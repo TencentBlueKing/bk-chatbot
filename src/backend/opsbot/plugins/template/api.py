@@ -14,79 +14,48 @@ specific language governing permissions and limitations under the License.
 """
 
 import abc
-import copy
-from typing import List
-from itertools import chain
+import time
+from typing import Union, Optional, Dict, List
 
 from opsbot import CommandSession
 
 
-class Action(abc.ABC):
-    def __init__(self, key, index_msg, index_example, params_template, params_map):
-        self.plugin_key = key
-        self.plugin_index_msg = index_msg
-        self.plugin_index_example = index_example
-        self.plugin_params_template = params_template
-        self.plugin_params_map = params_map
+class GenericTask:
+    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None, redis_client: Optional = None):
+        self._session = session
+        self.user_id = self._session.ctx['msg_sender_id']
+        self.biz_id = bk_biz_id
+        self.set_biz(redis_client)
 
-    def render_index_text(self, title='') -> List:
-        if not title:
-            title = f'{self.plugin_index_msg}{self.plugin_index_example}'
-        rich_text = [{'text': {'content': title}, 'type': 'text'}]
-        return rich_text
-
-    def render_params_text(self, session: CommandSession) -> List:
-        if not session.state.get('params'):
-            session.state['params'] = copy.deepcopy(self.plugin_params_template)
-
-        rich_text = [[{
-            'type': 'text',
-            'text': {
-                'content': f'【{self.plugin_params_map[key]}】: {val}    '
-            }
-        }, {
-            'type': 'link',
-            'link': {
-                'text': '修改\r\n',
-                'type': 'click',
-                'key': f'{self.plugin_key}.params|{key}'
-            }
-        }] for key, val in session.state.get('params').items()]
-
-        return list(chain.from_iterable(rich_text))
-
-    @classmethod
-    def render_terminate_tip(cls) -> List:
-        return [{'type': 'text', 'text': {'content': '(输入[结束]终止会话)'}}]
-
-    def render_execute_text(self) -> List:
-        return [{
-            'type': 'link',
-            'link': {
-                'text': '执行     ',
-                'type': 'click',
-                'key': f'{self.plugin_key}.commit'
-            }
-        }, {
-            'type': 'link',
-            'link': {
-                'text': '取消',
-                'type': 'click',
-                'key': f'{self.plugin_key}.cancel'
-            }
-        }]
-
-    def switch_session(self, session: CommandSession):
-        """
-        exist plugin kill it
-        """
-        if session.ctx.get('event', '') == 'click' and session.ctx.get('event_key', '') != self.plugin_key:
-            if session.ctx.get('event_key', '') in session.bot.config.SESSION_RESERVED_CMD:
-                session.switch(session.ctx['message'])
-                return True
-
-        return False
+    def set_biz(self, redis_client: Optional):
+        if redis_client:
+            if self.biz_id:
+                redis_client.hash_set('chat_single_biz', self.user_id, self.biz_id)
+            else:
+                if self._session.ctx['msg_from_type'] == 'single':
+                    self.biz_id = redis_client.hash_get("chat_single_biz", self.user_id)
+                else:
+                    self.biz_id = redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
 
     @abc.abstractmethod
-    async def run(self, session: CommandSession):
+    def execute_task(self) -> bool:
         raise NotImplementedError
+
+    @classmethod
+    def render_execute_msg(cls, platform: str, task_result: bool, task_name: str,
+                           parameter: List, task_domain: str) -> Dict:
+        return {
+            'card_type': 'text_notice',
+            'source': {
+                'desc': platform
+            },
+            'main_title': {
+                'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
+            },
+            'horizontal_content_list': parameter,
+            'task_id': str(int(time.time() * 100000)),
+            'card_action': {
+                'type': 1,
+                'url': task_domain
+            }
+        }

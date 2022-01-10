@@ -59,7 +59,7 @@ async def _(session: CommandSession):
 
     flow = Task(session)
     params = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
-    result = await flow.run_job_plan(job_plan_id, params)
+    result = await flow.execute_task(job_plan_id, params)
     msg = flow.render_job_plan_execute_msg(result, job_plan_name, global_var_list)
     await session.send('', msgtype='template_card', template_card=msg)
 
