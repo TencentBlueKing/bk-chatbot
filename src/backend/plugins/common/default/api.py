@@ -13,16 +13,10 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import time, json
-from typing import List, Callable
+import time
 
 from opsbot import CommandSession
 from component import RedisClient, CC, Backend, Plugin
-from .settings import (
-    DEFAULT_WELCOME_MSG, DEFAULT_WELCOME_BIZ, DEFAULT_WELCOME_REBIND,
-    DEFAULT_WELCOME_BIND, DEFAULT_WELCOME_INTENT, DEFAULT_INTENT_CATEGORY, DEFAULT_BIZ_TIP,
-    DEFAULT_WELCOME_TIP, DEFAULT_TOOL_BAR, DEFAULT_TOOL_EXTRA, DEFAULT_GUIDE_URL
-)
 
 
 class Flow:
