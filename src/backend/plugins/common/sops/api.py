@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 import time
-from typing import Union, List
+from typing import Union, List, Dict
 
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
@@ -26,8 +26,7 @@ from component import SOPS, RedisClient, BK_SOPS_DOMAIN
 
 class SopsTask(GenericTask):
     def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
-        self._redis_client = RedisClient(env='prod')
-        super().__init__(session, bk_biz_id, self._redis_client)
+        super().__init__(session, bk_biz_id, RedisClient(env='prod'))
         self._sops = SOPS()
 
     async def _get_sops_template_list(self, **params):
@@ -79,14 +78,23 @@ class SopsTask(GenericTask):
                 return None
 
             bk_sops_template = await self._get_sops_template_info(int(bk_sops_template_id))
-            self._redis_client.hash_set('plugins:bk_sops', self._session["TaskId"], bk_sops_template)
+            bk_sops_template_info = bk_sops_template['bk_sops_template_info']
             bk_sops_template_schemas = bk_sops_template['bk_sops_template_schemes']
-
-            template_name = bk_sops_template['name']
+            template_name = bk_sops_template_info['name']
+            activities = [k for k, v in bk_sops_template_info.get('pipeline_tree', {}).get('activities').items()
+                          if v['optional']]
             constants = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
-                         for var in bk_sops_template['pipeline_tree']['constants'].values()]
+                         for var in bk_sops_template_info['pipeline_tree']['constants'].values()]
         else:
             pass
+
+        info = {
+            'bk_sops_template_id': bk_sops_template_id,
+            'bk_sops_template_name': template_name,
+            'bk_sops_template_schemas': bk_sops_template_schemas,
+            'activities': activities,
+            'constants': constants
+        }
 
         template_card = {
             'card_type': 'button_interaction',
@@ -103,12 +111,12 @@ class SopsTask(GenericTask):
                 {
                     "text": "执行",
                     "style": 1,
-                    "key": f"bk_sops_template_execute|{bk_sops_template_id}|{template_name}|{json.dumps(constants)}"
+                    "key": f"bk_sops_template_execute|{json.dumps(info)}"
                 },
                 {
                     "text": "修改",
                     "style": 2,
-                    "key": f"bk_sops_template_update|{bk_sops_template_id}|{template_name}|{json.dumps(constants)}"
+                    "key": f"bk_sops_template_update|{json.dumps(info)}"
                 },
                 {
                     "text": "取消",
@@ -126,15 +134,15 @@ class SopsTask(GenericTask):
             }
         return template_card
 
-    async def execute_task(self, bk_sops_template_id: Union[str, int], bk_sops_template_name: str, constants: List):
-        bk_sops_template = self._redis_client.hash_get('plugins:bk_sops', self._session["TaskId"])
+    async def execute_task(self, bk_sops_template: Dict):
         if not bk_sops_template:
             return False
 
-        bk_sops_template_info = bk_sops_template['bk_sops_template_info']
-        bk_sops_template_schemas = bk_sops_template['bk_sops_template_schemas']
-        activities = [k for k, v in bk_sops_template_info.get('pipeline_tree', {}).get('activities').items()
-                      if v['optional']]
+        bk_sops_template_id = bk_sops_template['bk_sops_template_id']
+        bk_sops_template_name = bk_sops_template['bk_sops_template_name']
+        bk_sops_template_schemas = bk_sops_template.get('bk_sops_template_schemas') or []
+        activities = bk_sops_template['activities']
+        constants = bk_sops_template['constants']
 
         try:
             bk_sops_template_schema_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
@@ -155,7 +163,6 @@ class SopsTask(GenericTask):
                                                     constants=constants)
             await self._sops.start_task(self.biz_id, response.get('task_id'), bk_username=self.user_id)
             msg = f'{bk_sops_template_name} {constants} 任务启动成功'
-            self._redis_client.hash_del('plugins:bk_sops', self._session["TaskId"])
             return True
         except ActionFailed as e:
             msg = f'{bk_sops_template_id} {constants} error: 参数有误 {e}'
