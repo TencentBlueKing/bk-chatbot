@@ -179,6 +179,5 @@ class SopsTask(GenericTask):
 
         return False
 
-    def render_sops_template_execute_msg(self, result: bool, bk_sops_template: Dict):
-        return self.render_execute_msg('SOPS', result, bk_sops_template['bk_sops_template_name'],
-                                       bk_sops_template['constants'], BK_SOPS_DOMAIN)
+    def render_sops_template_execute_msg(self, result: bool, bk_sops_template_name: str, constants: List):
+        return self.render_execute_msg('SOPS', result, bk_sops_template_name, constants, BK_SOPS_DOMAIN)

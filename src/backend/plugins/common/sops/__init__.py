@@ -43,13 +43,13 @@ async def select_sops_template(session: CommandSession):
 @on_command('bk_sops_template_execute')
 async def execute_sops_template(session: CommandSession):
     _, bk_sops_template = session.ctx['event_key'].split('|')
-    try:
-        bk_sops_template = json.loads(bk_sops_template)
-    except json.JSONDecodeError:
-        pass
+    bk_sops_template = json.loads(bk_sops_template)
+
     flow = SopsTask(session)
     result = await flow.execute_task(bk_sops_template)
-    msg = flow.render_sops_template_execute_msg(result, bk_sops_template)
+    bk_sops_template_name = bk_sops_template['bk_sops_template_name']
+    constants = [{'keyname': k, 'value': v} for k, v in bk_sops_template['constants'].items()]
+    msg = flow.render_sops_template_execute_msg(result, bk_sops_template_name, constants)
     await session.send('', msgtype='template_card', template_card=msg)
 
 
@@ -57,9 +57,7 @@ async def execute_sops_template(session: CommandSession):
 async def update_sops_template(session: CommandSession):
     if 'event_key' in session.ctx:
         _, bk_sops_template = session.ctx['event_key'].split('|')
-        session.state['bk_sops_template'] = bk_sops_template
-    else:
-        return
+        session.state['bk_sops_template'] = json.loads(bk_sops_template)
 
     content = f'''>**SOPS TIP**
         >请顺序输入参数，**换行分隔**'''
