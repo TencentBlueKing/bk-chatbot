@@ -47,9 +47,7 @@ async def execute_sops_template(session: CommandSession):
 
     flow = SopsTask(session)
     result = await flow.execute_task(bk_sops_template)
-    bk_sops_template_name = bk_sops_template['bk_sops_template_name']
-    constants = [{'keyname': k, 'value': v} for k, v in bk_sops_template['constants'].items()]
-    msg = flow.render_sops_template_execute_msg(result, bk_sops_template_name, constants)
+    msg = flow.render_sops_template_execute_msg(result, bk_sops_template)
     await session.send('', msgtype='template_card', template_card=msg)
 
 
