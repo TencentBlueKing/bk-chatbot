@@ -13,6 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import json
+
 from opsbot import on_command, CommandSession
 from opsbot.log import logger
 
@@ -40,7 +42,20 @@ async def select_sops_template(session: CommandSession):
 
 @on_command('bk_sops_template_execute')
 async def execute_sops_template(session: CommandSession):
-    logger.info(session.ctx)
+    if 'event_key' in session.ctx:
+        _, bk_sops_template = session.ctx['event_key'].split('|')
+        session.state['bk_sops_template'] = bk_sops_template
+
+    content = f'''>**SOPS TIP**
+        >请顺序输入参数，**换行分隔**'''
+    params, _ = session.get('params', prompt='...', msgtype='markdown', markdown={'content': content})
+    params = params.split('\n')
+    for i, item in enumerate(params):
+        session.state['bk_sops_template']['constants'][i]['value'] = item
+
+    msg = await SopsTask(session).render_sops_template_info()
+    if msg:
+        await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('bk_sops_template_update')

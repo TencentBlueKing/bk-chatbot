@@ -86,7 +86,12 @@ class SopsTask(GenericTask):
             constants = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
                          for var in bk_sops_template_info['pipeline_tree']['constants'].values()]
         else:
-            pass
+            bk_sops_template = self._session.state['bk_sops_template']
+            bk_sops_template_id = bk_sops_template['bk_sops_template_id']
+            template_name = bk_sops_template['bk_sops_template_name']
+            bk_sops_template_schemas = bk_sops_template['bk_sops_template_schemas']
+            activities = bk_sops_template['activities']
+            constants = bk_sops_template['constants']
 
         info = {
             'bk_sops_template_id': bk_sops_template_id,
@@ -149,8 +154,8 @@ class SopsTask(GenericTask):
             bk_sops_template_schema_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
             schema = {'data': item['data'] for item in bk_sops_template_schemas
                       if item['id'] == bk_sops_template_schema_id}
-            select_group = schema.get('data', [])
-        except KeyError:
+            select_group = json.loads(schema.get('data', []))
+        except (KeyError, json.JSONDecodeError):
             select_group = None
 
         exclude_task_nodes_id = list(set(activities).difference(set(select_group))) if select_group else []
