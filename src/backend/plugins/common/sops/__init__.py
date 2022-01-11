@@ -42,9 +42,24 @@ async def select_sops_template(session: CommandSession):
 
 @on_command('bk_sops_template_execute')
 async def execute_sops_template(session: CommandSession):
+    _, bk_sops_template = session.ctx['event_key'].split('|')
+    try:
+        bk_sops_template = json.loads(bk_sops_template)
+    except json.JSONDecodeError:
+        pass
+    flow = SopsTask(session)
+    result = await flow.execute_task(bk_sops_template)
+    msg = flow.render_sops_template_execute_msg(result, bk_sops_template)
+    await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_sops_template_update')
+async def update_sops_template(session: CommandSession):
     if 'event_key' in session.ctx:
         _, bk_sops_template = session.ctx['event_key'].split('|')
         session.state['bk_sops_template'] = bk_sops_template
+    else:
+        return
 
     content = f'''>**SOPS TIP**
         >请顺序输入参数，**换行分隔**'''
@@ -58,11 +73,10 @@ async def execute_sops_template(session: CommandSession):
         await session.send('', msgtype='template_card', template_card=msg)
 
 
-@on_command('bk_sops_template_update')
-async def update_sops_template(session: CommandSession):
-    pass
-
-
 @on_command('bk_sops_template_cancel')
 async def _(session: CommandSession):
-    pass
+    _, bk_sops_template_name = session.ctx['event_key'].split('|')
+    content = f'''>**SOPS TIP** 
+        ><font color=\"warning\">您的标准运维任务「{bk_sops_template_name}」已取消...</font> 
+        '''
+    await session.send('', msgtype='markdown', markdown={'content': content})

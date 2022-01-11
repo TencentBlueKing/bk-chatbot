@@ -71,6 +71,8 @@ async def _(session: CommandSession):
         session.state['job_plan_id'] = job_plan_id
         session.state['job_plan_name'] = job_plan_name
         session.state['global_var_list'] = json.loads(global_var_list)
+    else:
+        return
 
     content = f'''>**JOB TIP**
     >请顺序输入参数，**换行分隔**'''
@@ -88,6 +90,6 @@ async def _(session: CommandSession):
 async def _(session: CommandSession):
     _, bk_job_plan_name = session.ctx['event_key'].split('|')
     content = f'''>**JOB TIP** 
-    ><font color=\"info\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
+    ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
     '''
     await session.send('', msgtype='markdown', markdown={'content': content})
