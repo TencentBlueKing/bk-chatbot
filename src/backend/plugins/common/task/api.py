@@ -68,7 +68,7 @@ class AppTask(GenericTask):
             'task_id': str(int(time.time() * 100000))
         }
 
-        if all(bk_app_task.values):
+        if any(bk_app_task.values()):
             template_card['card_type'] = 'multiple_interaction'
             template_card['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
             template_card['select_list'] = []
@@ -79,18 +79,18 @@ class AppTask(GenericTask):
             return template_card
 
         if bk_app_task['bk_job']:
-            template_card['select_list'].push({
+            template_card['select_list'].append({
                 'question_key': 'bk_job_plan_id',
                 'title': 'JOB',
-                'option_list': [{'id': str(job_plan['id']), 'text': job_plan['name']}
+                'option_list': [{'id': f'bk_job|{str(job_plan["id"])}', 'text': job_plan['name']}
                                 for job_plan in bk_app_task['bk_job'][:10]]
             })
 
         if bk_app_task['bk_sops']:
-            template_card['select_list'].push({
+            template_card['select_list'].append({
                 'question_key': 'bk_sops_template_id',
                 'title': 'SOPS',
-                'option_list': [{'id': str(template['id']), 'text': template['name']}
+                'option_list': [{'id': f'bk_sops|{str(template["id"])}', 'text': template['name']}
                                 for template in bk_app_task['bk_sops'][:10]]
             })
 
