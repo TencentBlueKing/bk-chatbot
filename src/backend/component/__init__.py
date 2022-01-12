@@ -21,7 +21,8 @@ from .public import (
     RedisClient, ESClient, regex_parse_entity, AesED, import_string, Cached
 )
 from .config import (
-    BK_CHAT_DOMAIN, BK_JOB_DOMAIN, BK_SOPS_DOMAIN, BK_DEVOPS_DOMAIN, BK_ITSM_DOMAIN
+    BK_CHAT_DOMAIN, BK_JOB_DOMAIN, BK_SOPS_DOMAIN, BK_DEVOPS_DOMAIN,
+    BK_ITSM_DOMAIN, BK_PAAS_DOMAIN
 )
 
 
@@ -29,4 +30,5 @@ __all__ = ['BKApi', 'CC', 'JOB', 'SOPS', 'DevOps', 'BKData', 'ITSM', 'Backend', 
            'fetch_slot', 'fetch_intent', 'BizMapper', 'TimeNormalizer',
            'RedisClient', 'ESClient',
            'regex_parse_entity', 'AesED', 'import_string',
-           'BK_CHAT_DOMAIN', 'BK_JOB_DOMAIN', 'BK_SOPS_DOMAIN', 'BK_DEVOPS_DOMAIN', 'BK_ITSM_DOMAIN']
+           'BK_CHAT_DOMAIN', 'BK_JOB_DOMAIN', 'BK_SOPS_DOMAIN', 'BK_DEVOPS_DOMAIN',
+           'BK_ITSM_DOMAIN', 'BK_PAAS_DOMAIN']
