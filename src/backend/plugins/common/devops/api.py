@@ -112,7 +112,11 @@ class DevOpsTask(GenericTask):
 
             start_infos = await self._get_devops_build_start_info(bk_devops_project_id, bk_devops_pipeline_id)
         else:
-            pass
+            bk_devops_pipeline = self._session.state['bk_devops_pipeline']
+            bk_devops_project_id = bk_devops_pipeline['bk_devops_project_id']
+            bk_devops_pipeline_id = bk_devops_pipeline['bk_devops_pipeline_id']
+            bk_devops_pipeline_name = bk_devops_pipeline['bk_devops_pipeline_name']
+            start_infos = bk_devops_pipeline['start_infos']
 
         info = {
             'bk_devops_project_id': bk_devops_project_id,
