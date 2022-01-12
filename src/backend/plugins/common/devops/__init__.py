@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from opsbot import on_command, CommandSession
 from opsbot.log import logger
 from component import DevOps
-from .api import render_start_msg, parse_params
+from .api import render_start_msg, parse_params, DevOpsTask
 from .settings import (
     DEVOPS_PROJECT_TIP, DEVOPS_PIPELINE_TIP,
     DEVOPS_PIPELINE_START_SUCCESS, DEVOPS_PIPELINE_START_FAIL,
@@ -110,3 +110,45 @@ async def devops_pipeline_start(session: CommandSession):
             info_value = session.get(reply, prompt=f'请输入参数 {reply}')
             session.state[reply] = info_value
             break
+
+
+@on_command('bk_devops_project_list', aliases=('蓝盾流水线', 'bk_devops'))
+async def _(session: CommandSession):
+    try:
+        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+    except KeyError:
+        bk_biz_id = None
+
+    msg = await DevOpsTask(session, bk_biz_id).render_devops_project_list()
+    msg and await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_devops_project_select')
+async def _(session: CommandSession):
+    msg = await DevOpsTask(session).render_devops_pipeline_list()
+    msg and await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_devops_pipeline_select')
+async def _(session: CommandSession):
+    msg = await DevOpsTask(session).render_devops_pipeline_detail()
+    msg and await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_devops_pipeline_update')
+async def _(session: CommandSession):
+    logger.info(session.ctx)
+
+
+@on_command('bk_devops_pipeline_execute')
+async def _(session: CommandSession):
+    logger.info(session.ctx)
+
+
+@on_command('bk_devops_pipeline_cancel')
+async def _(session: CommandSession):
+    _, bk_devops_pipeline_name = session.ctx['event_key'].split('|')
+    content = f'''>**CI TIP** 
+        ><font color=\"warning\">您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...</font> 
+        '''
+    await session.send('', msgtype='markdown', markdown={'content': content})

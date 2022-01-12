@@ -147,9 +147,9 @@ class DevOps:
         return await self.bk_devops_api.call_action(f'projects/',
                                                     'GET', headers={'X-DEVOPS-UID': bk_username})
 
-    async def v3_app_pipeline_list(self, project_id, bk_username) -> Dict:
+    async def v3_app_pipeline_list(self, project_id, bk_username, **params) -> Dict:
         return await self.bk_devops_api.call_action(f'projects/{project_id}/pipelines/',
-                                                    'GET', headers={'X-DEVOPS-UID': bk_username})
+                                                    'GET', headers={'X-DEVOPS-UID': bk_username}, params=params)
 
     async def v3_app_build_start_info(self, project_id, pipeline_id, bk_username) -> Dict:
         return await self.bk_devops_api.call_action(
