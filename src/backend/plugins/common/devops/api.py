@@ -18,57 +18,10 @@ import time
 from typing import Union, Dict, List
 
 from opsbot import CommandSession
-from opsbot.command import kill_current_session
 from opsbot.plugins import GenericTask
-from component import DevOps, RedisClient
-from .settings import SESSION_FINISHED_CMD, SESSION_FINISHED_MSG
-
-
-def render_start_msg(params: Dict, pipeline_name: str):
-    rich_text = [{'text': {'content': f'流水线: {pipeline_name}\r\n'}, 'type': 'text'}]
-    for info_id, info_value in params.items():
-        rich_text.extend([{
-            'type': 'text',
-            'text': {
-                'content': f'{info_id}: {info_value}    '
-            }
-        }, {
-            'type': 'link',
-            'link': {
-                'text': '修改\r\n',
-                'type': 'click',
-                'key': f'devops_pipeline_params_commit|{info_id}'
-            }
-        }])
-
-    rich_text.append({'text': {'content': f'\r\n[是/否] 执行'}, 'type': 'text'})
-
-    return rich_text
-
-
-async def parse_params(start_infos: List, session: CommandSession):
-    params = {}
-    filter_infos = [info for info in start_infos.get('properties', []) if not info.get('propertyType')]
-    for i, info in enumerate(filter_infos):
-        if session.ctx['message'].extract_plain_text().find(session.bot.config.RTX_NAME) != -1:
-            session.switch(param)
-
-        if info['id'] in session.state:
-            info["defaultValue"] = session.state[info['id']]
-
-        prompt = f'请输入{info["id"]}'
-        param = info["defaultValue"]
-        if not info["defaultValue"]:
-            param, ctx = session.get(info['id'], prompt=prompt)
-
-        if param == SESSION_FINISHED_CMD:
-            await session.send(SESSION_FINISHED_MSG)
-            kill_current_session(session.ctx)
-            return False
-
-        params[info['id']] = param
-
-    return params
+from opsbot.log import logger
+from opsbot.exceptions import ActionFailed, HttpFailed
+from component import DevOps, RedisClient, BK_DEVOPS_DOMAIN
 
 
 class DevOpsTask(GenericTask):
@@ -77,19 +30,19 @@ class DevOpsTask(GenericTask):
         self._devops = DevOps()
 
     async def _get_devops_project_list(self):
-        data = self._devops.v3_app_project_list(self.user_id)
+        data = await self._devops.v3_app_project_list(self.user_id)
         data.sort(key=lambda x: x['updatedAt'], reverse=True)
         return [{'id': str(project['projectCode']), 'text': project['projectName'], 'is_checked': False}
                 for project in data[:20]]
 
     async def _get_devops_pipeline_list(self, project_id: str):
-        data = self._devops.v3_app_pipeline_list(project_id, self.user_id)
-        data.sort(key=lambda x: x['updateTime'], reverse=True)
+        data = (await self._devops.v3_app_pipeline_list(project_id, self.user_id)).get('records', [])
+        data.sort(key=lambda x: x['latestBuildStartTime'], reverse=True)
         return [{'id': f'{project_id}|{project["pipelineId"]}|{project["pipelineName"]}',
                  'text': project['pipelineName'], 'is_checked': False} for project in data[:20]]
 
     async def _get_devops_build_start_info(self, project_id: str, pipeline_id: str):
-        start_infos = self._devops.v3_app_build_start_info(project_id, pipeline_id, self.user_id)
+        start_infos = await self._devops.v3_app_build_start_info(project_id, pipeline_id, self.user_id)
         filter_infos = [{'keyname': var['id'], 'value': var['defaultValue'] if var['defaultValue'] else '待输入'}
                         for var in start_infos.get('properties', []) if not var.get('propertyType')]
         return filter_infos
@@ -157,7 +110,7 @@ class DevOpsTask(GenericTask):
             except (KeyError, ValueError):
                 return None
 
-            filter_infos = self._get_devops_build_start_info(bk_devops_project_id, bk_devops_pipeline_id)
+            start_infos = await self._get_devops_build_start_info(bk_devops_project_id, bk_devops_pipeline_id)
         else:
             pass
 
@@ -165,7 +118,7 @@ class DevOpsTask(GenericTask):
             'bk_devops_project_id': bk_devops_project_id,
             'bk_devops_pipeline_id': bk_devops_pipeline_id,
             'bk_devops_pipeline_name': bk_devops_pipeline_name,
-            'params': filter_infos
+            'start_infos': start_infos
         }
 
         template_card = {
@@ -178,7 +131,7 @@ class DevOpsTask(GenericTask):
             },
             'task_id': str(int(time.time() * 100000)),
             'sub_title_text': '参数确认',
-            'horizontal_content_list': filter_infos,
+            'horizontal_content_list': start_infos,
             'button_list': [
                 {
                     "text": "执行",
@@ -198,3 +151,26 @@ class DevOpsTask(GenericTask):
             ]
         }
         return template_card
+
+    async def execute_task(self, bk_devops_pipeline: Dict):
+        bk_devops_project_id = bk_devops_pipeline['bk_devops_project_id']
+        bk_devops_pipeline_id = bk_devops_pipeline['bk_devops_pipeline_id']
+        bk_devops_pipeline_name = bk_devops_pipeline['bk_devops_pipeline_name']
+        params = {item['keyname']: item['value'] for item in bk_devops_pipeline['start_infos']}
+
+        try:
+            await self._devops.v3_app_build_start(bk_devops_project_id, bk_devops_pipeline_id, self.user_id, **params)
+            msg = f'{bk_devops_pipeline_name} {params} 任务启动成功'
+            return True
+        except ActionFailed as e:
+            msg = f'{bk_devops_pipeline_id} {params} error: 参数有误 {e}'
+        except HttpFailed as e:
+            msg = f'{bk_devops_pipeline_id} {params} error: 第三方服务异常 {e}'
+        finally:
+            logger.info(msg)
+
+        return False
+
+    def render_devops_pipeline_execute_msg(self, result: bool, bk_devops_pipeline: Dict):
+        return self.render_execute_msg('SOPS', result, bk_devops_pipeline['bk_devops_pipeline_name'],
+                                       bk_devops_pipeline['start_infos'], BK_DEVOPS_DOMAIN)
