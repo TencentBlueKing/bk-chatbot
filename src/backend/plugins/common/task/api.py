@@ -19,15 +19,16 @@ import itertools
 import time
 import base64
 from collections import defaultdict
-from typing import Dict, List, Optional, Coroutine
+from typing import Dict, List, Optional, Coroutine, Union
 
 from opsbot import CommandSession
 from opsbot.helpers import render_expression
 from opsbot.command import kill_current_session
 from opsbot.log import logger
 from opsbot.exceptions import ActionFailed, HttpFailed
+from opsbot.plugins import GenericTask
 from component import (
-    JOB, SOPS, Backend, DevOps, ITSM, RedisClient,
+    JOB, SOPS, Backend, DevOps, ITSM, RedisClient, BK_PAAS_DOMAIN,
     BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer
 )
 from .settings import (
@@ -35,6 +36,65 @@ from .settings import (
     TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS, TASK_EXEC_FAIL,
     PATTERN_IP, EXPR_DONT_ENABLE, SESSION_APPROVE_MSG
 )
+
+
+class AppTask(GenericTask):
+    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
+        super().__init__(session, bk_biz_id, RedisClient(env='prod'))
+        self._job = JOB()
+        self._sops = SOPS()
+
+    async def _get_app_task(self, task_name: str) -> Dict:
+        bk_job_plans = await self._job.get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
+                                                   length=10, name=task_name)
+        bk_sops_templates = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id,
+                                                         name_keyword=task_name)
+        return {
+            'bk_job': bk_job_plans.get('data', []),
+            'bk_sops': bk_sops_templates,
+            'bk_devops': []
+        }
+
+    async def render_app_task(self, task_name: str):
+        bk_app_task = await self._get_app_task(task_name)
+        template_card = {
+            'card_type': 'multiple_interaction',
+            'source': {
+                'desc': 'BKCHAT'
+            },
+            'main_title': {
+                'title': '任务查询结果'
+            },
+            'task_id': str(int(time.time() * 100000))
+        }
+
+        if all(bk_app_task.values):
+            template_card['card_type'] = 'multiple_interaction'
+            template_card['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
+            template_card['select_list'] = []
+        else:
+            template_card['card_type'] = 'text_notice'
+            template_card['main_title']['desc'] = '未找到对应任务'
+            template_card['card_action'] = {'type': 1, 'url': BK_PAAS_DOMAIN}
+            return template_card
+
+        if bk_app_task['bk_job']:
+            template_card['select_list'].push({
+                'question_key': 'bk_job_plan_id',
+                'title': 'JOB',
+                'option_list': [{'id': str(job_plan['id']), 'text': job_plan['name']}
+                                for job_plan in bk_app_task['bk_job'][:10]]
+            })
+
+        if bk_app_task['bk_sops']:
+            template_card['select_list'].push({
+                'question_key': 'bk_sops_template_id',
+                'title': 'SOPS',
+                'option_list': [{'id': str(template['id']), 'text': template['name']}
+                                for template in bk_app_task['bk_sops'][:10]]
+            })
+
+        return template_card
 
 
 class BKTask:

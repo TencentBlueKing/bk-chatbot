@@ -20,13 +20,22 @@ from opsbot import on_natural_language, NLPSession, IntentCommand
 from component import fetch_intent, fetch_slot
 
 from .api import (
-    BKTask, parse_slots, wait_commit, real_run, validate_intent,
+    AppTask, BKTask, parse_slots, wait_commit, real_run, validate_intent,
     describe_entity, Authority, Approval, Scheduler, CallbackHandler
 )
 from .settings import (
     TASK_EXEC_SUCCESS, TASK_EXEC_FAIL, TASK_LIST_TIP, TASK_FINISH_TIP,
     TASK_AUTHORITY_TIP, TASK_EXEC_CANCEL
 )
+
+
+@on_command('bk_app_task_filter', aliases=('任务查找', '查找任务'))
+async def _(session: CommandSession):
+    content = f'''>**BKCHAT TIP**
+            >请顺序输入任务名称，**支持模糊查询**'''
+    task_name, _ = session.get('task_name', prompt='...', msgtype='markdown', markdown={'content': content})
+    msg = await AppTask(session).render_app_task(task_name)
+    msg and await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('opsbot_trigger', aliases=('opsbot_trigger', ))

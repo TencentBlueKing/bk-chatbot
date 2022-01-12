@@ -98,7 +98,7 @@ async def _(session: CommandSession):
         raise ApiError(f'Command <itsm_ticket_approved> exception {e}')
 
 
-@on_command('itsm_ticket_created')
+@on_command('bk_itsm', alias=('提单', ))
 async def _(session: CommandSession):
     """创建单据"""
     pass

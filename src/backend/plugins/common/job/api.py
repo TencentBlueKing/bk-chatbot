@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 import time
-from typing import Union, List
+from typing import Union, List, Dict
 
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
@@ -29,14 +29,14 @@ class JobTask(GenericTask):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
         self._job = JOB()
 
-    async def _get_job_plan_list(self, **params):
+    async def _get_job_plan_list(self, **params) -> List:
         data = await self._job.get_job_plan_list(**params)
         bk_job_plans = data.get('data', [])
         bk_job_plans.sort(key=lambda x: x['last_modify_time'], reverse=True)
         return [{'id': str(job_plan['id']), 'text': job_plan['name'], 'is_checked': False}
                 for job_plan in bk_job_plans[:20]]
 
-    async def _get_job_plan_detail(self, **params):
+    async def _get_job_plan_detail(self, **params) -> Dict:
         data = await self._job.get_job_plan_detail(**params)
         return data
 
@@ -117,7 +117,7 @@ class JobTask(GenericTask):
         }
         return template_card
 
-    async def execute_task(self, job_plan_id: Union[str, int], global_var_list: List):
+    async def execute_task(self, job_plan_id: Union[str, int], global_var_list: List) -> bool:
         try:
             await JOB().execute_job_plan(
                 bk_biz_id=self.biz_id,
@@ -136,5 +136,5 @@ class JobTask(GenericTask):
 
         return False
 
-    def render_job_plan_execute_msg(self, result, job_plan_name, global_var_list):
+    def render_job_plan_execute_msg(self, result, job_plan_name, global_var_list) -> Dict:
         return self.render_execute_msg('JOB', result, job_plan_name, global_var_list, BK_JOB_DOMAIN)

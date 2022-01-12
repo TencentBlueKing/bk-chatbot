@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import json
 import time
-from typing import Union, Dict, List
+from typing import Union, Dict
 
 from opsbot import CommandSession
 from opsbot.plugins import GenericTask

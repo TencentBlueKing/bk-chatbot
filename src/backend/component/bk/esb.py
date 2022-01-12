@@ -232,3 +232,5 @@ class ITSM:
     async def get_services(self, **params):
         return await self.bk_itsm_api.call_action('get_services/', 'GET', params=params)
 
+    async def get_service_detail(self, **params):
+        return await self.bk_itsm_api.call_action('get_service_detail/', 'GET', params=params)

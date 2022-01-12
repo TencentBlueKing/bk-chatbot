@@ -29,13 +29,13 @@ class SopsTask(GenericTask):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
         self._sops = SOPS()
 
-    async def _get_sops_template_list(self, **params):
+    async def _get_sops_template_list(self, **params) -> List:
         data = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id, **params)
         data.sort(key=lambda x: x['edit_time'], reverse=True)
         return [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
                 for template in data[:20]]
 
-    async def _get_sops_template_info(self, template_id: int):
+    async def _get_sops_template_info(self, template_id: int) -> Dict:
         bk_sops_template_info = await self._sops.get_template_info(self.biz_id, template_id, bk_username=self.user_id)
         bk_sops_template_schemas = await self._sops.get_template_schemes(self.biz_id, template_id,
                                                                          bk_username=self.user_id)
@@ -140,7 +140,7 @@ class SopsTask(GenericTask):
             }
         return template_card
 
-    async def execute_task(self, bk_sops_template: Dict):
+    async def execute_task(self, bk_sops_template: Dict) -> bool:
         if not bk_sops_template:
             return False
 
@@ -179,6 +179,6 @@ class SopsTask(GenericTask):
 
         return False
 
-    def render_sops_template_execute_msg(self, result: bool, bk_sops_template: Dict):
+    def render_sops_template_execute_msg(self, result: bool, bk_sops_template: Dict) -> Dict:
         return self.render_execute_msg('SOPS', result, bk_sops_template['bk_sops_template_name'],
                                        bk_sops_template['constants'], BK_SOPS_DOMAIN)
