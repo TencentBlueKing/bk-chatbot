@@ -14,13 +14,9 @@ specific language governing permissions and limitations under the License.
 """
 
 from opsbot import (
-    on_command, CommandSession, on_natural_language, NLPSession
+    on_command, CommandSession,
 )
-from .settings import (
-    PLUGIN_KEY, PLUGIN_INDEX_MSG, PLUGIN_INDEX_EXAMPLE, PLUGIN_PARAMS_TEMPLATE,
-    PLUGIN_PARAMS_MAP, PLUGIN_ACTION, ITSM_KEY, ITSM_KEYWORDS,
-)
-from .api import RuleParser, Ticket, GenericIT
+from .api import GenericIT
 
 
 @on_command('bk_itsm', aliases=('提单', '查看服务列表'))
