@@ -54,7 +54,7 @@ async def _(session: CommandSession):
     elif app == 'bk_sops':
         msg = await SopsTask(session).render_sops_template_info()
 
-    msg or await session.send('', msgtype='template_card', template_card=msg)
+    msg and await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('opsbot_trigger', aliases=('opsbot_trigger', ))
