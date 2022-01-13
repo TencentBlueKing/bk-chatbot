@@ -4,7 +4,6 @@
 ## 依赖第三方组件
 
 * Redis >= 3.2.11
-* MongoDB >= 4.2
 * 语料库
 
 ## 后台服务进程
@@ -20,22 +19,17 @@
 推荐版本下载： [Redis 3.2.11](http://download.redis.io/releases/redis-3.2.11.tar.gz)
 
 注：可采用蓝鲸官方默认Redis
-### 2. 部署MongoDB
 
-请参考官方资料 [MongoDB](https://docs.mongodb.com/manual/installation/)
-
-推荐版本下载：[MongoDB 4.2.8](https://www.mongodb.com/dr/fastdl.mongodb.org/linux/mongodb-linux-x86_64-rhel70-4.2.8.tgz/download)
-
-### 3. 配置数据库
+### 2. 配置数据库
 
 1. Redis需要打开auth认证的功能，并为其配置密码
 
-### 4. Release包下载
+### 3. Release包下载
 
 官方发布的 **Linux Release** 包下载地址见[这里](https://github.com/Tencent/bk-chatbot/releases)
 
 
-### 5. 机器人后台部署
+### 4. 机器人后台部署
 
 #### 安装包
 > 解压
@@ -61,21 +55,12 @@ from opsbot.default_config import *
 
 RTX_NAME = '我的机器人'
 COMMAND_START = ['', re.compile(r'[/!]+')]
-API_ROOT = 'http://qyapi.weixin.qq.com/cgi-bin'
+API_ROOT = 'https://qyapi.weixin.qq.com/cgi-bin'
 ```
-> 编辑启动文件 server.py, 设置启动Host和Port, 注：该端口要与企业微信应用回调相对应
+> 编辑启动文件 config.py, 设置启动Host和Port, 注：该端口要与企业微信应用回调相对应
 ```
-from os import path
-
-import opsbot
-import config
-
-
-if __name__ == '__main__':
-    opsbot.init('xwork', config)
-    opsbot.load_plugins(path.join(path.dirname(__file__), intent', 'plugins'), 'intent.plugins')
-    # service on 0.0.0.0:8888
-    opsbot.run(host='0.0.0.0', port=8888)
+HOST = '127.0.0.1'
+PORT = 8888
 ```
 > 进入企业微信可查看
 * CORPID [查看](http://p.qpic.cn/pic_wework/3036008643/f4f249f8640f1a58ce330176eda833b613ef0c87857592ed/0/)
@@ -85,7 +70,7 @@ if __name__ == '__main__':
 
 > 配置企业微信密钥文件
 ```
-cd release && vim xhttp/decryption/config.py
+cd release && vim protocol/xwork/config.py
 ```
 
 ```
@@ -120,6 +105,13 @@ BK_APP_ID = ""             # 你的appid
 BK_APP_SECRET = ""         # 你的appkey
 BK_GET_TOKEN_URL = ""      # 目前不需要
 BK_REFRESH_TOKEN_URL = ""  # 目前不需要
+
+BK_PAAS_DOMAIN = ""        # 社区版平台域名
+BK_CHAT_DOMAIN = ""        # 留空
+BK_JOB_DOMAIN = ""         # 社区版JOB平台域名
+BK_SOPS_DOMAIN = ""        # 社区版标准运维域名
+BK_DEVOPS_DOMAIN = ""      # 社区版蓝盾域名
+BK_ITSM_DOMAIN = ""        # 社区版流程系统域名
 
 BK_CC_ROOT = ""            # 访问蓝鲸cc的根路径 你的domain + /api/c/compapi/v2/cc/  
 BK_JOB_ROOT = ""           # 访问蓝鲸JOB的根路径 你的domain + /api/c/compapi/v2/jobv3/
@@ -173,52 +165,30 @@ cd release && ./control start
 cd release && ./control stop
 ```
 
-### 6.前端部署
-> 开发者中心--应用创建，创建应用
+### 5.容器化部署
+> 自行服务器安装Docker环境
 
-> 创建测试/正式环境数据库
-
-```
-CREATE DATABASE IF NOT EXISTS 'stag_db/prod_db' DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-```
-
-> 在APP代码中配置数据库信息
-```
-/adapter/sites/open/config/stag.py 和 /adapter/sites/open/config/prod.py
-新增配置
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'stag_db/prod_db',
-        'USER': 'xxx',
-        'PASSWORD': 'xxx',
-        'HOST': 'xxxx',
-        'PORT': 'xxxx',
-    },
-}
-```
-
-> 环境变量配置(开发者中心--对应APP--应用管理--环境变量)
+> 已经为您编排好了一般Dockerfile文件
 
 ```
-# mongodb信息
-BKAPP_MONGO_DB_IP
-BKAPP_MONGO_DB_NAME
-BKAPP_MONGO_DB_PASSWORD
-BKAPP_MONGO_DB_PORT
-# redis 信息
-BKAPP_REDIS_DB_NAME
-BKAPP_REDIS_DB_PASSWORD
-BKAPP_REDIS_DB_PORT
-# 跨域信息
-BKAPP_CORS_ORIGIN_WHITELIST(配置CORS_ORIGIN_WHITELIST)
-BKAPP_CSRF_COOKIE_DOMAIN (配置CSRF_COOKIE_DOMAIN)
+release/src/backend/Dockerfile
+
+请一次性将需要的配置按照环境形式写入Dockerfile
+```
+
+> 打包镜像
+```
+docker build -f release/src/backend/Dockerfile --network=host -t {namespace}:{tag} .
+```
+
+> 启动镜像
 
 ```
-> 选择代码分支/tag，点击部署即可
+docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
+```
 
 
-### 7. 企业微信绑定
+### 6. 企业微信绑定
 > 企业微信后台
 * [打开](https://work.weixin.qq.com/wework_admin)
 
