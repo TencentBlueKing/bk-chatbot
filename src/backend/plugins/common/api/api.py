@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
 import hashlib
 from collections import defaultdict
 from typing import Dict
@@ -86,41 +85,4 @@ class DispatchMSG:
 
     @classmethod
     def add_event(cls, payload: Dict):
-        callback = payload.pop('callback', None)
-        if not callback:
-            return
-
-        rich_text = payload.get('rich_text')
-        if rich_text and isinstance(rich_text, list):
-            rich_text.extend([
-                {'type': 'text', 'text': {'content': f'-------------------\n'}},
-                {
-                    'type': 'link',
-                    'link': {
-                        'type': 'click',
-                        'text': '同意',
-                        'key': f'dispatch_msg|approve|{json.dumps(callback.get("approve"))}'
-                    }
-                },
-                {'type': 'text', 'text': {'content': '        '}},
-                {
-                    'type': 'link',
-                    'link': {
-                        'type': 'click',
-                        'text': '拒绝',
-                        'key': f'dispatch_msg|refuse|{json.dumps(callback.get("refuse"))}'
-                    }
-                }
-            ])
-
-            if 'check' in callback:
-                rich_text.extend([{'type': 'text', 'text': {'content': '        '}},
-                                  {
-                                      'type': 'link',
-                                      'link': {
-                                          "type": "view",
-                                          "text": "查看",
-                                          "key": callback.get('check', {}).get('url'),
-                                          "browser": 0
-                                      }
-                                  }])
+        pass
