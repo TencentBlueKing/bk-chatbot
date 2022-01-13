@@ -71,11 +71,11 @@ class GenericIT:
 
     async def render_service_detail(self):
         try:
-            service_id = await self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+            service_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
         except KeyError:
             return None
 
-        service = self._itsm.get_service_detail(service_id=int(service_id))
+        service = await self._itsm.get_service_detail(service_id=int(service_id))
         return {
             'card_type': 'text_notice',
             'source': {
