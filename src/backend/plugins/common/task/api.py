@@ -235,7 +235,10 @@ async def parse_slots(slots: List, session: CommandSession):
 
 
 async def validate_intent(intents: List, session: CommandSession):
-    """todo just test, remove this line"""
+    """
+    find most ratio intent and validate intent
+    add some other nlp method
+    """
     await Backend().predict_intent(sentence=session.msg_text.strip())
 
     if not intents:
@@ -253,6 +256,10 @@ async def validate_intent(intents: List, session: CommandSession):
 
 
 def wait_commit(intent: Dict, slots: List, session: CommandSession):
+    """
+    if config commit
+    generate commit msg, wait user click
+    """
     is_commit = 'commit'
     if intent.get('is_commit', True):
         prompt = summary_statement(intent, slots, '', is_click=True)

@@ -57,25 +57,11 @@ async def _(session: CommandSession):
     msg and await session.send('', msgtype='template_card', template_card=msg)
 
 
-@on_command('opsbot_trigger', aliases=('opsbot_trigger', ))
+@on_command('opsbot_intent', aliases=('opsbot_intent', ))
 async def _(session: CommandSession):
     """
     handle api call，need to add new method to protocol
     """
-    payload = session.ctx.get('payload')
-    try:
-        intent = (await describe_entity('intents', serial_number=payload.pop('intent_serial')))[0]
-    except IndexError:
-        return
-
-    slots = payload.get('slots')
-    user_id = payload.get('sender', 'trigger')
-    group_id = payload.get('open_id')
-    await real_run(intent, slots, user_id, group_id)
-
-
-@on_command('opsbot_intent', aliases=('opsbot_intent', ))
-async def _(session: CommandSession):
     _, biz_id, user_id = session.ctx['event_key'].split('|')
     if session.ctx['msg_sender_id'] != user_id:
         await session.send(f'{session.ctx["msg_sender_id"]} {TASK_AUTHORITY_TIP}')
