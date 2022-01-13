@@ -106,7 +106,8 @@ async def _(session: CommandSession):
 
 @on_command('bk_itsm_select_service')
 async def _(session: CommandSession):
-    pass
+    msg = await GenericIT(session).render_service_detail()
+    msg and await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('COMMON_PLUGIN_ITSM_DAEMON')

@@ -224,12 +224,12 @@ class GenericIT:
                 {
                     "text": "上页",
                     "style": 4,
-                    "key": f"bk_itsm|{page + 10}"
+                    "key": f"bk_itsm|{page - 10}"
                 },
                 {
                     "text": "下页",
                     "style": 4,
-                    "key": f"bk_itsm|{page - 10}"
+                    "key": f"bk_itsm|{page + 10}"
                 }
             ]
         }
