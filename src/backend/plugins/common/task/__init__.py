@@ -18,6 +18,8 @@ from typing import Coroutine
 from opsbot import on_command, CommandSession
 from opsbot import on_natural_language, NLPSession, IntentCommand
 from component import fetch_intent, fetch_slot
+from plugins.common.job import JobTask
+from plugins.common.sops import SopsTask
 
 from .api import (
     AppTask, BKTask, parse_slots, wait_commit, real_run, validate_intent,
@@ -40,7 +42,18 @@ async def _(session: CommandSession):
 
 @on_command('bk_app_task_select')
 async def _(session: CommandSession):
-    pass
+    try:
+        app_task = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        app, task_id = app_task.split('|')
+    except (KeyError, ValueError):
+        return None
+
+    if app == 'bk_job':
+        msg = await JobTask(session).render_job_plan_detail()
+    elif app == 'bk_sops':
+        msg = await SopsTask(session).render_sops_template_info()
+        
+    msg or await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('opsbot_trigger', aliases=('opsbot_trigger', ))
