@@ -45,6 +45,7 @@ async def _(session: CommandSession):
     try:
         app_task = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
         app, task_id = app_task.split('|')
+        session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId'] = task_id
     except (KeyError, ValueError):
         return None
 
@@ -52,7 +53,7 @@ async def _(session: CommandSession):
         msg = await JobTask(session).render_job_plan_detail()
     elif app == 'bk_sops':
         msg = await SopsTask(session).render_sops_template_info()
-        
+
     msg or await session.send('', msgtype='template_card', template_card=msg)
 
 
