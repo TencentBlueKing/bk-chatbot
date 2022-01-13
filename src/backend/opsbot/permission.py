@@ -41,7 +41,6 @@ IS_SUPERUSER = 0xFFFF
 
 OPEN_API = [
     'send_msg',
-    'send_ticket',
     'dispatch_msg',
     'handle_approval',
     'handle_scheduler'

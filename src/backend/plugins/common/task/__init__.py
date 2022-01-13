@@ -59,6 +59,9 @@ async def _(session: CommandSession):
 
 @on_command('opsbot_trigger', aliases=('opsbot_trigger', ))
 async def _(session: CommandSession):
+    """
+    handle api call，need to add new method to protocol
+    """
     payload = session.ctx.get('payload')
     try:
         intent = (await describe_entity('intents', serial_number=payload.pop('intent_serial')))[0]
@@ -105,6 +108,10 @@ async def _(session: CommandSession):
 
 @on_command('opsbot_task', aliases=('OPSBOT_任务执行', ))
 async def task(session: CommandSession):
+    """
+    support user intent config，combined with nlp/nlu，
+    recognize user meaning and transfer it to the bk platform task
+    """
     if 'user_id' in session.state:
         user_id = session.state.get('user_id')
         intent = session.state.get('intent')
@@ -155,6 +162,9 @@ async def task(session: CommandSession):
 
 @on_command('opsbot_callback', aliases=('handle_approval', 'handle_scheduler'))
 async def _(session: CommandSession):
+    """
+    real run the cmd after deal approval and scheduler
+    """
     data = await CallbackHandler(session).normalize(session.ctx.get('payload'))
     if not data:
         return
@@ -164,12 +174,18 @@ async def _(session: CommandSession):
 
 @on_command('opsbot_list_scheduler', aliases=('查看定时任务', '查看定时'))
 async def _(session: CommandSession):
+    """
+    display schedulers, the you can delete old one
+    """
     msg = await Scheduler(session, is_callback=False).list_scheduler()
     await session.send('', msgtype='rich_text', rich_text=msg)
 
 
 @on_command('opsbot_delete_scheduler')
 async def _(session: CommandSession):
+    """
+    delete scheduler
+    """
     _, timer_id = session.ctx['event_key'].split('|')
     await Scheduler(session, is_callback=False).delete_scheduler(int(timer_id))
     await session.send('定时器删除成功')
