@@ -96,6 +96,10 @@ class AppTask(GenericTask):
 
 
 class BKTask:
+    """
+    contain bk ci sops job platform
+    intent -> task -> platform
+    """
     def __init__(self, intent: Dict, slots: List, user_id: str, group_id: str = None, bot_id: str = None):
         self._intent = intent
         self._slots = slots
