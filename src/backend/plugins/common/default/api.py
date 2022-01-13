@@ -74,7 +74,7 @@ class Flow:
                 {
                     "text": "ITSM",
                     "style": 1,
-                    "key": "bk_itsm"
+                    "key": "bk_itsm|0"
                 }
             ]
         }

@@ -191,18 +191,15 @@ class GenericIT:
         self.user_id = self._session.ctx['msg_sender_id']
         self._itsm = ITSM()
 
-    async def render_services(self, page=0):
-        if self._session.is_first_run:
-            services = await self._itsm.get_services()
-            services = [{'id': str(var['id']), 'text': var['name']} for var in services]
-            self._session.state['services'] = services
-        else:
-            services = self._session.state['services']
-            try:
-                _, page = self._session.ctx['event_key'].split('|')
-                page = int(page)
-            except ValueError:
-                return None
+    async def render_services(self):
+        try:
+            _, page = self._session.ctx['event_key'].split('|')
+            page = int(page)
+        except ValueError:
+            return None
+
+        services = await self._itsm.get_services()
+        services = [{'id': str(var['id']), 'text': var['name']} for var in services]
 
         template_card = {
             'card_type': 'button_interaction',
