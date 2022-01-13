@@ -183,3 +183,57 @@ class Ticket:
                 }
             }
         ]
+
+
+class GenericIT:
+    def __init__(self, session: CommandSession):
+        self._session = session
+        self.user_id = self._session.ctx['msg_sender_id']
+        self._itsm = ITSM()
+
+    async def render_services(self, page=0):
+        if self._session.is_first_run:
+            services = await self._itsm.get_services()
+            services = [{'id': str(var['id']), 'text': var['name']} for var in services]
+            self._session.state['services'] = services
+        else:
+            services = self._session.state['services']
+            try:
+                _, page = self._session.ctx['event_key'].split('|')
+                page = int(page)
+            except ValueError:
+                return None
+
+        template_card = {
+            'card_type': 'button_interaction',
+            'source': {
+                'desc': 'ITSM'
+            },
+            'main_title': {
+                'title': '欢迎使用流程服务'
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'button_selection': {
+                'question_key': 'bk_itsm_service_id',
+                'title': '服务列表',
+                'option_list': services[page:page+10]
+            },
+            'button_list': [
+                {
+                    "text": "提单",
+                    "style": 1,
+                    "key": "bk_itsm_select_service"
+                },
+                {
+                    "text": "上页",
+                    "style": 4,
+                    "key": f"bk_itsm|{page + 10}"
+                },
+                {
+                    "text": "下页",
+                    "style": 4,
+                    "key": f"bk_itsm|{page - 10}"
+                }
+            ]
+        }
+        return template_card

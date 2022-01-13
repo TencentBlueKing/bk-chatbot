@@ -33,7 +33,7 @@ from .settings import (
     PLUGIN_KEY, PLUGIN_INDEX_MSG, PLUGIN_INDEX_EXAMPLE, PLUGIN_PARAMS_TEMPLATE,
     PLUGIN_PARAMS_MAP, PLUGIN_ACTION, ITSM_KEY, ITSM_KEYWORDS,
 )
-from .api import RuleParser, Ticket
+from .api import RuleParser, Ticket, GenericIT
 
 
 @on_command('itsm_ticket_approved')
@@ -100,8 +100,8 @@ async def _(session: CommandSession):
 
 @on_command('bk_itsm', aliases=('提单', ))
 async def _(session: CommandSession):
-    """创建单据"""
-    pass
+    msg = await GenericIT(session).render_services()
+    msg and await session.send('', msgtype='template_card', template_card=msg)
 
 
 @on_command('COMMON_PLUGIN_ITSM_DAEMON')
