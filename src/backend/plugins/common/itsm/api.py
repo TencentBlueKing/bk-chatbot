@@ -237,7 +237,7 @@ class GenericIT:
 
     async def render_service_detail(self):
         try:
-            service_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+            service_id = await self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
         except KeyError:
             return None
 
