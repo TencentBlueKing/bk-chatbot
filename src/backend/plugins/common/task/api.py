@@ -46,9 +46,9 @@ class AppTask(GenericTask):
 
     async def _get_app_task(self, task_name: str) -> Dict:
         bk_job_plans = await self._job.get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
-                                                   length=10, name=task_name)
+                                                         length=10, name=task_name)
         bk_sops_templates = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id,
-                                                         name_keyword=task_name)
+                                                               name_keyword=task_name)
         return {
             'bk_job': bk_job_plans.get('data', []),
             'bk_sops': bk_sops_templates,
@@ -69,9 +69,9 @@ class AppTask(GenericTask):
         }
 
         if any(bk_app_task.values()):
-            template_card['card_type'] = 'multiple_interaction'
+            template_card['card_type'] = 'vote_interaction'
             template_card['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
-            template_card['select_list'] = []
+            template_card['checkbox'] = {'question_key': 'bk_app_task_id', 'option_list': []}
         else:
             template_card['card_type'] = 'text_notice'
             template_card['main_title']['desc'] = '未找到对应任务'
@@ -79,20 +79,18 @@ class AppTask(GenericTask):
             return template_card
 
         if bk_app_task['bk_job']:
-            template_card['select_list'].append({
-                'question_key': 'bk_job_plan_id',
-                'title': 'JOB',
-                'option_list': [{'id': f'bk_job|{str(job_plan["id"])}', 'text': job_plan['name']}
-                                for job_plan in bk_app_task['bk_job'][:10]]
-            })
+            option_list = [
+                {'id': f'bk_job|{str(job_plan["id"])}', 'text': f'JOB {job_plan["name"]}', 'is_checked': False}
+                for job_plan in bk_app_task['bk_job'][:5]
+            ]
+            template_card['checkbox']['option_list'].extend(option_list)
 
         if bk_app_task['bk_sops']:
-            template_card['select_list'].append({
-                'question_key': 'bk_sops_template_id',
-                'title': 'SOPS',
-                'option_list': [{'id': f'bk_sops|{str(template["id"])}', 'text': template['name']}
-                                for template in bk_app_task['bk_sops'][:10]]
-            })
+            option_list = [
+                {'id': f'bk_sops|{str(template["id"])}', 'text': f'SOPS {template["name"]}', 'is_checked': False}
+                for template in bk_app_task['bk_sops'][:5]
+            ]
+            template_card['checkbox']['option_list'].extend(option_list)
 
         return template_card
 

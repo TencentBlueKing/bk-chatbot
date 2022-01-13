@@ -38,6 +38,11 @@ async def _(session: CommandSession):
     msg and await session.send('', msgtype='template_card', template_card=msg)
 
 
+@on_command('bk_app_task_select')
+async def _(session: CommandSession):
+    pass
+
+
 @on_command('opsbot_trigger', aliases=('opsbot_trigger', ))
 async def _(session: CommandSession):
     payload = session.ctx.get('payload')
