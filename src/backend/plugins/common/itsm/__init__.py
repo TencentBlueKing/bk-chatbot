@@ -98,10 +98,15 @@ async def _(session: CommandSession):
         raise ApiError(f'Command <itsm_ticket_approved> exception {e}')
 
 
-@on_command('bk_itsm', aliases=('提单', ))
+@on_command('bk_itsm', aliases=('提单', '查看服务列表'))
 async def _(session: CommandSession):
     msg = await GenericIT(session).render_services()
     msg and await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('bk_itsm_select_service')
+async def _(session: CommandSession):
+    pass
 
 
 @on_command('COMMON_PLUGIN_ITSM_DAEMON')

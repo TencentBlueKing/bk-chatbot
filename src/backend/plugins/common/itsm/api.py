@@ -234,3 +234,28 @@ class GenericIT:
             ]
         }
         return template_card
+
+    async def render_service_detail(self):
+        try:
+            service_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        except KeyError:
+            return None
+
+        service = self._itsm.get_service_detail(service_id=int(service_id))
+        return {
+            'card_type': 'text_notice',
+            'source': {
+                'desc': 'ITSM'
+            },
+            'main_title': {
+                'title': f'已选择服务模版「{service["name"]}」点击填单'
+            },
+            'quote_area': {
+                'quote_text': '\n'.join([field['name'] for field in service['fields']])
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'card_action': {
+                'type': 1,
+                'url': f'{BK_ITSM_DOMAIN}#/ticket/create?service_id={service_id}'
+            }
+        }
