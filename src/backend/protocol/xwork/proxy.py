@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import os
 import json
 import random
 from collections import defaultdict
@@ -167,10 +168,16 @@ class HttpApi(BaseApi):
             return result
 
     async def _handle_media_result(self, resp: Optional, path: str = './media/') -> Any:
+        if not os.path.isdir(path):
+            os.mkdir(path)
         filename = f'{random.randint(0, 10000)}.amr'
-        f = await aiofiles.open(f'{path}filename', mode='wb')
-        await f.write(await resp.read())
-        await f.close()
+        # f = await aiofiles.open(f'{path}filename', mode='wb')
+        # await f.write(await resp.read())
+        # await f.close()
+
+        async with aiofiles.open(f'{path}filename', mode='wb') as f:
+            await f.write(await resp.read())
+
         return filename
 
     async def call_action(self, action: str, method='POST', **params) -> Optional[Dict[str, Any]]:
