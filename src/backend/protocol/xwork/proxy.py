@@ -97,6 +97,9 @@ class Proxy(BaseProxy):
         if "Event" in context:
             context['event'] = context.get("Event")
             context['event_key'] = context.get("EventKey")
+        if "MediaId" in context:
+            context['media_id'] = context.get("MediaId")
+            self.get_media(context['media_id'])
 
         context['msg_type'] = context.get("MsgType")
         context['msg_from_type'] = 'single'
@@ -121,6 +124,9 @@ class Proxy(BaseProxy):
             return r.get('alias')
         except (HttpFailed, ActionFailed, IndexError):
             return msg_sender_id
+
+    async def get_media(self, media_id):
+        return await self._api.call_action('media/get', method='GET', params={'media_id': media_id})
 
     async def send(self, context: Dict[str, Any],
                    message: Union[str, Dict[str, Any], List[Dict[str, Any]]],

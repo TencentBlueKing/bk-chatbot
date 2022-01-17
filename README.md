@@ -1,4 +1,4 @@
-<img src="docs/resource/img/bk-chatbot.png" alt="image" style="zoom: 80%;" />
+<img src="docs/resource/img/bk-chatbot-zh.png" alt="image" style="zoom: 80%;" />
 
 # bk-chatbot
 
@@ -33,6 +33,7 @@ bk-chatbot 主要用于运维执行场景，如发布、变更、查询等执行
 ## Usage
 
 - [技能创建使用说明](docs/createskills.md)
+- [任务使用说明](docs/usage.md)
 
 ## Roadmap
 
