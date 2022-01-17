@@ -14,6 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
+import random
 from collections import defaultdict
 from importlib import import_module
 from typing import (
@@ -21,6 +22,7 @@ from typing import (
 )
 
 import aiohttp
+import aiofiles
 import requests
 from quart import request, abort, jsonify, render_template
 from jsonschema.exceptions import ValidationError
@@ -99,7 +101,7 @@ class Proxy(BaseProxy):
             context['event_key'] = context.get("EventKey")
         if "MediaId" in context:
             context['media_id'] = context.get("MediaId")
-            self.get_media(context['media_id'])
+            await self.get_media(context['media_id'])
 
         context['msg_type'] = context.get("MsgType")
         context['msg_from_type'] = 'single'
@@ -118,14 +120,14 @@ class Proxy(BaseProxy):
     def run(self, host=None, port=None, *args, **kwargs):
         self._server_app.run(host=host, port=port, *args, **kwargs)
 
-    async def convert_to_name(self, msg_sender_id) -> str:
+    async def convert_to_name(self, msg_sender_id: str) -> str:
         try:
             r = await self._api.call_action('user/get', method='GET', params={'userid': msg_sender_id})
             return r.get('alias')
         except (HttpFailed, ActionFailed, IndexError):
             return msg_sender_id
 
-    async def get_media(self, media_id):
+    async def get_media(self, media_id: str):
         return await self._api.call_action('media/get', method='GET', params={'media_id': media_id})
 
     async def send(self, context: Dict[str, Any],
@@ -158,11 +160,18 @@ class HttpApi(BaseApi):
 
         return response['access_token'] if response['errcode'] == 0 else ""
 
-    def _handle_api_result(self, result: Optional[Dict[str, Any]]) -> Any:
+    def _handle_json_result(self, result: Optional[Dict[str, Any]]) -> Any:
         if isinstance(result, dict):
             if result.get('errcode') != 0:
                 raise ActionFailed(retcode=result.get('errcode'))
             return result
+
+    async def _handle_media_result(self, resp: Optional, path: str = './media/') -> Any:
+        filename = f'{random.randint(0, 10000)}.amr'
+        f = await aiofiles.open(f'{path}filename', mode='wb')
+        await f.write(await resp.read())
+        await f.close()
+        return filename
 
     async def call_action(self, action: str, method='POST', **params) -> Optional[Dict[str, Any]]:
         if not self._is_available():
@@ -172,7 +181,11 @@ class HttpApi(BaseApi):
         try:
             async with aiohttp.request(method, url, **params) as resp:
                 if 200 <= resp.status < 300:
-                    return self._handle_api_result(json.loads(await resp.text()))
+                    headers = dict(resp.headers)
+                    if headers['Content-Type'] == 'application/json':
+                        return self._handle_json_result(json.loads(await resp.text()))
+                    elif headers['Content-Type'] in ['audio/amr']:
+                        return await self._handle_media_result(resp)
                 raise HttpFailed(resp.status)
         except aiohttp.InvalidURL:
             raise NetworkError('API root url invalid')
