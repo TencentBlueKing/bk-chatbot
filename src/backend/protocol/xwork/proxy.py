@@ -171,11 +171,7 @@ class HttpApi(BaseApi):
         if not os.path.isdir(path):
             os.mkdir(path)
         filename = f'{random.randint(0, 10000)}.amr'
-        # f = await aiofiles.open(f'{path}filename', mode='wb')
-        # await f.write(await resp.read())
-        # await f.close()
-
-        async with aiofiles.open(f'{path}filename', mode='wb') as f:
+        async with aiofiles.open(f'{path}{filename}', mode='wb') as f:
             await f.write(await resp.read())
 
         return filename
