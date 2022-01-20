@@ -6,7 +6,7 @@
 
 bk-chatbot 是一款可通过可视化的界面进行任务配置，通过聊天终端软件如企业微信应用机器人进行会话交互实现任务执行的蓝鲸 SaaS 产品。
 
-bk-chatbot 有两项核心服务，一为插件集成服务：目前默认集成了作业平台和标准运维平台，后续我们会陆续开放用户自定义插件服务；二为意图识别服务：用户任务配置中收集语料，通过 NLP 、相似度算法等技术训练成识别模型，用户通过与机器人聊天交互，精准匹配到您需要执行的任务。
+bk-chatbot 有两项核心服务，一为插件集成服务：目前默认集成了作业平台、标准运维和蓝盾平台，后续我们会陆续开放用户自定义插件服务；二为意图识别服务：用户任务配置中收集语料，通过 NLP 、相似度算法等技术训练成识别模型，用户通过与机器人聊天交互，精准匹配到您需要执行的任务。
 
 使用 bk-chatbot ，可以更为方便快捷的执行运维作业，当你不在电脑旁，也可以通过手机端企业微信的交互实现运维作业的执行。
 
@@ -32,7 +32,6 @@ bk-chatbot 主要用于运维执行场景，如发布、变更、查询等执行
 
 ## Usage
 
-- [技能创建使用说明](docs/createskills.md)
 - [任务使用说明](docs/usage.md)
 
 ## Roadmap
@@ -46,7 +45,7 @@ bk-chatbot 主要用于运维执行场景，如发布、变更、查询等执行
 - [蓝鲸 DevOps 在线视频教程](https://cloud.tencent.com/developer/edu/major-100008)
 
 - 联系我们，加入 bk-chatbot 交流群：639855706
-
+  
   <img src="docs/resource/img/qq_group.png" alt="image" style="float:left;zoom: 50%;" />
 
 ## BlueKing Community
@@ -65,4 +64,3 @@ bk-chatbot 主要用于运维执行场景，如发布、变更、查询等执行
 ### License
 
 bk-chatbot基于 MIT 协议， 详细请参考 [LICENSE](https://github.com/TencentBlueKing/bk-chatbot/tree/master/LICENSE) 
-

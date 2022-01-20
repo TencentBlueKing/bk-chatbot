@@ -32,7 +32,7 @@ Generic permission management: implement the permission control of robot intenti
 
 ## Usage
 
-- [usage doc](docs/createskills.md)
+- [usage doc](docs/usage.md)
 
 ## Roadmap
 
@@ -45,7 +45,7 @@ Generic permission management: implement the permission control of robot intenti
 - [bk DevOps online video tutorial(In Chinese)](https://cloud.tencent.com/developer/edu/major-100008)
 
 - Contact us, bk-chatbot technical communication QQ group: 639855706
-
+  
   <img src="docs/resource/img/qq_group.png" alt="image" style="float:left;zoom: 50%;" />
 
 ## BlueKing Community
@@ -64,5 +64,3 @@ If you have good ideas or suggestions, please let us know by Issues or Pull Requ
 ### License
 
 bk-chatbot is based on the MIT protocol. Please refer to [LICENSE](https://github.com/TencentBlueKing/bk-chatbot/tree/master/LICENSE)
-
-
