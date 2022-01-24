@@ -31,6 +31,7 @@ from opsbot.natural_language import handle_natural_language
 from opsbot.permission import (
     IS_SUPERUSER, IS_PRIVATE, IS_GROUP_MEMBER, OPEN_API
 )
+from opsbot.asr import ASR
 
 _message_preprocessors = set()
 
@@ -63,7 +64,7 @@ class Bot(BaseBot, XworkProxy):
 
         @self.on_voice
         async def _(ctx):
-            asyncio.ensure_future(self.handle_event(ctx))
+            asyncio.ensure_future(self.handle_voice(ctx))
 
     @property
     def type(self) -> str:
@@ -130,7 +131,10 @@ class Bot(BaseBot, XworkProxy):
             with open(f'./media/{ctx["media_name"]}', 'rb+') as f:
                 amr = f.read()
                 amr = base64.b64encode(amr).decode('utf-8')
-                await self.handle_message(ctx)
+            msg = ASR(amr).recognize()
+            ctx['message'] = msg
+            ctx['to_me'] = True
+            await self.handle_message(ctx)
 
     async def call_api(self, action: str, **params):
         pass
