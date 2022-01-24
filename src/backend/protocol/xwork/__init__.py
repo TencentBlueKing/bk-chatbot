@@ -132,6 +132,8 @@ class Bot(BaseBot, XworkProxy):
                 amr = f.read()
                 amr = base64.b64encode(amr).decode('utf-8')
             msg = ASR(amr).recognize()
+            if not msg:
+                return
             ctx['message'] = msg
             ctx['to_me'] = True
             await self.handle_message(ctx)

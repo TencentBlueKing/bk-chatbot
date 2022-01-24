@@ -19,7 +19,7 @@ class ASR:
     a voice recognize tool, you need to implement it,
     input is amr/wav bash64 code, output is text
     """
-    def __init__(self, voice: str):
+    def __init__(self, voice: str, **params):
         self.voice = voice
 
     def recognize(self):
