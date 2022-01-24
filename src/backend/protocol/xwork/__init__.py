@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import base64
 from collections import namedtuple
 from typing import Any, Optional, Dict
 
@@ -57,6 +58,10 @@ class Bot(BaseBot, XworkProxy):
             asyncio.ensure_future(self.handle_message(ctx))
 
         @self.on_event
+        async def _(ctx):
+            asyncio.ensure_future(self.handle_event(ctx))
+
+        @self.on_voice
         async def _(ctx):
             asyncio.ensure_future(self.handle_event(ctx))
 
@@ -119,6 +124,13 @@ class Bot(BaseBot, XworkProxy):
             ctx['message'] = self._message_class(ctx['event_key'].split('|')[0])
             ctx['to_me'] = True
             await self.handle_message(ctx)
+
+    async def handle_voice(self, ctx: Context_T):
+        if ctx['media_name'].endswith('.amr'):
+            with open(f'./media/{ctx["media_name"]}', 'rb+') as f:
+                amr = f.read()
+                amr = base64.b64encode(amr).decode('utf-8')
+                await self.handle_message(ctx)
 
     async def call_api(self, action: str, **params):
         pass
