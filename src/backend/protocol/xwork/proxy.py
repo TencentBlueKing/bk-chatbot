@@ -185,10 +185,9 @@ class HttpApi(BaseApi):
             async with aiohttp.request(method, url, **params) as resp:
                 if 200 <= resp.status < 300:
                     headers = dict(resp.headers)
-                    if headers['Content-Type'] == 'application/json':
-                        return self._handle_json_result(json.loads(await resp.text()))
-                    elif headers['Content-Type'] in ['audio/amr']:
+                    if headers['Content-Type'] in ['audio/amr']:
                         return await self._handle_media_result(resp)
+                    return self._handle_json_result(json.loads(await resp.text()))
                 raise HttpFailed(resp.status)
         except aiohttp.InvalidURL:
             raise NetworkError('API root url invalid')
