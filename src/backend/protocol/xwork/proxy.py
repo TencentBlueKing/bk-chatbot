@@ -103,7 +103,6 @@ class Proxy(BaseProxy):
             context['event_key'] = context.get("EventKey")
         if "MediaId" in context:
             context['media_id'] = context.get("MediaId")
-            context['media_name'] = await self.get_media(context['media_id'])
 
         context['msg_type'] = context.get("MsgType")
         context['msg_from_type'] = 'single'

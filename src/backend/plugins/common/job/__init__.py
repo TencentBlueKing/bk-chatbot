@@ -20,7 +20,7 @@ from opsbot import on_command, CommandSession
 from .api import JobTask
 
 
-@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', 'bk_job'))
+@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', '作业平台', 'bk_job'))
 async def list_job_plan(session: CommandSession):
     try:
         bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']

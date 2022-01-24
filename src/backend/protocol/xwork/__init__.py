@@ -127,7 +127,8 @@ class Bot(BaseBot, XworkProxy):
             await self.handle_message(ctx)
 
     async def handle_voice(self, ctx: Context_T):
-        if ctx['media_name'].endswith('.amr'):
+        if ctx['media_id']:
+            ctx['media_name'] = await self.get_media(ctx['media_id'])
             with open(f'./media/{ctx["media_name"]}', 'rb+') as f:
                 amr = f.read()
                 amr = base64.b64encode(amr).decode('utf-8')
