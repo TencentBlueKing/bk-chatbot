@@ -135,7 +135,7 @@ class Bot(BaseBot, XworkProxy):
             msg = ASR(amr).recognize()
             if not msg:
                 return
-            ctx['message'] = msg
+            ctx['message'] = self._message_class(msg)
             ctx['to_me'] = True
             await self.handle_message(ctx)
 
