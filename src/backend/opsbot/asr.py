@@ -22,7 +22,7 @@ class ASR:
     def __init__(self, voice: str, **params):
         self.voice = voice
 
-    def recognize(self):
+    def recognize(self) -> str:
         """
         need improve
         """
