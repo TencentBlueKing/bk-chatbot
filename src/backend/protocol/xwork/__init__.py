@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import base64
 from collections import namedtuple
 from typing import Any, Optional, Dict
 
@@ -30,6 +31,7 @@ from opsbot.natural_language import handle_natural_language
 from opsbot.permission import (
     IS_SUPERUSER, IS_PRIVATE, IS_GROUP_MEMBER, OPEN_API
 )
+from opsbot.asr import ASR
 
 _message_preprocessors = set()
 
@@ -59,6 +61,10 @@ class Bot(BaseBot, XworkProxy):
         @self.on_event
         async def _(ctx):
             asyncio.ensure_future(self.handle_event(ctx))
+
+        @self.on_voice
+        async def _(ctx):
+            asyncio.ensure_future(self.handle_voice(ctx))
 
     @property
     def type(self) -> str:
@@ -117,6 +123,19 @@ class Bot(BaseBot, XworkProxy):
     async def handle_event(self, ctx: Context_T):
         if ctx['event'] in ['template_card_event', 'template_card_menu_event']:
             ctx['message'] = self._message_class(ctx['event_key'].split('|')[0])
+            ctx['to_me'] = True
+            await self.handle_message(ctx)
+
+    async def handle_voice(self, ctx: Context_T):
+        if ctx['media_id']:
+            ctx['media_name'] = await self.get_media(ctx['media_id'])
+            with open(f'./media/{ctx["media_name"]}', 'rb+') as f:
+                amr = f.read()
+                amr = base64.b64encode(amr).decode('utf-8')
+            msg = ASR(amr).recognize()
+            if not msg:
+                return
+            ctx['message'] = self._message_class(msg)
             ctx['to_me'] = True
             await self.handle_message(ctx)
 

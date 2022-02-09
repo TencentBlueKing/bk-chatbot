@@ -56,4 +56,3 @@ async def _(session: CommandSession):
 
     msg = await flow.render_welcome_msg()
     await session.send('', msgtype='template_card', template_card=msg)
-

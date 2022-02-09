@@ -44,6 +44,7 @@ class Proxy(BaseProxy):
 
     on_text = _deco_maker('text')
     on_event = _deco_maker('event')
+    on_voice = _deco_maker('voice')
 
     @classmethod
     async def _validate_parameters(cls, module: Optional):
@@ -102,7 +103,6 @@ class Proxy(BaseProxy):
             context['event_key'] = context.get("EventKey")
         if "MediaId" in context:
             context['media_id'] = context.get("MediaId")
-            await self.get_media(context['media_id'])
 
         context['msg_type'] = context.get("MsgType")
         context['msg_from_type'] = 'single'
@@ -130,6 +130,9 @@ class Proxy(BaseProxy):
 
     async def get_media(self, media_id: str):
         return await self._api.call_action('media/get', method='GET', params={'media_id': media_id})
+
+    async def upload_media(self, file_type: str, **params) -> Any:
+        return await self._api.call_action('media/upload', params={'type': file_type}, data=params)
 
     async def send(self, context: Dict[str, Any],
                    message: Union[str, Dict[str, Any], List[Dict[str, Any]]],
