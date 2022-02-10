@@ -20,8 +20,9 @@ from typing import Union, List, Dict
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
+from opsbot.models import BKExecutionLog
 from opsbot.plugins import GenericTask
-from component import SOPS, RedisClient, BK_SOPS_DOMAIN
+from component import SOPS, RedisClient, BK_SOPS_DOMAIN, OrmClient
 
 
 class SopsTask(GenericTask):
@@ -175,6 +176,10 @@ class SopsTask(GenericTask):
         except HttpFailed as e:
             msg = f'{bk_sops_template_id} {constants} error: 第三方服务异常 {e}'
         finally:
+            execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='SOPS', bk_username=self.user_id,
+                                           feature_name=bk_sops_template_name, feature_id=str(bk_sops_template_id),
+                                           detail=constants)
+            OrmClient().add(execution_log)
             logger.info(msg)
 
         return False

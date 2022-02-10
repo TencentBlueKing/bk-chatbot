@@ -102,10 +102,6 @@ class OrmClient:
         db_session = sessionmaker(bind=engine)
         self.session = db_session()
 
-    @property
-    def session(self):
-        return self.session
-
     def commit_handle(func):
         def wrapper(self, *args, **kwargs):
             result = func(self, *args, **kwargs)

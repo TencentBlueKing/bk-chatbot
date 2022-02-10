@@ -20,8 +20,9 @@ from typing import Union, Dict
 from opsbot import CommandSession
 from opsbot.plugins import GenericTask
 from opsbot.log import logger
+from opsbot.models import BKExecutionLog
 from opsbot.exceptions import ActionFailed, HttpFailed
-from component import DevOps, RedisClient, BK_DEVOPS_DOMAIN
+from component import DevOps, RedisClient, BK_DEVOPS_DOMAIN, OrmClient
 
 
 class DevOpsTask(GenericTask):
@@ -171,6 +172,10 @@ class DevOpsTask(GenericTask):
         except HttpFailed as e:
             msg = f'{bk_devops_pipeline_id} {params} error: 第三方服务异常 {e}'
         finally:
+            execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='DEVOPS', bk_username=self.user_id,
+                                           feature_name=bk_devops_pipeline_name, feature_id=str(bk_devops_pipeline_id),
+                                           project_id=bk_devops_project_id, detail=params)
+            OrmClient().add(execution_log)
             logger.info(msg)
 
         return False
