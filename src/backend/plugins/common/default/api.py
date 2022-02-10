@@ -122,4 +122,4 @@ class Stat:
         self.orm_client = OrmClient()
 
     def stat_execution(self):
-        return self.query(BKExecutionLog, 'count')
+        return self.orm_client.query(BKExecutionLog, 'count')
