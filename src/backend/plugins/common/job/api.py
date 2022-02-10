@@ -21,6 +21,7 @@ from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
 from opsbot.plugins import GenericTask
+from opsbot.models import BKExecutionLog
 from component import JOB, RedisClient, BK_JOB_DOMAIN, OrmClient
 
 
@@ -117,7 +118,7 @@ class JobTask(GenericTask):
         }
         return template_card
 
-    async def execute_task(self, job_plan_id: Union[str, int], global_var_list: List) -> bool:
+    async def execute_task(self, job_plan_id: Union[str, int], job_plan_name: str, global_var_list: List) -> bool:
         try:
             await JOB().execute_job_plan(
                 bk_biz_id=self.biz_id,
@@ -132,7 +133,10 @@ class JobTask(GenericTask):
         except HttpFailed as e:
             msg = f'{job_plan_id} {global_var_list} error: 第三方服务异常 {e}'
         finally:
-            # OrmClient().add()
+            execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='JOB', bk_username=self.user_id,
+                                           feature_name=job_plan_name, feature_id=str(job_plan_id),
+                                           detail=global_var_list)
+            OrmClient().add(execution_log)
             logger.info(msg)
 
         return False
