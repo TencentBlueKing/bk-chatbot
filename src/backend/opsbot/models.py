@@ -15,7 +15,6 @@ specific language governing permissions and limitations under the License.
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, JSON, DateTime
-from sqlalchemy import create_engine
 
 Base = declarative_base()
 
@@ -36,11 +35,3 @@ class BKExecutionLog(Base):
     def __repr__(self):
         return "<BKExecutionLog(bk_biz_id='%s', bk_platform='%s', feature_name='%s')>" % (
             self.bk_biz_id, self.bk_platform, self.feature_name)
-
-
-def init_db(url='sqlite:///../src/backend/model.db?check_same_thread=False'):
-    engine = create_engine(url, echo=True)
-    Base.metadata.create_all(engine, checkfirst=True)
-
-
-init_db()

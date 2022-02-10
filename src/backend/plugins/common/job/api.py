@@ -21,7 +21,7 @@ from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
 from opsbot.plugins import GenericTask
-from component import JOB, RedisClient, BK_JOB_DOMAIN
+from component import JOB, RedisClient, BK_JOB_DOMAIN, OrmClient
 
 
 class JobTask(GenericTask):
@@ -132,6 +132,7 @@ class JobTask(GenericTask):
         except HttpFailed as e:
             msg = f'{job_plan_id} {global_var_list} error: 第三方服务异常 {e}'
         finally:
+            # OrmClient().add()
             logger.info(msg)
 
         return False
