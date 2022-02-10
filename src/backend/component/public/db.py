@@ -14,7 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
-from typing import Optional, List, Any, ClassVar
+from typing import Optional, Any, ClassVar
 
 from redis import Redis
 from elasticsearch import Elasticsearch
@@ -108,26 +108,27 @@ class OrmClient:
 
     def commit_handle(func):
         def wrapper(self, *args, **kwargs):
-            func(self, *args, **kwargs)
+            result = func(self, *args, **kwargs)
             self.session.commit()
+            return result
         return wrapper
 
     def query(self, cls: ClassVar, func: str, **params) -> Any:
         return getattr(self.session.query(cls).filter(**params), func)()
 
     @commit_handle
-    def add(self, obj: Optional[List, Any]):
+    def add(self, obj: Optional):
         if isinstance(obj, list):
             self.session.add_all(obj)
         else:
             self.session.add(obj)
 
     @commit_handle
-    def delete(self, obj):
+    def delete(self, obj: Optional):
         self.session.delete(obj)
 
     @commit_handle
-    def update(self, obj, **params):
+    def update(self, obj: Optional, **params):
         obj.update(params)
 
     def __del__(self):
