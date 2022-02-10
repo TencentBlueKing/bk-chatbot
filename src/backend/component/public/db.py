@@ -114,7 +114,7 @@ class OrmClient:
         return wrapper
 
     def query(self, cls: ClassVar, func: str, **params) -> Any:
-        return getattr(self.session.query(cls).filter(**params), func)()
+        return getattr(self.session.query(cls).filter_by(**params), func)()
 
     @commit_handle
     def add(self, obj: Optional):

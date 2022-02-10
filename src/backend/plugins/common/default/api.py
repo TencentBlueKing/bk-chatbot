@@ -16,7 +16,8 @@ specific language governing permissions and limitations under the License.
 import time
 
 from opsbot import CommandSession
-from component import RedisClient, CC, Backend, Plugin
+from opsbot.models import BKExecutionLog
+from component import RedisClient, CC, Backend, Plugin, OrmClient
 
 
 class Flow:
@@ -114,3 +115,11 @@ class Flow:
 
         RedisClient(env="prod").hash_set('chat_single_biz', self.user_id, bk_biz_id)
         return bk_biz_id
+
+
+class Stat:
+    def __init__(self):
+        self.orm_client = OrmClient()
+
+    def stat_execution(self):
+        return self.query(BKExecutionLog, 'count')

@@ -96,6 +96,7 @@ from .natural_language import (
 )
 from .event import EventSession
 from .helpers import context_id
+from .models import init_db
 
 __all__ = [
     'Bot', 'scheduler', 'init', 'get_bot', 'run',
@@ -109,4 +110,6 @@ __all__ = [
     'EventSession',
 
     'context_id',
+
+    'init_db',
 ]

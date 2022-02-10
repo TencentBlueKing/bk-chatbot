@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 from opsbot import on_command, CommandSession, on_natural_language
 from opsbot.log import logger
-from .api import Flow
+from .api import Flow, Stat
 from .settings import (
     DEFAULT_SHOW_GROUP_ID_ALIAS, DEFAULT_BIND_BIZ_ALIAS, DEFAULT_BIND_BIZ_TIP,
     DEFAULT_BIZ_BIND_SUCCESS, DEFAULT_BIZ_BIND_FAIL, DEFAULT_HELPER, DEFAULT_INTENT_CATEGORY
@@ -56,3 +56,14 @@ async def _(session: CommandSession):
 
     msg = await flow.render_welcome_msg()
     await session.send('', msgtype='template_card', template_card=msg)
+
+
+@on_command('stat_', aliases=('执行统计', ))
+async def _(session: CommandSession):
+    stat = Stat()
+    count = stat.stat_execution()
+    content = f'''>**执行统计** 
+        ><font color=\"warning\">您当前执行数「{count}」</font> 
+        '''
+    await session.send('', msgtype='markdown', markdown={'content': content})
+    del stat

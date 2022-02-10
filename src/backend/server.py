@@ -33,7 +33,7 @@ class Server:
         self._config = config
 
     def run(self):
-        opsbot.models.init_db()
+        opsbot.init_db()
         opsbot.init(self._bot_name, self._config)
         for plugin in self._plugins:
             opsbot.load_plugins(path.join(path.dirname(__file__), 'plugins', plugin), f'plugins.{plugin}')
