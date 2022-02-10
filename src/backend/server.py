@@ -20,6 +20,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 
 import opsbot
+try:
+    import config as CONFIG
+except ModuleNotFoundError:
+    CONFIG = None
 
 PRODUCT = getenv('PRODUCT', 'xwork')
 PLUGINS = getenv('PLUGINS', 'common').split(',')
@@ -45,4 +49,4 @@ class Server:
         opsbot.run()
 
 
-Server(PRODUCT, PLUGINS).run()
+Server(PRODUCT, PLUGINS, CONFIG).run()
