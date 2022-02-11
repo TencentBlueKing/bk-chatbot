@@ -38,7 +38,7 @@ async def create_bk_shortcut(session: CommandSession):
         del session.state['shortcut_name']
         shortcut_name, _ = session.get('shortcut_name', prompt='...', msgtype='markdown', markdown={'content': content})
 
-    ShortcutHandler().save(shortcut_name, platform, info)
+    sc_handler.save(platform, info)
     content = f'''>**{platform} TIP**
                 >快捷键「{shortcut_name}」保存成功'''
     await session.send('', msgtype='markdown', markdown={'content': content})
@@ -46,9 +46,9 @@ async def create_bk_shortcut(session: CommandSession):
 
 @on_command('bk_shortcut_execute')
 async def execute_bk_shortcut(session: CommandSession):
-    shortcut = session.state['shortcut']
+    shortcut = session.state['info']
     sc_handler = ShortcutHandler(shortcut.name, session)
-    msg = await sc_handler.execute_task()
+    msg = await sc_handler.execute_task(shortcut)
     await session.send('', msgtype='template_card', template_card=msg)
 
 

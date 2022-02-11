@@ -49,6 +49,6 @@ class ShortcutHandler(GenericTask):
                                      bk_username=self.user_id, name=self.name)
 
     async def execute_task(self, shortcut: BKShortcutTask):
-        flow = SHORTCUT_PROTO[shortcut.platform](self._session)()
+        flow = SHORTCUT_PROTO[shortcut.bk_platform](self._session)
         result = flow.execute_task(shortcut.params)
         return flow.render_job_plan_execute_msg(result, shortcut.params)
