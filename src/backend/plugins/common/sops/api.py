@@ -128,6 +128,11 @@ class SopsTask(GenericTask):
                     "text": "取消",
                     "style": 3,
                     "key": f"bk_sops_template_cancel|{template_name}"
+                },
+                {
+                    "text": "快捷键",
+                    "style": 4,
+                    "key": f"bk_shortcut_create|SOPS|{json.dumps(info)}"
                 }
             ]
         }

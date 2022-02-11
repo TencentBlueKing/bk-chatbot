@@ -38,6 +38,20 @@ class BKExecutionLog(Base):
             self.bk_biz_id, self.bk_platform, self.feature_name)
 
 
+class BKShortcutTask(Base):
+    __tablename__ = 'bk_shortcut_task'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(length=128), comment='快捷方式名')
+    bk_biz_id = Column(Integer, comment='业务ID')
+    bk_platform = Column(String(length=64), comment='平台名称')
+    bk_username = Column(String(length=128), comment='执行人')
+    params = Column(JSON, comment='执行参数', default={})
+
+    def __repr__(self):
+        return "<BKShortcutTask(name='%s', bk_username='%s')>" % (self.name, self.bk_username)
+
+
 def init_db(url='sqlite:///tmp.db?check_same_thread=False'):
     engine = create_engine(url, echo=True)
     Base.metadata.create_all(engine, checkfirst=True)

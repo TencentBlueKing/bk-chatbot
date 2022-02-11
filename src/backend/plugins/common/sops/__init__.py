@@ -16,8 +16,6 @@ specific language governing permissions and limitations under the License.
 import json
 
 from opsbot import on_command, CommandSession
-from opsbot.log import logger
-
 from .api import SopsTask
 
 

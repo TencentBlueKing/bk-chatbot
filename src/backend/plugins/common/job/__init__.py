@@ -16,7 +16,6 @@ specific language governing permissions and limitations under the License.
 import json
 
 from opsbot import on_command, CommandSession
-
 from .api import JobTask
 
 
@@ -51,16 +50,15 @@ async def select_bk_job_plan(session: CommandSession):
 
 @on_command('bk_job_plan_execute')
 async def _(session: CommandSession):
-    _, job_plan_id, job_plan_name, global_var_list = session.ctx['event_key'].split('|')
+    _, job_plan = session.ctx['event_key'].split('|')
     try:
-        global_var_list = json.loads(global_var_list)
+        job_plan = json.loads(job_plan)
     except json.JSONDecodeError:
         return
 
     flow = JobTask(session)
-    params = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
-    result = await flow.execute_task(job_plan_id, job_plan_name, params)
-    msg = flow.render_job_plan_execute_msg(result, job_plan_name, global_var_list)
+    result = await flow.execute_task(job_plan)
+    msg = flow.render_job_plan_execute_msg(result, job_plan)
     await session.send('', msgtype='template_card', template_card=msg)
 
 

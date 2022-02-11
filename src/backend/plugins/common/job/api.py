@@ -86,6 +86,7 @@ class JobTask(GenericTask):
             job_plan_name = self._session.state['job_plan_name']
             global_var_list = self._session.state['global_var_list']
 
+        info = {'job_plan_id': job_plan_id, 'job_plan_name': job_plan_name, 'global_var_list': global_var_list}
         template_card = {
             'card_type': 'button_interaction',
             'source': {
@@ -102,44 +103,55 @@ class JobTask(GenericTask):
                 {
                     "text": "执行",
                     "style": 1,
-                    "key": f"bk_job_plan_execute|{job_plan_id}|{job_plan_name}|{json.dumps(global_var_list)}"
+                    "key": f"bk_job_plan_execute|{json.dumps(info)}"
                 },
                 {
                     "text": "修改",
                     "style": 2,
-                    "key": f"bk_job_plan_update|{job_plan_id}|{job_plan_name}|{json.dumps(global_var_list)}"
+                    "key": f"bk_job_plan_update|{json.dumps(info)}"
                 },
                 {
                     "text": "取消",
                     "style": 3,
                     "key": f"bk_job_plan_cancel|{job_plan_name}"
+                },
+                {
+                    "text": "快捷键",
+                    "style": 4,
+                    "key": f"bk_shortcut_create|JOB|{json.dumps(info)}"
                 }
             ]
         }
         return template_card
 
-    async def execute_task(self, job_plan_id: Union[str, int], job_plan_name: str, global_var_list: List) -> bool:
+    async def execute_task(self, job_plan: Dict) -> bool:
+        job_plan_id = job_plan['job_plan_id']
+        job_plan_name = job_plan['job_plan_name']
+        global_var_list = job_plan['global_var_list']
+        params = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
+
         try:
             await JOB().execute_job_plan(
                 bk_biz_id=self.biz_id,
                 job_plan_id=int(job_plan_id),
-                global_var_list=global_var_list,
+                global_var_list=params,
                 bk_username=self.user_id
             )
-            msg = f'{job_plan_id} {global_var_list} 任务启动成功'
+            msg = f'{job_plan_id} {params} 任务启动成功'
             return True
         except ActionFailed as e:
-            msg = f'{job_plan_id} {global_var_list} error: 参数有误 {e}'
+            msg = f'{job_plan_id} {params} error: 参数有误 {e}'
         except HttpFailed as e:
-            msg = f'{job_plan_id} {global_var_list} error: 第三方服务异常 {e}'
+            msg = f'{job_plan_id} {params} error: 第三方服务异常 {e}'
         finally:
             execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='JOB', bk_username=self.user_id,
                                            feature_name=job_plan_name, feature_id=str(job_plan_id),
-                                           detail=global_var_list)
+                                           detail=params)
             OrmClient().add(execution_log)
             logger.info(msg)
 
         return False
 
-    def render_job_plan_execute_msg(self, result, job_plan_name, global_var_list) -> Dict:
-        return self.render_execute_msg('JOB', result, job_plan_name, global_var_list, BK_JOB_DOMAIN)
+    def render_job_plan_execute_msg(self, result, job_plan: Dict) -> Dict:
+        return self.render_execute_msg('JOB', result, job_plan['job_plan_name'],
+                                       job_plan['global_var_list'], BK_JOB_DOMAIN)

@@ -152,6 +152,11 @@ class DevOpsTask(GenericTask):
                     "text": "取消",
                     "style": 3,
                     "key": f"bk_devops_pipeline_cancel|{bk_devops_pipeline_name}"
+                },
+                {
+                    "text": "快捷键",
+                    "style": 4,
+                    "key": f"bk_shortcut_create|DevOps|{json.dumps(info)}"
                 }
             ]
         }
