@@ -52,7 +52,7 @@ async def execute_bk_shortcut(session: CommandSession):
     await session.send('', msgtype='template_card', template_card=msg)
 
 
-@on_command('bk_shortcut_list')
+@on_command('bk_shortcut_list', aliases=('查看快捷键', '快捷键'))
 async def list_bk_shortcut(session: CommandSession):
     msg = ShortcutHandler(session).render_shortcut_list()
     await session.send('', msgtype='template_card', template_card=msg)
@@ -65,6 +65,7 @@ async def delete_bk_shortcut(session: CommandSession):
     content = f'''>**快捷键 TIP**
                     >快捷键「{msg}」删除成功'''
     await session.send('', msgtype='markdown', markdown={'content': content})
+
 
 @on_natural_language
 async def _(session: NLPSession):

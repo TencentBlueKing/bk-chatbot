@@ -58,7 +58,7 @@ async def _(session: CommandSession):
     await session.send('', msgtype='template_card', template_card=msg)
 
 
-@on_command('stat_', aliases=('执行统计', ))
+@on_command('stat_execution', aliases=('执行统计', ))
 async def _(session: CommandSession):
     stat = Stat()
     count = stat.stat_execution()
