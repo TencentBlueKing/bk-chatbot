@@ -1,6 +1,6 @@
 # BK_CHATBOT 部署文档
 
-[toc]
+[TOC]
 
 ## 代码目录
 
