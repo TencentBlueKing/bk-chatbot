@@ -1,5 +1,6 @@
 # BK_CHATBOT 部署文档
 
+[toc]
 
 ## 依赖第三方组件
 
@@ -28,28 +29,33 @@
 
 官方发布的 **Linux Release** 包下载地址见[这里](https://github.com/Tencent/bk-chatbot/releases)
 
-
 ### 4. 机器人后台部署
 
 #### 安装包
+
 > 解压
+
 ```
 tar -zxf release.tar.gz 或 unzip release.zip
 ```
+
 * 包的目录结构如下
 
-<img src="resource/img/bk_app_tree.png" alt="image" style="zoom: 80%;" />
+<img src="./resource/img/bk_app_tree.png" alt="image" style="zoom: 80%" />
 
 > 创建用户配置文件
-```
+
+```shell
 cd release && touch config.py
 ```
+
 > 添加用户自定义配置，引入机器人默认配置，设置唤醒关键词，定义机器人名称
-```
+
+```shell
 cd release && vim config.py
 ```
 
-```
+```shell
 import re
 from opsbot.default_config import *
 
@@ -57,23 +63,28 @@ RTX_NAME = '我的机器人'
 COMMAND_START = ['', re.compile(r'[/!]+')]
 API_ROOT = 'https://qyapi.weixin.qq.com/cgi-bin'
 ```
+
 > 编辑启动文件 config.py, 设置启动Host和Port, 注：该端口要与企业微信应用回调相对应
-```
+
+```shell
 HOST = '127.0.0.1'
 PORT = 8888
 ```
+
 > 进入企业微信可查看
+
 * CORPID [查看](http://p.qpic.cn/pic_wework/3036008643/f4f249f8640f1a58ce330176eda833b613ef0c87857592ed/0/)
 * SECRET [查看](http://p.qpic.cn/pic_wework/3978463327/cbcd77c7c50cb5da32a41e101af95f6b5a2105e6bf046060/0/)
 * TOKEN    用户自定义
-* AES_KEY  用户自定义 
+* AES_KEY  用户自定义
 
 > 配置企业微信密钥文件
-```
+
+```shell
 cd release && vim protocol/xwork/config.py
 ```
 
-```
+```shell
 """
 Xwork configurations.
 """
@@ -87,15 +98,16 @@ AES_KEY = "必填"  # 企业微信应用自定义 aes
 ```
 
 > 配置蓝鲸API密钥和路径
+
 * 创建蓝鲸SaaS [查看](https://bk.tencent.com/docs/document/6.0/148/6690)
 * 获取应用信息[查看](https://bk.tencent.com/docs/document/6.0/148/6391)
 * APP 开API访问白名单[查看](https://bk.tencent.com/docs/document/6.0/148/6696)
 
-```
+```shell
 cd release && vim component/config.py
 ```
 
-```
+```shell
 """
 ALL Component Config
 Include: BK(APP_ID, APP_SECRET)
@@ -129,11 +141,11 @@ REDIS_DB_NAME = ''     # redis 启动的地址
 
 > 任务执行插件配置
 
-```
+```shell
 cd release && vim intent/plugins/task/settings.py
 ```
 
-```
+```shell
 """
 交互配置
 """
@@ -149,74 +161,82 @@ TASK_EXEC_FAIL = '任务启动失败'
 
 > 更多机器人个性化配置, 请参照
 
-```
+```shell
 cd release && cat opsbot/default_config.py
 ```
 
 #### 启动后台服务
 
-```
+```shell
 cd release && ./control start
 ```
 
 #### 停止后台服务
 
-```
+```shell
 cd release && ./control stop
 ```
 
 ### 5.容器化部署
-> 自行服务器安装Docker环境
 
+> 自行服务器安装Docker环境
 > 已经为您编排好了一般Dockerfile文件
 
-```
+```shell
 release/src/backend/Dockerfile
 
 请一次性将需要的配置按照环境形式写入Dockerfile
 ```
 
 > 打包镜像
-```
+
+```shell
 docker build -f release/src/backend/Dockerfile --network=host -t {namespace}:{tag} .
 ```
 
 > 启动镜像
 
-```
+```shell
 docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 ```
 
-
 ### 6. 企业微信绑定
+
 > 企业微信后台
+
 * [打开](https://work.weixin.qq.com/wework_admin)
 
-<img src="resource/img/xwork_index.png" alt="image" style="zoom: 67%;" />
+<img src="./resource/img/xwork_index.png" alt="image" style="zoom: 67%;" />
 
 > 创建应用
+
 * 进入 应用管理 -> [创建应用](https://work.weixin.qq.com/wework_admin/frame#apps/createApiApp)
 
-![image](resource/img/xwork_app_create.png)
+![image](./resource/img/xwork_app_create.png)
 
-<img src="resource/img/xwork_app_create2.png" alt="image" style="zoom: 67%;" />
+<img src="./resource/img/xwork_app_create2.png" alt="image" style="zoom: 67%;" />
 
 > 应用管理
+
 * 点击应用
 
-<img src="resource/img/xwork_app_manage.png" alt="image" style="zoom:67%;" />
+<img src="./resource/img/xwork_app_manage.png" alt="image" style="zoom:67%;" />
 
-<img src="resource/img/xwork_app_manage2.png" alt="image" style="zoom:67%;" />
+<img src="./resource/img/xwork_app_manage2.png" alt="image" style="zoom:67%;" />
 
 > 注册回调
+
 * 后台启动服务
 * 测试注册 (注：这里url要填写你后台服务部署的外网IP，确保端口开通)
 
-<img src="resource/img/xwork_app_callback.png" alt="image" style="zoom:67%;" />
+<img src="./resource/img/xwork_app_callback.png" alt="image" style="zoom:67%;" />
 
 ### 8. 其他
+
 > 社区版HOST配置
-```
+
+```shell
 {你社区版nginx所在服务器} {你自定义的域名} 
 ```
+
 > bk-chatbot 后台服务启动地址跟企业微信回调地址一致 否则收不到消息
