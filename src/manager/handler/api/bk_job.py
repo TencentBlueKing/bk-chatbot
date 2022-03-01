@@ -310,4 +310,4 @@ class JobV2:
         return rsp
 
 
-JOB = JobV2 if os.getenv("BKAPP_BK_JOB_VERSION", "V3") == "V2" else JobV3
+JOB = JobV2 if os.getenv("BKAPP_JOB_VERSION", "V3") == "V2" else JobV3

@@ -2,14 +2,36 @@
 
 [toc]
 
-## 依赖第三方组件
+## 代码目录
+
+* 机器人代码如下
+
+```shell
+.
+├── LICENSE
+├── README.md
+├── README_en.md
+├── VERSION
+├── docs                 # 文档集合
+│   ├── CONTRIBUTING.md
+│   ├── createskills.md
+│   ├── deploy.md
+│   ├── release.md
+│   ├── resource
+│   └── usage.md
+├── requirements.txt
+├── scripts
+│   └── cron.py
+└── src
+    ├── backend         # 机器人后端
+    └── manager         # 机器人管理端代码
+
+```
+
+## 第三方组件
 
 * Redis >= 3.2.11
 * 语料库
-
-## 后台服务进程
-
-* bk_chatbot_server
 
 ## 部署介绍
 
@@ -27,7 +49,7 @@
 
 ### 3. Release包下载
 
-官方发布的 **Linux Release** 包下载地址见[这里](https://github.com/Tencent/bk-chatbot/releases)
+官方发布的 **Linux Release** 包下载地址见[这里](https://github.com/TencentBlueKing/bk-chatbot/releases)
 
 ### 4. 机器人后台部署
 
@@ -35,7 +57,7 @@
 
 > 解压
 
-```
+```shell
 tar -zxf release.tar.gz 或 unzip release.zip
 ```
 
@@ -177,7 +199,7 @@ cd release && ./control start
 cd release && ./control stop
 ```
 
-### 5.容器化部署
+#### 容器化部署
 
 > 自行服务器安装Docker环境
 > 已经为您编排好了一般Dockerfile文件
@@ -200,7 +222,7 @@ docker build -f release/src/backend/Dockerfile --network=host -t {namespace}:{ta
 docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 ```
 
-### 6. 企业微信绑定
+#### 企业微信绑定
 
 > 企业微信后台
 
@@ -231,7 +253,71 @@ docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 
 <img src="./resource/img/xwork_app_callback.png" alt="image" style="zoom:67%;" />
 
-### 8. 其他
+### 5.机器人管理端部署
+
+* 代码目录
+
+```shell
+src/manager
+```
+
+#### 依赖下载
+
+##### 中间件依赖
+
+* mysql
+* redis
+
+##### 环境变量配置
+
+* 代码读取环境变量中的值进行参数设置
+
+```shell
+APP_ID="xxx"                        # APP_ID(如果蓝鲸paas部署环境变量中自带)
+APP_TOKEN="xxx"                     # APP_TOKEN(如果蓝鲸paas部署环境变量中自带)
+BK_PAAS_HOST=""                     # 社区版蓝鲸地址
+BKAPP_JOB_VERSION="V3"              # 作业平台版本(默认为V3)
+BKAPP_DEVOPS_HOST=""                # 蓝盾访问host
+BKAPP_JOB_HOST=""                   # 作业平台host
+
+# redis配置
+BKAPP_REDIS_DB_NAME="localhost"     # redis地址(默认为localhost)
+BKAPP_REDIS_DB_PASSWORD=""          # redis密码(默认为空)
+BKAPP_REDIS_DB_PORT="6379"          # redis端口(默认为6379)
+
+# mysql配置
+BKAPP_GCS_MYSQL_NAME=""             # mysql 库名
+BKAPP_GCS_MYSQL_USER=""             # mysql 用户
+BKAPP_GCS_MYSQL_PASSWORD=""         # mysql 密码
+BKAPP_GCS_MYSQL_HOST=""             # mysql host
+BKAPP_GCS_MYSQL_PORT=""             # mysql 端口
+```
+
+##### python第三方库依赖
+
+* pip下载(setuptools<=57.5.0)
+
+```shell
+pip install --upgrade setuptools==57.5.0 # 如果setuptools版本过高先降低版本
+pip install -r requirements.txt          # python环境依赖下载
+```
+
+#### 服务器启动
+
+* 启动web服务
+
+```shell
+gunicorn wsgi -w 4 
+```
+
+* 启动celery
+
+```shell
+python manage.py celery worker -l info
+python manage.py celery beat -l info
+```
+
+### 6.其他
 
 > 社区版HOST配置
 
