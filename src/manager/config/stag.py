@@ -32,16 +32,7 @@ RUN_MODE = "STAGING"
 # V3
 # import logging
 # logging.getLogger('app').setLevel('INFO')
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("BKAPP_GCS_MYSQL_NAME"),  # 数据库名
-        "USER": os.environ.get("BKAPP_GCS_MYSQL_USER"),  # 数据库用户
-        "PASSWORD": os.environ.get("BKAPP_GCS_MYSQL_PASSWORD"),  # 数据库密码
-        "HOST": os.environ.get("BKAPP_GCS_MYSQL_HOST"),  # 数据库主机
-        "PORT": os.environ.get("BKAPP_GCS_MYSQL_PORT", "3306"),  # 数据库端口
-    }
-}
+
 
 # 预发布环境数据库可以在这里配置
 # 默认 default 请不要修改，如果使用了外部数据库，请联系【蓝鲸助手】授权
