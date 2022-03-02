@@ -46,7 +46,7 @@ bk-chatbot 主要用于运维执行场景，如发布、变更、查询等执行
 
 - 联系我们，加入 bk-chatbot 交流群：639855706
   
-  <img src="docs/./resource/img/qq_group.png" alt="image" style="float:left;zoom: 50%;" />
+  <img src="docs/resource/img/qq_group.png" alt="image" style="float:left;zoom: 50%;" />
 
 ## BlueKing Community
 
