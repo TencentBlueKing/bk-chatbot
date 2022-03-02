@@ -1,4 +1,4 @@
-<img src="docs/./resource/img/bk-chatbot.png" alt="image" style="zoom: 80%;" />
+<img src="docs/resource/img/bk-chatbot.png" alt="image" style="zoom: 80%;" />
 
 # bk-chatbot
 
