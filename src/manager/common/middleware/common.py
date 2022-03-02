@@ -50,7 +50,7 @@ class CommonMiddleware(MiddlewareMixin):
                 else:
                     request_body = request.body.decode(charset)
                     payload = {} if request_body == "" else json.loads(request_body)
-        except Exception as ex:
+        except Exception as ex:  # pylint: disable=broad-except
             traceback.print_exc()
             error_msg = f"parameter parsing error: {ex}"
             logger.error(error_msg)

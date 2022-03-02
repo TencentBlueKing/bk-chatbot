@@ -12,7 +12,7 @@ Usage:
     # with traceback
     try:
         1 / 0
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         logger.exception("wrong3")
 """
 import logging

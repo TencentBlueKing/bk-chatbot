@@ -39,7 +39,7 @@ def get_client_by_user(user, **kwargs):
     """
     try:
         from account.models import BkUser as User
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         from django.contrib.auth.models import User
 
     try:
@@ -47,7 +47,7 @@ def get_client_by_user(user, **kwargs):
             username = user.username
         else:
             username = user
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         logger.exception('Failed to get user according to user (%s)' % user)
 
     common_args = {'bk_username': username}

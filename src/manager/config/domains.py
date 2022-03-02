@@ -57,7 +57,7 @@ module = __import__(domain_module, globals(), locals(), ["*"])
 for _root in API_ROOTS:
     try:
         locals()[_root] = getattr(module, _root)
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         pass
 
 __all__ = API_ROOTS

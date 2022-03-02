@@ -45,7 +45,7 @@ class RedisClient:
         data = self.redis_client.get(key)
         try:
             data = json.loads(data)
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except
             logger.error(f"REDIS GET ERR [{str(e)}]")
         return data
 

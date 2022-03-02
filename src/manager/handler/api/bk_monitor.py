@@ -196,7 +196,7 @@ class BkMonitor:
                 res["dimensions"] = list({d["dimension"] for d in res["list"]})
 
             return res
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except
             logger.error(f"[API]get_metric_data error {e}")
 
         return None

@@ -425,7 +425,7 @@ def valid_params(serializer_class, params, context=None):
                 serializer.fields,
                 params,
             )
-        except Exception:
+        except Exception: # pylint: disable=broad-except
             message = f"参数校验失败: {serializer.errors}"
 
         raise serializers.ValidationError(message)

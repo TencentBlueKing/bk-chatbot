@@ -31,7 +31,7 @@ class ApiAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
         try:
             req_data = json.loads(request.body)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             logger.error(f"authenticate error:{e}")
             req_data = {}
 

@@ -85,7 +85,7 @@ class PlatformTask:
             self.obj.status = status
             self.obj.save()
             return task_info
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except
             # 异常删除缓存信息
             traceback.print_exc()
             logger.error(f"更新日志状态异常:{e}")
@@ -126,7 +126,7 @@ class PlatformTask:
         except ValueError:
             traceback.print_exc()
             logger.error(f"发送通知错误:{traceback.format_exc()}")
-        except Exception:
+        except Exception: # pylint: disable=broad-except
             traceback.print_exc()
             logger.error(f"发送通知错误:{traceback.format_exc()}")
 

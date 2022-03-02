@@ -44,7 +44,7 @@ def get_context_processors_content(request):
         cp_func_list = tuple(import_string(path) for path in context_processors)
         for processors in cp_func_list:
             context.update(processors(request))
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-except
         logger.exception("Mako: get_context_processors_content error info:%s" % e)
         context = Context()
     return context

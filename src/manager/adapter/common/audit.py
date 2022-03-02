@@ -49,7 +49,7 @@ def record_audit_log(func):
                 {"code": e.code, "message": e.MESSAGE, "data": "", "result": False}
             )
             raise e
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except
             audit_record_dict["operate_result"].update(
                 {"code": 50000, "message": "系统异常,请联系管理员处理", "data": "", "result": False}
             )

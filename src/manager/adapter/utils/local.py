@@ -28,7 +28,7 @@ def get_request_id():
     """
     try:
         return get_request().request_id
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         return str(uuid.uuid4())
 
 
@@ -39,7 +39,7 @@ def get_request_username():
     username = ""
     try:
         username = get_request().user.username
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         pass
     finally:
         if not username and "celery" in sys.argv:
