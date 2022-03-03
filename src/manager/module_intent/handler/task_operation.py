@@ -14,10 +14,10 @@ specific language governing permissions and limitations under the License.
 """
 from common.constants import PlatformType
 from common.design.strategy import Strategy
-from module_intent.handler.task_devops import DevOps
-from module_intent.handler.task_job import Job
-from module_intent.handler.task_sops import Sops
-from module_intent.models import ExecutionLog
+from src.manager.module_intent.handler.task_devops import DevOps
+from src.manager.module_intent.handler.task_job import Job
+from src.manager.module_intent.handler.task_sops import Sops
+from src.manager.module_intent.models import ExecutionLog
 
 
 class Operation(Strategy):

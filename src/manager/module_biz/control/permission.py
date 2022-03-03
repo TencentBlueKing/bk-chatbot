@@ -15,8 +15,8 @@ specific language governing permissions and limitations under the License.
 """
 from rest_framework import permissions
 
-from module_biz.constants import ALL_REQUEST_METHODS
-from module_biz.constants import SUMMAYR_CHT_REQUEST_METHODS
+from src.manager.module_biz.constants import ALL_REQUEST_METHODS
+from src.manager.module_biz.constants import SUMMAYR_CHT_REQUEST_METHODS
 
 
 class BizPermission(permissions.BasePermission):

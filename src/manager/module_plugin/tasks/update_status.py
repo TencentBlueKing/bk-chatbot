@@ -22,9 +22,9 @@ from celery.task import task
 from django.db import transaction
 
 from blueapps.utils.logger import logger_celery as logger
-from handler.api.bk_itsm import BkITSM
-from module_plugin.hanlder.deal_plugin_status import deal_audit_plugin
-from module_plugin.models import PluginAuditLog
+from src.manager.handler.api.bk_itsm import BkITSM
+from src.manager.module_plugin.hanlder.deal_plugin_status import deal_audit_plugin
+from src.manager.module_plugin.models import PluginAuditLog
 
 
 @task()

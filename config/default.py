@@ -37,14 +37,14 @@ INSTALLED_APPS += (
     "rest_framework",
     "django_filters",
     "drf_yasg",
-    "module_api",
-    "module_biz",
-    "module_intent",
-    "module_faq",
-    "module_index",
-    "module_nlp",
-    "module_plugin",
-    "module_timer",
+    "src.manager.module_api",
+    "src.manager.module_biz",
+    "src.manager.module_intent",
+    "src.manager.module_faq",
+    "src.manager.module_index",
+    "src.manager.module_nlp",
+    "src.manager.module_plugin",
+    "src.manager.module_timer",
 )
 
 # 这里是默认的中间件，大部分情况下，不需要改动
@@ -71,10 +71,12 @@ INSTALLED_APPS += (
 # )
 
 # 自定义中间件
-MIDDLEWARE = ("corsheaders.middleware.CorsMiddleware",) + MIDDLEWARE
+MIDDLEWARE += (
+    "corsheaders.middleware.CorsMiddleware",
+    "common.middleware.common.CommonMiddleware",
+    "common.middleware.common.RequestProvider",
+)
 
-MIDDLEWARE += ("common.middleware.common.CommonMiddleware",)
-MIDDLEWARE += ("common.middleware.common.RequestProvider",)
 
 # 所有环境的日志级别可以在这里配置
 # LOG_LEVEL = 'INFO'

@@ -17,7 +17,7 @@ import operator
 from functools import reduce
 
 from common.constants import JOB_HOST
-from handler.api.bk_job import JOB
+from src.manager.handler.api.bk_job import JOB
 
 
 class BkJob:

@@ -17,8 +17,8 @@ import datetime
 
 from celery.task import periodic_task
 
-from module_plugin.hanlder.deal_plugin_count import get_plugin_exec
-from module_plugin.models import Plugin
+from src.manager.module_plugin.hanlder.deal_plugin_count import get_plugin_exec
+from src.manager.module_plugin.models import Plugin
 
 
 @periodic_task(run_every=datetime.timedelta(seconds=10))

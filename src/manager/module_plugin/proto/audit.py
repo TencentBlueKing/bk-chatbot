@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework.serializers import Serializer
-from module_plugin.proto import plugin_tag
+from src.manager.module_plugin.proto import plugin_tag
 from common.drf.serializers import BaseRspSerializer
 
 

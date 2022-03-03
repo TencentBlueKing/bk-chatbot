@@ -17,10 +17,9 @@ import asyncio
 
 from common.constants import PlatformType
 from common.design.strategy import Strategy
-from handler.api.devops import DevOps
-from handler.api.bk_job import JOB
-from handler.api.bk_sops import SOPS
-from module_intent.models import ExecutionLog
+from src.manager.handler.api.bk_job import JOB
+from src.manager.handler.api.bk_sops import SOPS
+from src.manager.module_intent.models import ExecutionLog
 
 
 async def get_sops_error(bk_username: str, bk_biz_id: int, task_id: str, node_id: str) -> dict:

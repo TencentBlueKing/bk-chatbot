@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from module_faq.models import FAQ
+from src.manager.module_faq.models import FAQ
 
 
 class FAQSerializer(serializers.ModelSerializer):

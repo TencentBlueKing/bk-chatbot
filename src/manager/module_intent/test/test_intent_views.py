@@ -20,7 +20,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture
 
-from module_intent.models import Intent, Task, Utterances
+from src.manager.module_intent.models import Intent, Task, Utterances
 
 
 @fixture()
@@ -116,7 +116,7 @@ def fake_task(faker, fake_intent, fake_intent_all_data) -> Task:
 
 @pytest.mark.view
 @pytest.mark.django_db
-@patch("module_intent.control.permission.IntentPermission.has_permission", return_value=True)
+@patch("src.manager.module_intent.control.permission.IntentPermission.has_permission", return_value=True)
 class TestIntentViewSet:
     def test_create(self, has_permission, client, fake_intent_all_data):
         """

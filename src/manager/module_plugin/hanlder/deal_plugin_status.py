@@ -25,9 +25,9 @@ from common.constants import (
 )
 from common.design.strategy import Strategy
 from common.redis import RedisClient
-from handler.api.bk_itsm import BkITSM
-from handler.in_api.plugin import PluginManage
-from module_plugin.models import Plugin, PluginAuditLog
+from src.manager.handler.api.bk_itsm import BkITSM
+from src.manager.handler.in_api.plugin import PluginManage
+from src.manager.module_plugin.models import Plugin, PluginAuditLog
 
 
 class DealPluginStatus(Strategy):

@@ -15,9 +15,9 @@ specific language governing permissions and limitations under the License.
 
 
 from common.design.strategy import Strategy
-from handler.bk.bk_job import BkJob
-from module_intent.handler import TaskType
-from module_intent.models import ExecutionLog
+from src.manager.handler.bk.bk_job import BkJob
+from src.manager.module_intent.handler import TaskType
+from src.manager.module_intent.models import ExecutionLog
 
 
 class Job(Strategy):

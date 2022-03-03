@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import pytest
 
-from module_nlp.models import CorpusDomain
+from src.manager.module_nlp.models import CorpusDomain
 
 
 @pytest.mark.django_db

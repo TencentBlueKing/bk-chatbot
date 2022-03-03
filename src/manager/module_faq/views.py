@@ -21,10 +21,10 @@ from common.http.request import init_views
 from common.mongodb.client import MongoDB
 from common.pagination import ResultsSetPagination
 from common.utils.time import mk_now_time
-from module_faq.control.permission import FaqPermission
-from module_faq.control.throttle import FaqThrottle
-from module_faq.models import FAQ
-from module_faq.serializers import FAQSerializer
+from src.manager.module_faq.control.permission import FaqPermission
+from src.manager.module_faq.control.throttle import FaqThrottle
+from src.manager.module_faq.models import FAQ
+from src.manager.module_faq.serializers import FAQSerializer
 
 
 class FaqViewSet(APIModelViewSet, ValidationMixin):

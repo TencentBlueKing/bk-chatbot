@@ -44,7 +44,7 @@ class CC:
         }
         try:
             data = CCApi.search_business(kwargs)["info"]
-        except Exception as e: # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             traceback.print_exc()
             logger.error(f"[API]search_business error {e}")
         return data

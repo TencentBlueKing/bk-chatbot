@@ -14,10 +14,10 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 from common.generic import APIModelViewSet, ValidationMixin
-from module_biz.control.permission import SummaryChatPermission
-from module_biz.control.throttle import BizThrottle
-from module_biz.models import ChatBindBusiness
-from module_biz.serializers import SummaryGroupBindBizSerializer
+from src.manager.module_biz.control.permission import SummaryChatPermission
+from src.manager.module_biz.control.throttle import BizThrottle
+from src.manager.module_biz.models import ChatBindBusiness
+from src.manager.module_biz.serializers import SummaryGroupBindBizSerializer
 
 
 class SummaryChatBindViewSet(APIModelViewSet, ValidationMixin):

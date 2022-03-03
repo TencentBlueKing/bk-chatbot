@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from module_api.views import (
+from src.manager.module_api.views import (
     admin_views,
     bkmonitor_views,
     cmdb_views,

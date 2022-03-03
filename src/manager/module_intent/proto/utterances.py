@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from rest_framework import serializers
 from rest_framework.fields import JSONField
 
-from module_intent.models import Utterances
+from src.manager.module_intent.models import Utterances
 
 
 class UtterancesSerializer(serializers.ModelSerializer):

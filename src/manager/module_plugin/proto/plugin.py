@@ -18,8 +18,8 @@ from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
 from common.drf.serializers import BaseRspSerializer
-from module_plugin.models import Plugin
-from module_plugin.proto import plugin_tag
+from src.manager.module_plugin.models import Plugin
+from src.manager.module_plugin.proto import plugin_tag
 
 
 # 插件action

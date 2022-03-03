@@ -17,12 +17,12 @@ from blueapps.account.decorators import login_exempt
 
 from common.generic import APIModelViewSet, ValidationMixin
 from common.pagination import ResultsSetPagination
-from module_biz.constants import CHAT_BOT_USE_SPACE
-from module_biz.control.permission import BizPermission
-from module_biz.control.throttle import BizThrottle
-from module_biz.handler import GroupBindHandler
-from module_biz.models import ChatBindBusiness
-from module_biz.serializers import GroupBindBizSerializer
+from src.manager.module_biz.constants import CHAT_BOT_USE_SPACE
+from src.manager.module_biz.control.permission import BizPermission
+from src.manager.module_biz.control.throttle import BizThrottle
+from src.manager.module_biz.handler import GroupBindHandler
+from src.manager.module_biz.models import ChatBindBusiness
+from src.manager.module_biz.serializers import GroupBindBizSerializer
 
 
 class ChatBindViewSet(APIModelViewSet, ValidationMixin):

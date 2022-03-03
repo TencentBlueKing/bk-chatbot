@@ -22,8 +22,8 @@ from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
 from common.drf.field import TimeStampSerializer
-from module_timer.models import TimerModel
-from module_timer.proto import timer_tag
+from src.manager.module_timer.models import TimerModel
+from src.manager.module_timer.proto import timer_tag
 
 
 class TimerSerializer(serializers.ModelSerializer):

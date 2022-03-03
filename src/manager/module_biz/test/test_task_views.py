@@ -108,7 +108,7 @@ def fake_devops_pipelines_start_info(faker) -> dict:
 @pytest.mark.view
 @pytest.mark.django_db
 class TestTaskViewSet:
-    @patch("handler.api.devops.DevOps.app_project_list")
+    @patch("src.manager.handler.api.devops.DevOps.app_project_list")
     def test_describe_devops_projects(self, app_project_list, fake_biz_id, client, fake_devops_projects):
         """
         项目数量
@@ -120,7 +120,7 @@ class TestTaskViewSet:
         assert len(response.json().get("data")) == len(fake_devops_projects.get("data"))
         assert app_project_list.called
 
-    @patch("handler.api.devops.DevOps.app_pipeline_list")
+    @patch("src.manager.handler.api.devops.DevOps.app_pipeline_list")
     def test_describe_devops_pipelines(self, app_pipeline_list, client, fake_devops_project_id, fake_devops_pipelines):
         """
         流水线数量
@@ -132,7 +132,7 @@ class TestTaskViewSet:
         assert len(response.json().get("data")) == len(fake_devops_pipelines.get("data"))
         assert app_pipeline_list.called
 
-    @patch("handler.api.devops.DevOps.app_build_start_info")
+    @patch("src.manager.handler.api.devops.DevOps.app_build_start_info")
     def test_describe_devops_pipelines_params(
         self, app_build_start_info, faker, client, fake_devops_project_id, fake_devops_pipelines_start_info
     ):

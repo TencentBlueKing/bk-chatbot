@@ -26,13 +26,13 @@ from common.drf.view_set import BaseGetViewSet
 from common.perm.permission import check_permission
 from common.redis import RedisClient
 from common.validation import validation
-from handler.api.bk_job import JOB
-from module_intent.constants import ONE_WEEK_SECONDS
-from module_intent.handler.task_info import TaskDetail
-from module_intent.handler.task_operation import Operation
-from module_intent.handler.task_tree import Pipeline
-from module_intent.models import ExecutionLog
-from module_intent.proto.log import (
+from src.manager.handler.api.bk_job import JOB
+from src.manager.module_intent.constants import ONE_WEEK_SECONDS
+from src.manager.module_intent.handler.task_info import TaskDetail
+from src.manager.module_intent.handler.task_operation import Operation
+from src.manager.module_intent.handler.task_tree import Pipeline
+from src.manager.module_intent.models import ExecutionLog
+from src.manager.module_intent.proto.log import (
     ExecutionLogSerializer,
     ReqPostBotCreateLog,
     ReqPostTaskOperate,
@@ -45,7 +45,7 @@ from module_intent.proto.log import (
     log_describe_records_docs,
     log_list_docs,
 )
-from module_intent.tasks.log_timer import task_status_timer
+from src.manager.module_intent.tasks.log_timer import task_status_timer
 
 
 @method_decorator(name="list", decorator=log_list_docs)

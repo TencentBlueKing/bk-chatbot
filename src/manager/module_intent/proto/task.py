@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from rest_framework import serializers
 
 from common.constants import TASK_PLATFORM_CHOICES
-from module_intent.models import Task
+from src.manager.module_intent.models import Task
 
 
 class TaskSerializer(serializers.ModelSerializer):

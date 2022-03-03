@@ -20,7 +20,7 @@ import requests
 from blueapps.utils.logger import logger_celery as logger
 from common.constants import MINI_PROGRAM_APPID, YOUTI_TEMPLATE_ID
 from common.design.strategy import Strategy
-from handler.in_api.youti import Mga
+from src.manager.handler.in_api.youti import Mga
 
 
 class Message(Strategy):

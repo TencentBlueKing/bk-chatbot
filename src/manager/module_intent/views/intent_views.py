@@ -20,9 +20,9 @@ from rest_framework.response import Response
 
 from common.control.throttle import ChatBotThrottle
 from common.drf.view_set import BaseManageViewSet
-from module_intent.control.permission import IntentPermission
-from module_intent.models import Intent, Task, Utterances
-from module_intent.proto.intent import (
+from src.manager.module_intent.control.permission import IntentPermission
+from src.manager.module_intent.models import Intent, Task, Utterances
+from src.manager.module_intent.proto.intent import (
     IntentSerializer,
     ReqGetIntentSerializer,
     intent_count_docs,

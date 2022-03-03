@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 """
 from rest_framework import serializers
 
-from module_faq.models import FAQ
+from src.manager.module_faq.models import FAQ
 
 
 class FaqSerializer(serializers.HyperlinkedModelSerializer):

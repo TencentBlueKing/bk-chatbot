@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 """
 from django.contrib import admin
 
-from module_biz.models import ChatBindBusiness
+from src.manager.module_biz.models import ChatBindBusiness
 
 
 class ChatBindBusinessAdmin(admin.ModelAdmin):

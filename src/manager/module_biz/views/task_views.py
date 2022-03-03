@@ -20,12 +20,12 @@ from rest_framework.response import Response
 from common.generic import BaseViewSet
 from common.http.request import get_request_user
 from common.validation import validation
-from handler.api.devops import DevOps
-from handler.api.bk_job import JOB
-from handler.api.bk_sops import SOPS
+from src.manager.handler.api.devops import DevOps
+from src.manager.handler.api.bk_job import JOB
+from src.manager.handler.api.bk_sops import SOPS
 
-from module_biz.control.throttle import BizThrottle
-from module_biz.proto import (
+from src.manager.module_biz.control.throttle import BizThrottle
+from src.manager.module_biz.proto import (
     DescribeDevopsPipelinesStartInfo,
     DescribeJob,
     DescribeSops,

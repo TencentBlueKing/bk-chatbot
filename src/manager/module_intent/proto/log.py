@@ -19,8 +19,8 @@ from rest_framework.serializers import Serializer
 
 from common.constants import PlatformType
 from common.drf.serializers import BaseRspSerializer
-from module_intent.handler import TaskType
-from module_intent.models import ExecutionLog
+from src.manager.module_intent.handler import TaskType
+from src.manager.module_intent.models import ExecutionLog
 
 
 class ExecutionLogSerializer(serializers.ModelSerializer):

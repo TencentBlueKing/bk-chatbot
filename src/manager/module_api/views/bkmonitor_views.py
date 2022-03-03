@@ -14,16 +14,16 @@ specific language governing permissions and limitations under the License.
 """
 import os
 
+from blueapps.account.decorators import login_exempt
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from blueapps.account.decorators import login_exempt
 from common.control.throttle import ChatBotThrottle
 from common.generic import BaseViewSet
 from common.perm.permission import check_permission
-from handler.api.bk_monitor import BkMonitor
-from module_api.serializers import BkMonitorSerializer
+from src.manager.handler.api.bk_monitor import BkMonitor
+from src.manager.module_api.serializers import BkMonitorSerializer
 
 BACKEND_USERNAME = os.getenv("PLUGIN_USER_NAME", "admin")
 

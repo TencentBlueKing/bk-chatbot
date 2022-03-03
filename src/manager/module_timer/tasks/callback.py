@@ -17,8 +17,8 @@ specific language governing permissions and limitations under the License.
 from blueapps.utils.logger import logger_celery as logger
 from celery.task import task
 
-from handler.api.bk_chat import BkChat
-from module_timer.models import TimerModel
+from src.manager.handler.api.bk_chat import BkChat
+from src.manager.module_timer.models import TimerModel
 
 
 @task()
