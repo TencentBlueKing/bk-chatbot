@@ -26,20 +26,20 @@ async def _(session: CommandSession):
     except KeyError:
         bk_biz_id = None
 
-    msg = await DevOpsTask(session, bk_biz_id).render_devops_project_list()
-    msg and await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await DevOpsTask(session, bk_biz_id).render_devops_project_list()
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('bk_devops_project_select')
 async def _(session: CommandSession):
-    msg = await DevOpsTask(session).render_devops_pipeline_list()
-    msg and await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await DevOpsTask(session).render_devops_pipeline_list()
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('bk_devops_pipeline_select')
 async def _(session: CommandSession):
-    msg = await DevOpsTask(session).render_devops_pipeline_detail()
-    msg and await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await DevOpsTask(session).render_devops_pipeline_detail()
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('bk_devops_pipeline_update')
@@ -55,9 +55,8 @@ async def _(session: CommandSession):
     for i, item in enumerate(params):
         session.state['bk_devops_pipeline']['start_infos'][i]['value'] = item
 
-    msg = await DevOpsTask(session).render_devops_pipeline_detail()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await DevOpsTask(session).render_devops_pipeline_detail()
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('bk_devops_pipeline_execute')
@@ -67,14 +66,14 @@ async def _(session: CommandSession):
 
     flow = DevOpsTask(session)
     result = await flow.execute_task(bk_devops_pipeline)
-    msg = flow.render_devops_pipeline_execute_msg(result, bk_devops_pipeline)
-    await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = flow.render_devops_pipeline_execute_msg(result, bk_devops_pipeline)
+    await session.send(**msg_template)
 
 
 @on_command('bk_devops_pipeline_cancel')
 async def _(session: CommandSession):
     _, bk_devops_pipeline_name = session.ctx['event_key'].split('|')
-    content = f'''>**CI TIP** 
-        ><font color=\"warning\">您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...</font> 
-        '''
-    await session.send('', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_task_cancel_msg', 'CI',
+                                                 f'您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...')
+    await session.send(**msg_template)
+

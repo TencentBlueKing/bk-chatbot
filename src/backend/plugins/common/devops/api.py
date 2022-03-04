@@ -53,26 +53,9 @@ class DevOpsTask(GenericTask):
             return None
 
         bk_devops_projects = await self._get_devops_project_list()
-        template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': 'CI'
-            },
-            'main_title': {
-                'title': '欢迎使用蓝盾平台',
-                'desc': '请选择蓝盾项目'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_devops_project_id',
-                'option_list': bk_devops_projects
-            },
-            'submit_button': {
-                'text': '确认',
-                'key': 'bk_devops_project_select'
-            }
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_task_list_msg', 'CI', '欢迎使用蓝盾平台', '请选择蓝盾项目',
+                                                   'bk_devops_project_id', bk_devops_projects,
+                                                   'bk_devops_project_select')
 
     async def render_devops_pipeline_list(self):
         try:
@@ -81,26 +64,9 @@ class DevOpsTask(GenericTask):
             return None
 
         bk_devops_pipelines = await self._get_devops_pipeline_list(bk_devops_project_id)
-        template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': 'CI'
-            },
-            'main_title': {
-                'title': '欢迎使用蓝盾平台',
-                'desc': f'请选择「{bk_devops_project_id}」下流水线'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_devops_pipeline_id',
-                'option_list': bk_devops_pipelines
-            },
-            'submit_button': {
-                'text': '确认',
-                'key': 'bk_devops_pipeline_select'
-            }
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_task_list_msg', 'CI', '欢迎使用蓝盾平台',
+                                                   f'请选择「{bk_devops_project_id}」下流水线', 'bk_devops_pipeline_id',
+                                                   bk_devops_pipelines, 'bk_devops_pipeline_select')
 
     async def render_devops_pipeline_detail(self):
         if self._session.is_first_run:
@@ -126,41 +92,10 @@ class DevOpsTask(GenericTask):
             'start_infos': start_infos
         }
 
-        template_card = {
-            'card_type': 'button_interaction',
-            'source': {
-                'desc': 'CI'
-            },
-            'main_title': {
-                'title': f'蓝盾流水线_{bk_devops_pipeline_name}'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'sub_title_text': '参数确认',
-            'horizontal_content_list': start_infos,
-            'button_list': [
-                {
-                    "text": "执行",
-                    "style": 1,
-                    "key": f"bk_devops_pipeline_execute|{json.dumps(info)}"
-                },
-                {
-                    "text": "修改",
-                    "style": 2,
-                    "key": f"bk_devops_pipeline_update|{json.dumps(info)}"
-                },
-                {
-                    "text": "取消",
-                    "style": 3,
-                    "key": f"bk_devops_pipeline_cancel|{bk_devops_pipeline_name}"
-                },
-                {
-                    "text": "快捷键",
-                    "style": 4,
-                    "key": f"bk_shortcut_create|DevOps|{json.dumps(info)}"
-                }
-            ]
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_task_select_msg', 'DevOps',
+                                                   f'蓝盾流水线_{bk_devops_pipeline_name}', start_infos,
+                                                   'bk_devops_pipeline_execute', 'bk_devops_pipeline_update',
+                                                   'bk_shortcut_create', info, bk_devops_pipeline_name)
 
     async def execute_task(self, bk_devops_pipeline: Dict):
         bk_devops_project_id = bk_devops_pipeline['bk_devops_project_id']
