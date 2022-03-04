@@ -34,52 +34,7 @@ class Flow:
     async def render_welcome_msg(self):
         bk_biz_id = RedisClient(env="prod").hash_get('chat_single_biz', self.user_id)
         data = await self._search_business()
-        template_card = {
-            'card_type': 'button_interaction',
-            'source': {
-                'desc': 'BKCHAT'
-            },
-            'main_title': {
-                'title': '欢迎使用蓝鲸信息流'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'button_selection': {
-                'question_key': 'bk_biz_id',
-                'title': '业务',
-                'option_list': data[:10],
-                'selected_id': bk_biz_id if bk_biz_id else ''
-            },
-            'action_menu': {
-                'desc': '更多操作',
-                'action_list': [
-                    {'text': '查找任务', 'key': 'bk_app_task_filter'},
-                    {'text': '绑定业务', 'key': 'bk_cc_biz_bind'}
-                ]
-            },
-            'button_list': [
-                {
-                    "text": "CI",
-                    "style": 1,
-                    "key": "bk_devops"
-                },
-                {
-                    "text": "JOB",
-                    "style": 1,
-                    "key": "bk_job"
-                },
-                {
-                    "text": "SOPS",
-                    "style": 1,
-                    "key": "bk_sops"
-                },
-                {
-                    "text": "ITSM",
-                    "style": 1,
-                    "key": "bk_itsm|0"
-                }
-            ]
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_welcome_msg', data, bk_biz_id)
 
     async def render_biz_msg(self):
         data = await self._search_business()

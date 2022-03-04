@@ -33,8 +33,8 @@ async def _(session: CommandSession):
     if 'event_key' in session.ctx:
         return
 
-    msg = await Flow(session).render_welcome_msg()
-    await session.send(msgtype='template_card', template_card=msg)
+    msg_template = await Flow(session).render_welcome_msg()
+    await session.send(**msg_template)
 
 
 @on_command('bk_cc_biz_bind', aliases=DEFAULT_BIND_BIZ_ALIAS)

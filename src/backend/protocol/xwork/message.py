@@ -14,7 +14,8 @@ specific language governing permissions and limitations under the License.
 """
 
 import re
-from typing import Iterable, Tuple
+import time
+from typing import Iterable, Tuple, Union, List, Dict
 
 from opsbot.adapter import Message as BaseMessage, MessageSegment as BaseMessageSegment
 from opsbot.stdlib import escape, unescape
@@ -130,3 +131,88 @@ class Message(BaseMessage):
                     filter(lambda x: x, (x.lstrip() for x in extra.split(',')))
                 )}
                 yield MessageSegment(type_=function_name, data=data)
+
+
+class MessageTemplate:
+    @classmethod
+    def render_welcome_msg(cls, data: List, bk_biz_id: Union[int, str]) -> Dict:
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+            'card_type': 'button_interaction',
+            'source': {
+                'desc': 'BKCHAT'
+            },
+            'main_title': {
+                'title': '欢迎使用蓝鲸信息流'
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'button_selection': {
+                'question_key': 'bk_biz_id',
+                'title': '业务',
+                'option_list': data[:10],
+                'selected_id': bk_biz_id if bk_biz_id else ''
+            },
+            'action_menu': {
+                'desc': '更多操作',
+                'action_list': [
+                    {'text': '查找任务', 'key': 'bk_app_task_filter'},
+                    {'text': '绑定业务', 'key': 'bk_cc_biz_bind'}
+                ]
+            },
+            'button_list': [
+                {
+                    "text": "CI",
+                    "style": 1,
+                    "key": "bk_devops"
+                },
+                {
+                    "text": "JOB",
+                    "style": 1,
+                    "key": "bk_job"
+                },
+                {
+                    "text": "SOPS",
+                    "style": 1,
+                    "key": "bk_sops"
+                },
+                {
+                    "text": "ITSM",
+                    "style": 1,
+                    "key": "bk_itsm|0"
+                }
+            ]
+        }
+        }
+
+    @classmethod
+    def render_biz_list_msg(cls, data: List) -> Dict:
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'vote_interaction',
+                'source': {
+                    'desc': 'CC'
+                },
+                'main_title': {
+                    'title': '欢迎使用配置平台',
+                    'desc': '请选择业务'
+                },
+                'task_id': str(int(time.time() * 100000)),
+                'checkbox': {
+                    'question_key': 'bk_biz_id',
+                    'option_list': data
+                },
+                'submit_button': {
+                    'text': '提交',
+                    'key': 'bk_cc_biz_select'
+                }
+            }
+        }
+
+    @classmethod
+    def render_stat_execution_msg(cls, content: str) -> Dict:
+        return {
+            'msgtype': 'markdown',
+            'markdown': {'content': content}
+        }

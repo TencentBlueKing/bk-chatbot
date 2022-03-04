@@ -22,7 +22,7 @@ from aiocache import cached
 
 from . import config as XworkConfig
 from .proxy import Proxy as XworkProxy
-from .message import Message, MessageSegment
+from .message import Message, MessageSegment, MessageTemplate
 from opsbot.adapter import Bot as BaseBot
 from opsbot.self_typing import Context_T
 from opsbot.log import logger
@@ -141,6 +141,9 @@ class Bot(BaseBot, XworkProxy):
 
     async def call_api(self, action: str, **params):
         pass
+
+    def send_template_msg(self, action, *args) -> Dict:
+        return getattr(MessageTemplate, action)(*args)
 
 
 def log_message(ctx: Context_T) -> None:
