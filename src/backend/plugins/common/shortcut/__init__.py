@@ -41,21 +41,22 @@ async def create_bk_shortcut(session: CommandSession):
     sc_handler.save(platform, info)
     content = f'''>**{platform} TIP**
                 >快捷键「{shortcut_name}」保存成功'''
-    await session.send('', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    await session.send(**msg_template)
 
 
 @on_command('bk_shortcut_execute')
 async def execute_bk_shortcut(session: CommandSession):
     shortcut = session.state['info']
     sc_handler = ShortcutHandler(session)
-    msg = await sc_handler.execute_task(shortcut)
-    await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await sc_handler.execute_task(shortcut)
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('bk_shortcut_list', aliases=('查看快捷键', '快捷键'))
 async def list_bk_shortcut(session: CommandSession):
-    msg = ShortcutHandler(session).render_shortcut_list()
-    await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = ShortcutHandler(session).render_shortcut_list()
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('bk_shortcut_delete')
@@ -64,7 +65,8 @@ async def delete_bk_shortcut(session: CommandSession):
     msg = sc_handler.delete()
     content = f'''>**快捷键 TIP**
                     >快捷键「{msg}」删除成功'''
-    await session.send('', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    msg_template and await session.send(**msg_template)
 
 
 @on_natural_language

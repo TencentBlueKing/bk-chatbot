@@ -58,7 +58,7 @@ async def _(session: CommandSession):
 
     flow = JobTask(session)
     result = await flow.execute_task(job_plan)
-    msg_template = flow.render_job_plan_execute_msg(result, job_plan)
+    msg_template = flow.render_job_execute_msg(result, job_plan)
     await session.send(**msg_template)
 
 

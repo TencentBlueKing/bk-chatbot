@@ -223,8 +223,8 @@ class MessageTemplate:
         }
 
     @classmethod
-    def render_task_list_msg(cls, platform: str, title: str, desc: str,
-                         question_key: str, data: List, submit_key: str) -> Dict:
+    def render_task_list_msg(cls, platform: str, title: str, desc: str, question_key: str,
+                             data: List, submit_key: str, submit_text: str = '确认') -> Dict:
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -243,7 +243,7 @@ class MessageTemplate:
                     'option_list': data
                 },
                 'submit_button': {
-                    'text': '确认',
+                    'text': submit_text,
                     'key': submit_key
                 }
             }
@@ -317,7 +317,7 @@ class MessageTemplate:
         }
 
     @classmethod
-    def render_task_cancel_msg(cls, platform: str, content: str) -> str:
+    def render_task_cancel_msg(cls, platform: str, content: str) -> Dict:
         return {
             'msgtype': 'markdown',
             'markdown': {
@@ -327,3 +327,11 @@ class MessageTemplate:
             }
         }
 
+    @classmethod
+    def render_markdown_msg(cls, content) -> Dict:
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'content': content
+            }
+        }

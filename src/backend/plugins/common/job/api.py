@@ -99,6 +99,6 @@ class JobTask(GenericTask):
 
         return False
 
-    def render_job_plan_execute_msg(self, result, job_plan: Dict) -> Dict:
+    def render_job_execute_msg(self, result, job_plan: Dict) -> Dict:
         return self.render_execute_msg('JOB', result, job_plan['job_plan_name'],
                                        job_plan['global_var_list'], BK_JOB_DOMAIN)

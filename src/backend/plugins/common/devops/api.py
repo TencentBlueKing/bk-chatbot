@@ -120,6 +120,6 @@ class DevOpsTask(GenericTask):
 
         return False
 
-    def render_devops_pipeline_execute_msg(self, result: bool, bk_devops_pipeline: Dict):
+    def render_devops_execute_msg(self, result: bool, bk_devops_pipeline: Dict):
         return self.render_execute_msg('CI', result, bk_devops_pipeline['bk_devops_pipeline_name'],
                                        bk_devops_pipeline['start_infos'], BK_DEVOPS_DOMAIN)

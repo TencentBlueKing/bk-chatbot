@@ -45,7 +45,7 @@ async def execute_sops_template(session: CommandSession):
 
     flow = SopsTask(session)
     result = await flow.execute_task(bk_sops_template)
-    msg_template = flow.render_sops_template_execute_msg(result, bk_sops_template)
+    msg_template = flow.render_sops_execute_msg(result, bk_sops_template)
     await session.send(**msg_template)
 
 

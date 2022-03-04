@@ -56,31 +56,13 @@ class ShortcutHandler(GenericTask):
     async def execute_task(self, shortcut: BKShortcutTask):
         flow = SHORTCUT_PROTO[shortcut.bk_platform](self._session)
         result = flow.execute_task(shortcut.params)
-        return getattr(flow, f'render_{shortcut.bk_platform.lower()}_plan_execute_msg')(result, shortcut.params)
+        return getattr(flow, f'render_{shortcut.bk_platform.lower()}_execute_msg')(result, shortcut.params)
 
     def render_shortcut_list(self):
         shortcuts = self.find_all()
-        template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': '快捷键',
-                'desc_color': 1
-            },
-            'main_title': {
-                'title': '欢迎使用快捷键服务',
-                'desc': '选择删除'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_shortcut_id',
-                'option_list': shortcuts
-            },
-            'submit_button': {
-                'text': '删除',
-                'key': 'bk_shortcut_delete'
-            }
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_task_list_msg', '快捷键', '欢迎使用快捷键服务', '选择删除',
+                                                   'bk_shortcut_id', shortcuts, 'bk_shortcut_delete',
+                                                   submit_text='删除')
 
     def delete(self):
         try:

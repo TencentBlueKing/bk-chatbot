@@ -66,7 +66,7 @@ async def _(session: CommandSession):
 
     flow = DevOpsTask(session)
     result = await flow.execute_task(bk_devops_pipeline)
-    msg_template = flow.render_devops_pipeline_execute_msg(result, bk_devops_pipeline)
+    msg_template = flow.render_devops_execute_msg(result, bk_devops_pipeline)
     await session.send(**msg_template)
 
 
@@ -76,4 +76,3 @@ async def _(session: CommandSession):
     msg_template = session.bot.send_template_msg('render_task_cancel_msg', 'CI',
                                                  f'您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...')
     await session.send(**msg_template)
-
