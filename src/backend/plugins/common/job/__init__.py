@@ -65,10 +65,12 @@ async def _(session: CommandSession):
 @on_command('bk_job_plan_update')
 async def _(session: CommandSession):
     if 'event_key' in session.ctx:
-        _, job_plan_id, job_plan_name, global_var_list = session.ctx['event_key'].split('|')
-        session.state['job_plan_id'] = job_plan_id
-        session.state['job_plan_name'] = job_plan_name
-        session.state['global_var_list'] = json.loads(global_var_list)
+        _, job_plan = session.ctx['event_key'].split('|')
+        try:
+            job_plan = json.loads(job_plan)
+        except json.JSONDecodeError:
+            return
+        session.state.update(job_plan)
 
     content = f'''>**JOB TIP**
     >请顺序输入参数，**换行分隔**'''
