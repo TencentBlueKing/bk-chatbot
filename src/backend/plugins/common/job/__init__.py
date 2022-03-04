@@ -43,9 +43,9 @@ async def search_job_plan(session: CommandSession):
 
 @on_command('bk_job_plan_select')
 async def select_bk_job_plan(session: CommandSession):
-    msg = await JobTask(session).render_job_plan_detail()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await JobTask(session).render_job_plan_detail()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_execute')
@@ -58,8 +58,8 @@ async def _(session: CommandSession):
 
     flow = JobTask(session)
     result = await flow.execute_task(job_plan)
-    msg = flow.render_job_plan_execute_msg(result, job_plan)
-    await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = flow.render_job_plan_execute_msg(result, job_plan)
+    await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_update')
@@ -77,15 +77,14 @@ async def _(session: CommandSession):
     for i, item in enumerate(params):
         session.state['global_var_list'][i]['value'] = item
 
-    msg = await JobTask(session).render_job_plan_detail()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await JobTask(session).render_job_plan_detail()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_cancel')
 async def _(session: CommandSession):
     _, bk_job_plan_name = session.ctx['event_key'].split('|')
-    content = f'''>**JOB TIP** 
-    ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
-    '''
-    await session.send('', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_task_cancel_msg', 'JOB',
+                                                 f'您的JOB执行方案「{bk_job_plan_name}」已取消...')
+    await session.send(**msg_template)

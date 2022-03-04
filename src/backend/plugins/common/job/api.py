@@ -13,8 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
-import time
 from typing import Union, List, Dict
 
 from opsbot import CommandSession
@@ -47,27 +45,8 @@ class JobTask(GenericTask):
 
         bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                      length=100, **params)
-        # template_card = {
-        #     'card_type': 'vote_interaction',
-        #     'source': {
-        #         'desc': 'JOB',
-        #         'desc_color': 1
-        #     },
-        #     'main_title': {
-        #         'title': '欢迎使用JOB平台',
-        #         'desc': '请选择JOB执行方案'
-        #     },
-        #     'task_id': str(int(time.time() * 100000)),
-        #     'checkbox': {
-        #         'question_key': 'bk_job_plan_id',
-        #         'option_list': bk_job_plans
-        #     },
-        #     'submit_button': {
-        #         'text': '确认',
-        #         'key': 'bk_job_plan_select'
-        #     }
-        # }
-        return self._session.bot.send_template_msg('render_task_list', 'JOB', '欢迎使用JOB平台', '请选择JOB执行方案',
+
+        return self._session.bot.send_template_msg('render_task_list_msg', 'JOB', '欢迎使用JOB平台', '请选择JOB执行方案',
                                                    'bk_job_plan_id', bk_job_plans, 'bk_job_plan_select')
 
     async def render_job_plan_detail(self):
@@ -88,42 +67,9 @@ class JobTask(GenericTask):
             global_var_list = self._session.state['global_var_list']
 
         info = {'job_plan_id': job_plan_id, 'job_plan_name': job_plan_name, 'global_var_list': global_var_list}
-        template_card = {
-            'card_type': 'button_interaction',
-            'source': {
-                'desc': 'JOB',
-                'desc_color': 1
-            },
-            'main_title': {
-                'title': f'JOB执行方案_{job_plan_name}'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'sub_title_text': '参数确认',
-            'horizontal_content_list': global_var_list,
-            'button_list': [
-                {
-                    "text": "执行",
-                    "style": 1,
-                    "key": f"bk_job_plan_execute|{json.dumps(info)}"
-                },
-                {
-                    "text": "修改",
-                    "style": 2,
-                    "key": f"bk_job_plan_update|{json.dumps(info)}"
-                },
-                {
-                    "text": "取消",
-                    "style": 3,
-                    "key": f"bk_job_plan_cancel|{job_plan_name}"
-                },
-                {
-                    "text": "快捷键",
-                    "style": 4,
-                    "key": f"bk_shortcut_create|JOB|{json.dumps(info)}"
-                }
-            ]
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_task_select_msg', 'JOB', f'JOB执行方案_{job_plan_name}',
+                                                   global_var_list, 'bk_job_plan_execute', 'bk_job_plan_update',
+                                                   'bk_job_plan_cancel', info, job_plan_name)
 
     async def execute_task(self, job_plan: Dict) -> bool:
         job_plan_id = job_plan['job_plan_id']

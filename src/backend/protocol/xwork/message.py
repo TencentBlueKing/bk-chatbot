@@ -14,6 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import re
+import json
 import time
 from typing import Iterable, Tuple, Union, List, Dict
 
@@ -222,8 +223,8 @@ class MessageTemplate:
         }
 
     @classmethod
-    def render_task_list(cls, platform: str, title: str, desc: str,
-                         question_key: str, data: List, submit_key: str):
+    def render_task_list_msg(cls, platform: str, title: str, desc: str,
+                         question_key: str, data: List, submit_key: str) -> Dict:
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -247,3 +248,77 @@ class MessageTemplate:
                 }
             }
         }
+
+    @classmethod
+    def render_task_select_msg(cls, platform: str, title: str, params: List,
+                               execute_key: str, update_key: str, cancel_key: str,
+                               data: Dict, task_name: str) -> Dict:
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'button_interaction',
+                'source': {
+                    'desc': platform,
+                    'desc_color': 1
+                },
+                'main_title': {
+                    'title': title
+                },
+                'task_id': str(int(time.time() * 100000)),
+                'sub_title_text': '参数确认',
+                'horizontal_content_list': params,
+                'button_list': [
+                    {
+                        "text": "执行",
+                        "style": 1,
+                        "key": f"{execute_key}|{json.dumps(data)}"
+                    },
+                    {
+                        "text": "修改",
+                        "style": 2,
+                        "key": f"{update_key}|{json.dumps(data)}"
+                    },
+                    {
+                        "text": "取消",
+                        "style": 3,
+                        "key": f"{cancel_key}|{task_name}"
+                    },
+                    {
+                        "text": "快捷键",
+                        "style": 4,
+                        "key": f"bk_shortcut_create|{platform}|{json.dumps(data)}"
+                    }
+                ]
+            }
+        }
+
+    @classmethod
+    def render_task_execute_msg(cls, platform: str, task_name: str, task_result: bool,
+                                params: List, task_domain: str) -> Dict:
+        return {
+            'card_type': 'text_notice',
+            'source': {
+                'desc': platform
+            },
+            'main_title': {
+                'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
+            },
+            'horizontal_content_list': params,
+            'task_id': str(int(time.time() * 100000)),
+            'card_action': {
+                'type': 1,
+                'url': task_domain
+            }
+        }
+
+    @classmethod
+    def render_task_cancel_msg(cls, platform: str, content: str) -> str:
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'content': f'''>**{platform} TIP** 
+                ><font color=\"warning\">{content}</font> 
+                '''
+            }
+        }
+
