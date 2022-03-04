@@ -95,7 +95,7 @@ class DevOpsTask(GenericTask):
         return self._session.bot.send_template_msg('render_task_select_msg', 'DevOps',
                                                    f'蓝盾流水线_{bk_devops_pipeline_name}', start_infos,
                                                    'bk_devops_pipeline_execute', 'bk_devops_pipeline_update',
-                                                   'bk_shortcut_create', info, bk_devops_pipeline_name)
+                                                   'bk_devops_pipeline_cancel', info, bk_devops_pipeline_name)
 
     async def execute_task(self, bk_devops_pipeline: Dict):
         bk_devops_project_id = bk_devops_pipeline['bk_devops_project_id']

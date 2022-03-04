@@ -158,7 +158,8 @@ class MessageTemplate:
                 'desc': '更多操作',
                 'action_list': [
                     {'text': '查找任务', 'key': 'bk_app_task_filter'},
-                    {'text': '绑定业务', 'key': 'bk_cc_biz_bind'}
+                    {'text': '绑定业务', 'key': 'bk_cc_biz_bind'},
+                    {'text': '快捷键', 'key': 'bk_shortcut_list'}
                 ]
             },
             'button_list': [
