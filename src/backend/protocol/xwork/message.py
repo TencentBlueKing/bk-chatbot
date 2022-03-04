@@ -296,18 +296,21 @@ class MessageTemplate:
     def render_task_execute_msg(cls, platform: str, task_name: str, task_result: bool,
                                 params: List, task_domain: str) -> Dict:
         return {
-            'card_type': 'text_notice',
-            'source': {
-                'desc': platform
-            },
-            'main_title': {
-                'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
-            },
-            'horizontal_content_list': params,
-            'task_id': str(int(time.time() * 100000)),
-            'card_action': {
-                'type': 1,
-                'url': task_domain
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'text_notice',
+                'source': {
+                    'desc': platform
+                },
+                'main_title': {
+                    'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
+                },
+                'horizontal_content_list': params,
+                'task_id': str(int(time.time() * 100000)),
+                'card_action': {
+                    'type': 1,
+                    'url': task_domain
+                }
             }
         }
 
