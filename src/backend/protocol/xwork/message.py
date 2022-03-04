@@ -211,8 +211,12 @@ class MessageTemplate:
         }
 
     @classmethod
-    def render_stat_execution_msg(cls, content: str) -> Dict:
+    def render_stat_execution_msg(cls, count: int) -> Dict:
         return {
             'msgtype': 'markdown',
-            'markdown': {'content': content}
+            'markdown': {
+                'content': f'''>**执行统计** 
+                ><font color=\"warning\">您当前执行数「{count}」</font> 
+                '''
+            }
         }

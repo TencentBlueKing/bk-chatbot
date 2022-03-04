@@ -39,9 +39,9 @@ async def _(session: CommandSession):
 
 @on_command('bk_cc_biz_bind', aliases=DEFAULT_BIND_BIZ_ALIAS)
 async def _(session: CommandSession):
-    msg = await Flow(session).render_biz_msg()
-    if msg:
-        await session.send(msgtype='template_card', template_card=msg)
+    msg_template = await Flow(session).render_biz_msg()
+    if msg_template:
+        await session.send(**msg_template)
     else:
         logger.info('no biz')
 
@@ -54,16 +54,14 @@ async def _(session: CommandSession):
         logger.info('bind biz error')
         return
 
-    msg = await flow.render_welcome_msg()
-    await session.send(msgtype='template_card', template_card=msg)
+    msg_template = await flow.render_welcome_msg()
+    await session.send(**msg_template)
 
 
 @on_command('stat_execution', aliases=('执行统计', ))
 async def _(session: CommandSession):
     stat = Stat()
     count = stat.stat_execution()
-    content = f'''>**执行统计** 
-        ><font color=\"warning\">您当前执行数「{count}」</font> 
-        '''
-    await session.send(msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_stat_execution_msg', count)
+    await session.send(**msg_template)
     del stat

@@ -41,26 +41,7 @@ class Flow:
         if not data:
             return None
 
-        template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': 'CC'
-            },
-            'main_title': {
-                'title': '欢迎使用配置平台',
-                'desc': '请选择业务'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_biz_id',
-                'option_list': data
-            },
-            'submit_button': {
-                'text': '提交',
-                'key': 'bk_cc_biz_select'
-            }
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_biz_list_msg', data)
 
     def bind_cc_biz(self):
         try:
