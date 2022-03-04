@@ -26,9 +26,9 @@ async def list_job_plan(session: CommandSession):
     except KeyError:
         bk_biz_id = None
 
-    msg = await JobTask(session, bk_biz_id).render_job_plan_list()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await JobTask(session, bk_biz_id).render_job_plan_list()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_sort')

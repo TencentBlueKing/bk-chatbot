@@ -47,27 +47,28 @@ class JobTask(GenericTask):
 
         bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                      length=100, **params)
-        template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': 'JOB',
-                'desc_color': 1
-            },
-            'main_title': {
-                'title': '欢迎使用JOB平台',
-                'desc': '请选择JOB执行方案'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_job_plan_id',
-                'option_list': bk_job_plans
-            },
-            'submit_button': {
-                'text': '确认',
-                'key': 'bk_job_plan_select'
-            }
-        }
-        return template_card
+        # template_card = {
+        #     'card_type': 'vote_interaction',
+        #     'source': {
+        #         'desc': 'JOB',
+        #         'desc_color': 1
+        #     },
+        #     'main_title': {
+        #         'title': '欢迎使用JOB平台',
+        #         'desc': '请选择JOB执行方案'
+        #     },
+        #     'task_id': str(int(time.time() * 100000)),
+        #     'checkbox': {
+        #         'question_key': 'bk_job_plan_id',
+        #         'option_list': bk_job_plans
+        #     },
+        #     'submit_button': {
+        #         'text': '确认',
+        #         'key': 'bk_job_plan_select'
+        #     }
+        # }
+        return self._session.bot.send_template_msg('render_task_list', 'JOB', '欢迎使用JOB平台', '请选择JOB执行方案',
+                                                   'bk_job_plan_id', bk_job_plans, 'bk_job_plan_select')
 
     async def render_job_plan_detail(self):
         if self._session.is_first_run:

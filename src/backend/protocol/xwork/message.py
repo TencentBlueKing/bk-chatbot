@@ -220,3 +220,30 @@ class MessageTemplate:
                 '''
             }
         }
+
+    @classmethod
+    def render_task_list(cls, platform: str, title: str, desc: str,
+                         question_key: str, data: List, submit_key: str):
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'vote_interaction',
+                'source': {
+                    'desc': platform,
+                    'desc_color': 1
+                },
+                'main_title': {
+                    'title': title,
+                    'desc': desc
+                },
+                'task_id': str(int(time.time() * 100000)),
+                'checkbox': {
+                    'question_key': question_key,
+                    'option_list': data
+                },
+                'submit_button': {
+                    'text': '确认',
+                    'key': submit_key
+                }
+            }
+        }
