@@ -55,6 +55,8 @@ class PluginBaseSerializer(serializers.ModelSerializer):
     plugin_addr = serializers.CharField(label="插件地址")
     plugin_desc = serializers.CharField(label="插件描叙")
     plugin_tag = serializers.CharField(label="插件标签")
+    plugin_start = serializers.CharField(label="开始action", required=False)
+    plugin_web = serializers.CharField(label="web页面action", required=False)
     plugin_global = serializers.DictField(label="全局变量", required=False)
     actions = serializers.ListField(label="动作", child=PluginAction(), allow_null=True)
     biz_list = serializers.ListField(label="业务选择", child=serializers.CharField())
@@ -66,6 +68,8 @@ class PluginBaseSerializer(serializers.ModelSerializer):
             "plugin_icon",
             "plugin_name",
             "plugin_addr",
+            "plugin_start",
+            "plugin_web",
             "plugin_desc",
             "plugin_tag",
             "plugin_status",
@@ -105,6 +109,8 @@ class PluginSerializer(PluginBaseSerializer):
             "plugin_icon",
             "plugin_name",
             "plugin_addr",
+            "plugin_start",
+            "plugin_web",
             "plugin_desc",
             "plugin_tag",
             "plugin_status",
@@ -165,24 +171,13 @@ class ReqUpdatePluginSerializer(PluginBaseSerializer):
     plugin_addr = serializers.CharField(label="插件地址", required=False)
     plugin_desc = serializers.CharField(label="插件描叙", required=False)
     plugin_tag = serializers.CharField(label="插件标签", required=False)
+    plugin_start = serializers.CharField(label="开始action", required=False)
+    plugin_web = serializers.CharField(label="web页面action", required=False)
     plugin_global = serializers.DictField(label="全局变量", required=False)
     plugin_status = serializers.IntegerField(label="状态", required=False)
-    actions = serializers.ListField(
-        label="动作",
-        child=PluginAction(),
-        allow_null=True,
-        required=False,
-    )
-    biz_list = serializers.ListField(
-        label="业务选择",
-        child=serializers.CharField(),
-        required=False,
-    )
-    developers = serializers.ListField(
-        label="业务选择",
-        child=serializers.CharField(),
-        required=False,
-    )
+    actions = serializers.ListField(label="动作", child=PluginAction(), allow_null=True, required=False)
+    biz_list = serializers.ListField(label="业务选择", child=serializers.CharField(), required=False)
+    developers = serializers.ListField(label="业务选择", child=serializers.CharField(), required=False)
 
     def to_representation(self, value):
         return {}
