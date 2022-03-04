@@ -252,8 +252,8 @@ class MessageTemplate:
     @classmethod
     def render_task_select_msg(cls, platform: str, title: str, params: List,
                                execute_key: str, update_key: str, cancel_key: str,
-                               data: Dict, task_name: str) -> Dict:
-        return {
+                               data: Dict, task_name: str, **kwargs) -> Dict:
+        template = {
             'msgtype': 'template_card',
             'template_card': {
                 'card_type': 'button_interaction',
@@ -291,6 +291,8 @@ class MessageTemplate:
                 ]
             }
         }
+        template['template_card'].update(kwargs)
+        return template
 
     @classmethod
     def render_task_execute_msg(cls, platform: str, task_name: str, task_result: bool,

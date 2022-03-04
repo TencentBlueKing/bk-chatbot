@@ -142,8 +142,8 @@ class Bot(BaseBot, XworkProxy):
     async def call_api(self, action: str, **params):
         pass
 
-    def send_template_msg(self, action, *args) -> Dict:
-        return getattr(MessageTemplate, action)(*args)
+    def send_template_msg(self, action, *args, **kwargs) -> Dict:
+        return getattr(MessageTemplate, action)(*args, **kwargs)
 
 
 def log_message(ctx: Context_T) -> None:

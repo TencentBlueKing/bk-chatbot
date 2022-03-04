@@ -50,26 +50,8 @@ class SopsTask(GenericTask):
             return None
 
         bk_sops_templates = await self._get_sops_template_list(**params)
-        template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': 'SOPS'
-            },
-            'main_title': {
-                'title': '欢迎使用标准运维',
-                'desc': '请选择标准运维模板'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_sops_template_id',
-                'option_list': bk_sops_templates
-            },
-            'submit_button': {
-                'text': '确认',
-                'key': 'bk_sops_template_select'
-            }
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_task_list_msg', 'SOPS', '欢迎使用标准运维', '请选择标准运维模板',
+                                                   'bk_sops_template_id', bk_sops_templates, 'bk_sops_template_select')
 
     async def render_sops_template_info(self):
         if self._session.is_first_run:
@@ -137,14 +119,17 @@ class SopsTask(GenericTask):
             ]
         }
 
-        if bk_sops_template_schemas:
-            template_card['button_selection'] = {
+        extra = {
+            'button_selection': {
                 'question_key': 'bk_sops_template_schema_id',
                 'title': '分组',
                 'option_list': [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
                                 for template in bk_sops_template_schemas[:10]]
             }
-        return template_card
+        } if bk_sops_template_schemas else {}
+        return self._session.bot.send_template_msg('render_task_select_msg', 'SOPS', f'标准运维任务_{template_name}',
+                                                   constants, 'bk_sops_template_execute', 'bk_sops_template_update',
+                                                   'bk_sops_template_cancel', info, template_name, **extra)
 
     async def execute_task(self, bk_sops_template: Dict) -> bool:
         if not bk_sops_template:
