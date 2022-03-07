@@ -50,7 +50,8 @@ async def _(session: CommandSession):
 
     content = f'''>**CI TIP**
         >请顺序输入参数，**换行分隔**'''
-    params, _ = session.get('params', prompt='...', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
         session.state['bk_devops_pipeline']['start_infos'][i]['value'] = item
