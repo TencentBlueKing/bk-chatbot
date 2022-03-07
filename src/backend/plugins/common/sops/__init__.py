@@ -71,6 +71,8 @@ async def update_sops_template(session: CommandSession):
 @on_command('bk_sops_template_cancel')
 async def _(session: CommandSession):
     _, bk_sops_template_name = session.ctx['event_key'].split('|')
-    msg_template = session.bot.send_template_msg('render_task_cancel_msg', 'SOPS',
-                                                 f'您的标准运维任务「{bk_sops_template_name}」已取消...')
+    content = f'''>**SOPS TIP** 
+                  ><font color=\"warning\">您的标准运维任务「{bk_sops_template_name}」已取消...</font> 
+                  '''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)

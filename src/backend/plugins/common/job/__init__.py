@@ -88,6 +88,8 @@ async def _(session: CommandSession):
 @on_command('bk_job_plan_cancel')
 async def _(session: CommandSession):
     _, bk_job_plan_name = session.ctx['event_key'].split('|')
-    msg_template = session.bot.send_template_msg('render_task_cancel_msg', 'JOB',
-                                                 f'您的JOB执行方案「{bk_job_plan_name}」已取消...')
+    content = f'''>**JOB TIP** 
+                ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
+                '''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)

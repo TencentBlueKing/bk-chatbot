@@ -136,7 +136,7 @@ class Message(BaseMessage):
 
 class MessageTemplate:
     @classmethod
-    def render_markdown_msg(cls, content) -> Dict:
+    def render_markdown_msg(cls, content: str) -> Dict:
         return {
             'msgtype': 'markdown',
             'markdown': {
@@ -312,16 +312,5 @@ class MessageTemplate:
                     'type': 1,
                     'url': task_domain
                 }
-            }
-        }
-
-    @classmethod
-    def render_task_cancel_msg(cls, platform: str, content: str) -> Dict:
-        return {
-            'msgtype': 'markdown',
-            'markdown': {
-                'content': f'''>**{platform} TIP** 
-                ><font color=\"warning\">{content}</font> 
-                '''
             }
         }

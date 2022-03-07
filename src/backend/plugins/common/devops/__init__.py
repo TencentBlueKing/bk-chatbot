@@ -74,6 +74,8 @@ async def _(session: CommandSession):
 @on_command('bk_devops_pipeline_cancel')
 async def _(session: CommandSession):
     _, bk_devops_pipeline_name = session.ctx['event_key'].split('|')
-    msg_template = session.bot.send_template_msg('render_task_cancel_msg', 'CI',
-                                                 f'您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...')
+    content = f'''>**CI TIP** 
+              ><font color=\"warning\">您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...</font> 
+              '''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)
