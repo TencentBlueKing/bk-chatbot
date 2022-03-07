@@ -136,6 +136,15 @@ class Message(BaseMessage):
 
 class MessageTemplate:
     @classmethod
+    def render_markdown_msg(cls, content) -> Dict:
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'content': content
+            }
+        }
+
+    @classmethod
     def render_welcome_msg(cls, data: List, bk_biz_id: Union[int, str]) -> Dict:
         return {
             'msgtype': 'template_card',
@@ -209,17 +218,6 @@ class MessageTemplate:
                     'text': '提交',
                     'key': 'bk_cc_biz_select'
                 }
-            }
-        }
-
-    @classmethod
-    def render_stat_execution_msg(cls, count: int) -> Dict:
-        return {
-            'msgtype': 'markdown',
-            'markdown': {
-                'content': f'''>**执行统计** 
-                ><font color=\"warning\">您当前执行数「{count}」</font> 
-                '''
             }
         }
 
@@ -325,14 +323,5 @@ class MessageTemplate:
                 'content': f'''>**{platform} TIP** 
                 ><font color=\"warning\">{content}</font> 
                 '''
-            }
-        }
-
-    @classmethod
-    def render_markdown_msg(cls, content) -> Dict:
-        return {
-            'msgtype': 'markdown',
-            'markdown': {
-                'content': content
             }
         }

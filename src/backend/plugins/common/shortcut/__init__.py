@@ -32,11 +32,12 @@ async def create_bk_shortcut(session: CommandSession):
 
     content = f'''>**{platform} TIP**
             >请输入快捷键名称，**最少输入8个字符**, 每个人每个业务最多10个快捷键'''
-    shortcut_name, _ = session.get('shortcut_name', prompt='...', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    shortcut_name, _ = session.get('shortcut_name', prompt='...', **msg_template)
     sc_handler = ShortcutHandler(session, shortcut_name)
     while not sc_handler.validate_name():
         del session.state['shortcut_name']
-        shortcut_name, _ = session.get('shortcut_name', prompt='...', msgtype='markdown', markdown={'content': content})
+        shortcut_name, _ = session.get('shortcut_name', prompt='...', **msg_template)
 
     sc_handler.save(platform, info)
     content = f'''>**{platform} TIP**

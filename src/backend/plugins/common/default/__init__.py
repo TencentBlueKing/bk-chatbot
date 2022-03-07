@@ -62,6 +62,9 @@ async def _(session: CommandSession):
 async def _(session: CommandSession):
     stat = Stat()
     count = stat.stat_execution()
-    msg_template = session.bot.send_template_msg('render_stat_execution_msg', count)
+    content = f'''>**执行统计** 
+                ><font color=\"warning\">您当前执行数「{count}」</font> 
+                '''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)
     del stat
