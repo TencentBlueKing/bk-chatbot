@@ -58,7 +58,7 @@ async def _(session: CommandSession):
     msg_template and await session.send(**msg_template)
 
 
-@on_command('opsbot_intent', aliases=('自定义任务', ))
+@on_command('bk_chat_task_list', aliases=('自定义任务', ))
 async def _(session: CommandSession):
     """
     handle api call，need to add new method to protocol
@@ -78,12 +78,12 @@ async def _(session: CommandSession):
         } for intent in intents[:20]
     ]
     msg_template = session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', TASK_LIST_TIP,
-                                                 f'请选择BKCHAT自定义技能 {TASK_FINISH_TIP}', 'bk_chat_task_id',
-                                                 tasks, 'bk_chat_task_select')
+                                                 f'请选择BKCHAT自定义技能 {TASK_FINISH_TIP}', 'bk_chat_intent_id',
+                                                 tasks, 'bk_chat_task_execute')
     await session.send(**msg_template)
 
 
-@on_command('opsbot_task', aliases=('OPSBOT_任务执行', ))
+@on_command('bk_chat_task_execute')
 async def task(session: CommandSession):
     """
     support user intent config，combined with nlp/nlu，
@@ -105,10 +105,11 @@ async def task(session: CommandSession):
             await session.send(msg)
             session.state['index'] = False
     else:
-        _, biz_id, user_id, intent_id = session.ctx['event_key'].split('|')
-        if session.ctx['msg_sender_id'] != user_id:
-            await session.send(f'{session.ctx["msg_sender_id"]} {TASK_AUTHORITY_TIP}')
-            return
+        try:
+            intent_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+            user_id = session.ctx['msg_sender_id']
+        except KeyError:
+            return None
 
         intent = (await AppTask(session).describe_entity('intents', id=int(intent_id)))[0]
         slots = await fetch_slot('', int(intent_id))
@@ -132,7 +133,7 @@ async def task(session: CommandSession):
     if is_approve:
         return
 
-    response = await real_run(intent, slots, user_id, session.ctx['msg_group_id'], session.bot.config.ID)
+    response = await real_run(intent, slots, user_id, session.ctx['msg_group_id'], session)
     await session.send(response.get('msg'))
     session.state.clear()
 
@@ -146,7 +147,7 @@ async def _(session: CommandSession):
     if not data:
         return
 
-    await real_run(*data.values(), session.bot.config.ID)
+    await real_run(*data.values(), session)
 
 
 @on_command('opsbot_list_scheduler', aliases=('查看定时任务', '查看定时'))
@@ -184,6 +185,6 @@ async def _(session: NLPSession):
     if not intent:
         return
 
-    return IntentCommand(intent.get('similar', 0) * 100, 'opsbot_task',
+    return IntentCommand(intent.get('similar', 0) * 100, 'bk_chat_task_execute',
                          args={'index': True, 'intent': intent,
                                'slots': None, 'user_id': session.ctx['msg_sender_id']})

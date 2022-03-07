@@ -160,16 +160,16 @@ def _validate_pattern(pattern, msg):
     return len(result) > 0
 
 
-def summary_statement(intent: Dict, slots: List, other: str, is_click=False):
-    params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
-    statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
+def summary_statement(intent: Dict, slots: List, other: str = '', is_click=False, session: CommandSession = None):
+    intent_name = intent.get("intent_name")
     if is_click:
-        return [
-            {'type': 'text','text': {'content': f'{statement}\n'}},
-            {'type': 'link', 'link': {'text': '执行', 'type': 'click', 'key': 'commit'}},
-            {'type': 'text', 'text': {'content': '    '}},
-            {'type': 'link', 'link': {'text': '取消', 'type': 'click', 'key': 'refuse'}}
-        ]
+        params = [{'keyname': slot['name'], 'value': slot['value']} for slot in slots]
+        statement = session.bot.send_template_msg('render_task_select_msg', 'BKCHAT', f'自定义任务_{intent_name}',
+                                                  params, 'bk_chat_task_execute', 'bk_chat_task_update',
+                                                  'bk_chat_task_cancel', intent, intent_name)
+    else:
+        params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
+        statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
 
     return statement
 
@@ -237,9 +237,9 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
     """
     is_commit = 'commit'
     if intent.get('is_commit', True):
-        prompt = summary_statement(intent, slots, '', is_click=True)
+        prompt = summary_statement(intent, slots, '', True, session)
         while True:
-            is_commit, ctx = session.get('is_commit', prompt='...', msgtype='rich_text', rich_text=prompt)
+            is_commit, ctx = session.get('is_commit', prompt='...', **prompt)
             if is_commit not in ['refuse', 'commit', TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
                 del session.state['is_commit']
             else:
@@ -248,7 +248,8 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
     return is_commit in ['commit', TASK_ALLOW_CMD]
 
 
-async def real_run(intent: Dict, slots: List, user_id: str, group_id: str, bot_id: str = None) -> Optional[Dict]:
+async def real_run(intent: Dict, slots: List, user_id: str, group_id: str,
+                   session: CommandSession = None) -> Optional[Dict]:
     response = defaultdict(dict)
     try:
         if 'timer' in intent:
@@ -259,8 +260,10 @@ async def real_run(intent: Dict, slots: List, user_id: str, group_id: str, bot_i
                                       exec_data=exec_data, expression='')
             msg = f'「定时」任务创建成功 时间： {timestamp}'
         else:
+            bot_id = session.bot.config.ID if session else None
             data = await BKTask(intent, slots, user_id, group_id, bot_id).run()
-            msg = summary_statement(intent, slots, f'{TASK_EXEC_SUCCESS}\r\n任务链接：{data.get("url")}')
+            msg = summary_statement(intent, slots, f'{TASK_EXEC_SUCCESS}\r\n任务链接：{data.get("url")}',
+                                    session=session)
             response.update(data)
     except ActionFailed as e:
         msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: 参数有误 {e}'
