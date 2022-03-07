@@ -17,7 +17,7 @@ from django.conf.urls import include
 from django.conf.urls import url
 from rest_framework import routers
 
-from module_faq import views
+from src.manager.module_faq import views
 
 router = routers.DefaultRouter()
 router.register(r"faq", views.FaqViewSet)

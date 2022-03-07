@@ -17,8 +17,8 @@ from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
 from common.drf.serializers import BaseRspSerializer
-from module_intent.models import Intent
-from module_intent.proto import intent_tag
+from src.manager.module_intent.models import Intent
+from src.manager.module_intent.proto import intent_tag
 
 
 class IntentSerializer(serializers.ModelSerializer):

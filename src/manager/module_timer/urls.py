@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from module_timer.views.timer import TimerViewSet
+from src.manager.module_timer.views.timer import TimerViewSet
 
 router = routers.DefaultRouter()
 

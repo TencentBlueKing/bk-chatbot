@@ -14,7 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 from common.constants import PROD_PLUGIN_URI_ENV
 from common.utils.time import mk_now_before_day
-from handler.in_api.plugin import PluginManage
+from src.manager.handler.in_api.plugin import PluginManage
 
 OPEN_PLUGIN_HTTP = "OPEN_PLUGIN_HTTP"
 

@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from django.conf import settings
 
 from common.redis import RedisClient
-from module_biz.models import ChatBindBusiness
+from src.manager.module_biz.models import ChatBindBusiness
 
 
 class GroupBindHandler:

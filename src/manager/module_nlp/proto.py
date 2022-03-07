@@ -21,7 +21,7 @@ from common.drf.serializers import (
     BaseRspSerializer,
     BaseSerializer,
 )
-from module_nlp.models import Corpus, CorpusDomain, CorpusIntent
+from src.manager.module_nlp.models import Corpus, CorpusDomain, CorpusIntent
 
 
 class CorpusDomainSerializer(serializers.ModelSerializer):

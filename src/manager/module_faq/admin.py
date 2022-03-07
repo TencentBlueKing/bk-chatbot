@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 """
 from django.contrib import admin
 
-from module_faq.models import FAQ
+from src.manager.module_faq.models import FAQ
 
 
 @admin.register(FAQ)

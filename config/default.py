@@ -37,14 +37,14 @@ INSTALLED_APPS += (
     "rest_framework",
     "django_filters",
     "drf_yasg",
-    "module_api",
-    "module_biz",
-    "module_intent",
-    "module_faq",
-    "module_index",
-    "module_nlp",
-    "module_plugin",
-    "module_timer",
+    "src.manager.module_api",
+    "src.manager.module_biz",
+    "src.manager.module_intent",
+    "src.manager.module_faq",
+    "src.manager.module_index",
+    "src.manager.module_nlp",
+    "src.manager.module_plugin",
+    "src.manager.module_timer",
 )
 
 # 这里是默认的中间件，大部分情况下，不需要改动
@@ -71,10 +71,12 @@ INSTALLED_APPS += (
 # )
 
 # 自定义中间件
-MIDDLEWARE = ("corsheaders.middleware.CorsMiddleware",) + MIDDLEWARE
+MIDDLEWARE += (
+    "corsheaders.middleware.CorsMiddleware",
+    "common.middleware.common.CommonMiddleware",
+    "common.middleware.common.RequestProvider",
+)
 
-MIDDLEWARE += ("common.middleware.common.CommonMiddleware",)
-MIDDLEWARE += ("common.middleware.common.RequestProvider",)
 
 # 所有环境的日志级别可以在这里配置
 # LOG_LEVEL = 'INFO'
@@ -102,7 +104,7 @@ IS_USE_CELERY = True
 CELERYD_CONCURRENCY = os.getenv("BK_CELERYD_CONCURRENCY", 2)
 
 # CELERY 配置，申明任务的文件路径，即包含有 @task 装饰器的函数文件
-CELERY_IMPORTS = "module_intent.tasks.log_timer"
+CELERY_IMPORTS = "src.manager.module_intent.tasks.log_timer"
 
 # load logging settings
 LOGGING = get_logging_config_dict(locals())

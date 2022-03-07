@@ -41,3 +41,4 @@ except ImportError as e:
 for _setting in dir(_module):
     if _setting == _setting.upper():
         locals()[_setting] = getattr(_module, _setting)
+DEBUG = True

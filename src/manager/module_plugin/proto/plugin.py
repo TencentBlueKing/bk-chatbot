@@ -18,8 +18,8 @@ from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
 from common.drf.serializers import BaseRspSerializer
-from module_plugin.models import Plugin
-from module_plugin.proto import plugin_tag
+from src.manager.module_plugin.models import Plugin
+from src.manager.module_plugin.proto import plugin_tag
 
 
 # 插件action
@@ -41,12 +41,17 @@ class PluginAction(Serializer):
         required = serializers.BooleanField(label="是否必须", required=False, default=True)
         options = serializers.ListField(label="选项", required=False, child=PluginActionParamOptions())
 
+
+    class PluginActionOperation(Serializer):
+        key = serializers.CharField(label="key")
+        name = serializers.CharField(label="操作名称")
+
     key = serializers.CharField(label="路由")
     desc = serializers.CharField(label="描叙")
     time_out = serializers.IntegerField(label="描叙", required=False, default=60)
     run_now = serializers.BooleanField(label="是否立即执行", required=False, default=False)
     params = serializers.ListField(label="字段", child=PluginActionParam())
-
+    operation = serializers.ListField(label="操作项", required=False, child=PluginActionOperation())
 
 # 基础
 class PluginBaseSerializer(serializers.ModelSerializer):
@@ -55,6 +60,8 @@ class PluginBaseSerializer(serializers.ModelSerializer):
     plugin_addr = serializers.CharField(label="插件地址")
     plugin_desc = serializers.CharField(label="插件描叙")
     plugin_tag = serializers.CharField(label="插件标签")
+    plugin_start = serializers.CharField(label="开始action", required=False)
+    plugin_web = serializers.CharField(label="web页面action", required=False)
     plugin_global = serializers.DictField(label="全局变量", required=False)
     actions = serializers.ListField(label="动作", child=PluginAction(), allow_null=True)
     biz_list = serializers.ListField(label="业务选择", child=serializers.CharField())
@@ -66,6 +73,8 @@ class PluginBaseSerializer(serializers.ModelSerializer):
             "plugin_icon",
             "plugin_name",
             "plugin_addr",
+            "plugin_start",
+            "plugin_web",
             "plugin_desc",
             "plugin_tag",
             "plugin_status",
@@ -105,6 +114,8 @@ class PluginSerializer(PluginBaseSerializer):
             "plugin_icon",
             "plugin_name",
             "plugin_addr",
+            "plugin_start",
+            "plugin_web",
             "plugin_desc",
             "plugin_tag",
             "plugin_status",
@@ -165,24 +176,13 @@ class ReqUpdatePluginSerializer(PluginBaseSerializer):
     plugin_addr = serializers.CharField(label="插件地址", required=False)
     plugin_desc = serializers.CharField(label="插件描叙", required=False)
     plugin_tag = serializers.CharField(label="插件标签", required=False)
+    plugin_start = serializers.CharField(label="开始action", required=False)
+    plugin_web = serializers.CharField(label="web页面action", required=False)
     plugin_global = serializers.DictField(label="全局变量", required=False)
     plugin_status = serializers.IntegerField(label="状态", required=False)
-    actions = serializers.ListField(
-        label="动作",
-        child=PluginAction(),
-        allow_null=True,
-        required=False,
-    )
-    biz_list = serializers.ListField(
-        label="业务选择",
-        child=serializers.CharField(),
-        required=False,
-    )
-    developers = serializers.ListField(
-        label="业务选择",
-        child=serializers.CharField(),
-        required=False,
-    )
+    actions = serializers.ListField(label="动作", child=PluginAction(), allow_null=True, required=False)
+    biz_list = serializers.ListField(label="业务选择", child=serializers.CharField(), required=False)
+    developers = serializers.ListField(label="业务选择", child=serializers.CharField(), required=False)
 
     def to_representation(self, value):
         return {}

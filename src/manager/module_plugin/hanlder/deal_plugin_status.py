@@ -25,9 +25,9 @@ from common.constants import (
 )
 from common.design.strategy import Strategy
 from common.redis import RedisClient
-from handler.api.bk_itsm import BkITSM
-from handler.in_api.plugin import PluginManage
-from module_plugin.models import Plugin, PluginAuditLog
+from src.manager.handler.api.bk_itsm import BkITSM
+from src.manager.handler.in_api.plugin import PluginManage
+from src.manager.module_plugin.models import Plugin, PluginAuditLog
 
 
 class DealPluginStatus(Strategy):
@@ -52,7 +52,8 @@ def get_plugin_params(obj: Plugin) -> dict:
         "name": obj.plugin_name,
         "addr": obj.plugin_addr,
         "choose_biz": obj.choose_biz,
-        "start": obj.actions[0].get("key"),
+        "start": obj.plugin_start if obj.plugin_start else obj.actions[0],
+        "web": obj.plugin_web,
         "tag": obj.plugin_tag,
         "status": 1,
         "global": obj.plugin_global,

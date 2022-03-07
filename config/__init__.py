@@ -40,9 +40,9 @@ def get_env_or_raise(key):
 
 
 # 应用 ID
-# APP_CODE = get_env_or_raise('BKPAAS_APP_ID')
+# APP_CODE = get_env_or_raise("BKPAAS_APP_ID")
 # 应用用于调用云 API 的 Secret
-# SECRET_KEY = get_env_or_raise('BKPAAS_APP_SECRET')
+# SECRET_KEY = get_env_or_raise("BKPAAS_APP_SECRET")
 
 # 本地开发SaaS运行版本
 RUN_VER = "open"
@@ -71,13 +71,6 @@ REDIS_HOST = os.getenv("BKAPP_REDIS_DB_NAME", "localhost")
 REDIS_PASSWORD = os.getenv("BKAPP_REDIS_DB_PASSWORD", "")
 REDIS_PORT = os.getenv("BKAPP_REDIS_DB_PORT", "6379")
 
-# 适配器部分
-conf_module = f"adapter.sites.{RUN_VER}.config"
-_module = importlib.import_module(conf_module)
-for _setting in dir(_module):
-    if _setting == _setting.upper():
-        locals()[_setting] = getattr(_module, _setting)
-
 # 加载不同运行环境不同配置
 try:
     RUN_VER_CONF = f"config.{RUN_VER}"
@@ -87,6 +80,15 @@ try:
             locals()[_setting] = getattr(run_ver_conf_module, _setting)
 except ImportError:
     pass
+
+
+# 适配器部分
+conf_module = f"adapter.sites.{RUN_VER}.config"
+_module = importlib.import_module(conf_module)
+for _setting in dir(_module):
+    if _setting == _setting.upper():
+        locals()[_setting] = getattr(_module, _setting)
+
 
 # 加载各个版本特殊配置
 try:

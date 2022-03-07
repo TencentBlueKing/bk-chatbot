@@ -19,7 +19,7 @@ from rest_framework.response import Response
 from common.control.throttle import ChatBotThrottle
 from common.generic import BaseViewSet
 from common.redis import RedisClient
-from handler.in_api.plugin import Service
+from src.manager.handler.in_api.plugin import Service
 
 
 class PluginViewSet(BaseViewSet):

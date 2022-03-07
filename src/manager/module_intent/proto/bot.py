@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from rest_framework import serializers
 
 from common.constants import CHAT_BOT_TYPES
-from module_intent.models import Bot
+from src.manager.module_intent.models import Bot
 
 
 class BotSerializer(serializers.ModelSerializer):

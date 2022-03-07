@@ -18,8 +18,8 @@ from unittest.mock import patch
 import pytest
 
 from common.constants import PlatformType, TaskExecStatus
-from module_intent.handler import TaskType
-from module_intent.models import ExecutionLog
+from src.manager.module_intent.handler import TaskType
+from src.manager.module_intent.models import ExecutionLog
 
 
 @pytest.fixture()
@@ -137,7 +137,7 @@ class TestExecutionLogViewSet:
         response = client.get("/api/v1/log/")
         assert len(response.json().get("data")) == 1
 
-    @patch("handler.api.bk_job.JOB.get_job_instance_list")
+    @patch("src.manager.handler.api.bk_job.JOB.get_job_instance_list")
     def test_describe_records(self, get_job_instance_list, client, fake_get_job_instance_list):
         """
         测试执行记录
@@ -185,8 +185,8 @@ class TestExecTaskView:
         }
 
     @pytest.mark.parametrize("action", [TaskType.RETRY.value, TaskType.SKIP.value])
-    @patch("handler.api.bk_job.JOB.operate_step_instance")
-    @patch("handler.api.bk_job.JOB.get_job_instance_status")
+    @patch("src.manager.handler.api.bk_job.JOB.operate_step_instance")
+    @patch("src.manager.handler.api.bk_job.JOB.get_job_instance_status")
     def test_task_job_retry_and_skip(self, get_status, operate_step, faker, admin_client, fake_fail_task, action):
         """
         重试/跳过 job失败步骤
@@ -211,7 +211,7 @@ class TestExecTaskView:
         assert rsp_json.get("result")
 
     @pytest.mark.parametrize("action", [TaskType.STOP.value])
-    @patch("handler.api.bk_job.JOB.operate_job_instance")
+    @patch("src.manager.handler.api.bk_job.JOB.operate_job_instance")
     def test_task_job_stop(self, operate_job, admin_client, fake_running_task, action):
         """
         停止job任务
@@ -224,8 +224,8 @@ class TestExecTaskView:
         assert rsp_json.get("result")
 
     @pytest.mark.parametrize("action", [TaskType.RETRY.value, TaskType.SKIP.value])
-    @patch("handler.api.bk_sops.SOPS.operate_node")
-    @patch("handler.api.bk_sops.SOPS.get_task_status")
+    @patch("src.manager.handler.api.bk_sops.SOPS.operate_node")
+    @patch("src.manager.handler.api.bk_sops.SOPS.get_task_status")
     def test_task_sops_retry_and_skip(self, get_status, operate_node, faker, admin_client, fake_fail_task, action):
         """
         重试/跳过 sops失败节点
@@ -255,7 +255,7 @@ class TestExecTaskView:
         assert rsp_json.get("result")
 
     @pytest.mark.parametrize("action", [TaskType.STOP.value])
-    @patch("handler.api.bk_sops.SOPS.operate_task")
+    @patch("src.manager.handler.api.bk_sops.SOPS.operate_task")
     def test_task_sops_stop(self, operate_task, faker, admin_client, fake_running_task, action):
         """
         停止 sops流程
@@ -270,8 +270,8 @@ class TestExecTaskView:
         assert rsp_json.get("result")
 
     @pytest.mark.parametrize("action", [TaskType.RETRY.value, TaskType.SKIP.value])
-    @patch("handler.api.devops.DevOps.app_build_status")
-    @patch("handler.api.devops.DevOps.app_build_retry")
+    @patch("src.manager.handler.api.devops.DevOps.app_build_status")
+    @patch("src.manager.handler.api.devops.DevOps.app_build_retry")
     def test_task_devops_retry_and_skip(
         self, app_build_retry, app_build_status, fake_fail_task, faker, admin_client, action
     ):
@@ -305,7 +305,7 @@ class TestExecTaskView:
         assert rsp_json.get("result")
 
     @pytest.mark.parametrize("action", [TaskType.STOP.value])
-    @patch("handler.api.devops.DevOps.app_build_stop")
+    @patch("src.manager.handler.api.devops.DevOps.app_build_stop")
     def test_task_devops_stop(self, app_build_stop, faker, admin_client, fake_running_task, action):
         """
         停止 蓝盾流程

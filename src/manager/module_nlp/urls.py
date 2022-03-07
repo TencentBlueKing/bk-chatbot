@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from module_nlp.views.corpus_view import CorpusViewSet, DomainViewSet, IntentViewSet
+from src.manager.module_nlp.views.corpus_view import CorpusViewSet, DomainViewSet, IntentViewSet
 
 router = routers.DefaultRouter()
 

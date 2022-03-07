@@ -15,11 +15,11 @@ specific language governing permissions and limitations under the License.
 """
 from django.contrib import admin
 
-from module_intent.models import Bot
-from module_intent.models import ExecutionLog
-from module_intent.models import Intent
-from module_intent.models import Task
-from module_intent.models import Utterances
+from src.manager.module_intent.models import Bot
+from src.manager.module_intent.models import ExecutionLog
+from src.manager.module_intent.models import Intent
+from src.manager.module_intent.models import Task
+from src.manager.module_intent.models import Utterances
 
 
 @admin.register(Bot)

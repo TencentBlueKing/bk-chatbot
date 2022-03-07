@@ -22,7 +22,7 @@ from common.control.throttle import ChatBotThrottle
 from common.generic import BaseViewSet
 from common.http.request import init_views
 from common.perm.permission import check_permission
-from handler.in_api.youti import Mga
+from src.manager.handler.in_api.youti import Mga
 
 
 class YoutiViewSet(BaseViewSet):
