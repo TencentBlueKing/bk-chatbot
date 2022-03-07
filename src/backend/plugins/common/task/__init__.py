@@ -23,7 +23,7 @@ from plugins.common.sops import SopsTask
 
 from .api import (
     AppTask, BKTask, parse_slots, wait_commit, real_run, validate_intent,
-    describe_entity, Authority, Approval, Scheduler, CallbackHandler
+    Authority, Approval, Scheduler, CallbackHandler
 )
 from .settings import (
     TASK_EXEC_SUCCESS, TASK_EXEC_FAIL, TASK_LIST_TIP, TASK_FINISH_TIP,
@@ -58,21 +58,13 @@ async def _(session: CommandSession):
     msg_template and await session.send(**msg_template)
 
 
-@on_command('opsbot_intent', aliases=('opsbot_intent', ))
+@on_command('opsbot_intent', aliases=('自定义任务', ))
 async def _(session: CommandSession):
     """
     handle api call，need to add new method to protocol
     """
-    _, biz_id, user_id = session.ctx['event_key'].split('|')
-    if session.ctx['msg_sender_id'] != user_id:
-        await session.send(f'{session.ctx["msg_sender_id"]} {TASK_AUTHORITY_TIP}')
-        return
-
-    if not biz_id or biz_id == '-1':
-        await session.send('请绑定业务')
-        return
-
-    intents = await describe_entity('intents', biz_id=int(biz_id), available_user=[user_id])
+    intents = await AppTask(session).describe_entity('intents', available_user=[session.ctx['msg_sender_id']],
+                                                     biz_id='-1')
     if session.ctx['msg_from_type'] == 'group':
         intents = [item for item in intents if session.ctx['msg_group_id'] in item['available_group']]
 
@@ -80,17 +72,15 @@ async def _(session: CommandSession):
         await session.send('当前业务下无技能，请联系业务运维同学进行配置')
         return
 
-    rich_text = [{
-        'type': 'link',
-        'link': {
-            'text': f'{item["intent_name"]}\n',
-            'type': 'click',
-            'key': f'opsbot_task|{biz_id}|{user_id}|{item["id"]}'
-        }
-    } for item in intents]
-    rich_text.insert(0, {'text': {'content': f'{user_id} {TASK_LIST_TIP}'}, 'type': 'text'})
-    rich_text.append({'text': {'content': TASK_FINISH_TIP}, 'type': 'text'})
-    await session.send('', msgtype='rich_text', rich_text=rich_text)
+    tasks = [
+        {
+            'id': str(intent['id']), 'text': intent['intent_name'], 'is_checked': False
+        } for intent in intents[:20]
+    ]
+    msg_template = session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', TASK_LIST_TIP,
+                                                 f'请选择BKCHAT自定义技能 {TASK_FINISH_TIP}', 'bk_chat_task_id',
+                                                 tasks, 'bk_chat_task_select')
+    await session.send(**msg_template)
 
 
 @on_command('opsbot_task', aliases=('OPSBOT_任务执行', ))
@@ -120,7 +110,7 @@ async def task(session: CommandSession):
             await session.send(f'{session.ctx["msg_sender_id"]} {TASK_AUTHORITY_TIP}')
             return
 
-        intent = (await describe_entity('intents', id=int(intent_id)))[0]
+        intent = (await AppTask(session).describe_entity('intents', id=int(intent_id)))[0]
         slots = await fetch_slot('', int(intent_id))
         if slots:
             slots[0]['prompt'] = f'{user_id} 已选择：{intent["intent_name"]}\n{slots[0]["prompt"]}'
@@ -164,8 +154,8 @@ async def _(session: CommandSession):
     """
     display schedulers, the you can delete old one
     """
-    msg = await Scheduler(session, is_callback=False).list_scheduler()
-    await session.send('', msgtype='rich_text', rich_text=msg)
+    msg_template = await Scheduler(session, is_callback=False).list_scheduler()
+    await session.send(**msg_template)
 
 
 @on_command('opsbot_delete_scheduler')
@@ -173,7 +163,11 @@ async def _(session: CommandSession):
     """
     delete scheduler
     """
-    _, timer_id = session.ctx['event_key'].split('|')
+    if session.is_first_run:
+        try:
+            timer_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        except KeyError:
+            return None
     await Scheduler(session, is_callback=False).delete_scheduler(int(timer_id))
     await session.send('定时器删除成功')
 

@@ -43,6 +43,7 @@ class AppTask(GenericTask):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
         self._job = JOB()
         self._sops = SOPS()
+        self._backend = Backend()
 
     async def _get_app_task(self, task_name: str) -> Dict:
         bk_job_plans = await self._job.get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
@@ -58,6 +59,11 @@ class AppTask(GenericTask):
     async def render_app_task(self, task_name: str):
         bk_app_task = await self._get_app_task(task_name)
         return self._session.bot.send_template_msg('render_task_filter_msg', bk_app_task, BK_PAAS_DOMAIN)
+
+    async def describe_entity(self, entity: str, **params):
+        if 'biz_id' in params:
+            params['biz_id'] = self.biz_id
+        return await self._backend.describe(entity, **params)
 
 
 class BKTask:
@@ -375,22 +381,17 @@ class Scheduler:
     @classmethod
     async def list_scheduler(cls):
         data = await cls.backend.get_timer(timer_user=cls.session.ctx['msg_sender_id'])
-        msg = [[{
-            'type': 'text',
-            'text': {
-                'content': f'{item["biz_id"]} {item["timer_name"]} {item["execute_time"]}'
-            }
-        }, {
-            'type': 'link',
-            'link': {
-                'text': f'  删除\n',
-                'type': 'click',
-                'key': f'opsbot_delete_scheduler|{item["id"]}'
-            }
-        }] for item in data]
-        msg = list(itertools.chain.from_iterable(msg))
-        msg.insert(0, {'type': 'text', 'text': {'content': '当前定时任务如下:\n'}})
-        return msg
+        timers = [
+            {
+                'id': str(item['id']),
+                'text': f'{item["biz_id"]} {item["timer_name"]} {item["execute_time"]}',
+                'is_checked': False
+            } for item in data[:20]
+        ]
+        msg_template = cls.session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', 'BKCHAT定时任务',
+                                                         f'当前定时任务如下:', 'bk_chat_timer_id',
+                                                         timers, 'bk_chat_timer_select', submit_text='删除')
+        return msg_template
 
     @classmethod
     async def delete_scheduler(cls, timer_id: int):
