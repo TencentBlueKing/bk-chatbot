@@ -35,9 +35,10 @@ from .settings import (
 async def _(session: CommandSession):
     content = f'''>**BKCHAT TIP**
             >请顺序输入任务名称，**支持模糊查询**'''
-    task_name, _ = session.get('task_name', prompt='...', msgtype='markdown', markdown={'content': content})
-    msg = await AppTask(session).render_app_task(task_name)
-    msg and await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    task_name, _ = session.get('task_name', prompt='...', **msg_template)
+    msg_template = await AppTask(session).render_app_task(task_name)
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('bk_app_task_select')
@@ -50,11 +51,11 @@ async def _(session: CommandSession):
         return None
 
     if app == 'bk_job':
-        msg = await JobTask(session).render_job_plan_detail()
+        msg_template = await JobTask(session).render_job_plan_detail()
     elif app == 'bk_sops':
-        msg = await SopsTask(session).render_sops_template_info()
+        msg_template = await SopsTask(session).render_sops_template_info()
 
-    msg and await session.send('', msgtype='template_card', template_card=msg)
+    msg_template and await session.send(**msg_template)
 
 
 @on_command('opsbot_intent', aliases=('opsbot_intent', ))

@@ -314,3 +314,42 @@ class MessageTemplate:
                 }
             }
         }
+
+    @classmethod
+    def render_task_filter_msg(cls, bk_app_task: Dict[str, List], bk_paas_domain: str):
+        template = {
+            'card_type': 'multiple_interaction',
+            'source': {
+                'desc': 'BKCHAT'
+            },
+            'main_title': {
+                'title': '任务查询结果'
+            },
+            'task_id': str(int(time.time() * 100000))
+        }
+
+        if any(bk_app_task.values()):
+            template['card_type'] = 'vote_interaction'
+            template['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
+            template['checkbox'] = {'question_key': 'bk_app_task_id', 'option_list': []}
+        else:
+            template['card_type'] = 'text_notice'
+            template['main_title']['desc'] = '未找到对应任务'
+            template['card_action'] = {'type': 1, 'url': bk_paas_domain}
+            return template
+
+        if bk_app_task['bk_job']:
+            option_list = [
+                {'id': f'bk_job|{str(job_plan["id"])}', 'text': f'JOB {job_plan["name"]}', 'is_checked': False}
+                for job_plan in bk_app_task['bk_job'][:5]
+            ]
+            template['checkbox']['option_list'].extend(option_list)
+
+        if bk_app_task['bk_sops']:
+            option_list = [
+                {'id': f'bk_sops|{str(template["id"])}', 'text': f'SOPS {template["name"]}', 'is_checked': False}
+                for template in bk_app_task['bk_sops'][:5]
+            ]
+            template['checkbox']['option_list'].extend(option_list)
+
+        return template

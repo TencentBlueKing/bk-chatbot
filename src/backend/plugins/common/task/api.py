@@ -57,42 +57,7 @@ class AppTask(GenericTask):
 
     async def render_app_task(self, task_name: str):
         bk_app_task = await self._get_app_task(task_name)
-        template_card = {
-            'card_type': 'multiple_interaction',
-            'source': {
-                'desc': 'BKCHAT'
-            },
-            'main_title': {
-                'title': '任务查询结果'
-            },
-            'task_id': str(int(time.time() * 100000))
-        }
-
-        if any(bk_app_task.values()):
-            template_card['card_type'] = 'vote_interaction'
-            template_card['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
-            template_card['checkbox'] = {'question_key': 'bk_app_task_id', 'option_list': []}
-        else:
-            template_card['card_type'] = 'text_notice'
-            template_card['main_title']['desc'] = '未找到对应任务'
-            template_card['card_action'] = {'type': 1, 'url': BK_PAAS_DOMAIN}
-            return template_card
-
-        if bk_app_task['bk_job']:
-            option_list = [
-                {'id': f'bk_job|{str(job_plan["id"])}', 'text': f'JOB {job_plan["name"]}', 'is_checked': False}
-                for job_plan in bk_app_task['bk_job'][:5]
-            ]
-            template_card['checkbox']['option_list'].extend(option_list)
-
-        if bk_app_task['bk_sops']:
-            option_list = [
-                {'id': f'bk_sops|{str(template["id"])}', 'text': f'SOPS {template["name"]}', 'is_checked': False}
-                for template in bk_app_task['bk_sops'][:5]
-            ]
-            template_card['checkbox']['option_list'].extend(option_list)
-
-        return template_card
+        return self._session.bot.send_template_msg('render_task_filter_msg', bk_app_task, BK_PAAS_DOMAIN)
 
 
 class BKTask:
