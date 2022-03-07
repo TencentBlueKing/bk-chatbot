@@ -52,7 +52,7 @@ def get_plugin_params(obj: Plugin) -> dict:
         "name": obj.plugin_name,
         "addr": obj.plugin_addr,
         "choose_biz": obj.choose_biz,
-        "start": obj.plugin_start,
+        "start": obj.plugin_start if obj.plugin_start else obj.actions[0],
         "web": obj.plugin_web,
         "tag": obj.plugin_tag,
         "status": 1,
