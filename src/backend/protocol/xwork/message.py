@@ -249,9 +249,32 @@ class MessageTemplate:
         }
 
     @classmethod
-    def render_task_select_msg(cls, platform: str, title: str, params: List,
-                               execute_key: str, update_key: str, cancel_key: str,
-                               data: Dict, task_name: str, **kwargs) -> Dict:
+    def render_task_select_msg(cls, platform: str, title: str, params: List, execute_key: str,
+                               update_key: str, cancel_key: str, data: Dict, task_name: str,
+                               action=['执行', '修改', '取消', '快捷键'], **kwargs) -> Dict:
+        button_map = {
+            '执行': {
+                "text": "执行",
+                "style": 1,
+                "key": f"{execute_key}|{json.dumps(data)}"
+            },
+            '修改': {
+                "text": "修改",
+                "style": 2,
+                "key": f"{update_key}|{json.dumps(data)}"
+            },
+            '取消': {
+                "text": "取消",
+                "style": 3,
+                "key": f"{cancel_key}|{task_name}"
+            },
+            '快捷键': {
+                "text": "快捷键",
+                "style": 4,
+                "key": f"bk_shortcut_create|{platform}|{json.dumps(data)}"
+            }
+        }
+        button_list = [v for k, v in button_map.items() if k in action]
         template = {
             'msgtype': 'template_card',
             'template_card': {
@@ -266,28 +289,7 @@ class MessageTemplate:
                 'task_id': str(int(time.time() * 100000)),
                 'sub_title_text': '参数确认',
                 'horizontal_content_list': params,
-                'button_list': [
-                    {
-                        "text": "执行",
-                        "style": 1,
-                        "key": f"{execute_key}|{json.dumps(data)}"
-                    },
-                    {
-                        "text": "修改",
-                        "style": 2,
-                        "key": f"{update_key}|{json.dumps(data)}"
-                    },
-                    {
-                        "text": "取消",
-                        "style": 3,
-                        "key": f"{cancel_key}|{task_name}"
-                    },
-                    {
-                        "text": "快捷键",
-                        "style": 4,
-                        "key": f"bk_shortcut_create|{platform}|{json.dumps(data)}"
-                    }
-                ]
+                'button_list': button_list
             }
         }
         template['template_card'].update(kwargs)

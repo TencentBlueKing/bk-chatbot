@@ -166,7 +166,7 @@ def summary_statement(intent: Dict, slots: List, other: str = '', is_click=False
         params = [{'keyname': slot['name'], 'value': slot['value']} for slot in slots]
         statement = session.bot.send_template_msg('render_task_select_msg', 'BKCHAT', f'自定义任务_{intent_name}',
                                                   params, 'bk_chat_task_execute', 'bk_chat_task_update',
-                                                  'bk_chat_task_cancel', intent, intent_name)
+                                                  'bk_chat_task_cancel', intent, intent_name, action=['执行', '取消'])
     else:
         params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
         statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
@@ -240,12 +240,13 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
         prompt = summary_statement(intent, slots, '', True, session)
         while True:
             is_commit, ctx = session.get('is_commit', prompt='...', **prompt)
-            if is_commit not in ['refuse', 'commit', TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
+            if is_commit not in ['bk_chat_task_cancel', 'bk_chat_task_execute',
+                                 TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
                 del session.state['is_commit']
             else:
                 break
 
-    return is_commit in ['commit', TASK_ALLOW_CMD]
+    return is_commit in ['bk_chat_task_execute', TASK_ALLOW_CMD]
 
 
 async def real_run(intent: Dict, slots: List, user_id: str, group_id: str,
