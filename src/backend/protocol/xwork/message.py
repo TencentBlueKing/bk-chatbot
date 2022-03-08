@@ -18,7 +18,9 @@ import json
 import time
 from typing import Iterable, Tuple, Union, List, Dict
 
-from opsbot.adapter import Message as BaseMessage, MessageSegment as BaseMessageSegment
+from opsbot.adapter import (
+    Message as BaseMessage, MessageSegment as BaseMessageSegment, MessageTemplate as BaseMessageTemplate
+)
 from opsbot.stdlib import escape, unescape
 
 
@@ -134,7 +136,7 @@ class Message(BaseMessage):
                 yield MessageSegment(type_=function_name, data=data)
 
 
-class MessageTemplate:
+class MessageTemplate(BaseMessageTemplate):
     @classmethod
     def render_markdown_msg(cls, content: str) -> Dict:
         return {

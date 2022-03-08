@@ -27,14 +27,15 @@ from opsbot.command import kill_current_session
 from opsbot.log import logger
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.plugins import GenericTask
+from opsbot.models import BKExecutionLog
 from component import (
     JOB, SOPS, Backend, DevOps, ITSM, RedisClient, BK_PAAS_DOMAIN,
-    BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer
+    BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer, OrmClient
 )
 from .settings import (
-    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD,
+    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD, SESSION_APPROVE_MSG,
     TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS, TASK_EXEC_FAIL,
-    PATTERN_IP, EXPR_DONT_ENABLE, SESSION_APPROVE_MSG
+    PATTERN_IP, EXPR_DONT_ENABLE, IS_USE_SQLITE
 )
 
 
@@ -86,11 +87,18 @@ class BKTask:
             return await getattr(BKTask, f'_bk_{task.get("platform").lower()}')(self, task)
 
     async def _log(self, biz_id, platform, task_id, project_id='', feature_id=''):
-        return await self.backend.log(biz_id=biz_id, bot_type='default', bot_name=self._bot_id, msg='task',
-                                      intent_id=self._intent.get('id'), intent_name=self._intent.get('intent_name'),
-                                      platform=platform, task_id=task_id, sender=self._user_id,
-                                      intent_create_user=self._executor, params=self._slots,
-                                      project_id=project_id, feature_id=feature_id, rtx=self._group_id or '')
+        if IS_USE_SQLITE:
+            execution_log = BKExecutionLog(bk_biz_id=biz_id, bk_platform=platform, bk_username=self._user_id,
+                                           feature_name=self._intent.get('intent_name'), feature_id=str(task_id),
+                                           detail=self._slots)
+            OrmClient().add(execution_log)
+            return task_id
+        else:
+            return await self.backend.log(biz_id=biz_id, bot_type='default', bot_name=self._bot_id, msg='task',
+                                          intent_id=self._intent.get('id'), intent_name=self._intent.get('intent_name'),
+                                          platform=platform, task_id=task_id, sender=self._user_id,
+                                          intent_create_user=self._executor, params=self._slots,
+                                          project_id=project_id, feature_id=feature_id, rtx=self._group_id or '')
 
     async def _bk_job(self, task: Dict):
         # only allow string and host(ip)
