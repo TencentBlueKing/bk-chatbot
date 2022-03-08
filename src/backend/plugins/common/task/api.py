@@ -292,9 +292,6 @@ class Authority:
         self._session = session
         self._redis_client = RedisClient(env='prod')
 
-    # def pre_xwork(self):
-    #     return {'available_user': [self._session.ctx['msg_sender_id']]}
-
     def pre_xwork(self) -> Dict:
         if self._session.ctx['msg_from_type'] == 'single':
             biz_id = self._redis_client.hash_get("chat_single_biz", self._session.ctx['msg_sender_id'])
