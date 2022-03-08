@@ -284,10 +284,10 @@ class Authority:
         self._session = session
         self._redis_client = RedisClient(env='prod')
 
-    def pre_xwork(self):
-        return {'available_user': [self._session.ctx['msg_sender_id']]}
+    # def pre_xwork(self):
+    #     return {'available_user': [self._session.ctx['msg_sender_id']]}
 
-    def pre_in_xwork(self) -> Dict:
+    def pre_xwork(self) -> Dict:
         if self._session.ctx['msg_from_type'] == 'single':
             biz_id = self._redis_client.hash_get("chat_single_biz", self._session.ctx['msg_sender_id'])
         else:
@@ -297,13 +297,6 @@ class Authority:
             return None
 
         return {'biz_id': int(biz_id), 'available_user': [self._session.ctx['msg_sender_id']]}
-
-    async def pre_qq(self) -> Dict:
-        data = await Backend().get_youti_user_info(bk_qq_openid=self._session.ctx['msg_sender_id'])
-        if data and data.get('product_list'):
-            return {'biz_id__in': data.get('product_list'), 'developer': [data.get('wx_openid')]}
-
-        return None
 
 
 class Approval:
@@ -398,7 +391,7 @@ class Scheduler:
     async def delete_scheduler(cls, timer_id: int):
         await cls.backend.delete_timer(timer_id)
 
-    class InXwork:
+    class Xwork:
         @staticmethod
         def handle_scheduler(payload: Dict):
             return {k: payload.get(k) for k in Scheduler.keys if k in payload}
