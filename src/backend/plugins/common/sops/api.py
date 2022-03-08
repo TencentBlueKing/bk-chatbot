@@ -14,7 +14,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
-import time
 from typing import Union, List, Dict
 
 from opsbot import CommandSession
@@ -82,41 +81,6 @@ class SopsTask(GenericTask):
             'bk_sops_template_schemas': bk_sops_template_schemas,
             'activities': activities,
             'constants': constants
-        }
-
-        template_card = {
-            'card_type': 'button_interaction',
-            'source': {
-                'desc': 'SOPS'
-            },
-            'main_title': {
-                'title': f'标准运维任务_{template_name}'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'sub_title_text': '参数确认',
-            'horizontal_content_list': constants,
-            'button_list': [
-                {
-                    "text": "执行",
-                    "style": 1,
-                    "key": f"bk_sops_template_execute|{json.dumps(info)}"
-                },
-                {
-                    "text": "修改",
-                    "style": 2,
-                    "key": f"bk_sops_template_update|{json.dumps(info)}"
-                },
-                {
-                    "text": "取消",
-                    "style": 3,
-                    "key": f"bk_sops_template_cancel|{template_name}"
-                },
-                {
-                    "text": "快捷键",
-                    "style": 4,
-                    "key": f"bk_shortcut_create|SOPS|{json.dumps(info)}"
-                }
-            ]
         }
 
         extra = {
