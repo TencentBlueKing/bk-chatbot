@@ -166,7 +166,7 @@ def summary_statement(intent: Dict, slots: List, other: str = '', is_click=False
         params = [{'keyname': slot['name'], 'value': slot['value']} for slot in slots]
         statement = session.bot.send_template_msg('render_task_select_msg', 'BKCHAT', f'自定义任务_{intent_name}',
                                                   params, 'bk_chat_task_execute', 'bk_chat_task_update',
-                                                  'bk_chat_task_cancel', intent, intent_name, action=['执行', '取消'])
+                                                  'bk_chat_task_cancel', intent, intent_name, ['执行', '取消'])
     else:
         params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
         statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
