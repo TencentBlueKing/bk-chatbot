@@ -235,7 +235,7 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
     if config commit
     generate commit msg, wait user click
     """
-    is_commit = 'commit'
+    is_commit = 'bk_chat_task_execute'
     if intent.get('is_commit', True):
         prompt = summary_statement(intent, slots, '', True, session)
         while True:
@@ -355,10 +355,7 @@ class Approval:
             await Approval.session.send(SESSION_APPROVE_MSG.format(','.join(approver)))
             return True
 
-    class InXwork(BaseBot):
-        pass
-
-    class QQ(BaseBot):
+    class Xwork(BaseBot):
         pass
 
     class Trigger(BaseBot):

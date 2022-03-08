@@ -58,7 +58,7 @@ async def _(session: CommandSession):
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_chat_task_list', aliases=('自定义任务', ))
+@on_command('bk_chat_task_list', aliases=('自定义任务', '自定义技能'))
 async def _(session: CommandSession):
     """
     handle api call，need to add new method to protocol
