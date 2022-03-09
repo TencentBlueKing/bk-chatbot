@@ -22,7 +22,7 @@ from .settings import (
 )
 
 
-@on_command('group_id', aliases=DEFAULT_SHOW_GROUP_ID_ALIAS)
+@on_command('bk_chat_group_id', aliases=DEFAULT_SHOW_GROUP_ID_ALIAS)
 async def _(session: CommandSession):
     if session.ctx['msg_from_type'] == 'group':
         await session.send(session.ctx['msg_group_id'])
