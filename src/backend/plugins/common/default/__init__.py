@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 from opsbot import on_command, CommandSession, on_natural_language
 from opsbot.log import logger
-from .api import Flow
+from .api import Flow, Stat
 from .settings import (
     DEFAULT_SHOW_GROUP_ID_ALIAS, DEFAULT_BIND_BIZ_ALIAS, DEFAULT_BIND_BIZ_TIP,
     DEFAULT_BIZ_BIND_SUCCESS, DEFAULT_BIZ_BIND_FAIL, DEFAULT_HELPER, DEFAULT_INTENT_CATEGORY
@@ -33,15 +33,15 @@ async def _(session: CommandSession):
     if 'event_key' in session.ctx:
         return
 
-    msg = await Flow(session).render_welcome_msg()
-    await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await Flow(session).render_welcome_msg()
+    await session.send(**msg_template)
 
 
 @on_command('bk_cc_biz_bind', aliases=DEFAULT_BIND_BIZ_ALIAS)
 async def _(session: CommandSession):
-    msg = await Flow(session).render_biz_msg()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await Flow(session).render_biz_msg()
+    if msg_template:
+        await session.send(**msg_template)
     else:
         logger.info('no biz')
 
@@ -54,5 +54,17 @@ async def _(session: CommandSession):
         logger.info('bind biz error')
         return
 
-    msg = await flow.render_welcome_msg()
-    await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await flow.render_welcome_msg()
+    await session.send(**msg_template)
+
+
+@on_command('stat_execution', aliases=('执行统计', ))
+async def _(session: CommandSession):
+    stat = Stat()
+    count = stat.stat_execution()
+    content = f'''>**执行统计** 
+                ><font color=\"warning\">您当前执行数「{count}」</font> 
+                '''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    await session.send(**msg_template)
+    del stat

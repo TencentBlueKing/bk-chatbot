@@ -17,22 +17,27 @@ from os import path, getenv
 from typing import List, Dict
 
 import opsbot
+try:
+    import config as CONFIG
+except ModuleNotFoundError:
+    CONFIG = None
 
 PRODUCT = getenv('PRODUCT', 'xwork')
 PLUGINS = getenv('PLUGINS', 'common').split(',')
 
 
 class Server:
-    def __init__(self, bot_name: str, plugins: List, config: Dict = None):
-        self._bot_name = bot_name
+    def __init__(self, bot_product: str, plugins: List, config: Dict = None):
+        self.bot_product = bot_product
         self._plugins = plugins
         self._config = config
 
     def run(self):
-        opsbot.init(self._bot_name, self._config)
+        opsbot.init_db()
+        opsbot.init(self.bot_product, self._config)
         for plugin in self._plugins:
             opsbot.load_plugins(path.join(path.dirname(__file__), 'plugins', plugin), f'plugins.{plugin}')
         opsbot.run()
 
 
-Server(PRODUCT, PLUGINS).run()
+Server(PRODUCT, PLUGINS, CONFIG).run()

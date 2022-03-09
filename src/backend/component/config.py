@@ -56,3 +56,5 @@ ES_DB_DOMAIN = os.getenv('ES_DB_DOMAIN', '')
 ES_DB_PORT = int(os.getenv('ES_DB_PORT', 32051))
 ES_DB_USERNAME = os.getenv('ES_DB_USERNAME', '')
 ES_DB_PASSWORD = os.getenv('ES_DB_PASSWORD', '')
+
+ORM_URL = os.getenv('ORM_URL', '')

@@ -44,3 +44,5 @@ TASK_EXEC_CANCEL = '任务已取消'
 
 PATTERN_IP = '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}'
 PATTERN_DYNAMIC_GROUP = '.*-.*-.*-.*-.*'
+
+IS_USE_SQLITE = True

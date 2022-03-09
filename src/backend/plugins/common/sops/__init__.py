@@ -16,8 +16,6 @@ specific language governing permissions and limitations under the License.
 import json
 
 from opsbot import on_command, CommandSession
-from opsbot.log import logger
-
 from .api import SopsTask
 
 
@@ -28,16 +26,16 @@ async def list_sops_template(session: CommandSession):
     except KeyError:
         bk_biz_id = None
 
-    msg = await SopsTask(session, bk_biz_id).render_sops_template_list()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await SopsTask(session, bk_biz_id).render_sops_template_list()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_sops_template_select')
 async def select_sops_template(session: CommandSession):
-    msg = await SopsTask(session).render_sops_template_info()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await SopsTask(session).render_sops_template_info()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_sops_template_execute')
@@ -47,8 +45,8 @@ async def execute_sops_template(session: CommandSession):
 
     flow = SopsTask(session)
     result = await flow.execute_task(bk_sops_template)
-    msg = flow.render_sops_template_execute_msg(result, bk_sops_template)
-    await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = flow.render_sops_execute_msg(result, bk_sops_template)
+    await session.send(**msg_template)
 
 
 @on_command('bk_sops_template_update')
@@ -59,20 +57,22 @@ async def update_sops_template(session: CommandSession):
 
     content = f'''>**SOPS TIP**
         >请顺序输入参数，**换行分隔**'''
-    params, _ = session.get('params', prompt='...', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
         session.state['bk_sops_template']['constants'][i]['value'] = item
 
-    msg = await SopsTask(session).render_sops_template_info()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await SopsTask(session).render_sops_template_info()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_sops_template_cancel')
 async def _(session: CommandSession):
     _, bk_sops_template_name = session.ctx['event_key'].split('|')
     content = f'''>**SOPS TIP** 
-        ><font color=\"warning\">您的标准运维任务「{bk_sops_template_name}」已取消...</font> 
-        '''
-    await session.send('', msgtype='markdown', markdown={'content': content})
+                  ><font color=\"warning\">您的标准运维任务「{bk_sops_template_name}」已取消...</font> 
+                  '''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    await session.send(**msg_template)

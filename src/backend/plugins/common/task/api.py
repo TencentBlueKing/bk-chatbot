@@ -27,14 +27,15 @@ from opsbot.command import kill_current_session
 from opsbot.log import logger
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.plugins import GenericTask
+from opsbot.models import BKExecutionLog
 from component import (
     JOB, SOPS, Backend, DevOps, ITSM, RedisClient, BK_PAAS_DOMAIN,
-    BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer
+    BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer, OrmClient
 )
 from .settings import (
-    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD,
+    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD, SESSION_APPROVE_MSG,
     TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS, TASK_EXEC_FAIL,
-    PATTERN_IP, EXPR_DONT_ENABLE, SESSION_APPROVE_MSG
+    PATTERN_IP, EXPR_DONT_ENABLE, IS_USE_SQLITE
 )
 
 
@@ -43,6 +44,7 @@ class AppTask(GenericTask):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
         self._job = JOB()
         self._sops = SOPS()
+        self._backend = Backend()
 
     async def _get_app_task(self, task_name: str) -> Dict:
         bk_job_plans = await self._job.get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
@@ -57,42 +59,12 @@ class AppTask(GenericTask):
 
     async def render_app_task(self, task_name: str):
         bk_app_task = await self._get_app_task(task_name)
-        template_card = {
-            'card_type': 'multiple_interaction',
-            'source': {
-                'desc': 'BKCHAT'
-            },
-            'main_title': {
-                'title': '任务查询结果'
-            },
-            'task_id': str(int(time.time() * 100000))
-        }
+        return self._session.bot.send_template_msg('render_task_filter_msg', bk_app_task, BK_PAAS_DOMAIN)
 
-        if any(bk_app_task.values()):
-            template_card['card_type'] = 'vote_interaction'
-            template_card['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
-            template_card['checkbox'] = {'question_key': 'bk_app_task_id', 'option_list': []}
-        else:
-            template_card['card_type'] = 'text_notice'
-            template_card['main_title']['desc'] = '未找到对应任务'
-            template_card['card_action'] = {'type': 1, 'url': BK_PAAS_DOMAIN}
-            return template_card
-
-        if bk_app_task['bk_job']:
-            option_list = [
-                {'id': f'bk_job|{str(job_plan["id"])}', 'text': f'JOB {job_plan["name"]}', 'is_checked': False}
-                for job_plan in bk_app_task['bk_job'][:5]
-            ]
-            template_card['checkbox']['option_list'].extend(option_list)
-
-        if bk_app_task['bk_sops']:
-            option_list = [
-                {'id': f'bk_sops|{str(template["id"])}', 'text': f'SOPS {template["name"]}', 'is_checked': False}
-                for template in bk_app_task['bk_sops'][:5]
-            ]
-            template_card['checkbox']['option_list'].extend(option_list)
-
-        return template_card
+    async def describe_entity(self, entity: str, **params):
+        if 'biz_id' in params:
+            params['biz_id'] = self.biz_id
+        return await self._backend.describe(entity, **params)
 
 
 class BKTask:
@@ -115,11 +87,18 @@ class BKTask:
             return await getattr(BKTask, f'_bk_{task.get("platform").lower()}')(self, task)
 
     async def _log(self, biz_id, platform, task_id, project_id='', feature_id=''):
-        return await self.backend.log(biz_id=biz_id, bot_type='default', bot_name=self._bot_id, msg='task',
-                                      intent_id=self._intent.get('id'), intent_name=self._intent.get('intent_name'),
-                                      platform=platform, task_id=task_id, sender=self._user_id,
-                                      intent_create_user=self._executor, params=self._slots,
-                                      project_id=project_id, feature_id=feature_id, rtx=self._group_id or '')
+        if IS_USE_SQLITE:
+            execution_log = BKExecutionLog(bk_biz_id=biz_id, bk_platform=platform, bk_username=self._user_id,
+                                           feature_name=self._intent.get('intent_name'), feature_id=str(task_id),
+                                           detail=self._slots)
+            OrmClient().add(execution_log)
+            return task_id
+        else:
+            return await self.backend.log(biz_id=biz_id, bot_type='default', bot_name=self._bot_id, msg='task',
+                                          intent_id=self._intent.get('id'), intent_name=self._intent.get('intent_name'),
+                                          platform=platform, task_id=task_id, sender=self._user_id,
+                                          intent_create_user=self._executor, params=self._slots,
+                                          project_id=project_id, feature_id=feature_id, rtx=self._group_id or '')
 
     async def _bk_job(self, task: Dict):
         # only allow string and host(ip)
@@ -189,16 +168,16 @@ def _validate_pattern(pattern, msg):
     return len(result) > 0
 
 
-def summary_statement(intent: Dict, slots: List, other: str, is_click=False):
-    params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
-    statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
+def summary_statement(intent: Dict, slots: List, other: str = '', is_click=False, session: CommandSession = None):
+    intent_name = intent.get("intent_name")
     if is_click:
-        return [
-            {'type': 'text','text': {'content': f'{statement}\n'}},
-            {'type': 'link', 'link': {'text': '执行', 'type': 'click', 'key': 'commit'}},
-            {'type': 'text', 'text': {'content': '    '}},
-            {'type': 'link', 'link': {'text': '取消', 'type': 'click', 'key': 'refuse'}}
-        ]
+        params = [{'keyname': slot['name'], 'value': slot['value']} for slot in slots]
+        statement = session.bot.send_template_msg('render_task_select_msg', 'BKCHAT', f'自定义任务_{intent_name}',
+                                                  params, 'bk_chat_task_execute', 'bk_chat_task_update',
+                                                  'bk_chat_task_cancel', intent, intent_name, ['执行', '取消'])
+    else:
+        params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
+        statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
 
     return statement
 
@@ -264,20 +243,22 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
     if config commit
     generate commit msg, wait user click
     """
-    is_commit = 'commit'
+    is_commit = 'bk_chat_task_execute'
     if intent.get('is_commit', True):
-        prompt = summary_statement(intent, slots, '', is_click=True)
+        prompt = summary_statement(intent, slots, '', True, session)
         while True:
-            is_commit, ctx = session.get('is_commit', prompt='...', msgtype='rich_text', rich_text=prompt)
-            if is_commit not in ['refuse', 'commit', TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
+            is_commit, ctx = session.get('is_commit', prompt='...', **prompt)
+            if is_commit not in ['bk_chat_task_cancel', 'bk_chat_task_execute',
+                                 TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
                 del session.state['is_commit']
             else:
                 break
 
-    return is_commit in ['commit', TASK_ALLOW_CMD]
+    return is_commit in ['bk_chat_task_execute', TASK_ALLOW_CMD]
 
 
-async def real_run(intent: Dict, slots: List, user_id: str, group_id: str, bot_id: str = None) -> Optional[Dict]:
+async def real_run(intent: Dict, slots: List, user_id: str, group_id: str,
+                   session: CommandSession = None) -> Optional[Dict]:
     response = defaultdict(dict)
     try:
         if 'timer' in intent:
@@ -288,8 +269,10 @@ async def real_run(intent: Dict, slots: List, user_id: str, group_id: str, bot_i
                                       exec_data=exec_data, expression='')
             msg = f'「定时」任务创建成功 时间： {timestamp}'
         else:
+            bot_id = session.bot.config.ID if session else None
             data = await BKTask(intent, slots, user_id, group_id, bot_id).run()
-            msg = summary_statement(intent, slots, f'{TASK_EXEC_SUCCESS}\r\n任务链接：{data.get("url")}')
+            msg = summary_statement(intent, slots, f'{TASK_EXEC_SUCCESS}\r\n任务链接：{data.get("url")}',
+                                    session=session)
             response.update(data)
     except ActionFailed as e:
         msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: 参数有误 {e}'
@@ -309,10 +292,7 @@ class Authority:
         self._session = session
         self._redis_client = RedisClient(env='prod')
 
-    def pre_xwork(self):
-        return {'available_user': [self._session.ctx['msg_sender_id']]}
-
-    def pre_in_xwork(self) -> Dict:
+    def pre_xwork(self) -> Dict:
         if self._session.ctx['msg_from_type'] == 'single':
             biz_id = self._redis_client.hash_get("chat_single_biz", self._session.ctx['msg_sender_id'])
         else:
@@ -322,13 +302,6 @@ class Authority:
             return None
 
         return {'biz_id': int(biz_id), 'available_user': [self._session.ctx['msg_sender_id']]}
-
-    async def pre_qq(self) -> Dict:
-        data = await Backend().get_youti_user_info(bk_qq_openid=self._session.ctx['msg_sender_id'])
-        if data and data.get('product_list'):
-            return {'biz_id__in': data.get('product_list'), 'developer': [data.get('wx_openid')]}
-
-        return None
 
 
 class Approval:
@@ -380,10 +353,7 @@ class Approval:
             await Approval.session.send(SESSION_APPROVE_MSG.format(','.join(approver)))
             return True
 
-    class InXwork(BaseBot):
-        pass
-
-    class QQ(BaseBot):
+    class Xwork(BaseBot):
         pass
 
     class Trigger(BaseBot):
@@ -410,28 +380,23 @@ class Scheduler:
     @classmethod
     async def list_scheduler(cls):
         data = await cls.backend.get_timer(timer_user=cls.session.ctx['msg_sender_id'])
-        msg = [[{
-            'type': 'text',
-            'text': {
-                'content': f'{item["biz_id"]} {item["timer_name"]} {item["execute_time"]}'
-            }
-        }, {
-            'type': 'link',
-            'link': {
-                'text': f'  删除\n',
-                'type': 'click',
-                'key': f'opsbot_delete_scheduler|{item["id"]}'
-            }
-        }] for item in data]
-        msg = list(itertools.chain.from_iterable(msg))
-        msg.insert(0, {'type': 'text', 'text': {'content': '当前定时任务如下:\n'}})
-        return msg
+        timers = [
+            {
+                'id': str(item['id']),
+                'text': f'{item["biz_id"]} {item["timer_name"]} {item["execute_time"]}',
+                'is_checked': False
+            } for item in data[:20]
+        ]
+        msg_template = cls.session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', 'BKCHAT定时任务',
+                                                         f'当前定时任务如下:', 'bk_chat_timer_id',
+                                                         timers, 'bk_chat_timer_select', submit_text='删除')
+        return msg_template
 
     @classmethod
     async def delete_scheduler(cls, timer_id: int):
         await cls.backend.delete_timer(timer_id)
 
-    class InXwork:
+    class Xwork:
         @staticmethod
         def handle_scheduler(payload: Dict):
             return {k: payload.get(k) for k in Scheduler.keys if k in payload}
