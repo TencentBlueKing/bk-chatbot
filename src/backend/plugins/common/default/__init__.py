@@ -73,12 +73,11 @@ async def _(session: CommandSession):
 @on_command('bk_chat_search_knowledge')
 async def _(session: CommandSession):
     answers = session.state.get('answers')
-    content = ''.join([
+    content = '\n'.join([
         f'''><font color=\"info\">问题：{item["question"]}</font>
         ><font color=\"warning\">答案：{item["solution"]}</font>'''
         for item in answers
     ])
-    content = f'''>**结果:** 
-             {content}'''
+    content = f'''>**结果:**\n{content}'''
     msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)
