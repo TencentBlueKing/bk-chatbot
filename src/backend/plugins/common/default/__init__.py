@@ -74,9 +74,11 @@ async def _(session: CommandSession):
 async def _(session: CommandSession):
     answers = session.state.get('answers')
     content = ''.join([
-        f'><font color=\"info\">{item["question"]}</font>><font color=\"info\">{item["solution"]}</font>'
+        f'''><font color=\"info\">问题：{item["question"]}</font>
+        ><font color=\"warning\">答案：{item["solution"]}</font>'''
         for item in answers
     ])
-    content = f'''>**结果:** {content}'''
+    content = f'''>**结果:** 
+             {content}'''
     msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)

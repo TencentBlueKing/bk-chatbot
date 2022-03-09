@@ -225,7 +225,7 @@ def train_model(biz_data_list, stop_word_list, biz_id=None):
     dir_type = 'mongo' if USE_MONGO else 'text'
     dir_path = os.path.join(BIZ_MODELS_DIR, dir_type, str(biz_id))
     if not os.path.exists(dir_path):
-        os.mkdir(dir_path)
+        os.makedirs(dir_path)
     dictionary_path, index_path, tfidf_path = get_models_path(biz_id)
     # 获取词袋(字典)
     dictionary = corpora.Dictionary(text_list)
