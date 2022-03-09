@@ -25,7 +25,7 @@ MONGO_DB_USERNAME = os.getenv('MONGO_DB_USERNAME', '')
 MONGO_DB_PASSWORD = os.getenv('MONGO_DB_PASSWORD', '')
 
 CUR_PATH = dirname(abspath(__file__))
-BIZ_MODELS_DIR = join(CUR_PATH, 'biz_models')
+BIZ_MODELS_DIR = join(CUR_PATH, 'corpus')
 STOP_WORDS_PATH = join(CUR_PATH, 'corpus', 'stopwords.txt')
 SIMILAR_WORD_PATH = join(CUR_PATH, 'corpus', 'similar_word.json')
 SIMILAR_WORD = json.load(open(SIMILAR_WORD_PATH))

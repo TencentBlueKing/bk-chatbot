@@ -233,12 +233,12 @@ def train_model(biz_data_list, stop_word_list, biz_id=None):
     # 制作语料库，产生稀疏文档向量
     corpus = [dictionary.doc2bow(text) for text in text_list]
     # 对语料库建模,即训练转换模型
-    tfidf = models.TfidfModel(corpus)
-    tfidf.save(tfidf_path)
+    tf_idf = models.TfidfModel(corpus)
+    tf_idf.save(tfidf_path)
     # 将语料转换为LSI,并索引
-    index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features=len(dictionary.keys()))
+    index = similarities.SparseMatrixSimilarity(tf_idf[corpus], num_features=len(dictionary.keys()))
     index.save(index_path)
-    return tfidf, index, dictionary
+    return tf_idf, index, dictionary
 
 
 def fetch_answer(msg_content, biz_id=None):
@@ -254,13 +254,13 @@ def fetch_answer(msg_content, biz_id=None):
     # 获取业务模型
     if not biz_id:
         biz_id = 0
-    tfidf, ind, dictionary = get_model(biz_id)
+    tf_idf, ind, dictionary = get_model(biz_id)
     # 获取存储的模型失败，重新训练
-    if NEED_TRAIN or not tfidf:
+    if NEED_TRAIN or not tf_idf:
         # 模型训练
-        tfidf, ind, dictionary = train_model(biz_data_list, stop_word_list, biz_id)
+        tf_idf, ind, dictionary = train_model(biz_data_list, stop_word_list, biz_id)
     # 根据模型获取结果
-    similar_result = match_model(question_all_list, tfidf, ind, dictionary)
+    similar_result = match_model(question_all_list, tf_idf, ind, dictionary)
     # 结果排序
     sorted_result = sort_by_similar(similar_result, biz_data_list)
     intent_list = filter_by_similar(sorted_result)

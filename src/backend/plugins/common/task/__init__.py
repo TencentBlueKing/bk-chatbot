@@ -17,7 +17,7 @@ from typing import Coroutine
 
 from opsbot import on_command, CommandSession
 from opsbot import on_natural_language, NLPSession, IntentCommand
-from component import IntentRecognition, SlotRecognition
+from component import IntentRecognition, SlotRecognition, fetch_answer
 from plugins.common.job import JobTask
 from plugins.common.sops import SopsTask
 
@@ -138,7 +138,7 @@ async def task(session: CommandSession):
     session.state.clear()
 
 
-@on_command('opsbot_callback', aliases=('handle_approval', 'handle_scheduler'))
+@on_command('bk_chat_task_callback', aliases=('handle_approval', 'handle_scheduler'))
 async def _(session: CommandSession):
     """
     real run the cmd after deal approval and scheduler
@@ -150,7 +150,7 @@ async def _(session: CommandSession):
     await real_run(*data.values(), session)
 
 
-@on_command('opsbot_list_scheduler', aliases=('查看定时任务', '查看定时'))
+@on_command('bk_chat_task_list_scheduler', aliases=('查看定时任务', '查看定时'))
 async def _(session: CommandSession):
     """
     display schedulers, the you can delete old one
@@ -159,7 +159,7 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('opsbot_delete_scheduler')
+@on_command('bk_chat_task_delete_scheduler')
 async def _(session: CommandSession):
     """
     delete scheduler
@@ -182,9 +182,11 @@ async def _(session: NLPSession):
         return
     intents = await IntentRecognition().fetch_intent(session.msg_text.strip(), **intent_filter)
     intent = await validate_intent(intents, session)
-    if not intent:
-        return
+    if intent:
+        return IntentCommand(intent.get('similar', 0) * 100, 'bk_chat_task_execute',
+                             args={'index': True, 'intent': intent,
+                                   'slots': None, 'user_id': session.ctx['msg_sender_id']})
 
-    return IntentCommand(intent.get('similar', 0) * 100, 'bk_chat_task_execute',
-                         args={'index': True, 'intent': intent,
-                               'slots': None, 'user_id': session.ctx['msg_sender_id']})
+    answers = fetch_answer(session.msg_text.strip())
+    if answers:
+        return IntentCommand(100, 'bk_chat_search_knowledge', args={'answers': answers})
