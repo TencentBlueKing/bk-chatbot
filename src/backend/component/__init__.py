@@ -14,7 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 
 from .bk import BKApi, CC, JOB, SOPS, DevOps, Backend, BKData, Plugin, ITSM
-from .nlu.v20210521 import fetch_slot, fetch_intent
+from .nlu.v20220216 import IntentRecognition, SlotRecognition
 from .nlp.biz import BizMapper
 from .nlp.time import TimeNormalizer
 from .public import (
@@ -28,7 +28,7 @@ from .config import (
 
 
 __all__ = ['BKApi', 'CC', 'JOB', 'SOPS', 'DevOps', 'BKData', 'ITSM', 'Backend', 'Plugin',
-           'fetch_slot', 'fetch_intent', 'BizMapper', 'TimeNormalizer',
+           'IntentRecognition', 'SlotRecognition', 'BizMapper', 'TimeNormalizer',
            'RedisClient', 'ESClient', 'OrmClient',
            'regex_parse_entity', 'AesED', 'import_string',
            'BK_CHAT_DOMAIN', 'BK_JOB_DOMAIN', 'BK_SOPS_DOMAIN', 'BK_DEVOPS_DOMAIN',

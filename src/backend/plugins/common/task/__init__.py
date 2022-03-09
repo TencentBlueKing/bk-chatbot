@@ -17,7 +17,7 @@ from typing import Coroutine
 
 from opsbot import on_command, CommandSession
 from opsbot import on_natural_language, NLPSession, IntentCommand
-from component import fetch_intent, fetch_slot
+from component import IntentRecognition, SlotRecognition
 from plugins.common.job import JobTask
 from plugins.common.sops import SopsTask
 
@@ -95,7 +95,7 @@ async def task(session: CommandSession):
         slots = session.state.get('slots')
         if not slots:
             stripped_msg = session.ctx['message'].extract_plain_text().strip()
-            slots = await fetch_slot(stripped_msg, intent.get('intent_id'))
+            slots = await SlotRecognition(intent).fetch_slot(stripped_msg)
             session.state['slots'] = slots
         if session.state.get('index'):
             msg = f'识别到技能：{intent.get("intent_name")}\r\n输入 [结束] 终止会话'
@@ -112,7 +112,7 @@ async def task(session: CommandSession):
             return None
 
         intent = (await AppTask(session).describe_entity('intents', id=int(intent_id)))[0]
-        slots = await fetch_slot('', int(intent_id))
+        slots = await SlotRecognition(intent).fetch_slot()
         if slots:
             slots[0]['prompt'] = f'{user_id} 已选择：{intent["intent_name"]}\n{slots[0]["prompt"]}'
         session.state['user_id'] = user_id
@@ -180,7 +180,7 @@ async def _(session: NLPSession):
         intent_filter = await intent_filter
     if not intent_filter:
         return
-    intents = await fetch_intent(session.msg_text.strip(), **intent_filter)
+    intents = await IntentRecognition().fetch_intent(session.msg_text.strip(), **intent_filter)
     intent = await validate_intent(intents, session)
     if not intent:
         return
