@@ -1,4 +1,3 @@
-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -15,104 +14,61 @@ specific language governing permissions and limitations under the License.
 """
 
 import os
-import json
 import io
-import re
+
 import jieba
 from gensim import corpora, models, similarities
+try:
+    from pymongo import MongoClient
+except ImportError:
+    MongoClient = None
 
-from component import Backend
-
-CUR_PATH = os.path.dirname(os.path.abspath(__file__))
-BASE_DICT_PATH = os.path.join(CUR_PATH, 'corpus', 'base_dict.txt')
-STOP_WORDS_PATH = os.path.join(CUR_PATH, 'corpus', 'stopwords.txt')
-SIMILAR_WORD_PATH = os.path.join(CUR_PATH, 'corpus', 'similar_word.json')
-similar_word = json.load(open(SIMILAR_WORD_PATH, encoding='utf-8'))
-jieba.load_userdict(BASE_DICT_PATH)
-
-
-async def get_slots(intent_id):
-    slot_list = []
-    try:
-        task_list = await Backend().describe('tasks', index_id=intent_id)
-        slots = task_list[0]['slots']
-        for slot in slots:
-            slot.setdefault('value', '')
-            slot_list.append(slot)
-    except IndexError:
-        return slot_list
-    else:
-        return slot_list
+from opsbot.log import logger
+from .config import (
+    USE_MONGO, NEED_TRAIN, EXAMPLE_CORPUS, SIMILAR_WORD, BIZ_MODELS_DIR, STOP_WORDS_PATH,
+    MONGO_DB_HOST, MONGO_DB_NAME, MONGO_TABLE_NAME, MONGO_DB_PORT, MONGO_DB_USERNAME, MONGO_DB_PASSWORD,
+    FILTER_PERCENTAGE, SIMILAR_PERCENTAGE
+)
 
 
-def get_slot_data(msg, reglist):
-    reg_msg_tmp = re.split(r"\?+|\s+", str(''.join([i if ord(i) < 128 else '?' for i in msg])))
-    reg_msg = list(filter(None, [x.strip() for x in reg_msg_tmp]))
-    reg_msg_list_tmp = []
-    for m in range(0, len(reg_msg)):
-        reg_msg_dir = {}
-        str_num = 0
-        for n in range(0, len(reglist)):
-            pat = re.compile(reglist[n]['pattern'])
-            regstr_obj = pat.search(reg_msg[m])
-            if regstr_obj and len(regstr_obj.group()) > str_num:
-                reg_msg_dir['value'] = regstr_obj.group()
-                reg_msg_dir['value'] = regstr_obj.group()
-                reg_msg_dir['id'] = reglist[n]['id']
-                reg_msg_dir['pattern'] = reglist[n]['pattern']
-                reg_msg_dir['name'] = reglist[n]['name']
-                str_num = len(regstr_obj.group())
-        if reg_msg_dir:
-            reg_msg_list_tmp.append(reg_msg_dir)
-        for a in reg_msg_list_tmp:
-            for b in reglist:
-                if str(a['id']) == str(b['id']):
-                    b['value'] = a['value']
-    return reglist
-
-
-async def fetch_slot(msg_content, intent_id):
-    """
-    获取slot值，
-    :param msg_content: 用户语句
-    :param intent_id: 意图id
-    :return:
-    """
-    slot_list = await get_slots(intent_id)
-    reg_list = get_slot_data(msg_content, slot_list)
-    return reg_list
-
-
-async def get_corpus_text(**kwargs):
+def get_corpus_wiki(biz_id=None):
     """
     获取语料，
-    :param biz_id: 业务id，业务纬度，内部群聊场景
-    :param user_id: 用户id，单聊的场景
+    :param biz_id: 业务id，业务纬度
     :return:
     """
-    backend = Backend()
     intent_list = []
-    db_intents = await backend.describe('intents', **kwargs)
-    if len(db_intents) > 0:
-        for intent in db_intents:
-            intent_id = intent['id']
-            intent_name = intent['intent_name']
-            is_commit = intent['is_commit']
-            status = intent['status']
-            available_user = intent['available_user']
-            available_group = intent['available_group']
-            approver = intent['approver']
-            biz_id = intent['biz_id']
-            updated_by = intent['updated_by']
-            # todo decrease check db frequently
-            db_utterances = await backend.describe('utterances', index_id=intent_id)
-            if len(db_utterances) > 0:
-                utterance_list = db_utterances[0]['content']
-                for utterance in utterance_list:
+    if not USE_MONGO:
+        for biz_corpus in EXAMPLE_CORPUS:
+            if biz_corpus['data'] and len(biz_corpus['data']) > 0:
+                for corpus in biz_corpus['data']:
+                    if not biz_id:
+                        intent_list.append(
+                            {'question': corpus['question'], 'solution': corpus['solution'], 'biz_id': 0})
+                    if biz_corpus['biz_id'] == biz_id:
+                        intent_list.append(
+                            {'question': corpus['question'], 'solution': corpus['solution'], 'biz_id': int(biz_id)})
+    else:
+        db_name = MONGO_DB_NAME
+        collection_name = MONGO_TABLE_NAME
+        db_results = []
+        client = MongoClient(host=MONGO_DB_HOST, port=MONGO_DB_PORT,
+                             username=MONGO_DB_USERNAME, password=MONGO_DB_PASSWORD)
+        db = client[db_name]
+        collection = db[collection_name]
+        cursor = collection.find()
+        for i in cursor:
+            db_results.append(i)
+        client.close()
+        if db_results and len(db_results) > 0:
+            for intent in db_results:
+                if not biz_id:
+                    intent_list.append({'question': intent['question'], 'solution': intent['solution'], 'biz_id': 0})
+                if 'biz_id' in intent and intent['biz_id'] == biz_id:
                     intent_list.append(
-                        {'intent_id': intent_id, 'intent_name': intent_name, 'is_commit': is_commit, 'status': status,
-                         'available_user': available_user, 'available_group': available_group, 'biz_id': biz_id,
-                         'utterance': utterance, 'updated_by': updated_by, 'approver': approver})
+                        {'question': intent['question'], 'solution': intent['solution'], 'biz_id': int(biz_id)})
+        else:
+            logger.error('执行获取mongo语料数据错误')
     return intent_list
 
 
@@ -143,8 +99,8 @@ def similar_questions(doc_test_list):
     question_all_list = []
     list_index = []
     for index, word in enumerate(doc_test_list):
-        if similar_word.get(word):
-            similar_list = similar_word[word]
+        if SIMILAR_WORD.get(word):
+            similar_list = SIMILAR_WORD[word]
             list_index.append((index, similar_list))
     if len(list_index) > 0:
         for i in range(len(list_index)):
@@ -190,12 +146,11 @@ def match_model(question_word, model_tfidf, model_ind, model_dictionary):
 
 def filter_by_similar(sorted_list):
     """
-    若多于similar_percentage=0.6的有超过5个，则再次过滤
+    若多于SIMILAR_PERCENTAGE的有超过5个，则再次过滤
     :param sorted_list: 正排序的结果
     """
-    filter_percentage = 0.75
     sorted_list.sort(key=lambda k: k['similar'], reverse=True)
-    filter_list = list(filter(lambda x: x['similar'] > filter_percentage, sorted_list))
+    filter_list = list(filter(lambda x: x['similar'] > FILTER_PERCENTAGE, sorted_list))
     if len(filter_list) == 0:
         ret = sorted_list[0:5]
     else:
@@ -204,23 +159,19 @@ def filter_by_similar(sorted_list):
 
 
 def sort_by_similar(sort, biz_data_list):
-    similar_percentage = 0.6
     sort_res = []
     for i in sort:
-        if i[1] >= similar_percentage:
-            temp = {'utterance': biz_data_list[i[0]]['utterance'], 'id': biz_data_list[i[0]]['intent_id'],
-                    'intent_name': biz_data_list[i[0]]['intent_name'], 'intent_id': biz_data_list[i[0]]['intent_id'],
-                    'is_commit': biz_data_list[i[0]]['is_commit'], 'status': biz_data_list[i[0]]['status'],
-                    'updated_by': biz_data_list[i[0]]['updated_by'], 'approver': biz_data_list[i[0]]['approver'],
-                    'available_user': biz_data_list[i[0]]['available_user'],
-                    'available_group': biz_data_list[i[0]]['available_group'], 'biz_id': biz_data_list[i[0]]['biz_id'],
+        if i[1] >= SIMILAR_PERCENTAGE:
+            temp = {'question': biz_data_list[i[0]]['question'],
+                    'solution': biz_data_list[i[0]]['solution'],
+                    'biz_id': biz_data_list[i[0]]['biz_id'],
                     'similar': float(round(i[1], 2))}
             if len(sort_res) == 0:
                 sort_res.append(temp)
             else:
                 flag = False
                 for tmp in sort_res:
-                    if tmp['intent_name'] == temp['intent_name']:
+                    if tmp['question'] == temp['question']:
                         flag = True
                         break
                 if not flag:
@@ -228,36 +179,71 @@ def sort_by_similar(sort, biz_data_list):
     return sort_res
 
 
-def train_model(biz_data_list, stop_word_list):
+def get_models_path(biz_id):
+    dir_type = 'mongo' if USE_MONGO else 'text'
+    dictionary_path = os.path.join(BIZ_MODELS_DIR, dir_type, str(biz_id), '{}.dict'.format(biz_id))
+    index_path = os.path.join(BIZ_MODELS_DIR, dir_type, str(biz_id), '{}.index'.format(biz_id))
+    tfidf_path = os.path.join(BIZ_MODELS_DIR, dir_type, str(biz_id), '{}.tfidf'.format(biz_id))
+    return dictionary_path, index_path, tfidf_path
+
+
+def get_model(biz_id):
+    """
+    从本地文件加载模型
+    :param biz_id: 业务ID
+    """
+    dictionary_path, index_path, tfidf_path = get_models_path(biz_id)
+    dictionary = ""
+    index = ""
+    tfidf = ""
+    if (os.path.isfile(dictionary_path)) and (os.path.isfile(index_path)) and (os.path.isfile(tfidf_path)):
+        dictionary = corpora.Dictionary.load(dictionary_path)
+        index = similarities.SparseMatrixSimilarity.load(index_path)
+        tfidf = models.TfidfModel.load(tfidf_path)
+
+    return tfidf, index, dictionary
+
+
+def train_model(biz_data_list, stop_word_list, biz_id=None):
     """
     根据业务语料来训练模型
     :param biz_data_list: 某个业务的语料
     """
     text_list = []
     if len(biz_data_list) == 1:
-        tmp_data = {'intent_id': 0, 'is_commit': False, 'status': False, 'utterance': '你好',
-                    'available_group': [], 'intent_name': '你好', 'available_user': []}
+        tmp_data = {'utterance': '你好', 'intent_name': '你好', 'biz_id': 0}
         biz_data_list.append(tmp_data)
     for w in biz_data_list:
-        utterance = w['utterance']
+        utterance = w['question']
         cut_res = jieba.lcut(utterance.lower())
         each_text_list = [w for w in cut_res if w not in stop_word_list]
         # 分词和去掉停用词之后的语料
         text_list.append(each_text_list)
+    # 模型文件存储路径
+    if not biz_id:
+        biz_id = 0
+    dir_type = 'mongo' if USE_MONGO else 'text'
+    dir_path = os.path.join(BIZ_MODELS_DIR, dir_type, str(biz_id))
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
+    dictionary_path, index_path, tfidf_path = get_models_path(biz_id)
     # 获取词袋(字典)
     dictionary = corpora.Dictionary(text_list)
+    dictionary.save(dictionary_path)
     # 制作语料库，产生稀疏文档向量
     corpus = [dictionary.doc2bow(text) for text in text_list]
     # 对语料库建模,即训练转换模型
     tfidf = models.TfidfModel(corpus)
+    tfidf.save(tfidf_path)
     # 将语料转换为LSI,并索引
     index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features=len(dictionary.keys()))
+    index.save(index_path)
     return tfidf, index, dictionary
 
 
-async def fetch_intent(msg_content, **kwargs):
+def fetch_answer(msg_content, biz_id=None):
     # 获取语料
-    biz_data_list = await get_corpus_text(**kwargs)
+    biz_data_list = get_corpus_wiki(biz_id)
     # 对输入内容进行分词
     cut_word_res = jieba.lcut(msg_content.lower())
     # 停用词列表
@@ -265,8 +251,14 @@ async def fetch_intent(msg_content, **kwargs):
     # 去除停用词
     question_word = filter_stop_word(cut_word_res, stop_word_list)
     question_all_list = similar_questions(question_word)
-    # 模型训练
-    tfidf, ind, dictionary = train_model(biz_data_list, stop_word_list)
+    # 获取业务模型
+    if not biz_id:
+        biz_id = 0
+    tfidf, ind, dictionary = get_model(biz_id)
+    # 获取存储的模型失败，重新训练
+    if NEED_TRAIN or not tfidf:
+        # 模型训练
+        tfidf, ind, dictionary = train_model(biz_data_list, stop_word_list, biz_id)
     # 根据模型获取结果
     similar_result = match_model(question_all_list, tfidf, ind, dictionary)
     # 结果排序
