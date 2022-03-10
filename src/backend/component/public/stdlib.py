@@ -14,7 +14,9 @@ specific language governing permissions and limitations under the License.
 """
 
 import re
-import base64, hmac, json
+import base64
+import hmac
+import json
 from importlib import import_module
 from typing import Dict, ByteString
 
@@ -79,8 +81,8 @@ def import_string(dotted_path):
 
 
 class Response:
-    def __init__(self, result=True, code=0, msg='', data={}):
+    def __init__(self, result=True, code=0, msg='', data=None):
         self.result = result
         self.code = code
-        self.data = data
+        self.data = data or {}
         self.msg = msg
