@@ -33,7 +33,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 ############################################################
-version_tag = ["verison"]
+version_tag = ["版本"]
 version_list_docs = swagger_auto_schema(
     tags=version_tag,
     operation_id="version",
