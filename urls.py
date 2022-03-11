@@ -42,6 +42,7 @@ urlpatterns = [
     url(r"^api/v1/", include("src.manager.module_nlp.urls")),
     url(r"^api/v1/", include("src.manager.module_plugin.urls")),
     url(r"^api/v1/", include("src.manager.module_timer.urls")),
+    url(r"^api/v1/", include("src.manager.module_other.urls")),
     # 文档
     url(r"^swagger/$", schema_view.with_ui("swagger"), name="schema-swagger-ui"),
     url(r"^api-docs/$", schema_view.with_ui("redoc"), name="schema-docs"),
