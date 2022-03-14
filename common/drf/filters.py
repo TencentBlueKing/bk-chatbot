@@ -25,6 +25,9 @@ class BaseOpenApiFilter(django_filters.FilterSet):
 
     created_at_min = filters.CharFilter(field_name="created_at", lookup_expr="gte")
     created_at_max = filters.CharFilter(field_name="created_at", lookup_expr="lte")
+    updated_at_min = filters.CharFilter(field_name="updated_at", lookup_expr="gte")
+    updated_at_max = filters.CharFilter(field_name="updated_at", lookup_expr="lte")
+
 
     def self_or(self, queryset, field_name, value):
         """

@@ -45,6 +45,7 @@ INSTALLED_APPS += (
     "src.manager.module_nlp",
     "src.manager.module_plugin",
     "src.manager.module_timer",
+    "src.manager.module_other",
 )
 
 # 这里是默认的中间件，大部分情况下，不需要改动
