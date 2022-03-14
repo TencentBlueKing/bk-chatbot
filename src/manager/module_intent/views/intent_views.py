@@ -52,6 +52,20 @@ class IntentViewSet(BaseManageViewSet):
     permission_classes = (IntentPermission,)
     throttle_classes = (ChatBotThrottle,)
 
+    def list(self, request, *args, **kwargs):
+        request.query_params._mutable = True
+        # available_user查询
+        available_user = self.request.payload.get("available_user", None)
+        if available_user:
+            request.query_params["available_user"] = f'"{self.request.payload.get("available_user")}"'
+        # available_group 查询
+        available_group = self.request.payload.get("available_group", None)
+        if available_group:
+            request.query_params["available_group"] = f'"{self.request.payload.get("available_group")}"'
+
+        data = super().list(self, request, *args, **kwargs)
+        return data
+
     def perform_create(self, serializer):
         """
         新增意图后续动作
