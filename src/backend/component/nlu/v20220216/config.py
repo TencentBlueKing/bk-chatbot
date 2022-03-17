@@ -13,6 +13,11 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from .db import RedisClient, ESClient, OrmClient
-from .stdlib import *
-from .meta import *
+import os
+
+CUR_PATH = os.path.dirname(os.path.abspath(__file__))
+BASE_DICT_PATH = os.path.join(CUR_PATH, 'corpus', 'base_dict.txt')
+STOP_WORDS_PATH = os.path.join(CUR_PATH, 'corpus', 'stopwords.txt')
+SIMILAR_WORD_PATH = os.path.join(CUR_PATH, 'corpus', 'similar_word.json')
+BASE_CONFIDENCE = 0.6
+ADVANCED_CONFIDENCE = 0.75

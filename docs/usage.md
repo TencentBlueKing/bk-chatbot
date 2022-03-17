@@ -17,3 +17,7 @@
 4、我们同时支持任务查找的功能，如下，您可自由输入你想要执行的任务，后台会给您匹配到最佳的任务。
 
 <img title="" src="./resource/img/kills_find1.jpg" alt="image" style="zoom: 67%;" width="206"><img title="" src="./resource/img/kills_find2.jpg" alt="image" width="207">
+
+5、语音交互样例展示
+
+<img title="" src="./resource/img/voice.png" alt="image" style="zoom: 67%;" width="206"><img title="" src="./resource/img/voice2.png" alt="image" width="207"><img title="" src="./resource/img/voice3.png" alt="image" width="207">

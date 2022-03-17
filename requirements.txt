@@ -32,7 +32,7 @@ Quart==0.6.15
 requests==2.25.1
 sortedcontainers==2.3.0
 typing-extensions==3.7.4.3
-urllib3==1.26.4
+urllib3==1.26.5
 wsproto==1.0.0
 yarl==1.6.3
 redis==3.5.3

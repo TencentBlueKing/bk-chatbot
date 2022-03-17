@@ -13,6 +13,17 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from .db import RedisClient, ESClient, OrmClient
-from .stdlib import *
-from .meta import *
+
+class ASR:
+    """
+    a voice recognize tool, you need to implement it,
+    input is amr/wav bash64 code, output is text
+    """
+    def __init__(self, voice: str, **params):
+        self.voice = voice
+
+    def recognize(self) -> str:
+        """
+        need improve
+        """
+        return self.voice

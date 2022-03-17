@@ -24,7 +24,7 @@ from .api import DispatchMSG
 @on_command('send_msg', aliases=('send_msg',))
 async def _(session: CommandSession):
     try:
-        await session.send('', **session.ctx['payload'])
+        await session.send(**session.ctx['payload'])
     except KeyError:
         logger.exception(f'API ERROR {session.ctx}')
 
@@ -45,4 +45,4 @@ async def _(session: CommandSession):
         await session.send(msg)
     else:
         payload = dispatcher.process_msg()
-        await session.send('', **payload)
+        await session.send(**payload)

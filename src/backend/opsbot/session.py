@@ -29,7 +29,7 @@ class BaseSession:
     def self_id(self) -> int:
         return self.bot.config.RTX_NAME
 
-    async def send(self, message: Message_T, *,
+    async def send(self, message: Message_T = None,
                    at_sender: bool = False,
                    ensure_private: bool = False,
                    ignore_failure: bool = True,

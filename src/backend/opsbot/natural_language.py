@@ -120,7 +120,7 @@ async def handle_natural_language(bot: Bot, ctx: Context_T) -> bool:
     Handle a message as natural language.
 
     This function is typically called by "handle_message".
-
+    todo you can add your own nlp method and make it more clever
     :param bot: Bot instance
     :param ctx: message context
     :return: the message is handled as natural language

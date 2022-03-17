@@ -16,20 +16,19 @@ specific language governing permissions and limitations under the License.
 import json
 
 from opsbot import on_command, CommandSession
-
 from .api import JobTask
 
 
-@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', 'bk_job'))
+@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', '作业平台', 'bk_job'))
 async def list_job_plan(session: CommandSession):
     try:
         bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
     except KeyError:
         bk_biz_id = None
 
-    msg = await JobTask(session, bk_biz_id).render_job_plan_list()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await JobTask(session, bk_biz_id).render_job_plan_list()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_sort')
@@ -44,50 +43,53 @@ async def search_job_plan(session: CommandSession):
 
 @on_command('bk_job_plan_select')
 async def select_bk_job_plan(session: CommandSession):
-    msg = await JobTask(session).render_job_plan_detail()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await JobTask(session).render_job_plan_detail()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_execute')
 async def _(session: CommandSession):
-    _, job_plan_id, job_plan_name, global_var_list = session.ctx['event_key'].split('|')
+    _, job_plan = session.ctx['event_key'].split('|')
     try:
-        global_var_list = json.loads(global_var_list)
+        job_plan = json.loads(job_plan)
     except json.JSONDecodeError:
         return
 
     flow = JobTask(session)
-    params = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
-    result = await flow.execute_task(job_plan_id, params)
-    msg = flow.render_job_plan_execute_msg(result, job_plan_name, global_var_list)
-    await session.send('', msgtype='template_card', template_card=msg)
+    result = await flow.execute_task(job_plan)
+    msg_template = flow.render_job_execute_msg(result, job_plan)
+    await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_update')
 async def _(session: CommandSession):
     if 'event_key' in session.ctx:
-        _, job_plan_id, job_plan_name, global_var_list = session.ctx['event_key'].split('|')
-        session.state['job_plan_id'] = job_plan_id
-        session.state['job_plan_name'] = job_plan_name
-        session.state['global_var_list'] = json.loads(global_var_list)
+        _, job_plan = session.ctx['event_key'].split('|')
+        try:
+            job_plan = json.loads(job_plan)
+        except json.JSONDecodeError:
+            return
+        session.state.update(job_plan)
 
     content = f'''>**JOB TIP**
     >请顺序输入参数，**换行分隔**'''
-    params, _ = session.get('params', prompt='...', msgtype='markdown', markdown={'content': content})
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
         session.state['global_var_list'][i]['value'] = item
 
-    msg = await JobTask(session).render_job_plan_detail()
-    if msg:
-        await session.send('', msgtype='template_card', template_card=msg)
+    msg_template = await JobTask(session).render_job_plan_detail()
+    if msg_template:
+        await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_cancel')
 async def _(session: CommandSession):
     _, bk_job_plan_name = session.ctx['event_key'].split('|')
     content = f'''>**JOB TIP** 
-    ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
-    '''
-    await session.send('', msgtype='markdown', markdown={'content': content})
+                ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
+                '''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    await session.send(**msg_template)

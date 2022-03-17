@@ -13,6 +13,13 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from .db import RedisClient, ESClient, OrmClient
-from .stdlib import *
-from .meta import *
+from ..job.api import JobTask
+from ..sops.api import SopsTask
+from ..devops import DevOpsTask
+
+
+SHORTCUT_PROTO = {
+    'JOB': JobTask,
+    'SOPS': SopsTask,
+    'DevOps': DevOpsTask
+}

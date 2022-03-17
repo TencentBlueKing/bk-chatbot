@@ -14,13 +14,17 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
+from typing import Optional, Any, ClassVar
 
 from redis import Redis
 from elasticsearch import Elasticsearch
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from component.config import (
     REDIS_DB_NAME, REDIS_DB_PASSWORD, REDIS_DB_PORT,
-    ES_DB_DOMAIN, ES_DB_PORT, ES_DB_USERNAME, ES_DB_PASSWORD
+    ES_DB_DOMAIN, ES_DB_PORT, ES_DB_USERNAME, ES_DB_PASSWORD,
+    ORM_URL
 )
 
 
@@ -86,3 +90,42 @@ class ESClient:
 
     def search(self, **kwargs):
         return self.es.search(**kwargs)
+
+
+class OrmClient:
+    """
+    this support most of object relation db,
+    user need to set its db engine
+    """
+    def __init__(self, url: str = ORM_URL):
+        engine = create_engine(url)
+        db_session = sessionmaker(bind=engine)
+        self.session = db_session()
+
+    def commit_handle(func):
+        def wrapper(self, *args, **kwargs):
+            result = func(self, *args, **kwargs)
+            self.session.commit()
+            return result
+        return wrapper
+
+    def query(self, cls: ClassVar, func: str, **params) -> Any:
+        return getattr(self.session.query(cls).filter_by(**params), func)()
+
+    @commit_handle
+    def add(self, obj: Optional):
+        if isinstance(obj, list):
+            self.session.add_all(obj)
+        else:
+            self.session.add(obj)
+
+    @commit_handle
+    def delete(self, obj: Optional):
+        self.session.delete(obj)
+
+    @commit_handle
+    def update(self, obj: Optional, **params):
+        obj.update(params)
+
+    def __del__(self):
+        self.session.close()
