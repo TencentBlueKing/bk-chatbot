@@ -41,7 +41,6 @@ class PluginAction(Serializer):
         required = serializers.BooleanField(label="是否必须", required=False, default=True)
         options = serializers.ListField(label="选项", required=False, child=PluginActionParamOptions())
 
-
     class PluginActionOperation(Serializer):
         key = serializers.CharField(label="key")
         name = serializers.CharField(label="操作名称")
@@ -52,6 +51,7 @@ class PluginAction(Serializer):
     run_now = serializers.BooleanField(label="是否立即执行", required=False, default=False)
     params = serializers.ListField(label="字段", child=PluginActionParam())
     operation = serializers.ListField(label="操作项", required=False, child=PluginActionOperation())
+
 
 # 基础
 class PluginBaseSerializer(serializers.ModelSerializer):
