@@ -21,8 +21,7 @@ from rest_framework.response import Response
 from common.control.throttle import ChatBotThrottle
 from common.generic import BaseViewSet
 from common.http.request import init_views
-from common.perm.permission import check_permission
-from handler.in_api.youti import Mga
+from src.manager.handler.in_api.youti import Mga
 
 
 class YoutiViewSet(BaseViewSet):
@@ -35,7 +34,6 @@ class YoutiViewSet(BaseViewSet):
 
     @login_exempt
     @csrf_exempt
-    @check_permission()
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

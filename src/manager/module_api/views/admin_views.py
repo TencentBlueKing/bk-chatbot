@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from blueapps.account.decorators import login_exempt
 from common.http.request import init_views
-from module_intent.models import Intent, Task, Utterances
+from src.manager.module_intent.models import Intent, Task, Utterances
 
 
 @login_exempt

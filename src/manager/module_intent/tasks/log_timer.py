@@ -24,7 +24,7 @@ from common.constants import (
     UPDATE_TASK_TIME,
 )
 from common.redis import RedisClient
-from module_intent.handler.task_log import update_task_status
+from src.manager.module_intent.handler.task_log import update_task_status
 
 
 @periodic_task(run_every=datetime.timedelta(seconds=UPDATE_TASK_TIME))

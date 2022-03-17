@@ -15,9 +15,9 @@ specific language governing permissions and limitations under the License.
 
 from common.control.throttle import ChatBotThrottle
 from common.generic import APIModelViewSet, ValidationMixin
-from module_intent.control.permission import IntentPermission
-from module_intent.models import Utterances
-from module_intent.proto.utterances import UtterancesSerializer
+from src.manager.module_intent.control.permission import IntentPermission
+from src.manager.module_intent.models import Utterances
+from src.manager.module_intent.proto.utterances import UtterancesSerializer
 
 
 class UtterancesViewSet(APIModelViewSet, ValidationMixin):

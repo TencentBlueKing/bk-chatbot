@@ -24,8 +24,8 @@ from common.drf.view_set import (
 )
 from common.perm.permission import check_permission
 from common.validation import validation
-from module_nlp.models import Corpus, CorpusDomain, CorpusIntent
-from module_nlp.proto import (
+from src.manager.module_nlp.models import Corpus, CorpusDomain, CorpusIntent
+from src.manager.module_nlp.proto import (
     CorpusDomainSerializer,
     CorpusIntentSerializer,
     CorpusSerializer,

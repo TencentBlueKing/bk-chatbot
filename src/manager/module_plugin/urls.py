@@ -18,8 +18,8 @@ from django.conf.urls import include, url
 from rest_framework import routers
 
 
-from module_plugin.views.plugin_view import PluginViewSet
-from module_plugin.views.audit_view import PluginAuditViewSet
+from src.manager.module_plugin.views.plugin_view import PluginViewSet
+from src.manager.module_plugin.views.audit_view import PluginAuditViewSet
 
 router = routers.DefaultRouter()
 

@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 from rest_framework import permissions
 
 from common.http.request import get_request_user
-from module_faq.models import FAQ
+from src.manager.module_faq.models import FAQ
 
 
 class FaqPermission(permissions.BasePermission):

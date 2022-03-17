@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 
 from pytest import fixture
 
-from module_nlp.models import Corpus, CorpusDomain, CorpusIntent
+from src.manager.module_nlp.models import Corpus, CorpusDomain, CorpusIntent
 
 
 @fixture()

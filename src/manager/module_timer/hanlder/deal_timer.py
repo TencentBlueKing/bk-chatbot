@@ -14,8 +14,8 @@ specific language governing permissions and limitations under the License.
 """
 
 from common.constants import TIMER_BIZ_ID, TIMER_JOB_PLAN_ID, TIMER_USER_NAME
-from handler.api.bk_job import JOB
-from module_timer.models import TimerModel
+from src.manager.handler.api.bk_job import JOB
+from src.manager.module_timer.models import TimerModel
 
 
 def deal_timer(serializer) -> TimerModel:

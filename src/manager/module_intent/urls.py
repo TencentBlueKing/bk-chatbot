@@ -15,11 +15,11 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from module_intent.views.bot_views import BotViewSet
-from module_intent.views.intent_views import IntentViewSet
-from module_intent.views.exec_views import TaskExecutionViewSet, ExecutionLogViewSet
-from module_intent.views.tasks_views import TasksViewSet
-from module_intent.views.utterance_views import UtterancesViewSet
+from src.manager.module_intent.views.bot_views import BotViewSet
+from src.manager.module_intent.views.intent_views import IntentViewSet
+from src.manager.module_intent.views.exec_views import TaskExecutionViewSet, ExecutionLogViewSet
+from src.manager.module_intent.views.tasks_views import TasksViewSet
+from src.manager.module_intent.views.utterance_views import UtterancesViewSet
 
 router = routers.DefaultRouter()
 

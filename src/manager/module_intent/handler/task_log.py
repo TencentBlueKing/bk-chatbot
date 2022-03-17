@@ -30,11 +30,11 @@ from common.constants import (
 from common.design.strategy import Strategy
 from common.models.base import to_format_date
 from common.redis import RedisClient
-from handler.api.message import Message
-from handler.bk.bk_devops import BkDevOps
-from handler.bk.bk_job import BkJob
-from handler.bk.bk_sops import BkSops
-from module_intent.models import ExecutionLog
+from src.manager.handler.api.message import Message
+from src.manager.handler.bk.bk_devops import BkDevOps
+from src.manager.handler.bk.bk_job import BkJob
+from src.manager.handler.bk.bk_sops import BkSops
+from src.manager.module_intent.models import ExecutionLog
 
 
 def update_task_status(id: int) -> None:

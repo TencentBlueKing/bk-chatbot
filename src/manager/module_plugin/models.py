@@ -54,6 +54,8 @@ class Plugin(BaseModel):
     plugin_addr = models.CharField("插件地址", max_length=256)
     plugin_desc = models.CharField("插件描叙", max_length=512)
     plugin_tag = models.CharField("插件标签", max_length=128)
+    plugin_start = models.CharField("开始action", default="", max_length=128)
+    plugin_web = models.CharField("web使用action", default="", max_length=128)
     plugin_status = models.IntegerField(
         "插件状态",
         default=PluginStatus.DEFAULT.value,

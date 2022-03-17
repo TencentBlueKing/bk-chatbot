@@ -20,9 +20,9 @@ from rest_framework.response import Response
 from common.control.throttle import ChatBotThrottle
 from common.generic import APIModelViewSet, ValidationMixin
 from common.pagination import ResultsSetPagination
-from module_intent.control.permission import IntentPermission
-from module_intent.models import Bot
-from module_intent.proto.bot import BotSerializer
+from src.manager.module_intent.control.permission import IntentPermission
+from src.manager.module_intent.models import Bot
+from src.manager.module_intent.proto.bot import BotSerializer
 
 tags = ["机器人接入"]
 

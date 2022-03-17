@@ -12,8 +12,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-import json
-import zlib
 
 import django_filters
 from django.db import models
@@ -33,23 +31,6 @@ from common.models.base import BaseModel
 from common.models.json import DictCharField
 
 
-class CompressJSONField(models.BinaryField):
-    def __init__(self, compress_level=6, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.compress_level = compress_level
-
-    def get_prep_value(self, value):
-        value = super().get_prep_value(value)
-        return zlib.compress(json.dumps(value).encode("utf-8"), self.compress_level)
-
-    def to_python(self, value):
-        value = super().to_python(value)
-        return json.loads(zlib.decompress(value).decode("utf-8"))
-
-    def from_db_value(self, value, expression, connection, context):
-        return self.to_python(value)
-
-
 class Bot(BaseModel):
     """
     机器人
@@ -65,7 +46,7 @@ class Bot(BaseModel):
         max_length=128,
         choices=CHAT_BOT_TYPES,
     )
-    config = CompressJSONField(verbose_name=_("机器人配置"), default={})
+    config = DictCharField(verbose_name=_("机器人配置"), default={})
 
     class Meta:
         db_table = "tab_bot"
@@ -110,8 +91,8 @@ class Intent(BaseModel):
     biz_id = models.PositiveIntegerField(_("业务ID"), default=0, db_index=True)
     intent_name = models.CharField(_("技能名称"), default="", max_length=128)
     status = models.BooleanField(_("意图状态"), default=True)
-    available_user = CompressJSONField(verbose_name=_("可执行用户"), default=[])
-    available_group = CompressJSONField(verbose_name=_("可执行群组"), default=[])
+    available_user = DictCharField(verbose_name=_("可执行用户"), default=[])
+    available_group = DictCharField(verbose_name=_("可执行群组"), default=[])
     is_commit = models.BooleanField(_("执行确认"), default=True)
     serial_number = models.CharField(_("序列号"), default="-1", max_length=128)
     developer = DictCharField(_("开发商"), default=[])
@@ -135,6 +116,8 @@ class Intent(BaseModel):
         serial_number = filters.CharFilter(field_name="serial_number")
         developer = filters.CharFilter(field_name="developer", lookup_expr="icontains")
         approver = filters.CharFilter(field_name="approver", lookup_expr="icontains")
+        available_user  = filters.CharFilter(field_name="available_user", lookup_expr="icontains")
+        available_group  = filters.CharFilter(field_name="available_group", lookup_expr="icontains")
 
     @classmethod
     def query_intent_list(cls, **kwargs):
@@ -172,7 +155,7 @@ class Utterances(BaseModel):
 
     biz_id = models.PositiveIntegerField(_("业务ID"), default=0, db_index=True)
     index_id = models.BigIntegerField(_("索引ID"), default=-1)
-    content = CompressJSONField(verbose_name=_("语料列表"), default=[])
+    content = DictCharField(verbose_name=_("语料列表"), default=[])
 
     class Meta:
         db_table = "tab_intent_utterances"
@@ -211,9 +194,9 @@ class Task(BaseModel):
     platform = models.CharField(_("平台名称"), default=TAK_PLATFORM_JOB, max_length=128, choices=TASK_PLATFORM_CHOICES)
     task_id = models.CharField(_("任务ID"), default="", max_length=128)
     project_id = models.CharField(_("项目id"), default="", max_length=128)
-    activities = CompressJSONField(verbose_name=_("节点信息"), default=[])
-    slots = CompressJSONField(verbose_name=_("槽位信息"), default=[])
-    source = CompressJSONField(verbose_name=_("任务元数据"), default={})
+    activities = DictCharField(verbose_name=_("节点信息"), default=[])
+    slots = DictCharField(verbose_name=_("槽位信息"), default=[])
+    source = DictCharField(verbose_name=_("任务元数据"), default={})
     script = models.TextField(_("执行脚本信息"), default="")
 
     class Meta:

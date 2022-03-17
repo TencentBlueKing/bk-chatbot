@@ -20,9 +20,9 @@ from rest_framework.response import Response
 
 from common.control.throttle import ChatBotThrottle
 from common.drf.view_set import BaseManageViewSet
-from module_intent.control.permission import IntentPermission
-from module_intent.models import Intent, Task, Utterances
-from module_intent.proto.intent import (
+from src.manager.module_intent.control.permission import IntentPermission
+from src.manager.module_intent.models import Intent, Task, Utterances
+from src.manager.module_intent.proto.intent import (
     IntentSerializer,
     ReqGetIntentSerializer,
     intent_count_docs,
@@ -51,6 +51,20 @@ class IntentViewSet(BaseManageViewSet):
     ordering = "-updated_at"
     permission_classes = (IntentPermission,)
     throttle_classes = (ChatBotThrottle,)
+
+    def list(self, request, *args, **kwargs):
+        request.query_params._mutable = True
+        # available_user查询
+        available_user = self.request.payload.get("available_user", None)
+        if available_user:
+            request.query_params["available_user"] = f'"{self.request.payload.get("available_user")}"'
+        # available_group 查询
+        available_group = self.request.payload.get("available_group", None)
+        if available_group:
+            request.query_params["available_group"] = f'"{self.request.payload.get("available_group")}"'
+
+        data = super().list(self, request, *args, **kwargs)
+        return data
 
     def perform_create(self, serializer):
         """

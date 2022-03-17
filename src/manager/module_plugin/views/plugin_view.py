@@ -17,10 +17,10 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 
 from common.drf.view_set import BaseAllViewSet
-from module_plugin.hanlder.deal_plugin_count import get_plugin_exec
-from module_plugin.hanlder.deal_plugin_status import DealPluginStatus, del_stag_plugin
-from module_plugin.models import Plugin
-from module_plugin.proto.plugin import (
+from src.manager.module_plugin.hanlder.deal_plugin_count import get_plugin_exec
+from src.manager.module_plugin.hanlder.deal_plugin_status import DealPluginStatus, del_stag_plugin
+from src.manager.module_plugin.models import Plugin
+from src.manager.module_plugin.proto.plugin import (
     PluginSerializer,
     ReqListPluginSerializer,
     ReqUpdatePluginSerializer,

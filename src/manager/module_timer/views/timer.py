@@ -28,9 +28,9 @@ from common.drf.view_set import (
     BaseUpdateViewSet,
 )
 from common.perm.permission import check_permission
-from module_timer.hanlder.deal_timer import deal_timer, update_timer_status
-from module_timer.models import TimerModel
-from module_timer.proto.timer import (
+from src.manager.module_timer.hanlder.deal_timer import deal_timer, update_timer_status
+from src.manager.module_timer.models import TimerModel
+from src.manager.module_timer.proto.timer import (
     ReqPutTimerSerializer,
     TimerSerializer,
     timer_callback_docs,
@@ -39,7 +39,7 @@ from module_timer.proto.timer import (
     timer_list_docs,
     timer_update_docs,
 )
-from module_timer.tasks.callback import callback
+from src.manager.module_timer.tasks.callback import callback
 
 
 @method_decorator(name="list", decorator=timer_list_docs)

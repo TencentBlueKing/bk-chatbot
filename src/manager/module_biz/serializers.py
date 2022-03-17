@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 from common.constants import CHAT_BOT_TYPES
-from module_biz.models import ChatBindBusiness
+from src.manager.module_biz.models import ChatBindBusiness
 
 
 class GroupBindBizSerializer(serializers.ModelSerializer):

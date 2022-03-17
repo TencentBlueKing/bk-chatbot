@@ -16,10 +16,10 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from module_biz.views.biz_views import BizViewSet
-from module_biz.views.chat_bind_views import ChatBindViewSet, OpenChatBindViewSet
-from module_biz.views.summary_chat_bind import SummaryChatBindViewSet
-from module_biz.views.task_views import TaskViewSet
+from src.manager.module_biz.views.biz_views import BizViewSet
+from src.manager.module_biz.views.chat_bind_views import ChatBindViewSet, OpenChatBindViewSet
+from src.manager.module_biz.views.summary_chat_bind import SummaryChatBindViewSet
+from src.manager.module_biz.views.task_views import TaskViewSet
 
 router = routers.DefaultRouter()
 

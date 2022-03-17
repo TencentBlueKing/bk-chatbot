@@ -17,7 +17,7 @@ import asyncio
 import copy
 
 from common.exceptions import HttpRequestError, HttpResultError
-from handler.api.bk_sops import SOPS
+from src.manager.handler.api.bk_sops import SOPS
 
 
 class BkSops:

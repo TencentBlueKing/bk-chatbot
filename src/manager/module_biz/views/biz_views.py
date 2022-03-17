@@ -20,8 +20,8 @@ from blueapps.utils.logger import logger
 from common.generic import BaseViewSet
 from common.redis import RedisClient
 from common.http.request import get_request_user
-from handler.api.bk_cc import CC
-from module_biz.control.throttle import BizThrottle
+from src.manager.handler.api.bk_cc import CC
+from src.manager.module_biz.control.throttle import BizThrottle
 
 
 class BizViewSet(BaseViewSet):

@@ -20,8 +20,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.drf.view_set import BaseViewSet
-from module_plugin.proto.audit import audit_callback_docs
-from module_plugin.tasks.update_status import update_status
+from src.manager.module_plugin.proto.audit import audit_callback_docs
+from src.manager.module_plugin.tasks.update_status import update_status
 
 
 @method_decorator(name="callback", decorator=audit_callback_docs)

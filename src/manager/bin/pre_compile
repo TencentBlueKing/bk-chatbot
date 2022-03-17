@@ -1,4 +1,0 @@
-#!/bin/bash
-echo "update requirements.txt"
-cat requirements_services.txt >> requirements.txt
-cat requirements.txt

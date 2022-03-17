@@ -14,7 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 
 from common.constants import DEVOPS_HOST
-from handler.api.devops import DevOps
+from src.manager.handler.api.devops import DevOps
 
 
 class BkDevOps:
