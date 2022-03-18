@@ -21,6 +21,23 @@ from common.drf.serializers import BaseRspSerializer
 from src.manager.module_plugin.models import Plugin
 from src.manager.module_plugin.proto import plugin_tag
 
+base_fields = [
+    "plugin_icon",
+    "plugin_name",
+    "plugin_addr",
+    "plugin_start",
+    "plugin_web",
+    "plugin_desc",
+    "plugin_tag",
+    "plugin_status",
+    "plugin_global",
+    "plugin_type",
+    "developers",
+    "choose_biz",
+    "biz_list",
+    "actions",
+    "plugin_wait_time",
+]
 
 # 插件action
 class PluginAction(Serializer):
@@ -45,12 +62,19 @@ class PluginAction(Serializer):
         key = serializers.CharField(label="key")
         name = serializers.CharField(label="操作名称")
 
+    class PluginActionCustomOperation(Serializer):
+        key = serializers.CharField(label="key")
+        name = serializers.CharField(label="操作名称")
+        field = serializers.CharField(label="字段")
+        place = serializers.CharField(label="位置")
+
     key = serializers.CharField(label="路由")
     desc = serializers.CharField(label="描叙")
-    time_out = serializers.IntegerField(label="描叙", required=False, default=60)
+    time_out = serializers.IntegerField(label="接口超时时间", required=False, default=60)
     run_now = serializers.BooleanField(label="是否立即执行", required=False, default=False)
     params = serializers.ListField(label="字段", child=PluginActionParam())
     operation = serializers.ListField(label="操作项", required=False, child=PluginActionOperation())
+    custom_operation = serializers.ListField(label="", required=False, child=PluginActionCustomOperation())
 
 
 # 基础
@@ -66,25 +90,11 @@ class PluginBaseSerializer(serializers.ModelSerializer):
     actions = serializers.ListField(label="动作", child=PluginAction(), allow_null=True)
     biz_list = serializers.ListField(label="业务选择", child=serializers.CharField())
     developers = serializers.ListField(label="业务选择", child=serializers.CharField())
+    plugin_wait_time = serializers.IntegerField(label="结束会话时间", required=False)
 
     class Meta:
         model = Plugin
-        fields = [
-            "plugin_icon",
-            "plugin_name",
-            "plugin_addr",
-            "plugin_start",
-            "plugin_web",
-            "plugin_desc",
-            "plugin_tag",
-            "plugin_status",
-            "plugin_global",
-            "plugin_type",
-            "developers",
-            "choose_biz",
-            "biz_list",
-            "actions",
-        ]
+        fields = base_fields
 
     def validate_developers(self, value):
         """
@@ -108,29 +118,7 @@ class PluginSerializer(PluginBaseSerializer):
 
     class Meta:
         model = Plugin
-        fields = [
-            "id",
-            "plugin_key",
-            "plugin_icon",
-            "plugin_name",
-            "plugin_addr",
-            "plugin_start",
-            "plugin_web",
-            "plugin_desc",
-            "plugin_tag",
-            "plugin_status",
-            "plugin_global",
-            "plugin_type",
-            "developers",
-            "choose_biz",
-            "biz_list",
-            "actions",
-        ]
-
-
-# 插件管理-单个查询响应
-class RspRetrievePluginSerializer(BaseRspSerializer):
-    data = PluginSerializer()
+        fields = ["id","plugin_key"] + base_fields
 
 
 # 插件管理-查询多个
@@ -158,17 +146,6 @@ class ReqListPluginSerializer(serializers.ModelSerializer):
         ]
 
 
-# 插件管理-查询响应
-class RspListPluginSerializer(BaseRspSerializer):
-    count = serializers.IntegerField(label="数量")
-    data = serializers.ListField(child=ReqListPluginSerializer())
-
-
-# 插件管理-添加响应
-class RspCreatePluginSerializer(BaseRspSerializer):
-    data = PluginSerializer()
-
-
 # 插件管理-更新
 class ReqUpdatePluginSerializer(PluginBaseSerializer):
     plugin_icon = serializers.CharField(label="插件图标", required=False)
@@ -186,6 +163,24 @@ class ReqUpdatePluginSerializer(PluginBaseSerializer):
 
     def to_representation(self, value):
         return {}
+
+
+############################################################
+
+# 插件管理-查询响应
+class RspListPluginSerializer(BaseRspSerializer):
+    count = serializers.IntegerField(label="数量")
+    data = serializers.ListField(child=ReqListPluginSerializer())
+
+
+# 插件管理-单个查询响应
+class RspRetrievePluginSerializer(BaseRspSerializer):
+    data = PluginSerializer()
+
+
+# 插件管理-添加响应
+class RspCreatePluginSerializer(BaseRspSerializer):
+    data = PluginSerializer()
 
 
 ############################################################

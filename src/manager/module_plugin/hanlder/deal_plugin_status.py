@@ -58,6 +58,7 @@ def get_plugin_params(obj: Plugin) -> dict:
         "status": 1,
         "global": obj.plugin_global,
         "actions": obj.actions,
+        "wait_time": obj.plugin_wait_time
     }
     return params
 
