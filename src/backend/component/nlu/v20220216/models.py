@@ -83,18 +83,18 @@ class IntentRecognition:
 
         similar_question_word = []
         tmp = copy.deepcopy(question_word)
-        try:
-            for similar_word in word_matrix:
-                for cursor in word_matrix[1:]:
-                    for similar_word_i in similar_word[1]:
-                        tmp[similar_word[0]] = similar_word_i
-                        for similar_word_j in cursor[1]:
-                            tmp[cursor[0]] = similar_word_j
-                            similar_question_word.append(tmp)
-        except IndexError:
-            for word in similar_word[1]:
-                tmp[similar_word[0]] = word
-                similar_question_word.append(tmp)
+
+        for similar_word in word_matrix:
+            for cursor in word_matrix[1:]:
+                for similar_word_i in similar_word[1]:
+                    tmp[similar_word[0]] = similar_word_i
+                    for similar_word_j in cursor[1]:
+                        tmp[cursor[0]] = similar_word_j
+                        similar_question_word.append(tmp)
+            else:
+                for word in similar_word[1]:
+                    tmp[similar_word[0]] = word
+                    similar_question_word.append(copy.copy(tmp))
 
         return similar_question_word
 
