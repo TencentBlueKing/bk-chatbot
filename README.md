@@ -33,6 +33,7 @@ bk-chatbot 主要用于运维执行场景，如发布、变更、查询等执行
 ## Usage
 
 - [任务使用说明](docs/usage.md)
+- [知识库使用说明](docs/usage.md)
 
 ## Roadmap
 
