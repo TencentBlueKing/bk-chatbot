@@ -186,6 +186,6 @@ class StringPreHandler:
     def str_to_int(cls, s):
         try:
             res = int(s)
-        except:
+        except ValueError:
             res = 0
         return res

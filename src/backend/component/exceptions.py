@@ -21,3 +21,7 @@ from opsbot.exceptions import (
 
 class TokenNotAvailable(ComponentError):
     pass
+
+
+class SlotLocMatchError(ComponentError):
+    pass

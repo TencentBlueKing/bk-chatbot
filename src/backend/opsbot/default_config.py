@@ -68,5 +68,41 @@ APSCHEDULER_CONFIG: Dict[str, Any] = {
     'apscheduler.timezone': 'Asia/Shanghai'
 }
 
-SESSION_RESERVED_WORD: Iterable[str] = ['group_id', 'welcome', 'biz_list', 'bind_biz', 'opsbot_help']
+SESSION_RESERVED_WORD: Iterable[str] = [
+    'bk_chat_group_id',
+    'bk_chat_welcome',
+    'bk_cc_biz_bind',
+    'bk_cc_biz_select',
+    'bk_chat_stat_execution',
+    'bk_chat_search_knowledge',
+    'bk_chat_task_delete_scheduler',
+    'bk_chat_task_callback',
+    'bk_chat_task_execute',
+    'bk_chat_task_list',
+    'bk_app_task_select',
+    'bk_app_task_filter',
+    'bk_shortcut_create',
+    'bk_shortcut_execute',
+    'bk_shortcut_list',
+    'bk_shortcut_delete',
+    'bk_job_plan_list',
+    'bk_job_plan_search',
+    'bk_job_plan_select',
+    'bk_job_plan_execute',
+    'bk_job_plan_update',
+    'bk_job_plan_cancel',
+    'bk_sops_template_list',
+    'bk_sops_template_select',
+    'bk_sops_template_execute',
+    'bk_sops_template_update',
+    'bk_sops_template_cancel',
+    'bk_devops_project_list',
+    'bk_devops_project_select',
+    'bk_devops_pipeline_select',
+    'bk_devops_pipeline_update',
+    'bk_devops_pipeline_execute',
+    'bk_devops_pipeline_cancel',
+    'bk_itsm',
+    'bk_itsm_select_service'
+]
 SESSION_RESERVED_CMD: Iterable[str] = os.getenv('SESSION_RESERVED_CMD', '').split(',')
