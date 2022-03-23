@@ -73,6 +73,7 @@ class Plugin(BaseModel):
     plugin_global = DictCharField("全局变量", default={})
     plugin_exec_count = models.IntegerField("执行总次数", default=0)
     plugin_lately_count = models.IntegerField("插件最近30天执行次数", default=0)
+    plugin_wait_time = models.IntegerField("等待时间", default=0)
 
     class Meta:
         db_table = "tab_plugins"
