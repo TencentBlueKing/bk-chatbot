@@ -64,3 +64,6 @@ class Mga:
 
     def get_user_info(self, **params):
         return self._call("api/ops/info/get-user-info/", "get", params=params)
+
+    def get_user_info_by_phone(self, **params):
+        return self._call("api/ops/info/get-user-info-by-phone/", "get", params=params)
