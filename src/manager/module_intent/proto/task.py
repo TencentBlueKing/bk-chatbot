@@ -30,7 +30,7 @@ class TaskSerializer(serializers.ModelSerializer):
     task_id = serializers.CharField(required=True, label="任务ID")
     activities = serializers.ListField(required=True, label="节点信息")
     slots = serializers.ListField(required=True, label="槽位信息")
-    source = serializers.DictField(required=True, label="任务元数据")
+    source = serializers.JSONField(required=True, label="任务元数据")
     script = serializers.CharField(required=True, label="执行脚本信息")
 
     class Meta:
