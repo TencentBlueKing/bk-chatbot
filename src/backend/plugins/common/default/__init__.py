@@ -22,13 +22,13 @@ from .settings import (
 )
 
 
-@on_command('group_id', aliases=DEFAULT_SHOW_GROUP_ID_ALIAS)
+@on_command('bk_chat_group_id', aliases=DEFAULT_SHOW_GROUP_ID_ALIAS)
 async def _(session: CommandSession):
     if session.ctx['msg_from_type'] == 'group':
         await session.send(session.ctx['msg_group_id'])
 
 
-@on_command('welcome', aliases=('help', '帮助', '小鲸', '1'))
+@on_command('bk_chat_welcome', aliases=('help', '帮助', '小鲸', '1'))
 async def _(session: CommandSession):
     if 'event_key' in session.ctx:
         return
@@ -58,7 +58,7 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('stat_execution', aliases=('执行统计', ))
+@on_command('bk_chat_stat_execution', aliases=('执行统计', ))
 async def _(session: CommandSession):
     stat = Stat()
     count = stat.stat_execution()
@@ -68,3 +68,16 @@ async def _(session: CommandSession):
     msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)
     del stat
+
+
+@on_command('bk_chat_search_knowledge')
+async def _(session: CommandSession):
+    answers = session.state.get('answers')
+    content = '\n'.join([
+        f'''><font color=\"info\">问题：{item["question"]}</font>
+        ><font color=\"warning\">答案：{item["solution"]}</font>'''
+        for item in answers
+    ])
+    content = f'''>**结果:**\n{content}'''
+    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    await session.send(**msg_template)

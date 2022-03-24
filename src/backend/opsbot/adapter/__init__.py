@@ -191,7 +191,7 @@ class Message(list, abc.ABC):
         return result
 
 
-class MessageTemplate:
+class MessageTemplate(abc.ABC):
     @classmethod
     @abc.abstractmethod
     def render_markdown_msg(cls):
