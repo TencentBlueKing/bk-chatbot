@@ -61,3 +61,8 @@ class YoutiViewSet(BaseViewSet):
     def get_user_info(self, request):
         req_data, _ = init_views(request)
         return Response(Mga().get_user_info(**req_data).get("data"))
+
+    @action(detail=False, methods=["POST"])
+    def get_user_info_by_phone(self, request):
+        req_data, _ = init_views(request)
+        return Response(Mga().get_user_info_by_phone(**req_data).get("data"))

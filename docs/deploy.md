@@ -255,12 +255,6 @@ docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 
 ### 5.机器人管理端部署
 
-* 代码目录
-
-```shell
-src/manager
-```
-
 #### 依赖下载
 
 ##### 中间件依赖

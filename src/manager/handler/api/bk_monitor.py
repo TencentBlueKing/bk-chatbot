@@ -13,8 +13,9 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from adapter.api import BkMonitorApi
 from blueapps.utils.logger import logger
+
+from adapter.api import BkMonitorApi
 
 SQL_TEMPLATE = {
     # cpu使用率
@@ -196,7 +197,7 @@ class BkMonitor:
                 res["dimensions"] = list({d["dimension"] for d in res["list"]})
 
             return res
-        except Exception as e: # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             logger.error(f"[API]get_metric_data error {e}")
 
         return None

@@ -18,6 +18,7 @@ import traceback
 from typing import Callable
 
 from blueapps.utils.logger import logger_celery as logger
+
 from common.constants import (
     TASK_EXEC_STATUS_COLOR_DICT,
     TASK_EXECUTE_STATUS_DICT,
@@ -85,7 +86,7 @@ class PlatformTask:
             self.obj.status = status
             self.obj.save()
             return task_info
-        except Exception as e: # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except
             # 异常删除缓存信息
             traceback.print_exc()
             logger.error(f"更新日志状态异常:{e}")
@@ -126,7 +127,7 @@ class PlatformTask:
         except ValueError:
             traceback.print_exc()
             logger.error(f"发送通知错误:{traceback.format_exc()}")
-        except Exception: # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             logger.error(f"发送通知错误:{traceback.format_exc()}")
 
