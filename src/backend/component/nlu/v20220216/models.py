@@ -27,7 +27,7 @@ from component import Backend
 from component.exceptions import SlotLocMatchError
 from .config import (
     BASE_DICT_PATH, STOP_WORDS_PATH,
-    SIMILAR_WORD_PATH, BASE_CONFIDENCE
+    SIMILAR_WORD_LIB, BASE_CONFIDENCE
 )
 
 
@@ -76,25 +76,16 @@ class IntentRecognition:
         replace similar word,
         generate more text
         """
-        similar_word = json.load(open(SIMILAR_WORD_PATH, encoding='utf-8'))
-        word_matrix = [(index, similar_word[word]) for index, word in enumerate(question_word) if word in similar_word]
-        if not word_matrix:
-            return [question_word]
+        word_matrix = []
+        for word in question_word:
+            if word in SIMILAR_WORD_LIB:
+                word_matrix.append(SIMILAR_WORD_LIB[word])
+            else:
+                word_matrix.append([word])
 
         similar_question_word = []
-        tmp = copy.deepcopy(question_word)
-
-        for similar_word in word_matrix:
-            for cursor in word_matrix[1:]:
-                for similar_word_i in similar_word[1]:
-                    tmp[similar_word[0]] = similar_word_i
-                    for similar_word_j in cursor[1]:
-                        tmp[cursor[0]] = similar_word_j
-                        similar_question_word.append(tmp)
-            else:
-                for word in similar_word[1]:
-                    tmp[similar_word[0]] = word
-                    similar_question_word.append(copy.copy(tmp))
+        for item in itertools.product(*word_matrix):
+            similar_question_word.append(list(item))
 
         return similar_question_word
 
