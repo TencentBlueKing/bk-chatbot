@@ -41,21 +41,7 @@ class GenericTask:
     def execute_task(self) -> bool:
         raise NotImplementedError
 
-    @classmethod
-    def render_execute_msg(cls, platform: str, task_result: bool, task_name: str,
+    def render_execute_msg(self, platform: str, task_result: bool, task_name: str,
                            parameter: List, task_domain: str) -> Dict:
-        return {
-            'card_type': 'text_notice',
-            'source': {
-                'desc': platform
-            },
-            'main_title': {
-                'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
-            },
-            'horizontal_content_list': parameter,
-            'task_id': str(int(time.time() * 100000)),
-            'card_action': {
-                'type': 1,
-                'url': task_domain
-            }
-        }
+        return self._session.bot.send_template_msg('render_task_execute_msg', platform, task_name,
+                                                   task_result, parameter, task_domain)

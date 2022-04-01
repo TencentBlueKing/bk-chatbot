@@ -14,14 +14,14 @@ specific language governing permissions and limitations under the License.
 """
 
 import json
-import time
 from typing import Union, List, Dict
 
 from opsbot import CommandSession
 from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
+from opsbot.models import BKExecutionLog
 from opsbot.plugins import GenericTask
-from component import SOPS, RedisClient, BK_SOPS_DOMAIN
+from component import SOPS, RedisClient, BK_SOPS_DOMAIN, OrmClient
 
 
 class SopsTask(GenericTask):
@@ -49,26 +49,8 @@ class SopsTask(GenericTask):
             return None
 
         bk_sops_templates = await self._get_sops_template_list(**params)
-        template_card = {
-            'card_type': 'vote_interaction',
-            'source': {
-                'desc': 'SOPS'
-            },
-            'main_title': {
-                'title': '欢迎使用标准运维',
-                'desc': '请选择标准运维模板'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'checkbox': {
-                'question_key': 'bk_sops_template_id',
-                'option_list': bk_sops_templates
-            },
-            'submit_button': {
-                'text': '确认',
-                'key': 'bk_sops_template_select'
-            }
-        }
-        return template_card
+        return self._session.bot.send_template_msg('render_task_list_msg', 'SOPS', '欢迎使用标准运维', '请选择标准运维模板',
+                                                   'bk_sops_template_id', bk_sops_templates, 'bk_sops_template_select')
 
     async def render_sops_template_info(self):
         if self._session.is_first_run:
@@ -101,44 +83,17 @@ class SopsTask(GenericTask):
             'constants': constants
         }
 
-        template_card = {
-            'card_type': 'button_interaction',
-            'source': {
-                'desc': 'SOPS'
-            },
-            'main_title': {
-                'title': f'标准运维任务_{template_name}'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'sub_title_text': '参数确认',
-            'horizontal_content_list': constants,
-            'button_list': [
-                {
-                    "text": "执行",
-                    "style": 1,
-                    "key": f"bk_sops_template_execute|{json.dumps(info)}"
-                },
-                {
-                    "text": "修改",
-                    "style": 2,
-                    "key": f"bk_sops_template_update|{json.dumps(info)}"
-                },
-                {
-                    "text": "取消",
-                    "style": 3,
-                    "key": f"bk_sops_template_cancel|{template_name}"
-                }
-            ]
-        }
-
-        if bk_sops_template_schemas:
-            template_card['button_selection'] = {
+        extra = {
+            'button_selection': {
                 'question_key': 'bk_sops_template_schema_id',
                 'title': '分组',
                 'option_list': [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
                                 for template in bk_sops_template_schemas[:10]]
             }
-        return template_card
+        } if bk_sops_template_schemas else {}
+        return self._session.bot.send_template_msg('render_task_select_msg', 'SOPS', f'标准运维任务_{template_name}',
+                                                   constants, 'bk_sops_template_execute', 'bk_sops_template_update',
+                                                   'bk_sops_template_cancel', info, template_name, **extra)
 
     async def execute_task(self, bk_sops_template: Dict) -> bool:
         if not bk_sops_template:
@@ -175,10 +130,14 @@ class SopsTask(GenericTask):
         except HttpFailed as e:
             msg = f'{bk_sops_template_id} {constants} error: 第三方服务异常 {e}'
         finally:
+            execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='SOPS', bk_username=self.user_id,
+                                           feature_name=bk_sops_template_name, feature_id=str(bk_sops_template_id),
+                                           detail=constants)
+            OrmClient().add(execution_log)
             logger.info(msg)
 
         return False
 
-    def render_sops_template_execute_msg(self, result: bool, bk_sops_template: Dict) -> Dict:
+    def render_sops_execute_msg(self, result: bool, bk_sops_template: Dict) -> Dict:
         return self.render_execute_msg('SOPS', result, bk_sops_template['bk_sops_template_name'],
                                        bk_sops_template['constants'], BK_SOPS_DOMAIN)

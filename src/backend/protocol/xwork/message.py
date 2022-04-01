@@ -14,9 +14,13 @@ specific language governing permissions and limitations under the License.
 """
 
 import re
-from typing import Iterable, Tuple
+import json
+import time
+from typing import Iterable, Tuple, Union, List, Dict
 
-from opsbot.adapter import Message as BaseMessage, MessageSegment as BaseMessageSegment
+from opsbot.adapter import (
+    Message as BaseMessage, MessageSegment as BaseMessageSegment, MessageTemplate as BaseMessageTemplate
+)
 from opsbot.stdlib import escape, unescape
 
 
@@ -130,3 +134,226 @@ class Message(BaseMessage):
                     filter(lambda x: x, (x.lstrip() for x in extra.split(',')))
                 )}
                 yield MessageSegment(type_=function_name, data=data)
+
+
+class MessageTemplate(BaseMessageTemplate):
+    @classmethod
+    def render_markdown_msg(cls, content: str) -> Dict:
+        return {
+            'msgtype': 'markdown',
+            'markdown': {
+                'content': content
+            }
+        }
+
+    @classmethod
+    def render_welcome_msg(cls, data: List, bk_biz_id: Union[int, str]) -> Dict:
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+            'card_type': 'button_interaction',
+            'source': {
+                'desc': 'BKCHAT'
+            },
+            'main_title': {
+                'title': '欢迎使用蓝鲸信息流'
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'button_selection': {
+                'question_key': 'bk_biz_id',
+                'title': '业务',
+                'option_list': data[:10],
+                'selected_id': bk_biz_id if bk_biz_id else ''
+            },
+            'action_menu': {
+                'desc': '更多操作',
+                'action_list': [
+                    {'text': '查找任务', 'key': 'bk_app_task_filter'},
+                    {'text': '绑定业务', 'key': 'bk_cc_biz_bind'},
+                    {'text': '快捷键', 'key': 'bk_shortcut_list'}
+                ]
+            },
+            'button_list': [
+                {
+                    "text": "CI",
+                    "style": 1,
+                    "key": "bk_devops"
+                },
+                {
+                    "text": "JOB",
+                    "style": 1,
+                    "key": "bk_job"
+                },
+                {
+                    "text": "SOPS",
+                    "style": 1,
+                    "key": "bk_sops"
+                },
+                {
+                    "text": "ITSM",
+                    "style": 1,
+                    "key": "bk_itsm|0"
+                }
+            ]
+        }
+        }
+
+    @classmethod
+    def render_biz_list_msg(cls, data: List) -> Dict:
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'vote_interaction',
+                'source': {
+                    'desc': 'CC'
+                },
+                'main_title': {
+                    'title': '欢迎使用配置平台',
+                    'desc': '请选择业务'
+                },
+                'task_id': str(int(time.time() * 100000)),
+                'checkbox': {
+                    'question_key': 'bk_biz_id',
+                    'option_list': data
+                },
+                'submit_button': {
+                    'text': '提交',
+                    'key': 'bk_cc_biz_select'
+                }
+            }
+        }
+
+    @classmethod
+    def render_task_list_msg(cls, platform: str, title: str, desc: str, question_key: str,
+                             data: List, submit_key: str, submit_text: str = '确认') -> Dict:
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'vote_interaction',
+                'source': {
+                    'desc': platform,
+                    'desc_color': 1
+                },
+                'main_title': {
+                    'title': title,
+                    'desc': desc
+                },
+                'task_id': str(int(time.time() * 100000)),
+                'checkbox': {
+                    'question_key': question_key,
+                    'option_list': data
+                },
+                'submit_button': {
+                    'text': submit_text,
+                    'key': submit_key
+                }
+            }
+        }
+
+    @classmethod
+    def render_task_select_msg(cls, platform: str, title: str, params: List, execute_key: str,
+                               update_key: str, cancel_key: str, data: Dict, task_name: str,
+                               action=['执行', '修改', '取消', '快捷键'], **kwargs) -> Dict:
+        button_map = {
+            '执行': {
+                "text": "执行",
+                "style": 1,
+                "key": f"{execute_key}|{json.dumps(data)}"
+            },
+            '修改': {
+                "text": "修改",
+                "style": 2,
+                "key": f"{update_key}|{json.dumps(data)}"
+            },
+            '取消': {
+                "text": "取消",
+                "style": 3,
+                "key": f"{cancel_key}|{task_name}"
+            },
+            '快捷键': {
+                "text": "快捷键",
+                "style": 4,
+                "key": f"bk_shortcut_create|{platform}|{json.dumps(data)}"
+            }
+        }
+        button_list = [v for k, v in button_map.items() if k in action]
+        template = {
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'button_interaction',
+                'source': {
+                    'desc': platform,
+                    'desc_color': 1
+                },
+                'main_title': {
+                    'title': title
+                },
+                'task_id': str(int(time.time() * 100000)),
+                'sub_title_text': '参数确认',
+                'horizontal_content_list': params,
+                'button_list': button_list
+            }
+        }
+        template['template_card'].update(kwargs)
+        return template
+
+    @classmethod
+    def render_task_execute_msg(cls, platform: str, task_name: str, task_result: bool,
+                                params: List, task_domain: str) -> Dict:
+        return {
+            'msgtype': 'template_card',
+            'template_card': {
+                'card_type': 'text_notice',
+                'source': {
+                    'desc': platform
+                },
+                'main_title': {
+                    'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
+                },
+                'horizontal_content_list': params,
+                'task_id': str(int(time.time() * 100000)),
+                'card_action': {
+                    'type': 1,
+                    'url': task_domain
+                }
+            }
+        }
+
+    @classmethod
+    def render_task_filter_msg(cls, bk_app_task: Dict[str, List], bk_paas_domain: str):
+        template = {
+            'card_type': 'multiple_interaction',
+            'source': {
+                'desc': 'BKCHAT'
+            },
+            'main_title': {
+                'title': '任务查询结果'
+            },
+            'task_id': str(int(time.time() * 100000))
+        }
+
+        if any(bk_app_task.values()):
+            template['card_type'] = 'vote_interaction'
+            template['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
+            template['checkbox'] = {'question_key': 'bk_app_task_id', 'option_list': []}
+        else:
+            template['card_type'] = 'text_notice'
+            template['main_title']['desc'] = '未找到对应任务'
+            template['card_action'] = {'type': 1, 'url': bk_paas_domain}
+            return template
+
+        if bk_app_task['bk_job']:
+            option_list = [
+                {'id': f'bk_job|{str(job_plan["id"])}', 'text': f'JOB {job_plan["name"]}', 'is_checked': False}
+                for job_plan in bk_app_task['bk_job'][:5]
+            ]
+            template['checkbox']['option_list'].extend(option_list)
+
+        if bk_app_task['bk_sops']:
+            option_list = [
+                {'id': f'bk_sops|{str(template["id"])}', 'text': f'SOPS {template["name"]}', 'is_checked': False}
+                for template in bk_app_task['bk_sops'][:5]
+            ]
+            template['checkbox']['option_list'].extend(option_list)
+
+        return template

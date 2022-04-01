@@ -23,4 +23,3 @@ class RangeTimeEnum():
     night = 18  # 晚上、傍晚
     lateNight = 20  # 晚、晚间
     midNight = 23  # 深夜
-

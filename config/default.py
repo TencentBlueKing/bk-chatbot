@@ -105,7 +105,7 @@ IS_USE_CELERY = True
 CELERYD_CONCURRENCY = os.getenv("BK_CELERYD_CONCURRENCY", 2)
 
 # CELERY 配置，申明任务的文件路径，即包含有 @task 装饰器的函数文件
-CELERY_IMPORTS = "src.manager.module_intent.tasks.log_timer"
+CELERY_IMPORTS = ("src.manager.module_intent.tasks.log_timer",)
 
 # load logging settings
 LOGGING = get_logging_config_dict(locals())

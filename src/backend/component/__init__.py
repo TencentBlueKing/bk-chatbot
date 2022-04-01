@@ -14,11 +14,13 @@ specific language governing permissions and limitations under the License.
 """
 
 from .bk import BKApi, CC, JOB, SOPS, DevOps, Backend, BKData, Plugin, ITSM
-from .nlu.v20210521 import fetch_slot, fetch_intent
+from .nlu.v20220216 import IntentRecognition, SlotRecognition
 from .nlp.biz import BizMapper
 from .nlp.time import TimeNormalizer
+from .nlp.knowledge.v20220309 import fetch_answer
 from .public import (
-    RedisClient, ESClient, regex_parse_entity, AesED, import_string, Cached
+    RedisClient, ESClient, OrmClient,
+    regex_parse_entity, AesED, import_string, Cached
 )
 from .config import (
     BK_CHAT_DOMAIN, BK_JOB_DOMAIN, BK_SOPS_DOMAIN, BK_DEVOPS_DOMAIN,
@@ -27,8 +29,8 @@ from .config import (
 
 
 __all__ = ['BKApi', 'CC', 'JOB', 'SOPS', 'DevOps', 'BKData', 'ITSM', 'Backend', 'Plugin',
-           'fetch_slot', 'fetch_intent', 'BizMapper', 'TimeNormalizer',
-           'RedisClient', 'ESClient',
+           'IntentRecognition', 'SlotRecognition', 'BizMapper', 'TimeNormalizer', 'fetch_answer',
+           'RedisClient', 'ESClient', 'OrmClient',
            'regex_parse_entity', 'AesED', 'import_string',
            'BK_CHAT_DOMAIN', 'BK_JOB_DOMAIN', 'BK_SOPS_DOMAIN', 'BK_DEVOPS_DOMAIN',
            'BK_ITSM_DOMAIN', 'BK_PAAS_DOMAIN']

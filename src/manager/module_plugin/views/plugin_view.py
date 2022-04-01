@@ -18,7 +18,10 @@ from rest_framework.decorators import action
 
 from common.drf.view_set import BaseAllViewSet
 from src.manager.module_plugin.hanlder.deal_plugin_count import get_plugin_exec
-from src.manager.module_plugin.hanlder.deal_plugin_status import DealPluginStatus, del_stag_plugin
+from src.manager.module_plugin.hanlder.deal_plugin_status import (
+    DealPluginStatus,
+    del_stag_plugin,
+)
 from src.manager.module_plugin.models import Plugin
 from src.manager.module_plugin.proto.plugin import (
     PluginSerializer,
@@ -70,13 +73,13 @@ class PluginViewSet(BaseAllViewSet):
         """
         with transaction.atomic():
             instance = serializer.instance
+            username = self.request.user.username
+            if username not in instance.developers:
+                raise PermissionError("not have permission to update plugin")
             # 老状态
             old_status = instance.plugin_status
             serializer.save()  # 保存数据的时候替换instance里面的数据
             new_status = instance.plugin_status
-            username = self.request.user.username
-            if username not in instance.developers:
-                raise PermissionError("not have permission to update plugin")
 
             # 状态流转
             if new_status == Plugin.PluginStatus.STAG.value or new_status != old_status:

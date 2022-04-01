@@ -189,3 +189,35 @@ class Message(list, abc.ABC):
         if result:
             result = result[1:]
         return result
+
+
+class MessageTemplate(abc.ABC):
+    @classmethod
+    @abc.abstractmethod
+    def render_markdown_msg(cls):
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def render_welcome_msg(cls):
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def render_biz_list_msg(cls):
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def render_task_select_msg(cls):
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def render_task_execute_msg(cls):
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def render_task_filter_msg(cls):
+        raise NotImplementedError

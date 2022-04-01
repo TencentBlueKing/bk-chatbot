@@ -47,3 +47,25 @@ class VersionModel(BaseModel):
         version = filters.CharFilter(field_name="version", lookup_expr="contains")
         title = filters.CharFilter(field_name="title", lookup_expr="contains")
         author = filters.CharFilter(field_name="author", lookup_expr="contains")
+
+
+class PluginTagModel(BaseModel):
+    """
+    插件标签
+    """
+
+    key = models.CharField("插件标签唯一key", unique=True, max_length=64, null=False)
+    name = models.CharField("插件标签唯一名称", unique=True, max_length=128, null=False)
+
+    class Meta:
+        db_table = "tab_plugin_tag"
+        verbose_name = "【插件标签】"
+        verbose_name_plural = "【插件标签】"
+
+    class OpenApiFilter(BaseOpenApiFilter):
+        """
+        过滤
+        """
+
+        key = filters.BooleanFilter(field_name="key", lookup_expr="contains")
+        name = filters.CharFilter(field_name="name", lookup_expr="contains")

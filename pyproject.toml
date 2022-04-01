@@ -2,7 +2,7 @@
 name = "bkchat-manage"
 version = "0.1.0"
 description = ""
-authors = ["junitan <junitan@tencent.com>"]
+authors = ["bkchat"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
