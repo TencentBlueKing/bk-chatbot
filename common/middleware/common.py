@@ -19,7 +19,6 @@ import json
 import traceback
 
 from blueapps.utils.logger import logger
-from django.shortcuts import render
 
 from common.http.html import error_response
 from common.utils.local import local
@@ -56,27 +55,23 @@ class CommonMiddleware(MiddlewareMixin):
             logger.error(error_msg)
             return error_response(error_msg)
 
-        logger.info({"message": json.dumps(payload)})
+        # 地址记录
+        logger.info(
+            {
+                "message": json.dumps(payload),
+                "url": request.get_full_path(),
+            }
+        )
         request.payload = payload
         return
-
-    def process_response(self, request, response):
-        """
-        出中间件，用来处理出状态
-        """
-        if response.status_code == 404:
-            return render(request, "index.html")
-
-        return response
 
     @staticmethod
     def process_exception(request, error: Exception):
         """
         用来处理异常
         """
+        # 记录错误日志
         logger.error(f"{traceback.format_exc()}")
-        logger.error(f"{request},error: {error}")
-        return error_response(str(error))
 
 
 class RequestProvider:
