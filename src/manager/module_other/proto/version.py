@@ -18,7 +18,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 
 from src.manager.module_other.models import VersionModel
-
+from src.manager.module_other.proto import other_tag
 
 class VersionSerializer(serializers.ModelSerializer):
     """
@@ -33,8 +33,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
 
 ############################################################
-version_tag = ["版本"]
 version_list_docs = swagger_auto_schema(
-    tags=version_tag,
+    tags=other_tag,
     operation_id="version",
 )

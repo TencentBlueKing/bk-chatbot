@@ -14,15 +14,25 @@ specific language governing permissions and limitations under the License.
 """
 
 
-from django.conf.urls import include, url
-from rest_framework import routers
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import serializers
 
-from src.manager.module_other.views.plugin_tag import PluginTagViewSet
-from src.manager.module_other.views.version import VersionViewSet
+from src.manager.module_other.models import PluginTagModel
+from src.manager.module_other.proto import other_tag
 
-router = routers.DefaultRouter()
 
-router.register(r"version", VersionViewSet, basename="version")  # 版本
-router.register(r"plugin_tag", PluginTagViewSet, basename="plugin_tag")  # 版本
+class PluginTagSerializer(serializers.ModelSerializer):
+    """
+    插件标签
+    """
 
-urlpatterns = (url(r"^", include(router.urls)),)
+    class Meta:
+        model = PluginTagModel
+        fields = ["id", "key", "name"]
+
+
+############################################################
+plugin_tag_list_docs = swagger_auto_schema(
+    tags=other_tag,
+    operation_id="plugin_tag",
+)

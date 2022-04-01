@@ -13,16 +13,18 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from django.utils.decorators import method_decorator
 
-from django.conf.urls import include, url
-from rest_framework import routers
+from common.drf.view_set import BaseGetViewSet
+from src.manager.module_other.models import PluginTagModel
+from src.manager.module_other.proto.plugin_tag import (
+    PluginTagSerializer,
+    plugin_tag_list_docs,
+)
 
-from src.manager.module_other.views.plugin_tag import PluginTagViewSet
-from src.manager.module_other.views.version import VersionViewSet
 
-router = routers.DefaultRouter()
-
-router.register(r"version", VersionViewSet, basename="version")  # 版本
-router.register(r"plugin_tag", PluginTagViewSet, basename="plugin_tag")  # 版本
-
-urlpatterns = (url(r"^", include(router.urls)),)
+@method_decorator(name="list", decorator=plugin_tag_list_docs)
+class PluginTagViewSet(BaseGetViewSet):
+    queryset = PluginTagModel.objects.all()
+    serializer_class = PluginTagSerializer
+    filterset_class = PluginTagModel.OpenApiFilter
