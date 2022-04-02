@@ -223,12 +223,7 @@ class Task(BaseModel):
         """
         更新语料
         """
-
-        update_data = {}
-        for key, value in kwargs.items():
-            if value:
-                update_data.setdefault(key, value)
-        cls.objects.filter(index_id=intent_id).update(**update_data)
+        cls.objects.filter(index_id=intent_id).update(**kwargs)
 
 
 class ExecutionLog(BaseModel):
