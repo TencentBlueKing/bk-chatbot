@@ -94,9 +94,9 @@ class PlatformType(Enum):
 
 
 # 定时任务
-UPDATE_TASK_TIME = 60  # 更新任务时间间隔
-UPDATE_TASK_MAX_WORKERS = 10  # 最大线程
-UPDATE_TASK_MAX_TIME = 60 * 60 * 2  # 任务保留时间
+UPDATE_TASK_TIME = os.getenv("UPDATE_TASK_TIME", 30)  # 更新任务时间间隔
+UPDATE_TASK_MAX_WORKERS = os.getenv("UPDATE_TASK_TIME", 10)  # 最大线程
+UPDATE_TASK_MAX_TIME = os.getenv("UPDATE_TASK_TIME", 60 * 60 * 60)  # 任务保留时间
 UPDATE_TASK_LOG = "task_log"
 UPDATE_TASK_PREFIX = "task_log_"  # 任务redis key前缀
 TASK_NOTICE_PREFIX = "task_notice"  # 机器人日志通知前缀
