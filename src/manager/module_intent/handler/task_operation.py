@@ -12,7 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from common.constants import PlatformType
+
 from common.design.strategy import Strategy
 from src.manager.module_intent.handler.task_devops import DevOps
 from src.manager.module_intent.handler.task_job import Job
@@ -38,7 +38,7 @@ class Operation(Strategy):
         return cls._map.value[task_log.platform](action, task_log, data)
 
 
-@Operation.register(PlatformType.JOB.value)
+@Operation.register(ExecutionLog.PlatformType.JOB.value)
 def do_job(action: int, obj: ExecutionLog, data):
     """
     执行job
@@ -47,7 +47,7 @@ def do_job(action: int, obj: ExecutionLog, data):
     return ret
 
 
-@Operation.register(PlatformType.SOPS.value)
+@Operation.register(ExecutionLog.PlatformType.SOPS.value)
 def do_sops(action: int, obj: ExecutionLog, data):
     """
     执行标准运维
@@ -56,7 +56,7 @@ def do_sops(action: int, obj: ExecutionLog, data):
     return ret
 
 
-@Operation.register(PlatformType.DEV_OPS.value)
+@Operation.register(ExecutionLog.PlatformType.DEV_OPS.value)
 def do_devops(action: int, obj: ExecutionLog, data):
     """
     执行蓝盾

@@ -20,10 +20,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.control.throttle import ChatBotThrottle
-from common.generic import BaseViewSet
+from common.drf.generic import BaseViewSet
 from common.perm.permission import check_permission
 from src.manager.handler.api.bk_monitor import BkMonitor
-from src.manager.module_api.serializers import BkMonitorSerializer
+from src.manager.module_api.proto.bk_monitor import BkMonitorSerializer
 
 BACKEND_USERNAME = os.getenv("PLUGIN_USER_NAME", "admin")
 

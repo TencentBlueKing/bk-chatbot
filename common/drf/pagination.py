@@ -28,3 +28,8 @@ class DataPageNumberPagination(PageNumberPagination):
             "data": data,
         }
         return Response(data)
+
+
+class ResultsSetPagination(PageNumberPagination):
+    page_size = 10  # 每页显示多少条
+    page_query_param = "page"  # URL中页码的参数

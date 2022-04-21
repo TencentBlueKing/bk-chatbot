@@ -14,7 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 
 from common.control.throttle import ChatBotThrottle
-from common.generic import APIModelViewSet, ValidationMixin
+from common.drf.generic import APIModelViewSet, ValidationMixin
 from src.manager.module_intent.control.permission import IntentPermission
 from src.manager.module_intent.models import Task
 from src.manager.module_intent.proto.task import TaskSerializer

@@ -17,7 +17,6 @@ specific language governing permissions and limitations under the License.
 import asyncio
 from typing import Callable
 
-from common.constants import PlatformType
 from common.design.strategy import Strategy
 from src.manager.handler.api.devops import DevOps
 from src.manager.handler.api.bk_job import JOB
@@ -54,7 +53,7 @@ class Pipeline(Strategy):
         return cls._map.value[platform](execution_log_obj)
 
 
-@Pipeline.register(PlatformType.JOB.value)
+@Pipeline.register(ExecutionLog.PlatformType.JOB.value)
 def make_job_pipeline(obj: ExecutionLog):
     """
     生成作业平台 pipeline
@@ -69,7 +68,7 @@ def make_job_pipeline(obj: ExecutionLog):
     return data
 
 
-@Pipeline.register(PlatformType.SOPS.value)
+@Pipeline.register(ExecutionLog.PlatformType.SOPS.value)
 def make_sops_pipeline(obj: ExecutionLog):
     """
     生成标准运维 pipeline
@@ -109,7 +108,7 @@ def make_sops_pipeline(obj: ExecutionLog):
     return data
 
 
-@Pipeline.register(PlatformType.DEV_OPS.value)
+@Pipeline.register(ExecutionLog.PlatformType.DEV_OPS.value)
 def make_devops_pipeline(obj: ExecutionLog):
     """
     生成蓝盾 pipeline

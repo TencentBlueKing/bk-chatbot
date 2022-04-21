@@ -20,7 +20,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.constants import TIMER_MAX_NUM
 from common.drf.view_set import (
     BaseCreateViewSet,
     BaseDelViewSet,
@@ -28,6 +27,7 @@ from common.drf.view_set import (
     BaseUpdateViewSet,
 )
 from common.perm.permission import check_permission
+from src.manager.module_timer.constants import TIMER_MAX_NUM
 from src.manager.module_timer.hanlder.deal_timer import deal_timer, update_timer_status
 from src.manager.module_timer.models import TimerModel
 from src.manager.module_timer.proto.timer import (

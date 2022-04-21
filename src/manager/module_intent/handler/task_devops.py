@@ -35,7 +35,7 @@ class DevOps(Strategy):
 
 
 @DevOps.register(TaskType.STOP.value)
-def stop(bk_dev_ops: BkDevOps, **kwargs):
+def stop(bk_dev_ops, **kwargs):
     """
     停止流程
     @param bk_dev_ops:

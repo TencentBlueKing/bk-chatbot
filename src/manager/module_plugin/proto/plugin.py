@@ -39,6 +39,7 @@ base_fields = [
     "plugin_wait_time",
 ]
 
+
 # 插件action
 class PluginAction(Serializer):
     """
@@ -118,7 +119,7 @@ class PluginSerializer(PluginBaseSerializer):
 
     class Meta:
         model = Plugin
-        fields = ["id","plugin_key"] + base_fields
+        fields = ["id", "plugin_key"] + base_fields
 
 
 # 插件管理-查询多个

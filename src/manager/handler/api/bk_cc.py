@@ -18,7 +18,7 @@ import traceback
 from blueapps.utils.logger import logger
 
 from adapter.api import CCApi
-from common.batch import batch_request
+from common.requests.batch import batch_request
 
 
 class CC:

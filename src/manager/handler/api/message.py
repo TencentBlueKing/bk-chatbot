@@ -16,11 +16,15 @@ specific language governing permissions and limitations under the License.
 import os
 
 import requests
-
 from blueapps.utils.logger import logger_celery as logger
-from common.constants import MINI_PROGRAM_APPID, YOUTI_TEMPLATE_ID
+
 from common.design.strategy import Strategy
-from src.manager.handler.in_api.youti import Mga
+from common.utils.os import get_env_or_raise
+from src.manager.handler.in_api.youti_api import MgaAPI
+
+# 消息通知相关
+YOUTI_TEMPLATE_ID = get_env_or_raise("YOUTI_TEMPLATE_ID")  # 游梯模板id
+MINI_PROGRAM_APPID = get_env_or_raise("MINI_PROGRAM_APPID")  # 小程序id
 
 
 class Message(Strategy):
@@ -97,14 +101,7 @@ def rtx_notice(
 
 @Message.register(Message.YOU_TI.value)
 def youti_notice(
-    log_id: int,
-    user: str,
-    receiver: str,
-    intent_name: str,
-    intent_id: int,
-    time: str,
-    status: str,
-    **kwargs,
+    log_id: int, user: str, receiver: str, intent_name: str, intent_id: int, time: str, status: str, **kwargs
 ):
 
     page_path = f"pages/taskinfo/taskinfo?id={log_id}&intent_id={intent_id}"
@@ -119,4 +116,4 @@ def youti_notice(
         },
         "miniprogram": {"appid": MINI_PROGRAM_APPID, "pagepath": page_path},
     }
-    return Mga().send_custom_msg(**data)
+    return MgaAPI().send_custom_msg(**data)

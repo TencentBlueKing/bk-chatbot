@@ -13,6 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from enum import Enum
+
 import django_filters
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -23,8 +25,6 @@ from common.constants import (
     CHAT_BOT_TYPES,
     TAK_PLATFORM_JOB,
     TASK_PLATFORM_CHOICES,
-    PlatformType,
-    TaskExecStatus,
 )
 from common.drf.filters import BaseOpenApiFilter
 from common.models.base import BaseModel
@@ -116,8 +116,8 @@ class Intent(BaseModel):
         serial_number = filters.CharFilter(field_name="serial_number")
         developer = filters.CharFilter(field_name="developer", lookup_expr="icontains")
         approver = filters.CharFilter(field_name="approver", lookup_expr="icontains")
-        available_user  = filters.CharFilter(field_name="available_user", lookup_expr="icontains")
-        available_group  = filters.CharFilter(field_name="available_group", lookup_expr="icontains")
+        available_user = filters.CharFilter(field_name="available_user", lookup_expr="icontains")
+        available_group = filters.CharFilter(field_name="available_group", lookup_expr="icontains")
 
     @classmethod
     def query_intent_list(cls, **kwargs):
@@ -223,18 +223,32 @@ class Task(BaseModel):
         """
         更新语料
         """
-
-        update_data = {}
-        for key, value in kwargs.items():
-            if value:
-                update_data.setdefault(key, value)
-        cls.objects.filter(index_id=intent_id).update(**update_data)
+        cls.objects.filter(index_id=intent_id).update(**kwargs)
 
 
 class ExecutionLog(BaseModel):
     """
     意图执行日志
     """
+
+    class PlatformType(Enum):
+        """
+        平台类型
+        """
+
+        DEFAULT = 0  # 默认
+        JOB = 1  # 作业平台
+        SOPS = 2  # 标准运维
+        DEV_OPS = 3  # 蓝盾
+        DEFINE = 4  # 自定义
+
+    class TaskExecStatus(Enum):
+        INIT = 0  # 初始状态
+        RUNNING = 1  # 执行中
+        SUCCESS = 2  # 执行成功
+        FAIL = 3  # 执行失败
+        SUSPENDED = 4  # 暂停
+        REMOVE = 5  # 执行异常
 
     biz_id = models.PositiveIntegerField(_("业务ID"), default=0, db_index=True)
     intent_id = models.BigIntegerField(_("意图ID"), default=-1)

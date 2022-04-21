@@ -17,7 +17,6 @@ from unittest.mock import patch
 
 import pytest
 
-from common.constants import PlatformType, TaskExecStatus
 from src.manager.module_intent.handler import TaskType
 from src.manager.module_intent.models import ExecutionLog
 
@@ -114,7 +113,7 @@ def fake_running_task(fake_execution_log):
     模拟正在执行的任务
     @return:
     """
-    fake_execution_log.status = TaskExecStatus.RUNNING.value
+    fake_execution_log.status = ExecutionLog.TaskExecStatus.RUNNING.value
     fake_execution_log.save()
     return fake_execution_log
 
@@ -125,8 +124,7 @@ def fake_fail_task(fake_execution_log):
     模拟失败的任务
     @return:
     """
-    fake_execution_log.status = TaskExecStatus.FAIL.value
-    # fake_execution_log.platform = request.param
+    fake_execution_log.status = ExecutionLog.TaskExecStatus.FAIL.value
     fake_execution_log.save()
     return fake_execution_log
 
@@ -191,7 +189,7 @@ class TestExecTaskView:
         """
         重试/跳过 job失败步骤
         """
-        data = self.make_data(fake_fail_task, PlatformType.JOB.value, action)
+        data = self.make_data(fake_fail_task, ExecutionLog.PlatformType.JOB.value, action)
         # 操作步骤部分返回
         operate_step.return_value = {
             "result": True,
@@ -216,7 +214,7 @@ class TestExecTaskView:
         """
         停止job任务
         """
-        data = self.make_data(fake_running_task, PlatformType.JOB.value, action)
+        data = self.make_data(fake_running_task, ExecutionLog.PlatformType.JOB.value, action)
         operate_job.return_value = {"result": True, "data": {"job_instance_id": fake_running_task.task_id}}
         rsp = admin_client.post("/api/v1/task/exec/task_operate/", data=data)
         rsp_json = rsp.json()
@@ -230,7 +228,7 @@ class TestExecTaskView:
         """
         重试/跳过 sops失败节点
         """
-        data = self.make_data(fake_fail_task, PlatformType.SOPS.value, action)
+        data = self.make_data(fake_fail_task, ExecutionLog.PlatformType.SOPS.value, action)
         # 操作步骤部分返回
         operate_node.return_value = {"result": True, "data": "success", "code": 0}
         # 获取任务状态部分返回
@@ -263,7 +261,7 @@ class TestExecTaskView:
 
         # 操作步骤部分返回
         operate_task.return_value = {"result": True, "data": {}}
-        data = self.make_data(fake_running_task, PlatformType.SOPS.value, action)
+        data = self.make_data(fake_running_task, ExecutionLog.PlatformType.SOPS.value, action)
         rsp = admin_client.post("/api/v1/task/exec/task_operate/", data=data)
         assert operate_task.called
         rsp_json = rsp.json()
@@ -299,7 +297,7 @@ class TestExecTaskView:
                 ],
             },
         }
-        data = self.make_data(fake_fail_task, PlatformType.DEV_OPS.value, action)
+        data = self.make_data(fake_fail_task, ExecutionLog.PlatformType.DEV_OPS.value, action)
         rsp = admin_client.post("/api/v1/task/exec/task_operate/", data=data)
         rsp_json = rsp.json()
         assert rsp_json.get("result")
@@ -313,7 +311,7 @@ class TestExecTaskView:
         """
         app_build_stop.return_value = {"data": True, "message": faker.word(), "status": 0}
 
-        data = self.make_data(fake_running_task, PlatformType.DEV_OPS.value, action)
+        data = self.make_data(fake_running_task, ExecutionLog.PlatformType.DEV_OPS.value, action)
         rsp = admin_client.post("/api/v1/task/exec/task_operate/", data=data)
         rsp_json = rsp.json()
         assert rsp_json.get("result")

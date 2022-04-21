@@ -14,11 +14,11 @@ specific language governing permissions and limitations under the License.
 """
 import json
 
+from blueapps.utils.logger import logger
 from rest_framework import permissions
 
-from blueapps.utils.logger import logger
-from common.redis import RedisClient
 from common.http.request import get_request_user
+from common.redis import RedisClient
 from src.manager.handler.api.bk_cc import CC
 
 

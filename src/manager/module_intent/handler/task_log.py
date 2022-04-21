@@ -19,15 +19,6 @@ from typing import Callable
 
 from blueapps.utils.logger import logger_celery as logger
 
-from common.constants import (
-    TASK_EXEC_STATUS_COLOR_DICT,
-    TASK_EXECUTE_STATUS_DICT,
-    TASK_NOTICE_PREFIX,
-    UPDATE_TASK_MAX_TIME,
-    UPDATE_TASK_PREFIX,
-    PlatformType,
-    TaskExecStatus,
-)
 from common.design.strategy import Strategy
 from common.models.base import to_format_date
 from common.redis import RedisClient
@@ -35,6 +26,13 @@ from src.manager.handler.api.message import Message
 from src.manager.handler.bk.bk_devops import BkDevOps
 from src.manager.handler.bk.bk_job import BkJob
 from src.manager.handler.bk.bk_sops import BkSops
+from src.manager.module_intent.constants import (
+    TASK_EXEC_STATUS_COLOR_DICT,
+    TASK_EXECUTE_STATUS_DICT,
+    TASK_NOTICE_PREFIX,
+    UPDATE_TASK_MAX_TIME,
+    UPDATE_TASK_PREFIX,
+)
 from src.manager.module_intent.models import ExecutionLog
 
 
@@ -119,8 +117,8 @@ class PlatformTask:
             }
             # 如果出现状态为成功/移除 则删除
             if self.obj.status in [
-                TaskExecStatus.SUCCESS.value,
-                TaskExecStatus.REMOVE.value,
+                ExecutionLog.TaskExecStatus.SUCCESS.value,
+                ExecutionLog.TaskExecStatus.REMOVE.value,
             ]:
                 self.del_task_cache(self.obj.id)
             Message.notice(**params)
@@ -152,7 +150,7 @@ class TaskStatus(Strategy):
         task_class.callback(**ret_dict)
 
 
-@TaskStatus.register(PlatformType.JOB.value)
+@TaskStatus.register(ExecutionLog.PlatformType.JOB.value)
 def job(task_class: PlatformTask):
     """
     作业平台
@@ -171,13 +169,13 @@ def job(task_class: PlatformTask):
     )
     status = job_ret.get("status")
     if status not in [
-        TaskExecStatus.SUCCESS.value,
-        TaskExecStatus.FAIL.value,
-        TaskExecStatus.REMOVE.value,
+        ExecutionLog.TaskExecStatus.SUCCESS.value,
+        ExecutionLog.TaskExecStatus.FAIL.value,
+        ExecutionLog.TaskExecStatus.REMOVE.value,
     ]:
         return {}
     param_uniq_list = bk_job.get_uniq_var_value()  # 去重后参数
-    if status == TaskExecStatus.SUCCESS.value:  # 成功通知
+    if status == ExecutionLog.TaskExecStatus.SUCCESS.value:  # 成功通知
         return {
             "task_uri": bk_job.url,
             "param_list": param_uniq_list,
@@ -193,7 +191,7 @@ def job(task_class: PlatformTask):
         }
 
 
-@TaskStatus.register(PlatformType.SOPS.value)
+@TaskStatus.register(ExecutionLog.PlatformType.SOPS.value)
 def sops(task_class: PlatformTask):
     """
     标准运维
@@ -209,9 +207,9 @@ def sops(task_class: PlatformTask):
     sops_ret = task_class.save_task(func=bk_sops.get_task_status)
     status = sops_ret.get("status")
     if status not in [
-        TaskExecStatus.SUCCESS.value,
-        TaskExecStatus.FAIL.value,
-        TaskExecStatus.REMOVE.value,
+        ExecutionLog.TaskExecStatus.SUCCESS.value,
+        ExecutionLog.TaskExecStatus.FAIL.value,
+        ExecutionLog.TaskExecStatus.REMOVE.value,
     ]:
         return {}
 
@@ -231,7 +229,7 @@ def sops(task_class: PlatformTask):
         }
 
 
-@TaskStatus.register(PlatformType.DEV_OPS.value)
+@TaskStatus.register(ExecutionLog.PlatformType.DEV_OPS.value)
 def dev_ops(task_class: PlatformTask):
     """
     @param task_class:
@@ -251,9 +249,9 @@ def dev_ops(task_class: PlatformTask):
     # 1.判断状态，2.通过状态判断是否通知 3.查询参数
     status = dev_ops_ret.get("status", "")
     if status not in [
-        TaskExecStatus.SUCCESS.value,
-        TaskExecStatus.FAIL.value,
-        TaskExecStatus.REMOVE.value,
+        ExecutionLog.TaskExecStatus.SUCCESS.value,
+        ExecutionLog.TaskExecStatus.FAIL.value,
+        ExecutionLog.TaskExecStatus.REMOVE.value,
     ]:
         return {}
 
@@ -269,7 +267,7 @@ def dev_ops(task_class: PlatformTask):
         )
     )
 
-    if status == TaskExecStatus.SUCCESS.value:  # 成功通知
+    if status == ExecutionLog.TaskExecStatus.SUCCESS.value:  # 成功通知
         return {
             "task_uri": bk_devops.pipeline_url,
             "param_list": param_list,

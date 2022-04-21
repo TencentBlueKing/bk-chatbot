@@ -15,11 +15,11 @@ specific language governing permissions and limitations under the License.
 """
 from blueapps.account.decorators import login_exempt
 
-from common.generic import APIModelViewSet, ValidationMixin
-from common.pagination import ResultsSetPagination
+from common.control.throttle import ChatBotThrottle
+from common.drf.generic import APIModelViewSet, ValidationMixin
+from common.drf.pagination import ResultsSetPagination
 from src.manager.module_biz.constants import CHAT_BOT_USE_SPACE
 from src.manager.module_biz.control.permission import BizPermission
-from src.manager.module_biz.control.throttle import BizThrottle
 from src.manager.module_biz.handler import GroupBindHandler
 from src.manager.module_biz.models import ChatBindBusiness
 from src.manager.module_biz.serializers import GroupBindBizSerializer
@@ -36,7 +36,7 @@ class ChatBindViewSet(APIModelViewSet, ValidationMixin):
     ordering_fields = ["biz_id", "created_at", "updated_at", "created_by"]
     ordering = "-created_at"
     permission_classes = (BizPermission,)
-    throttle_classes = (BizThrottle,)
+    throttle_classes = (ChatBotThrottle,)
     pagination_class = ResultsSetPagination
 
     def perform_create(self, serializer):
