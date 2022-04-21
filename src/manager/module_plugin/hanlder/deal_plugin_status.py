@@ -15,7 +15,12 @@ specific language governing permissions and limitations under the License.
 
 
 from blueapps.utils.logger import logger
-from common.constants import (
+
+from common.design.strategy import Strategy
+from common.redis import RedisClient
+from src.manager.handler.api.bk_itsm import BkITSM
+from src.manager.handler.in_api.plugin import PluginManage
+from src.manager.module_plugin.constants import (
     PLUGIN_ITSM_CALLBACK_URI,
     PLUGIN_ITSM_SERVICE_ID,
     PROD_BOT_NAME,
@@ -23,10 +28,6 @@ from common.constants import (
     STAG_BOT_NAME,
     STAG_PLUGIN_URI_ENV,
 )
-from common.design.strategy import Strategy
-from common.redis import RedisClient
-from src.manager.handler.api.bk_itsm import BkITSM
-from src.manager.handler.in_api.plugin import PluginManage
 from src.manager.module_plugin.models import Plugin, PluginAuditLog
 
 
@@ -58,7 +59,7 @@ def get_plugin_params(obj: Plugin) -> dict:
         "status": 1,
         "global": obj.plugin_global,
         "actions": obj.actions,
-        "wait_time": obj.plugin_wait_time
+        "wait_time": obj.plugin_wait_time,
     }
     return params
 

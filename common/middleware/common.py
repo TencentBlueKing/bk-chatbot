@@ -55,11 +55,15 @@ class CommonMiddleware(MiddlewareMixin):
             logger.error(error_msg)
             return error_response(error_msg)
 
-        # 地址记录
+        # 请求信息记录
         logger.info(
             {
-                "message": json.dumps(payload),
-                "url": request.get_full_path(),
+                "message": json.dumps(
+                    {
+                        "url": request.get_full_path(),
+                        "data": payload,
+                    }
+                )
             }
         )
         request.payload = payload

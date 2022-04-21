@@ -14,16 +14,6 @@ specific language governing permissions and limitations under the License.
 """
 
 from adapter.api import SopsApi
-from common.constants import TaskExecStatus
-
-sops_instance_status_map = {
-    "CREATED": TaskExecStatus.INIT.value,  # 未执行
-    "RUNNING": TaskExecStatus.RUNNING.value,  # 执行中
-    "FAILED": TaskExecStatus.FAIL.value,  # 失败
-    "FINISHED": TaskExecStatus.SUCCESS.value,  # 已完成
-    "SUSPENDED": TaskExecStatus.SUSPENDED.value,  # 暂停
-    "REVOKED": TaskExecStatus.REMOVE.value,  # 已终止
-}
 
 
 class SOPS:
@@ -94,10 +84,8 @@ class SOPS:
         }
         sops_task_ret = SopsApi.get_task_status(params, raw=True)
         data = sops_task_ret.get("data", None)
-        status = data.get("state", "")
         return {
             "ok": data is not None,
-            "status": sops_instance_status_map.get(status, "1"),
             "data": data,
         }
 

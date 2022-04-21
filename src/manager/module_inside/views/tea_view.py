@@ -12,53 +12,52 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-import os
+
 
 from blueapps.account.decorators import login_exempt
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
-from rest_framework.response import Response
 
 from common.control.throttle import ChatBotThrottle
-from common.drf.generic import BaseViewSet
-from common.perm.permission import check_permission
-from src.manager.handler.api.bk_monitor import BkMonitor
-from src.manager.module_api.proto.bk_monitor import BkMonitorSerializer
+from common.drf.validation import validation
+from common.drf.view_set import BaseViewSet
+from common.http.html import jsonify
+from src.manager.handler.in_api.tea_api import TeaAPI
+from src.manager.module_inside.proto.tea import (
+    ReqGetProductSerializer,
+    get_product_docs,
+)
 
-BACKEND_USERNAME = os.getenv("PLUGIN_USER_NAME", "admin")
 
-
-class BkMonitorViewSet(BaseViewSet):
+@method_decorator(name="get_product", decorator=get_product_docs)
+class TeaViewSet(BaseViewSet):
     """
-    蓝鲸监控
+    Youti 相关操作
     """
 
     throttle_classes = (ChatBotThrottle,)
-    http_method_names = ["post"]
 
     @login_exempt
     @csrf_exempt
-    @check_permission()
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    @action(detail=False, methods=["POST"])
-    def get_metric_data(self, request):
+    @action(detail=False, methods=["GET"])
+    @validation(ReqGetProductSerializer)
+    def get_product(self, request):
         """
-        metric: cpu/memory/network/
-        kwargs = {
-            'biz_id': 883,
-            'ip': 'x.x.x.x',
-            'bk_cloud_id': 0,
-            'start_timestamp': 1638374400000,
-            'end_timestamp': 1638460799000,
-        }
+        @return:
         """
-        serializer = BkMonitorSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        query_params = serializer.validated_data
-        metric_name = query_params.pop("metric")
-
-        res = BkMonitor.get_ts_data(BACKEND_USERNAME, metric_name, **query_params)
-        return Response(res)
+        payload = request.payload
+        valid_projects = TeaAPI().get_valid_product(**payload)
+        projects_info = list(
+            map(
+                lambda x: {
+                    "name": x.get("name"),
+                    "code": str(x.get("cc_id")),
+                },
+                valid_projects,
+            )
+        )
+        return jsonify({"count": len(projects_info), "result": projects_info})

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -13,20 +12,9 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from common.control.throttle import ChatBotThrottle
 
 
-class FaqThrottle(ChatBotThrottle):
-    def wait(self):
-        """
-        多少秒后可以允许继续访问
-        Optionally, return a recommended number of seconds to wait before
-        the next request.
-        """
-        # last_time = RECORD[self.ident][0]
-        last_time = self.redis_client.hash_get(
-            "faq_ip_throttle",
-            self.ident,
-        )[0]
-        now = self.ctime()
-        return int(self.times_request + last_time - now)
+inside_tag = ["内部使用"]
+
+
+__all__ = ["inside_tag"]

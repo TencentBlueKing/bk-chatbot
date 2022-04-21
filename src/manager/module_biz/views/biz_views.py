@@ -13,23 +13,22 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from blueapps.utils.logger import logger
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from blueapps.utils.logger import logger
-from common.generic import BaseViewSet
-from common.redis import RedisClient
+from common.drf.generic import BaseViewSet
 from common.http.request import get_request_user
+from common.redis import RedisClient
 from src.manager.handler.api.bk_cc import CC
-from src.manager.module_biz.control.throttle import BizThrottle
-
+from common.control.throttle import ChatBotThrottle
 
 class BizViewSet(BaseViewSet):
     """
     业务信息
     """
 
-    throttle_classes = (BizThrottle,)
+    throttle_classes = (ChatBotThrottle,)
 
     @action(detail=False, methods=["POST"])
     def describe_biz(self, request):

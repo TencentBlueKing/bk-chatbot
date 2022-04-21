@@ -26,6 +26,8 @@ schema_view = get_schema_view(
     ),
     public=True,
 )
+
+
 urlpatterns = [
     # 出于安全考虑，默认屏蔽admin访问路径。
     # 开启前请修改路径随机内容，降低被猜测命中几率，提升安全性
@@ -33,16 +35,8 @@ urlpatterns = [
     url(r"^admin_opsbot/", admin.site.urls),
     url(r"^account/", include("blueapps.account.urls")),
     url(r"^i18n/", include("django.conf.urls.i18n")),
-    url(r"^", include("src.manager.module_index.urls")),
     # 业务逻辑
-    url(r"^api/v1/", include("src.manager.module_api.urls")),
-    url(r"^api/v1/", include("src.manager.module_biz.urls")),
-    url(r"^api/v1/", include("src.manager.module_intent.urls")),
-    url(r"^api/v1/", include("src.manager.module_faq.urls")),
-    url(r"^api/v1/", include("src.manager.module_nlp.urls")),
-    url(r"^api/v1/", include("src.manager.module_plugin.urls")),
-    url(r"^api/v1/", include("src.manager.module_timer.urls")),
-    url(r"^api/v1/", include("src.manager.module_other.urls")),
+    url(r"^", include("src.manager.urls")),  # 入口urls
     # 文档
     url(r"^swagger/$", schema_view.with_ui("swagger"), name="schema-swagger-ui"),
     url(r"^api-docs/$", schema_view.with_ui("redoc"), name="schema-docs"),

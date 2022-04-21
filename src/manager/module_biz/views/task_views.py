@@ -17,14 +17,13 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.generic import BaseViewSet
+from common.control.throttle import ChatBotThrottle
+from common.drf.generic import BaseViewSet
+from common.drf.validation import validation
 from common.http.request import get_request_user
-from common.validation import validation
-from src.manager.handler.api.devops import DevOps
 from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
-
-from src.manager.module_biz.control.throttle import BizThrottle
+from src.manager.handler.api.devops import DevOps
 from src.manager.module_biz.proto import (
     DescribeDevopsPipelinesStartInfo,
     DescribeJob,
@@ -40,7 +39,7 @@ class TaskViewSet(BaseViewSet):
     后端任务
     """
 
-    throttle_classes = [BizThrottle]
+    throttle_classes = [ChatBotThrottle]
 
     @swagger_auto_schema(tags=tags, operation_id="作业平台-获取JOB任务列表")
     @action(detail=False, methods=["GET"])

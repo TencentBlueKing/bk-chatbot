@@ -17,7 +17,6 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
-from common.constants import PlatformType
 from common.drf.serializers import BaseRspSerializer
 from src.manager.module_intent.handler import TaskType
 from src.manager.module_intent.models import ExecutionLog
@@ -61,7 +60,7 @@ class ReqBotCreateLogData(Serializer):
     intent_id = serializers.CharField(label="意图ID")
     intent_name = serializers.CharField(label="技能名称")
     intent_create_user = serializers.CharField(label="意图添加人")
-    platform = serializers.IntegerField(min_value=0, max_value=len(list(PlatformType)), label="机器人名称")
+    platform = serializers.IntegerField(min_value=0, max_value=len(list(ExecutionLog.PlatformType)), label="机器人名称")
     project_id = serializers.CharField(required=False, allow_blank=True, label="项目ID")
     feature_id = serializers.CharField(required=False, allow_blank=True, label="特色ID")
     task_id = serializers.CharField(required=True, label="任务ID")

@@ -15,6 +15,8 @@ specific language governing permissions and limitations under the License.
 from blueapps.conf.default_settings import *  # noqa
 from blueapps.conf.log import get_logging_config_dict
 
+from src.manager.settings import BKCHAT_INSTALLED_APPS, CHILD_CELERY_IMPORTS
+
 # 这里是默认的 INSTALLED_APPS，大部分情况下，不需要改动
 # 如果你已经了解每个默认 APP 的作用，确实需要去掉某些 APP，请去掉下面的注释，然后修改
 # INSTALLED_APPS = (
@@ -32,21 +34,14 @@ from blueapps.conf.log import get_logging_config_dict
 #     'blueapps.account',
 # )
 
+
 # 请在这里加入你的自定义 APP
 INSTALLED_APPS += (
     "rest_framework",
     "django_filters",
     "drf_yasg",
-    "src.manager.module_api",
-    "src.manager.module_biz",
-    "src.manager.module_intent",
-    "src.manager.module_faq",
-    "src.manager.module_index",
-    "src.manager.module_nlp",
-    "src.manager.module_plugin",
-    "src.manager.module_timer",
-    "src.manager.module_other",
 )
+INSTALLED_APPS += BKCHAT_INSTALLED_APPS
 
 # 这里是默认的中间件，大部分情况下，不需要改动
 # 如果你已经了解每个默认 MIDDLEWARE 的作用，确实需要去掉某些 MIDDLEWARE，或者改动先后顺序，请去掉下面的注释，然后修改
@@ -105,7 +100,8 @@ IS_USE_CELERY = True
 CELERYD_CONCURRENCY = os.getenv("BK_CELERYD_CONCURRENCY", 2)
 
 # CELERY 配置，申明任务的文件路径，即包含有 @task 装饰器的函数文件
-CELERY_IMPORTS = ("src.manager.module_intent.tasks.log_timer",)
+CELERY_IMPORTS = ()
+CELERY_IMPORTS += CHILD_CELERY_IMPORTS
 
 # load logging settings
 LOGGING = get_logging_config_dict(locals())
@@ -190,7 +186,7 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.FormParser",
         "rest_framework.parsers.MultiPartParser",
     ],
-    "EXCEPTION_HANDLER": "common.drf.exception_handler.custom_exception_handler",
+    "EXCEPTION_HANDLER": "common.drf.handler.custom_exception_handler",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S",

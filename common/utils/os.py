@@ -12,21 +12,18 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from rest_framework import permissions
+import os
 
-from common.http.request import get_request_user
-from src.manager.module_faq.models import FAQ
+from django.conf import settings
 
 
-class FaqPermission(permissions.BasePermission):
+def get_env_or_raise(key, default=None):
     """
-    知识库权限控制
+    Get an environment variable, if it does not exist, raise an exception
     """
-
-    def has_permission(self, request, view):
-        data = FAQ.query_faq_list(member__contains=get_request_user(request))
-
-        if not data:
-            return False
-
-        return True
+    value = os.environ.get(key, default)
+    if not value and not hasattr(settings, "IS_TEST"):
+        raise RuntimeError(
+            ('Environment variable "{}" ' "not found, you must set this variable to run this application.").format(key),
+        )
+    return value

@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from celery.task import periodic_task
 
-from common.constants import (
+from src.manager.module_intent.constants import (
     UPDATE_TASK_MAX_WORKERS,
     UPDATE_TASK_PREFIX,
     UPDATE_TASK_TIME,

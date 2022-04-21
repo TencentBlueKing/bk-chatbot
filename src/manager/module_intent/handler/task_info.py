@@ -15,10 +15,10 @@ specific language governing permissions and limitations under the License.
 
 import asyncio
 
-from common.constants import PlatformType
 from common.design.strategy import Strategy
 from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
+from src.manager.handler.api.devops import DevOps
 from src.manager.module_intent.models import ExecutionLog
 
 
@@ -50,7 +50,7 @@ class TaskDetail(Strategy):
         return cls._map.value[platform](execution_log_obj)
 
 
-@TaskDetail.register(PlatformType.JOB.value)
+@TaskDetail.register(ExecutionLog.PlatformType.JOB.value)
 def job(obj: ExecutionLog):
     """
     作业平台
@@ -102,7 +102,7 @@ def job(obj: ExecutionLog):
     return ip_error_infos
 
 
-@TaskDetail.register(PlatformType.SOPS.value)
+@TaskDetail.register(ExecutionLog.PlatformType.SOPS.value)
 def sops(obj: ExecutionLog):
     """
     标准运维
@@ -157,7 +157,7 @@ def sops(obj: ExecutionLog):
     return error_infos
 
 
-@TaskDetail.register(PlatformType.DEV_OPS.value)
+@TaskDetail.register(ExecutionLog.PlatformType.DEV_OPS.value)
 def dev_ops(obj: ExecutionLog):
     """
     蓝盾

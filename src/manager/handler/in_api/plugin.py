@@ -17,7 +17,7 @@ import os
 
 import requests
 
-from common.constants import PLUGIN_RELOAD_URI
+from src.manager.module_plugin.constants import PLUGIN_RELOAD_URI
 
 
 class Service:

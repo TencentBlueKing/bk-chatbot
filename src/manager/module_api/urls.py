@@ -21,11 +21,10 @@ from src.manager.module_api.views import (
     bkmonitor_views,
     cmdb_views,
     plugin_views,
-    youti_views,
 )
 
 router = routers.DefaultRouter()
-router.register(r"youti", youti_views.YoutiViewSet, basename="youti")
+
 router.register(r"plugin", plugin_views.PluginViewSet, basename="plugin")
 router.register(r"bkmonitor", bkmonitor_views.BkMonitorViewSet, basename="bkmonitor")
 router.register(r"cmdb", cmdb_views.CmdbViewSet, basename="cmdb")

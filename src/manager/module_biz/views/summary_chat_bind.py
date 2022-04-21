@@ -13,9 +13,9 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from common.generic import APIModelViewSet, ValidationMixin
+from common.control.throttle import ChatBotThrottle
+from common.drf.generic import APIModelViewSet, ValidationMixin
 from src.manager.module_biz.control.permission import SummaryChatPermission
-from src.manager.module_biz.control.throttle import BizThrottle
 from src.manager.module_biz.models import ChatBindBusiness
 from src.manager.module_biz.serializers import SummaryGroupBindBizSerializer
 
@@ -29,4 +29,4 @@ class SummaryChatBindViewSet(APIModelViewSet, ValidationMixin):
     serializer_class = SummaryGroupBindBizSerializer
     filterset_class = ChatBindBusiness.OpenApiFilter
     permission_classes = (SummaryChatPermission,)
-    throttle_classes = (BizThrottle,)
+    throttle_classes = (ChatBotThrottle,)

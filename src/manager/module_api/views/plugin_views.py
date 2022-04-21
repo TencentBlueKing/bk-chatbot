@@ -17,7 +17,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.control.throttle import ChatBotThrottle
-from common.generic import BaseViewSet
+from common.drf.generic import BaseViewSet
 from common.redis import RedisClient
 from src.manager.handler.in_api.plugin import Service
 

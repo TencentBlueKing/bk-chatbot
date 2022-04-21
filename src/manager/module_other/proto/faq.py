@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -13,10 +12,12 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
+
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from src.manager.module_faq.models import FAQ
+from src.manager.module_other.models import FAQModel
 
 
 class FAQSerializer(serializers.ModelSerializer):
@@ -29,5 +30,5 @@ class FAQSerializer(serializers.ModelSerializer):
     member = serializers.CharField(required=True, label=_("维护人员"))
 
     class Meta:
-        model = FAQ
+        model = FAQModel
         fields = "__all__"

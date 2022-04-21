@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -13,21 +12,15 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from rest_framework import serializers
-
-from src.manager.module_faq.models import FAQ
 
 
-class FaqSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = FAQ
-        fields = (
-            "biz_id",
-            "biz_name",
-            "faq_name",
-            "faq_db",
-            "faq_collection",
-            "member",
-            "create_by",
-            "update_time",
-        )
+from django.conf.urls import include, url
+from rest_framework import routers
+
+from src.manager.module_inside.views import tea_view, youti_view
+
+router = routers.DefaultRouter()
+router.register(r"youti", youti_view.YoutiViewSet, basename="youti")
+router.register(r"tea", tea_view.TeaViewSet, basename="tea")
+
+urlpatterns = (url(r"^", include(router.urls)),)

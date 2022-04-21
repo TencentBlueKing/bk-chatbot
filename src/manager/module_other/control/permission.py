@@ -12,33 +12,21 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+from rest_framework import permissions
+
+from common.http.request import get_request_user
+from src.manager.module_other.models import FAQModel
 
 
-from functools import wraps
-from typing import Callable, Union
-
-from common.http.html import error_response
-from django.http import JsonResponse
-
-
-def validation(valida):
+class FaqPermission(permissions.BasePermission):
     """
-    验证器
+    知识库权限控制
     """
 
-    def _validation(func):
-        @wraps(func)
-        def _wrapper(self, request, *args, **kwargs) -> Union[Callable, JsonResponse]:
-            """
-            用来验证请求数据是否存在
-            """
-            protocol = valida(data=request.payload)
-            if protocol.is_valid():
-                request.payload = protocol.data
-                return func(self, request, *args, **kwargs)
-            else:
-                return error_response(protocol.errors)
+    def has_permission(self, request, view):
+        data = FAQModel.query_faq_list(member__contains=get_request_user(request))
 
-        return _wrapper
+        if not data:
+            return False
 
-    return _validation
+        return True
