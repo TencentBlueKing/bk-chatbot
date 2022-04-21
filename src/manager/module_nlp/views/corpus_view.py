@@ -23,7 +23,7 @@ from common.drf.view_set import (
     BaseUpdateViewSet,
 )
 from common.perm.permission import check_permission
-from common.validation import validation
+from common.drf.validation import validation
 from src.manager.module_nlp.models import Corpus, CorpusDomain, CorpusIntent
 from src.manager.module_nlp.proto import (
     CorpusDomainSerializer,

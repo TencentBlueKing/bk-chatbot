@@ -14,20 +14,23 @@ specific language governing permissions and limitations under the License.
 """
 import time
 
+from blueapps.account.decorators import login_exempt
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from blueapps.account.decorators import login_exempt
-from common.constants import UPDATE_TASK_MAX_TIME, UPDATE_TASK_PREFIX
 from common.control.throttle import ChatBotThrottle
+from common.drf.validation import validation
 from common.drf.view_set import BaseGetViewSet
 from common.perm.permission import check_permission
 from common.redis import RedisClient
-from common.validation import validation
 from src.manager.handler.api.bk_job import JOB
-from src.manager.module_intent.constants import ONE_WEEK_SECONDS
+from src.manager.module_intent.constants import (
+    ONE_WEEK_SECONDS,
+    UPDATE_TASK_MAX_TIME,
+    UPDATE_TASK_PREFIX,
+)
 from src.manager.module_intent.handler.task_info import TaskDetail
 from src.manager.module_intent.handler.task_operation import Operation
 from src.manager.module_intent.handler.task_tree import Pipeline
@@ -45,7 +48,6 @@ from src.manager.module_intent.proto.log import (
     log_describe_records_docs,
     log_list_docs,
 )
-from src.manager.module_intent.tasks.log_timer import task_status_timer
 
 
 @method_decorator(name="list", decorator=log_list_docs)
@@ -169,16 +171,11 @@ class TaskExecutionViewSet(BaseGetViewSet):
         """
         payload = request.payload
         id = payload.get("id")
-        action = payload.get("action")
+        action = int(payload.get("action"))
         data = payload.get("data", {})
         Operation.do(action, id, data)
         # 重新添加缓存时间
         with RedisClient() as r:
             key = f"{UPDATE_TASK_PREFIX}{id}"  # 唯一key
             r.set(key, 1, UPDATE_TASK_MAX_TIME)  # 设置过期时间
-        return Response({"data": ""})
-
-    @action(detail=False, methods=["POST"])
-    def status(self, request, *args, **kwargs):
-        task_status_timer()
         return Response({"data": ""})

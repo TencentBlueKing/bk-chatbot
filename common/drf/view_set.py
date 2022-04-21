@@ -28,6 +28,10 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
 
 
 class BaseViewSet(ViewSet):
+    """
+    没有额外的封装，直接使用
+    """
+
     authentication_classes = (CsrfExemptSessionAuthentication, BasicAuthentication)
     valida_response_data = False
 
@@ -113,6 +117,7 @@ class BaseGetViewSet(NewBaseViewSet, mixins.ListModelMixin):
     """
     get请求
     """
+
     ordering = "-id"
     pagination_class = DataPageNumberPagination
 

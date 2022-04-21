@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -13,17 +12,11 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from common.control.throttle import ChatBotThrottle
 
+from common.utils.os import get_env_or_raise
 
-class BizThrottle(ChatBotThrottle):
-    def wait(self):
-        """
-        多少秒后可以允许继续访问
-        Optionally, return a recommended number of seconds to wait before
-        the next request.
-        """
-        # last_time = RECORD[self.ident][0]
-        last_time = self.redis_client.hash_get(self.view_key, self.ident)[0]
-        now = self.ctime()
-        return int(self.times_request + last_time - now)
+# 定时任务相关
+TIMER_USER_NAME = get_env_or_raise("TIMER_USER_NAME")  # 定时任务执行人员
+TIMER_BIZ_ID = get_env_or_raise("TIMER_BIZ_ID")  # 定时任务执行ID
+TIMER_JOB_PLAN_ID = get_env_or_raise("TIMER_JOB_PLAN_ID")  # 定时任务执行人员
+TIMER_MAX_NUM = get_env_or_raise("TIMER_MAX_NUM", 5)  # 单业务添加的最大定时任务数量

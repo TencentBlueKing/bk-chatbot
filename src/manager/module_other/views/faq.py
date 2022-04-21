@@ -12,19 +12,20 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 from bson.objectid import ObjectId
 from django.http import JsonResponse
 from rest_framework.decorators import action
 
-from common.generic import APIModelViewSet, ValidationMixin
+from common.control.throttle import ChatBotThrottle
+from common.drf.generic import APIModelViewSet, ValidationMixin
+from common.drf.pagination import ResultsSetPagination
 from common.http.request import init_views
 from common.mongodb.client import MongoDB
-from common.pagination import ResultsSetPagination
 from common.utils.time import mk_now_time
-from src.manager.module_faq.control.permission import FaqPermission
-from src.manager.module_faq.control.throttle import FaqThrottle
-from src.manager.module_faq.models import FAQ
-from src.manager.module_faq.serializers import FAQSerializer
+from src.manager.module_other.control.permission import FaqPermission
+from src.manager.module_other.models import FAQModel
+from src.manager.module_other.proto.faq import FAQSerializer
 
 
 class FaqViewSet(APIModelViewSet, ValidationMixin):
@@ -32,22 +33,13 @@ class FaqViewSet(APIModelViewSet, ValidationMixin):
     知识库操作
     """
 
-    queryset = FAQ.objects.all()
+    queryset = FAQModel.objects.all()
     serializer_class = FAQSerializer
-    filter_fields = {
-        "biz_id": ["exact"],
-        "biz_name": ["exact"],
-        "faq_name": ["exact"],
-        "faq_db": ["exact"],
-        "num": ["exact"],
-        "member": ["contains", "exact", "in"],
-        "created_by": ["exact"],
-        "is_deleted": ["exact"],
-    }
+    filterset_class = FAQModel.OpenApiFilter
+    permission_classes = (FaqPermission,)
+    throttle_classes = (ChatBotThrottle,)
     ordering_fields = ["biz_id", "faq_name", "created_by", "updated_at"]
     ordering = "-updated_at"
-    permission_classes = (FaqPermission,)
-    throttle_classes = (FaqThrottle,)
     pagination_class = ResultsSetPagination
 
     @action(detail=False, methods=["POST"])

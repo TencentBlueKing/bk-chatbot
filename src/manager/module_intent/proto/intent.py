@@ -72,7 +72,7 @@ class ReqPostIntentSerializer(Serializer):
     platform = serializers.CharField(label="平台类型")
     task_id = serializers.CharField(label="任务id")
     source = serializers.DictField(label="数据源数据")
-    slots = serializers.ListField(label="槽位信息")
+    slots = serializers.ListField(label="槽位信息", allow_null=True)
     serial_number = serializers.CharField(label="序列号")
     activities = serializers.ListField(label="节点信息")
     project_id = serializers.CharField(label="项目id")

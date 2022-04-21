@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 import asyncio
 import copy
 
-from common.exceptions import HttpRequestError, HttpResultError
+from common.drf.exceptions import HttpRequestError, HttpResultError
 from src.manager.handler.api.bk_sops import SOPS
 
 

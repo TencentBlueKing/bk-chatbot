@@ -19,13 +19,9 @@ import datetime
 import json
 from functools import wraps
 
-from django.conf import settings
-from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.db import connection, transaction
-from django.http import Http404
 from django.utils.decorators import classonlymethod
-from django.utils.translation import ugettext as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, filters, serializers, status
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
@@ -35,8 +31,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.viewsets import ModelViewSet as _ModelViewSet
 from rest_framework.viewsets import ViewSet
 
-from blueapps.utils.logger import logger
-from common.exceptions import BaseException, ErrorCode, RouteDisabledError, ValidationError
+from common.drf.exceptions import RouteDisabledError, ValidationError
 
 
 def login_exempt(view_func):
@@ -425,7 +420,7 @@ def valid_params(serializer_class, params, context=None):
                 serializer.fields,
                 params,
             )
-        except Exception: # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             message = f"参数校验失败: {serializer.errors}"
 
         raise serializers.ValidationError(message)
@@ -523,70 +518,7 @@ def format_serializer_errors(errors, fields, params, prefix="  "):
     return message
 
 
-def format_error_response(code=None, message="", data=None, errors=None):
-    if len(str(code)) == 3:
-        code = ErrorCode.SYS_PLAT_CODE + ErrorCode.SYS_WEB_CODE + code
-    message = message + "(" + code + ")"
-    return {
-        "result": False,
-        "code": code,
-        "data": data,
-        "message": message,
-        "errors": errors,
-    }
-
-
 def set_rollback():
     atomic_requests = connection.settings_dict.get("ATOMIC_REQUESTS", False)
     if atomic_requests and connection.in_atomic_block:
         transaction.set_rollback(True)
-
-
-def custom_exception_handler(exc, context):
-    """
-    Returns the response that should be used for any given exception.
-
-    By default we handle the REST framework `APIException`, and also
-    Django's built-in `Http404` and `PermissionDenied` exceptions.
-
-    Any unhandled exceptions may return `None`, which will cause a 500 error
-    to be raised.
-    """
-    if isinstance(exc, Http404):
-        exc = exceptions.NotFound()
-    elif isinstance(exc, PermissionDenied):
-        exc = exceptions.PermissionDenied()
-
-    # ValidationError is subclass of APIException
-    if isinstance(exc, exceptions.APIException):
-        data = format_error_response(
-            "{}".format(
-                exc.status_code,
-            ),
-            format_validation_message(exc),
-        )
-        set_rollback()
-        return Response(data)
-
-    if isinstance(exc, BaseException):
-        logger.error(
-            "API_FAIL: {message}, code={code}, args={args}".format(
-                message=exc.message,
-                code=exc.code,
-                args=exc.args,
-            ),
-        )
-        data = format_error_response(
-            exc.code,
-            exc.message,
-            exc.data,
-            exc.errors,
-        )
-        set_rollback()
-        return Response(data)
-
-    error_message = _("系统错误，请联系管理员")
-    if settings.DEBUG:
-        error_message += f": {str(exc)}"
-    logger.exception(f"API_ERROR: {str(exc)}")
-    return Response(format_error_response("500", error_message))

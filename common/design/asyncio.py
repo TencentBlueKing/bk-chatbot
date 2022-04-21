@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -13,8 +12,38 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from django.apps import AppConfig
+import asyncio
 
 
-class ModuleFaqConfig(AppConfig):
-    name = "module_faq"
+class MyAsyncio:
+    def __init__(self, *args, **kwargs):
+        """
+        @param args:
+        @param kwargs:
+        """
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        self.loop = asyncio.get_event_loop()
+
+    def run_until_complete(self, tasks):
+        """
+        执行任务
+        @param tasks:
+        @return:
+        """
+        data, _ = self.loop.run_until_complete(asyncio.wait(tasks))
+        return data
+
+    def __enter__(self):
+        """
+        @return:
+        """
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        """
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        return self.loop.close()
