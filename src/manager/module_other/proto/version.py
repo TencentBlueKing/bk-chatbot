@@ -20,6 +20,7 @@ from rest_framework import serializers
 from src.manager.module_other.models import VersionModel
 from src.manager.module_other.proto import other_tag
 
+
 class VersionSerializer(serializers.ModelSerializer):
     """
     version

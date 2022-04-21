@@ -17,7 +17,6 @@ specific language governing permissions and limitations under the License.
 
 from django.conf import settings
 
-
 API_ROOTS = [
     # 蓝鲸平台模块域名
     "BK_LOGIN_APIGATEWAY_ROOT",
@@ -57,7 +56,7 @@ module = __import__(domain_module, globals(), locals(), ["*"])
 for _root in API_ROOTS:
     try:
         locals()[_root] = getattr(module, _root)
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         pass
 
 __all__ = API_ROOTS

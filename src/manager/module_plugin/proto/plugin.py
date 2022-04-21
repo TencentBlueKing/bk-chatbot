@@ -39,6 +39,7 @@ base_fields = [
     "plugin_wait_time",
 ]
 
+
 # 插件action
 class PluginAction(Serializer):
     """

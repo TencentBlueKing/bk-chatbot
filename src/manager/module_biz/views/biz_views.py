@@ -17,11 +17,12 @@ from blueapps.utils.logger import logger
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.control.throttle import ChatBotThrottle
 from common.drf.generic import BaseViewSet
 from common.http.request import get_request_user
 from common.redis import RedisClient
 from src.manager.handler.api.bk_cc import CC
-from common.control.throttle import ChatBotThrottle
+
 
 class BizViewSet(BaseViewSet):
     """

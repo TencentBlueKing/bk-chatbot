@@ -27,7 +27,7 @@ def init_views(request):
     req_data = {}
     try:
         req_data = json.loads(request.body)
-    except Exception: # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except
         logger.error(
             f"[INIT_VIEWS] req_data parse error {request.body}",
         )

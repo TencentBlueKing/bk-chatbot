@@ -63,4 +63,4 @@ except ImportError as e:
 
 BK_STATIC_URL = STATIC_URL + "dist/"
 
-CSRF_COOKIE_DOMAIN=None
+CSRF_COOKIE_DOMAIN = None
