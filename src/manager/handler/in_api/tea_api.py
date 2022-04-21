@@ -18,9 +18,6 @@ from common.utils.os import get_env_or_raise
 
 from .base import BaseApi
 
-# 从环境变量中获取不存在的状态
-TEA_PRODUCT_EXCLUDE_STATUS = get_env_or_raise("TEA_PRODUCT_EXCLUDE_STATUS")
-
 
 class TeaAPI(BaseApi):
     def __init__(self, **kwargs):
@@ -51,7 +48,8 @@ class TeaAPI(BaseApi):
         # 过滤出有效项目
         valid_projects = list(
             filter(
-                lambda x: x.get("cc_id") and x.get("status") not in TEA_PRODUCT_EXCLUDE_STATUS.split(","),
+                lambda x: x.get("cc_id")
+                and x.get("status") not in get_env_or_raise("TEA_PRODUCT_EXCLUDE_STATUS").split(","),
                 data,
             )
         )
