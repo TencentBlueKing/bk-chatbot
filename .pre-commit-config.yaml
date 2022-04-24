@@ -1,0 +1,38 @@
+# files: (module_*)
+exclude: (config|blueking|static|adapter|blueapps|migrations)
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: name-tests-test
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/asottile/setup-cfg-fmt
+    rev: v1.17.0
+    hooks:
+      - id: setup-cfg-fmt
+
+  # 根据 .flake8 给出的配置检查 Python 代码风格，检测代码是否符合符合 PEP8 规范
+  - repo: https://github.com/pycqa/flake8
+    rev: '3.9.2'
+    hooks:
+      - id: flake8
+
+  # 提升 Python 代码风格，符合更高版本的 Python 语法
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.15.0
+    hooks:
+      - id: pyupgrade
+        args: [--py36-plus]
+
+  # Black 是一个官方的 Python 代码格式化工具
+  - repo: https://github.com/psf/black
+    rev: 21.5b1
+    hooks:
+      - id: black
+        language_version: python3
+        args: [ "--line-length=120" ]
