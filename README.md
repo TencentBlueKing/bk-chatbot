@@ -13,7 +13,7 @@ bk-chatbot 有两项核心服务，一为插件集成服务：目前默认集成
 ## Overview
 
 - [架构设计](docs/architecture.md)
-- [代码目录](docs/usecase.md)
+- [代码目录](docs/code_structure.md)
 - [使用场景](docs/usecase.md)
 
 ## Features
