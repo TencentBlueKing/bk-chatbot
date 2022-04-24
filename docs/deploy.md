@@ -32,6 +32,14 @@
 ### 4. 机器人后台部署
 
 #### 安装包
+> 下载
+```shell
+git clone https://github.com/TencentBlueKing/bk-chatbot.git
+cd bk-chatbot
+pip install poetry
+poetry shell
+poetry update
+```
 > 解压
 ```
 tar -zxf release.tar.gz 或 unzip release.zip
@@ -165,7 +173,7 @@ cd release && ./control start
 cd release && ./control stop
 ```
 
-### 5.容器化部署
+#### 容器化部署
 > 自行服务器安装Docker环境
 
 > 已经为您编排好了一般Dockerfile文件
@@ -187,6 +195,45 @@ docker build -f release/src/backend/Dockerfile --network=host -t {namespace}:{ta
 docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 ```
 
+### 5. 管理端部署
+> 环境变量配置
+```shell
+# 可以根据用到的功能进行自定义配置，不配置默认设置xxx即可
+
+# 环境配置
+export BK_PAAS_HOST="http://paas.bktencent.com/"         # 私有化部署的蓝鲸paas的host
+export APP_ID="xxx"                                      # 项目对应的APP_ID
+export APP_TOKEN="xxx"                                   # 项目对应的APP_TOKEN
+export BKAPP_JOB_HOST="xxx"                              # job平台host
+export BKAPP_DEVOPS_HOST="xxx"                           # 蓝盾平台host
+
+# 发布环境配置mysql(测试环境可以在config/dev.py里面直接修改)
+export BKAPP_GCS_MYSQL_HOST="127.0.0.1"
+export BKAPP_GCS_MYSQL_PORT="3306"
+export BKAPP_GCS_MYSQL_NAME="bkchat"
+export BKAPP_GCS_MYSQL_USER="root"
+export BKAPP_GCS_MYSQL_PASSWORD="root"
+
+# module_plugin 模块用到的环境变量
+export PLUGIN_ITSM_SERVICE_ID="xxx"   # itsm审核单据
+export PLUGIN_ITSM_CALLBACK_URI="xxx" # itsm回调接口
+export PLUGIN_RELOAD_URI="xxx"        # 插件重载接口
+export PROD_BOT_NAME="xxx"            # 正式环境机器人名称
+export STAG_BOT_NAME="xxx"            # 预发布环境机器人名称
+
+# module_timer 模块用到的环境变量
+export TIMER_USER_NAME="xxx"   # 定时任务执行人
+export TIMER_BIZ_ID="xxx"      # 定时任务用到job平台的项目ID
+export TIMER_JOB_PLAN_ID="xxx" # 定时任务用到job平台执行方案的ID
+```
+
+> 项目启动
+
+```shell
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver 
+```
 
 ### 6. 企业微信绑定
 > 企业微信后台
