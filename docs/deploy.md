@@ -13,15 +13,15 @@
 ├── README_en.md
 ├── VERSION
 ├── docs                 # 文档集合
-│   ├── CONTRIBUTING.md
-│   ├── createskills.md
-│   ├── deploy.md
-│   ├── release.md
-│   ├── resource
-│   └── usage.md
+│   ├── CONTRIBUTING.md
+│   ├── createskills.md
+│   ├── deploy.md
+│   ├── release.md
+│   ├── resource
+│   └── usage.md
 ├── requirements.txt
 ├── scripts
-│   └── cron.py
+│   └── cron.py
 └── src
     ├── backend         # 机器人后端
     └── manager         # 机器人管理端代码
@@ -320,3 +320,4 @@ python manage.py celery beat -l info
 ```
 
 > bk-chatbot 后台服务启动地址跟企业微信回调地址一致 否则收不到消息
+
