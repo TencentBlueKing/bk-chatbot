@@ -1,14 +1,37 @@
 # BK_CHATBOT 部署文档
 
+[TOC]
 
-## 依赖第三方组件
+## 代码目录
+
+* 机器人代码如下
+
+```shell
+.
+├── LICENSE
+├── README.md
+├── README_en.md
+├── VERSION
+├── docs                 # 文档集合
+│   ├── CONTRIBUTING.md
+│   ├── createskills.md
+│   ├── deploy.md
+│   ├── release.md
+│   ├── resource
+│   └── usage.md
+├── requirements.txt
+├── scripts
+│   └── cron.py
+└── src
+    ├── backend         # 机器人后端
+    └── manager         # 机器人管理端代码
+
+```
+
+## 第三方组件
 
 * Redis >= 3.2.11
 * 语料库
-
-## 后台服务进程
-
-* bk_chatbot_server
 
 ## 部署介绍
 
@@ -26,38 +49,35 @@
 
 ### 3. Release包下载
 
-官方发布的 **Linux Release** 包下载地址见[这里](https://github.com/Tencent/bk-chatbot/releases)
-
+官方发布的 **Linux Release** 包下载地址见[这里](https://github.com/TencentBlueKing/bk-chatbot/releases)
 
 ### 4. 机器人后台部署
 
 #### 安装包
-> 下载
-```shell
-git clone https://github.com/TencentBlueKing/bk-chatbot.git
-cd bk-chatbot
-pip install poetry
-poetry shell
-poetry update
-```
+
 > 解压
-```
+
+```shell
 tar -zxf release.tar.gz 或 unzip release.zip
 ```
+
 * 包的目录结构如下
 
-<img src="resource/img/bk_app_tree.png" alt="image" style="zoom: 80%;" />
+<img src="./resource/img/bk_app_tree.png" alt="image" style="zoom: 80%" />
 
 > 创建用户配置文件
-```
+
+```shell
 cd release && touch config.py
 ```
+
 > 添加用户自定义配置，引入机器人默认配置，设置唤醒关键词，定义机器人名称
-```
+
+```shell
 cd release && vim config.py
 ```
 
-```
+```shell
 import re
 from opsbot.default_config import *
 
@@ -65,23 +85,28 @@ RTX_NAME = '我的机器人'
 COMMAND_START = ['', re.compile(r'[/!]+')]
 API_ROOT = 'https://qyapi.weixin.qq.com/cgi-bin'
 ```
+
 > 编辑启动文件 config.py, 设置启动Host和Port, 注：该端口要与企业微信应用回调相对应
-```
+
+```shell
 HOST = '127.0.0.1'
 PORT = 8888
 ```
+
 > 进入企业微信可查看
+
 * CORPID [查看](http://p.qpic.cn/pic_wework/3036008643/f4f249f8640f1a58ce330176eda833b613ef0c87857592ed/0/)
 * SECRET [查看](http://p.qpic.cn/pic_wework/3978463327/cbcd77c7c50cb5da32a41e101af95f6b5a2105e6bf046060/0/)
 * TOKEN    用户自定义
-* AES_KEY  用户自定义 
+* AES_KEY  用户自定义
 
 > 配置企业微信密钥文件
-```
+
+```shell
 cd release && vim protocol/xwork/config.py
 ```
 
-```
+```shell
 """
 Xwork configurations.
 """
@@ -95,15 +120,16 @@ AES_KEY = "必填"  # 企业微信应用自定义 aes
 ```
 
 > 配置蓝鲸API密钥和路径
+
 * 创建蓝鲸SaaS [查看](https://bk.tencent.com/docs/document/6.0/148/6690)
 * 获取应用信息[查看](https://bk.tencent.com/docs/document/6.0/148/6391)
 * APP 开API访问白名单[查看](https://bk.tencent.com/docs/document/6.0/148/6696)
 
-```
+```shell
 cd release && vim component/config.py
 ```
 
-```
+```shell
 """
 ALL Component Config
 Include: BK(APP_ID, APP_SECRET)
@@ -137,11 +163,11 @@ REDIS_DB_NAME = ''     # redis 启动的地址
 
 > 任务执行插件配置
 
-```
+```shell
 cd release && vim intent/plugins/task/settings.py
 ```
 
-```
+```shell
 """
 交互配置
 """
@@ -157,113 +183,140 @@ TASK_EXEC_FAIL = '任务启动失败'
 
 > 更多机器人个性化配置, 请参照
 
-```
+```shell
 cd release && cat opsbot/default_config.py
 ```
 
 #### 启动后台服务
 
-```
+```shell
 cd release && ./control start
 ```
 
 #### 停止后台服务
 
-```
+```shell
 cd release && ./control stop
 ```
 
 #### 容器化部署
-> 自行服务器安装Docker环境
 
+> 自行服务器安装Docker环境
 > 已经为您编排好了一般Dockerfile文件
 
-```
+```shell
 release/src/backend/Dockerfile
 
 请一次性将需要的配置按照环境形式写入Dockerfile
 ```
 
 > 打包镜像
-```
+
+```shell
 docker build -f release/src/backend/Dockerfile --network=host -t {namespace}:{tag} .
 ```
 
 > 启动镜像
 
-```
+```shell
 docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 ```
 
-### 5. 管理端部署
-> 环境变量配置
-```shell
-# 可以根据用到的功能进行自定义配置，不配置默认设置xxx即可
+#### 企业微信绑定
 
-# 环境配置
-export BK_PAAS_HOST="http://paas.bktencent.com/"         # 私有化部署的蓝鲸paas的host
-export APP_ID="xxx"                                      # 项目对应的APP_ID
-export APP_TOKEN="xxx"                                   # 项目对应的APP_TOKEN
-export BKAPP_JOB_HOST="xxx"                              # job平台host
-export BKAPP_DEVOPS_HOST="xxx"                           # 蓝盾平台host
-
-# 发布环境配置mysql(测试环境可以在config/dev.py里面直接修改)
-export BKAPP_GCS_MYSQL_HOST="127.0.0.1"
-export BKAPP_GCS_MYSQL_PORT="3306"
-export BKAPP_GCS_MYSQL_NAME="bkchat"
-export BKAPP_GCS_MYSQL_USER="root"
-export BKAPP_GCS_MYSQL_PASSWORD="root"
-
-# module_plugin 模块用到的环境变量
-export PLUGIN_ITSM_SERVICE_ID="xxx"   # itsm审核单据
-export PLUGIN_ITSM_CALLBACK_URI="xxx" # itsm回调接口
-export PLUGIN_RELOAD_URI="xxx"        # 插件重载接口
-export PROD_BOT_NAME="xxx"            # 正式环境机器人名称
-export STAG_BOT_NAME="xxx"            # 预发布环境机器人名称
-
-# module_timer 模块用到的环境变量
-export TIMER_USER_NAME="xxx"   # 定时任务执行人
-export TIMER_BIZ_ID="xxx"      # 定时任务用到job平台的项目ID
-export TIMER_JOB_PLAN_ID="xxx" # 定时任务用到job平台执行方案的ID
-```
-
-> 项目启动
-
-```shell
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver 
-```
-
-### 6. 企业微信绑定
 > 企业微信后台
+
 * [打开](https://work.weixin.qq.com/wework_admin)
 
-<img src="resource/img/xwork_index.png" alt="image" style="zoom: 67%;" />
+<img src="./resource/img/xwork_index.png" alt="image" style="zoom: 67%;" />
 
 > 创建应用
+
 * 进入 应用管理 -> [创建应用](https://work.weixin.qq.com/wework_admin/frame#apps/createApiApp)
 
-![image](resource/img/xwork_app_create.png)
+![image](./resource/img/xwork_app_create.png)
 
-<img src="resource/img/xwork_app_create2.png" alt="image" style="zoom: 67%;" />
+<img src="./resource/img/xwork_app_create2.png" alt="image" style="zoom: 67%;" />
 
 > 应用管理
+
 * 点击应用
 
-<img src="resource/img/xwork_app_manage.png" alt="image" style="zoom:67%;" />
+<img src="./resource/img/xwork_app_manage.png" alt="image" style="zoom:67%;" />
 
-<img src="resource/img/xwork_app_manage2.png" alt="image" style="zoom:67%;" />
+<img src="./resource/img/xwork_app_manage2.png" alt="image" style="zoom:67%;" />
 
 > 注册回调
+
 * 后台启动服务
 * 测试注册 (注：这里url要填写你后台服务部署的外网IP，确保端口开通)
 
-<img src="resource/img/xwork_app_callback.png" alt="image" style="zoom:67%;" />
+<img src="./resource/img/xwork_app_callback.png" alt="image" style="zoom:67%;" />
 
-### 8. 其他
-> 社区版HOST配置
+### 5.机器人管理端部署
+
+#### 依赖下载
+
+##### 中间件依赖
+
+* mysql
+* redis
+
+##### 环境变量配置
+
+* 代码读取环境变量中的值进行参数设置
+
+```shell
+APP_ID="xxx"                        # APP_ID(如果蓝鲸paas部署环境变量中自带)
+APP_TOKEN="xxx"                     # APP_TOKEN(如果蓝鲸paas部署环境变量中自带)
+BK_PAAS_HOST=""                     # 社区版蓝鲸地址
+BKAPP_JOB_VERSION="V3"              # 作业平台版本(默认为V3)
+BKAPP_DEVOPS_HOST=""                # 蓝盾访问host
+BKAPP_JOB_HOST=""                   # 作业平台host
+
+# redis配置
+BKAPP_REDIS_DB_NAME="localhost"     # redis地址(默认为localhost)
+BKAPP_REDIS_DB_PASSWORD=""          # redis密码(默认为空)
+BKAPP_REDIS_DB_PORT="6379"          # redis端口(默认为6379)
+
+# mysql配置
+BKAPP_GCS_MYSQL_NAME=""             # mysql 库名
+BKAPP_GCS_MYSQL_USER=""             # mysql 用户
+BKAPP_GCS_MYSQL_PASSWORD=""         # mysql 密码
+BKAPP_GCS_MYSQL_HOST=""             # mysql host
+BKAPP_GCS_MYSQL_PORT=""             # mysql 端口
 ```
+
+##### python第三方库依赖
+
+* pip下载(setuptools<=57.5.0)
+
+```shell
+pip install --upgrade setuptools==57.5.0 # 如果setuptools版本过高先降低版本
+pip install -r requirements.txt          # python环境依赖下载
+```
+
+#### 服务器启动
+
+* 启动web服务
+
+```shell
+gunicorn wsgi -w 4 
+```
+
+* 启动celery
+
+```shell
+python manage.py celery worker -l info
+python manage.py celery beat -l info
+```
+
+### 6.其他
+
+> 社区版HOST配置
+
+```shell
 {你社区版nginx所在服务器} {你自定义的域名} 
 ```
+
 > bk-chatbot 后台服务启动地址跟企业微信回调地址一致 否则收不到消息
