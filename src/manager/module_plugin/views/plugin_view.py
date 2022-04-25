@@ -15,8 +15,13 @@ specific language governing permissions and limitations under the License.
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
+from common.control.throttle import ChatBotThrottle
+from common.drf.generic import BaseViewSet
 from common.drf.view_set import BaseAllViewSet
+from common.redis import RedisClient
+from src.manager.module_plugin.hanlder.api import Service
 from src.manager.module_plugin.hanlder.deal_plugin_count import get_plugin_exec
 from src.manager.module_plugin.hanlder.deal_plugin_status import (
     DealPluginStatus,
@@ -110,3 +115,22 @@ class PluginViewSet(BaseAllViewSet):
         request.query_params._mutable = True
         request.query_params["developers"] = f'"{self.request.user.username}"'
         return super().list(self, request, *args, **kwargs)
+
+
+class CallPluginViewSet(BaseViewSet):
+    throttle_classes = (ChatBotThrottle,)
+    http_method_names = ["post"]
+
+    @action(detail=False, methods=["POST"])
+    def call(self, request):
+        """
+        调用服务
+        @param request:
+        @return:
+        """
+
+        return Response(Service().call_service(**request.payload))
+
+    @action(detail=False, methods=["POST"])
+    def get_h5_config(self, request):
+        return Response(RedisClient().get(request.payload.get("secret", "")))

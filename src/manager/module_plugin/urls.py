@@ -17,13 +17,13 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-
-from src.manager.module_plugin.views.plugin_view import PluginViewSet
 from src.manager.module_plugin.views.audit_view import PluginAuditViewSet
+from src.manager.module_plugin.views.plugin_view import CallPluginViewSet, PluginViewSet
 
 router = routers.DefaultRouter()
 
 router.register(r"plugin", PluginViewSet, basename="manage_plugin")  # 插件管理
 router.register(r"plugin/audit", PluginAuditViewSet, basename="plugin_audit")  # 插件审核
+router.register(r"plugin", CallPluginViewSet, basename="call_plugin")
 
 urlpatterns = (url(r"^manage/", include(router.urls)),)

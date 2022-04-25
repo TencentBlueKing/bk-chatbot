@@ -13,8 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 from common.utils.time import mk_now_before_day
-from src.manager.handler.in_api.plugin import PluginManage
 from src.manager.module_plugin.constants import PROD_PLUGIN_URI_ENV
+from src.manager.module_plugin.hanlder.api import PluginManage
 
 OPEN_PLUGIN_HTTP = "OPEN_PLUGIN_HTTP"
 

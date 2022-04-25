@@ -19,7 +19,7 @@ from blueapps.utils.logger import logger
 from common.design.strategy import Strategy
 from common.redis import RedisClient
 from src.manager.handler.api.bk_itsm import BkITSM
-from src.manager.handler.in_api.plugin import PluginManage
+from src.manager.module_plugin.hanlder.api import PluginManage
 from src.manager.module_plugin.constants import (
     PLUGIN_ITSM_CALLBACK_URI,
     PLUGIN_ITSM_SERVICE_ID,
