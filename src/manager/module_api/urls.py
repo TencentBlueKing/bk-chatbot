@@ -16,16 +16,10 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from src.manager.module_api.views import (
-    admin_views,
-    bkmonitor_views,
-    cmdb_views,
-    plugin_views,
-)
+from src.manager.module_api.views import admin_views, bkmonitor_views, cmdb_views
 
 router = routers.DefaultRouter()
 
-router.register(r"plugin", plugin_views.PluginViewSet, basename="plugin")
 router.register(r"bkmonitor", bkmonitor_views.BkMonitorViewSet, basename="bkmonitor")
 router.register(r"cmdb", cmdb_views.CmdbViewSet, basename="cmdb")
 

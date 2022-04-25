@@ -13,29 +13,20 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from rest_framework.decorators import action
-from rest_framework.response import Response
 
-from common.control.throttle import ChatBotThrottle
-from common.drf.generic import BaseViewSet
-from common.redis import RedisClient
-from src.manager.handler.in_api.plugin import Service
+from django.utils.module_loading import import_string
 
 
-class PluginViewSet(BaseViewSet):
-    throttle_classes = (ChatBotThrottle,)
-    http_method_names = ["post"]
-
-    @action(detail=False, methods=["POST"])
-    def call(self, request):
+class BaseMgaAPI:
+    def send_custom_msg(self, **params):
         """
-        调用服务
-        @param request:
+        @param params:
         @return:
         """
+        pass
 
-        return Response(Service().call_service(**request.payload))
 
-    @action(detail=False, methods=["POST"])
-    def get_h5_config(self, request):
-        return Response(RedisClient().get(request.payload.get("secret", "")))
+try:
+    MgaAPI = import_string("src.manager.handler.in_api.youti_api.MgaAPI")
+except ImportError:
+    MgaAPI = BaseMgaAPI

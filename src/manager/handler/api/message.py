@@ -20,7 +20,7 @@ from blueapps.utils.logger import logger_celery as logger
 
 from common.design.strategy import Strategy
 from common.utils.os import get_env_or_raise
-from src.manager.handler.in_api.youti_api import MgaAPI
+from src.manager.handler.api.youti import MgaAPI
 
 # 消息通知相关
 YOUTI_TEMPLATE_ID = get_env_or_raise("YOUTI_TEMPLATE_ID")  # 游梯模板id
