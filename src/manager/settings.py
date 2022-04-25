@@ -16,8 +16,6 @@ specific language governing permissions and limitations under the License.
 import os
 
 from blueapps.conf.default_settings import *  # noqa
-from blueapps.conf.log import get_logging_config_dict
-from django.conf.urls import include, url
 
 current_dir = os.path.dirname(__file__)
 
