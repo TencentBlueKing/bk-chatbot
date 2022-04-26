@@ -73,7 +73,6 @@ class DevOps:
         }
         ret = DevOpsApi.app_build_status(params=params, raw=True)
         ret_data = ret.get("data", {})
-        status = ret_data.get("status", "")
         return {
             "ok": ret != "",
             "data": ret_data,
