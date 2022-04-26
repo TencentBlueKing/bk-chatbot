@@ -30,4 +30,3 @@ class BkHostSerializer(Serializer):
     set_ids = serializers.JSONField(label="集群列表", required=False)
     module_ids = serializers.JSONField(label="模块列表", required=False)
     ip_keyword = serializers.CharField(required=False, allow_blank=True, label="ip关键字")
-
