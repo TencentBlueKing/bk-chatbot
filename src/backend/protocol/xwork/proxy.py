@@ -83,8 +83,6 @@ class Proxy(BaseProxy):
         decryption = Decryption(request.args.get("msg_signature"), request.args.get("timestamp"),
                                 request.args.get("nonce"), await request.get_data())
         payload = decryption.parse()
-        if not payload:
-            return
         if not isinstance(payload, dict):
             abort(400)
 
