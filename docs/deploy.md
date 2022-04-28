@@ -320,3 +320,4 @@ python manage.py celery beat -l info
 ```
 
 > bk-chatbot 后台服务启动地址跟企业微信回调地址一致 否则收不到消息
+

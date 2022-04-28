@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "bkchat-manage"
+version = "0.1.0"
+description = ""
+authors = ["bkchat"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+Django = "2.2.16"
+Faker = "8.8.2"
+celery = "3.1.25"
+django-celery = "3.2.1"
+drf-yasg = "1.20.0"
+django-filter= "2.4.0"
+mysqlclient = "1.4.4"
+Werkzeug = "0.14.1"
+drf-ujson2 = "1.6.1"
+redis = "2.10.5"
+requests = "2.22.0"
+typing-extensions = "^4.1.1"
+Mako = "1.0.6"
+PyJWT = "1.6.1"
+pymongo = "3.11.0"
+croniter = "1.1.0"
+django-cors-headers = "3.5.0"
+pytest-django = "3.9.0"
+pytest-cov = "2.12.1"
+pytest-sugar = "0.9.3"
+pytest = "5.4.3"
+fakeredis = "1.7.0"
+bkoauth = "^0.0.25"
+whitenoise = "3.3.1"
+cryptography = "3.1.1"
+gunicorn = "19.6.0"
+raven = "6.5.0"
+blueapps = "3.6.1rc0"
+ddtrace = "0.14.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
