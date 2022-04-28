@@ -15,6 +15,20 @@ specific language governing permissions and limitations under the License.
 """
 
 from adapter.api import DevOpsApi
+from common.constants import TaskExecStatus
+
+dev_ops_instance_status_map = {
+    "QUEUE": TaskExecStatus.INIT.value,  # 未执行
+    "QUEUE_CACHE": TaskExecStatus.INIT.value,  # 未执行
+    "RUNNING": TaskExecStatus.RUNNING.value,  # 执行中
+    "FAILED": TaskExecStatus.FAIL.value,  # 失败
+    "STAGE_SUCCESS": TaskExecStatus.SUCCESS.value,  # 已完成
+    "SUCCEED": TaskExecStatus.SUCCESS.value,  # 已完成
+    "SUSPENDED": TaskExecStatus.SUSPENDED.value,  # 暂停
+    "CANCELED": TaskExecStatus.REMOVE.value,  # 已终止
+    "TERMINATE": TaskExecStatus.REMOVE.value,  # 已终止
+    "QUEUE_TIMEOUT": TaskExecStatus.REMOVE.value,  # 已终止
+}
 
 
 class DevOps:
@@ -73,8 +87,10 @@ class DevOps:
         }
         ret = DevOpsApi.app_build_status(params=params, raw=True)
         ret_data = ret.get("data", {})
+        status = ret_data.get("status", "")
         return {
             "ok": ret != "",
+            "status": dev_ops_instance_status_map.get(status, "1"),
             "data": ret_data,
         }
 
