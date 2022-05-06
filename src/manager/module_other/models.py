@@ -122,3 +122,25 @@ class FAQModel(BaseModel):
         num = filters.CharFilter(field_name="num", lookup_expr="exact")
         member = filters.CharFilter(field_name="member", lookup_expr="contains")
         created_by = filters.CharFilter(field_name="created_by", lookup_expr="exact")
+
+
+class IMTypeModel(BaseModel):
+    """
+    im类型模型
+    """
+
+    platform = models.CharField("平台", max_length=256)
+    im_type = models.CharField("类型", max_length=256)
+
+    class Meta:
+        db_table = "tab_im_type"
+        verbose_name = "【im类型】"
+        verbose_name_plural = "【im类型】"
+
+    class OpenApiFilter(BaseOpenApiFilter):
+        """
+        过滤
+        """
+
+        platform = filters.CharFilter(field_name="platform", lookup_expr="contains")
+        im_type = filters.CharFilter(field_name="im_type", lookup_expr="contains")
