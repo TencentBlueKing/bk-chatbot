@@ -16,12 +16,18 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from src.manager.module_api.views import admin_views, bkmonitor_views, cmdb_views
+from src.manager.module_api.views import (
+    admin_views,
+    bkmonitor_views,
+    cmdb_views,
+    intent_view,
+)
 
 router = routers.DefaultRouter()
 
 router.register(r"bkmonitor", bkmonitor_views.BkMonitorViewSet, basename="bkmonitor")
 router.register(r"cmdb", cmdb_views.CmdbViewSet, basename="cmdb")
+router.register(r"admin/intent", intent_view.IntentViewSet, basename="intent_api")
 
 urlpatterns = (
     url(r"^exec/admin_describe_intents", admin_views.admin_describe_intents),
