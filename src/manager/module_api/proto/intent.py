@@ -15,12 +15,33 @@ specific language governing permissions and limitations under the License.
 
 
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import serializers
 
 from src.manager.module_api.proto import api_tag
-from src.manager.module_intent.proto.intent import ReqPostIntentSerializer
+from src.manager.module_intent.models import Intent
+
+
+class IntentSerializer(serializers.ModelSerializer):
+
+    # # 意图表需要
+    available_user = serializers.ListField(required=False, label="可执行用户")
+    available_group = serializers.ListField(required=False, label="可执行群组")
+    developer = serializers.ListField(required=False, plabel="开发商")
+    approver = serializers.ListField(required=False, label="审批人")
+
+    class Meta:
+        model = Intent
+        exclude = [
+            "updated_by",
+            "is_deleted",
+            "deleted_by",
+            "deleted_at",
+            "description",
+        ]
+
 
 intent_update_docs = swagger_auto_schema(
     tags=api_tag,
     operation_id="意图管理-修改",
-    request_body=ReqPostIntentSerializer,
+    # request_body=ReqPostIntentSerializer,
 )

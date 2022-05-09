@@ -14,14 +14,13 @@ specific language governing permissions and limitations under the License.
 """
 
 from blueapps.account.decorators import login_exempt
-from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from common.drf.view_set import BaseUpdateViewSet
 from common.perm.permission import check_permission
-from src.manager.module_intent.models import Intent, Task, Utterances
-from src.manager.module_intent.proto.intent import IntentSerializer, intent_update_docs
+from src.manager.module_api.proto.intent import IntentSerializer, intent_update_docs
+from src.manager.module_intent.models import Intent
 
 
 @method_decorator(name="update", decorator=intent_update_docs)
@@ -38,31 +37,3 @@ class IntentViewSet(BaseUpdateViewSet):
     @check_permission()
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
-
-    def perform_update(self, serializer):
-        """
-        更新意图的后续动作
-        """
-
-        with transaction.atomic():
-            super().perform_update(serializer)
-            payload = self.request.payload
-            Utterances.update_utterance(
-                intent_id=serializer.instance.id,
-                biz_id=serializer.instance.biz_id,
-                index_id=serializer.instance.id,
-                content=payload.get("utterances", ""),
-            )
-            # fix前端传过来的source为字符串的问题
-            source = payload.get("source", "")
-            Task.update_task(
-                intent_id=serializer.instance.id,
-                biz_id=int(serializer.instance.biz_id),
-                index_id=serializer.instance.id,
-                project_id=payload.get("project_id", ""),
-                platform=payload.get("platform", ""),
-                task_id=payload.get("task_id", ""),
-                slots=payload.get("slots", []),
-                activities=payload.get("activities", []),
-                source=source,
-            )
