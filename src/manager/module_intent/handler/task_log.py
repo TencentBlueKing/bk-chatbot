@@ -214,7 +214,7 @@ def sops(task_class: PlatformTask):
         return {}
 
     # 查询标准运维的详情
-    if status == TaskExecStatus.SUCCESS.value:  # 成功通知
+    if status == ExecutionLog.TaskExecStatus.SUCCESS.value:  # 成功通知
         return {
             "task_uri": bk_sops.task_uri,
             "param_list": bk_sops.params,

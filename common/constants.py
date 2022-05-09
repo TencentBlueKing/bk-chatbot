@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -15,6 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+
+from enum import Enum
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -50,6 +50,16 @@ TASK_PLATFORM_CHOICES = (
     (TAK_PLATFORM_DEVOPS, _("蓝盾")),
     (TAK_PLATFORM_DEFINE, _("自定义")),
 )
+
+
+class TaskExecStatus(Enum):
+    INIT = 0  # 初始状态
+    RUNNING = 1  # 执行中
+    SUCCESS = 2  # 执行成功
+    FAIL = 3  # 执行失败
+    SUSPENDED = 4  # 暂停
+    REMOVE = 5  # 执行异常
+
 
 # 环境变量获取
 JOB_HOST = get_env_or_raise("BKAPP_JOB_HOST")

@@ -15,7 +15,12 @@ specific language governing permissions and limitations under the License.
 
 from django.contrib import admin
 
-from src.manager.module_other.models import FAQModel, PluginTagModel, VersionModel
+from src.manager.module_other.models import (
+    FAQModel,
+    IMTypeModel,
+    PluginTagModel,
+    VersionModel,
+)
 
 
 @admin.register(VersionModel)
@@ -37,3 +42,10 @@ class FAQAdmin(admin.ModelAdmin):
     list_display = ["faq_name", "faq_db", "faq_collection", "created_by", "updated_at"]
     list_filter = ["faq_name", "faq_db", "faq_collection", "created_by", "updated_at"]
     search_fields = ["faq_name", "faq_db", "faq_collection", "created_by", "updated_at"]
+
+
+@admin.register(IMTypeModel)
+class IMTypeAdmin(admin.ModelAdmin):
+    list_display = ["platform", "im_type"]
+    list_filter = ["platform", "im_type"]
+    search_fields = ["platform", "im_type"]

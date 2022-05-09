@@ -13,19 +13,4 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
-from django.conf.urls import include, url
-from rest_framework import routers
-
-from src.manager.module_other.views.faq import FaqViewSet
-from src.manager.module_other.views.im_view import IMViewSet
-from src.manager.module_other.views.plugin_tag import PluginTagViewSet
-from src.manager.module_other.views.version import VersionViewSet
-
-router = routers.DefaultRouter()
-
-router.register(r"version", VersionViewSet, basename="version")  # 版本
-router.register(r"plugin_tag", PluginTagViewSet, basename="plugin_tag")  # 版本
-router.register(r"faq", FaqViewSet, basename="faq")
-router.register(r"im", IMViewSet, basename="im")
-urlpatterns = (url(r"^", include(router.urls)),)
+api_tag = ["API相关"]

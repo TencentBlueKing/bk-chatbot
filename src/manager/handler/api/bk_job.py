@@ -19,6 +19,22 @@ import os
 from blueapps.utils.logger import logger
 
 from adapter.api import JobV2Api, JobV3Api
+from common.constants import TaskExecStatus
+
+# 状态字典
+job_instance_status_map = {
+    1: TaskExecStatus.INIT.value,  # 未执行
+    2: TaskExecStatus.RUNNING.value,  # 正在执行
+    3: TaskExecStatus.SUCCESS.value,  # 执行成功
+    4: TaskExecStatus.FAIL.value,  # 执行失败
+    5: TaskExecStatus.REMOVE.value,  # 跳过
+    6: TaskExecStatus.REMOVE.value,  # 忽略错误
+    7: TaskExecStatus.RUNNING.value,  # 等待用户
+    8: TaskExecStatus.REMOVE.value,  # 手动结束
+    9: TaskExecStatus.REMOVE.value,  # 状态异常
+    10: TaskExecStatus.REMOVE.value,  # 步骤强制终止中
+    11: TaskExecStatus.REMOVE.value,  # 步骤强制终止成功
+}
 
 
 class JobV3:
@@ -69,7 +85,7 @@ class JobV3:
         job_status = job_instance.get("status", {})
         return {
             "ok": ok,
-            "status": job_status,
+            "status": job_instance_status_map.get(job_status),
             "data": response,
         }
 
