@@ -13,10 +13,14 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import json
+import traceback
+
 from blueapps.utils.logger import logger
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.constants import USER_VISIT
 from common.control.throttle import ChatBotThrottle
 from common.drf.generic import BaseViewSet
 from common.http.request import get_request_user
@@ -59,19 +63,19 @@ class BizViewSet(BaseViewSet):
             {},
             fields=["bk_biz_id", "bk_biz_name"],
         )
-        key = f"user_visited_{username}"
-        record = RedisClient().get(key)
-        if record and data:
-            biz_id = record.get("biz_id", "-1")
-            try:
-                cursor = [
-                    i
-                    for i, __ in enumerate(
-                        data,
-                    )
-                    if __["bk_biz_id"] == int(biz_id)
-                ][0]
-                data[0], data[cursor] = data[cursor], data[0]
-            except IndexError:
-                logger.error(f"查询redis中的业务ID为{biz_id}的业务数据失败")
+
+        # 历史记录替换到最前面:不管查询最近的是不是异常都不会影响查询功能
+        try:
+            key = f"{USER_VISIT}_{username}"
+            record_biz_id = RedisClient().get(key)
+            for biz_index in range(len(data)):
+                biz = data[biz_index]
+                if biz.get("bk_biz_id") == record_biz_id:
+                    data.pop(biz_index)
+                    data.insert(0, biz)
+                    break
+        except Exception:  # pylint: disable=broad-except
+            logger.error(json.dumps({"message": traceback.format_exc()}))
+            return
+
         return Response(data)

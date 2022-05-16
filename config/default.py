@@ -70,6 +70,7 @@ INSTALLED_APPS += BKCHAT_INSTALLED_APPS
 MIDDLEWARE += (
     "corsheaders.middleware.CorsMiddleware",
     "common.middleware.common.CommonMiddleware",
+    "common.middleware.visit.VisitMiddleware",
     "common.middleware.common.RequestProvider",
 )
 
