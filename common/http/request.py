@@ -56,4 +56,5 @@ def get_request_biz_id(request) -> str:
     @param request:
     @return:
     """
+    logger.info(json.dumps({"cookies": request.COOKIES}))
     return request.COOKIES.get("biz_id")
