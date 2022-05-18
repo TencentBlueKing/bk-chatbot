@@ -25,6 +25,7 @@ from src.manager.module_other.models import (
 
 @admin.register(VersionModel)
 class VersionModelAdmin(admin.ModelAdmin):
+    fields = ["is_show", "version", "title", "context", "author"]
     list_display = ["is_show", "version", "title", "context", "author", "updated_at"]
     list_filter = ["is_show", "version", "title", "context", "author", "updated_at"]
     search_fields = ["is_show", "version", "title", "context", "author", "updated_at"]
@@ -32,13 +33,15 @@ class VersionModelAdmin(admin.ModelAdmin):
 
 @admin.register(PluginTagModel)
 class PluginTagModelAdmin(admin.ModelAdmin):
-    list_display = ["key", "name"]
-    list_filter = ["key", "name"]
-    search_fields = ["key", "name"]
+    fields = ["key", "name"]
+    list_display = ["key", "name", "created_by", "updated_at"]
+    list_filter = ["key", "name", "created_by", "updated_at"]
+    search_fields = ["key", "name", "created_by", "updated_at"]
 
 
 @admin.register(FAQModel)
 class FAQAdmin(admin.ModelAdmin):
+    fields = ["faq_name", "faq_db", "faq_collection", "created_by"]
     list_display = ["faq_name", "faq_db", "faq_collection", "created_by", "updated_at"]
     list_filter = ["faq_name", "faq_db", "faq_collection", "created_by", "updated_at"]
     search_fields = ["faq_name", "faq_db", "faq_collection", "created_by", "updated_at"]
@@ -46,6 +49,7 @@ class FAQAdmin(admin.ModelAdmin):
 
 @admin.register(IMTypeModel)
 class IMTypeAdmin(admin.ModelAdmin):
-    list_display = ["platform", "im_type"]
-    list_filter = ["platform", "im_type"]
-    search_fields = ["platform", "im_type"]
+    fields = ["platform", "im_type", "alias", "define"]
+    list_display = ["platform", "im_type", "alias", "created_by", "updated_at"]
+    list_filter = ["platform", "im_type", "alias", "created_by", "updated_at"]
+    search_fields = ["platform", "im_type", "alias", "created_by", "updated_at"]

@@ -16,9 +16,47 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 
 from common.drf.serializers import BaseRspSerializer
+from common.http.request import get_request_biz_id
+from common.utils.uuid import get_random_str
+from src.manager.module_other.models import IMTypeModel
 from src.manager.module_trigger.models import TriggerModel
 
 trigger_tag = ["触发器"]
+
+
+class BizId:
+    def set_context(self, instance):
+        """
+        设置默认值
+        """
+        self.biz_id = get_request_biz_id(instance.context["request"])
+
+    def __call__(self, *args, **kwargs):
+        return self.biz_id
+
+    def __repr__(self):
+        return
+
+
+class TriggerKey:
+    def set_context(self, instance):
+        """
+        设置默认值
+        """
+
+        payload = instance.context["request"].payload
+        im_platform = payload.get("im_platform")
+        im_type = payload.get("im_type")
+        im_objects = IMTypeModel.objects.filter(platform=im_platform, im_type=im_type).first()
+        if not im_objects:
+            raise Exception("缺失im类型")
+        self.trigger_key = f"{im_objects.alias}-{get_random_str()}"
+
+    def __call__(self, *args, **kwargs):
+        return self.trigger_key
+
+    def __repr__(self):
+        return
 
 
 class TriggerViewSerializer(serializers.ModelSerializer):
@@ -33,14 +71,38 @@ class TriggerViewSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
-            "platform",
             "trigger_key",
-            "trigger_type",
+            "im_platform",
+            "im_type",
             "info",
+            "biz_id",
             "created_by",
             "created_at",
             "updated_at",
         ]
+
+
+class ReqPostTriggerViewSerializer(TriggerViewSerializer):
+    """
+    添加
+    """
+
+    biz_id = serializers.HiddenField(default=BizId())
+    trigger_key = serializers.HiddenField(default=TriggerKey())
+
+    class Meta:
+        model = TriggerModel
+        fields = ["name", "biz_id", "im_platform", "im_type", "info", "trigger_key"]
+
+
+class ReqPutTriggerViewSerializer(TriggerViewSerializer):
+    """
+    添加
+    """
+
+    class Meta:
+        model = TriggerModel
+        fields = ["name", "im_platform", "im_type", "info"]
 
 
 # 查询响应

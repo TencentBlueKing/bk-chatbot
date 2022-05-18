@@ -27,11 +27,25 @@ class ImSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IMTypeModel
-        fields = ["id", "platform", "im_type"]
+        fields = ["id", "platform", "im_type", "alias", "define"]
+
+
+class ReqGetPlatformSerializer(serializers.Serializer):
+    """
+    插件标签
+    """
+
+    pass
 
 
 ############################################################
 im_list_docs = swagger_auto_schema(
     tags=other_tag,
     operation_id="im",
+)
+
+im_platform_list_docs = swagger_auto_schema(
+    request_body=ReqGetPlatformSerializer(),
+    tags=other_tag,
+    operation_id="im_platform",
 )

@@ -17,8 +17,11 @@ specific language governing permissions and limitations under the License.
 from django.utils.decorators import method_decorator
 
 from common.drf.view_set import BaseManageViewSet
+from common.http.request import get_request_biz_id
 from src.manager.module_trigger.models import TriggerModel
 from src.manager.module_trigger.proto.trigger import (
+    ReqPostTriggerViewSerializer,
+    ReqPutTriggerViewSerializer,
     TriggerViewSerializer,
     trigger_create_docs,
     trigger_delete_docs,
@@ -34,4 +37,20 @@ from src.manager.module_trigger.proto.trigger import (
 class TriggerViewSet(BaseManageViewSet):
     queryset = TriggerModel.objects.all()
     serializer_class = TriggerViewSerializer
+    create_serializer_class = ReqPostTriggerViewSerializer
+    update_serializer_class = ReqPutTriggerViewSerializer
     filterset_class = TriggerModel.OpenApiFilter
+
+    def list(self, request, *args, **kwargs):
+        """
+        查询触发器
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        request.query_params._mutable = True
+        biz_id = request.payload.get("biz_id", None)
+        if not biz_id:
+            request.query_params["biz_id"] = get_request_biz_id(request)
+        return super().list(self, request, *args, **kwargs)

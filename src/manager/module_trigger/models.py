@@ -26,10 +26,11 @@ class TriggerModel(BaseModel):
     触发器
     """
 
+    biz_id = models.CharField("名称", default="system", max_length=256)
     name = models.CharField("名称", default="", max_length=256)
-    platform = models.CharField("平台", max_length=256, default=0)
-    trigger_type = models.CharField("触发器类型", max_length=256, default=0)
-    trigger_key = models.CharField("触发器key", max_length=256, default="")
+    trigger_key = models.CharField("触发器key", max_length=64, unique=True, default="")
+    im_platform = models.CharField("平台", max_length=256, default=0)
+    im_type = models.CharField("im类型", max_length=256, default=0)
     info = DictCharField("触发器信息", default="")
 
     class Meta:
@@ -40,7 +41,8 @@ class TriggerModel(BaseModel):
         提供给rest查询使用
         """
 
+        biz_id = filters.CharFilter(field_name="biz_id")
         name = filters.CharFilter(field_name="name")
-        platform = filters.CharFilter(field_name="platform")
-        trigger_type = filters.CharFilter(field_name="trigger_type")
+        im_platform = filters.CharFilter(field_name="im_platform")
+        im_type = filters.CharFilter(field_name="im_type")
         trigger_key = filters.CharFilter(field_name="trigger_key")
