@@ -25,6 +25,8 @@ class ImSerializer(serializers.ModelSerializer):
     插件标签
     """
 
+    define = serializers.ListField()
+
     class Meta:
         model = IMTypeModel
         fields = ["id", "platform", "im_type", "alias", "define"]
