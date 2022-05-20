@@ -35,6 +35,8 @@ class TriggerModel(BaseModel):
 
     class Meta:
         db_table = "tab_trigger"
+        verbose_name = "【触发器】"
+        verbose_name_plural = "【触发器】"
 
     class OpenApiFilter(BaseOpenApiFilter):
         """

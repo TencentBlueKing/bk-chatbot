@@ -52,5 +52,8 @@ class TriggerViewSet(BaseManageViewSet):
         request.query_params._mutable = True
         biz_id = request.payload.get("biz_id", None)
         if not biz_id:
-            request.query_params["biz_id"] = get_request_biz_id(request)
+            cookie_biz_id = get_request_biz_id(request)
+            if not cookie_biz_id:
+                raise Exception("请求错误,请刷新重试")
+            request.query_params["biz_id"] = cookie_biz_id
         return super().list(self, request, *args, **kwargs)
