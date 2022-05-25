@@ -19,6 +19,7 @@ from typing import Any, Optional, Dict
 
 import aiohttp
 
+from opsbot.log import logger
 from component.exceptions import *
 from component.api import Api
 from component.config import (
@@ -60,6 +61,7 @@ class BKApi(Api):
         if isinstance(result, dict):
             if result.get('result', False) or result.get('code', -1) == 0 or result.get('status', -1) == 0:
                 return result.get('data')
+            logger.error(result)
             raise ActionFailed(retcode=result.get('code'), info=result)
 
     async def call_action(self, action: str, method: str, **params) -> Any:

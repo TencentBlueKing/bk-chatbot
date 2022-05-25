@@ -28,6 +28,7 @@ import requests
 from quart import request, abort, jsonify, render_template
 from jsonschema.exceptions import ValidationError
 
+from opsbot.log import logger
 from .message import Message
 from .decryption import Decryption
 from opsbot.proxy import (
@@ -165,6 +166,7 @@ class HttpApi(BaseApi):
     def _handle_json_result(self, result: Optional[Dict[str, Any]]) -> Any:
         if isinstance(result, dict):
             if result.get('errcode') != 0:
+                logger.error(result)
                 raise ActionFailed(retcode=result.get('errcode'))
             return result
 
