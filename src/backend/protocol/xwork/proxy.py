@@ -123,8 +123,8 @@ class Proxy(BaseProxy):
     async def convert_to_name(self, msg_sender_id: str) -> str:
         try:
             r = await self._api.call_action('user/get', method='GET', params={'userid': msg_sender_id})
-            return r.get('alias')
-        except (HttpFailed, ActionFailed, IndexError):
+            return r['alias']
+        except (HttpFailed, ActionFailed, KeyError):
             return msg_sender_id
 
     async def get_media(self, media_id: str):

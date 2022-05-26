@@ -72,7 +72,6 @@ class BKApi(Api):
             raise TokenNotAvailable
 
         url = f"{self._api_root}/{action}?{self._access_token}"
-
         try:
             async with aiohttp.request(method, url, **params) as resp:
                 if 200 <= resp.status < 300:
