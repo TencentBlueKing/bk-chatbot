@@ -151,51 +151,51 @@ class MessageTemplate(BaseMessageTemplate):
         return {
             'msgtype': 'template_card',
             'template_card': {
-            'card_type': 'button_interaction',
-            'source': {
-                'desc': 'BKCHAT'
-            },
-            'main_title': {
-                'title': '欢迎使用蓝鲸信息流'
-            },
-            'task_id': str(int(time.time() * 100000)),
-            'button_selection': {
-                'question_key': 'bk_biz_id',
-                'title': '业务',
-                'option_list': data[:10],
-                'selected_id': bk_biz_id if bk_biz_id else ''
-            },
-            'action_menu': {
-                'desc': '更多操作',
-                'action_list': [
-                    {'text': '查找任务', 'key': 'bk_app_task_filter'},
-                    {'text': '绑定业务', 'key': 'bk_cc_biz_bind'},
-                    {'text': '快捷键', 'key': 'bk_shortcut_list'}
+                'card_type': 'button_interaction',
+                'source': {
+                    'desc': 'BKCHAT'
+                },
+                'main_title': {
+                    'title': '欢迎使用蓝鲸信息流'
+                },
+                'task_id': str(int(time.time() * 100000)),
+                'button_selection': {
+                    'question_key': 'bk_biz_id',
+                    'title': '业务',
+                    'option_list': data[:10],
+                    'selected_id': bk_biz_id if bk_biz_id else ''
+                },
+                'action_menu': {
+                    'desc': '更多操作',
+                    'action_list': [
+                        {'text': '查找任务', 'key': 'bk_app_task_filter'},
+                        {'text': '绑定业务', 'key': 'bk_cc_biz_bind'},
+                        {'text': '快捷键', 'key': 'bk_shortcut_list'}
+                    ]
+                },
+                'button_list': [
+                    {
+                        "text": "CI",
+                        "style": 1,
+                        "key": "bk_devops"
+                    },
+                    {
+                        "text": "JOB",
+                        "style": 1,
+                        "key": "bk_job"
+                    },
+                    {
+                        "text": "SOPS",
+                        "style": 1,
+                        "key": "bk_sops"
+                    },
+                    {
+                        "text": "ITSM",
+                        "style": 1,
+                        "key": "bk_itsm|0"
+                    }
                 ]
-            },
-            'button_list': [
-                {
-                    "text": "CI",
-                    "style": 1,
-                    "key": "bk_devops"
-                },
-                {
-                    "text": "JOB",
-                    "style": 1,
-                    "key": "bk_job"
-                },
-                {
-                    "text": "SOPS",
-                    "style": 1,
-                    "key": "bk_sops"
-                },
-                {
-                    "text": "ITSM",
-                    "style": 1,
-                    "key": "bk_itsm|0"
-                }
-            ]
-        }
+            }
         }
 
     @classmethod
