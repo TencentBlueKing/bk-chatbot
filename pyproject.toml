@@ -35,6 +35,7 @@ gunicorn = "19.6.0"
 raven = "6.5.0"
 blueapps = "3.6.1rc0"
 ddtrace = "0.14.1"
+pycryptodome = "3.14.1"
 
 [tool.poetry.dev-dependencies]
 

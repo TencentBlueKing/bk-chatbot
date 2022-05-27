@@ -73,3 +73,32 @@ class ChatBindBusiness(BaseModel):
         chat_index_id = filters.CharFilter(field_name="chat_index_id")
         chat_group_id = filters.CharFilter(field_name="chat_group_id")
         is_deleted = filters.BooleanFilter(field_name="is_deleted")
+
+
+class BizVariableModel(BaseModel):
+    """
+    业务变量
+    """
+
+    key = models.CharField("全局变量的key", default="", max_length=128)
+    name = models.CharField("全局变量name", default="", max_length=128)
+    biz_id = models.CharField("业务ID", default="", max_length=128)
+    value = models.TextField("变量值", default="")
+    type = models.CharField("类型", default="", max_length=128)
+    ase_key = models.CharField("ase_key", default="", max_length=128)
+
+    class Meta:
+        unique_together = ("key", "biz_id")
+        db_table = "tab_biz_variable"
+        verbose_name = _("业务变量")
+        verbose_name_plural = _("业务变量")
+
+    class OpenApiFilter(BaseOpenApiFilter):
+        """
+        提供给rest查询使用
+        """
+
+        key = filters.CharFilter(field_name="key")
+        name = filters.CharFilter(field_name="name")
+        biz_id = filters.CharFilter(field_name="biz_id")
+        value = filters.CharFilter(field_name="value")

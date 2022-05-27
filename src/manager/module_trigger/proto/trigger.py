@@ -61,7 +61,7 @@ class TriggerKey:
 
 class TriggerViewSerializer(serializers.ModelSerializer):
     """
-    语料领域验证器
+    触发器验证器
     """
 
     info = serializers.DictField(label="触发器key")
