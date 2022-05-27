@@ -101,4 +101,3 @@ class BizVariableModel(BaseModel):
         key = filters.CharFilter(field_name="key")
         name = filters.CharFilter(field_name="name")
         biz_id = filters.CharFilter(field_name="biz_id")
-        value = filters.CharFilter(field_name="value")

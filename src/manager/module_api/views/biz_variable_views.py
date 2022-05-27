@@ -22,8 +22,8 @@ from drf_yasg.utils import swagger_auto_schema
 from common.drf.view_set import BaseGetViewSet
 from common.perm.permission import check_permission
 from src.manager.module_api.proto import api_tag
+from src.manager.module_api.proto.biz_variable import BizVariableViewSerializer
 from src.manager.module_biz.models import BizVariableModel
-from src.manager.module_biz.proto.biz_variable import BizVariableViewSerializer
 
 
 @method_decorator(name="list", decorator=swagger_auto_schema(tags=api_tag, operation_id="查询业务变量"))

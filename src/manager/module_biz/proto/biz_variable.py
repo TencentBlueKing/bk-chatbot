@@ -49,13 +49,7 @@ class BizVariableViewSerializer(serializers.ModelSerializer):
         # 这里可以通过obj进行一些处理获取销售量然后返回
         value = obj.value
         if obj.type == "password":
-            try:
-                key = obj.ase_key
-                aes_cipher = AESClassicCipher(key)
-                value = aes_cipher.decrypt(value)
-                return value
-            except:  # pylint: disable=broad-except
-                pass
+            return "*" * 8
         return value
 
     class Meta:
