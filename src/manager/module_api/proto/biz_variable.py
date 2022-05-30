@@ -22,7 +22,7 @@ from src.manager.module_biz.models import BizVariableModel
 biz_variable_tag = ["业务全局变量"]
 
 
-class BizVariableViewSerializer(serializers.ModelSerializer):
+class APIBizVariableViewSerializer(serializers.ModelSerializer):
     """
     全局变量验证器
     """

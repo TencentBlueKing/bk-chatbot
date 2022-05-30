@@ -22,7 +22,7 @@ from drf_yasg.utils import swagger_auto_schema
 from common.drf.view_set import BaseGetViewSet
 from common.perm.permission import check_permission
 from src.manager.module_api.proto import api_tag
-from src.manager.module_api.proto.biz_variable import BizVariableViewSerializer
+from src.manager.module_api.proto.biz_variable import APIBizVariableViewSerializer
 from src.manager.module_biz.models import BizVariableModel
 
 
@@ -33,7 +33,7 @@ class BizVariableViewSet(BaseGetViewSet):
     """
 
     queryset = BizVariableModel.objects.all()
-    serializer_class = BizVariableViewSerializer
+    serializer_class = APIBizVariableViewSerializer
     filterset_class = BizVariableModel.OpenApiFilter
 
     @login_exempt
