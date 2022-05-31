@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -22,7 +21,7 @@ ONE_WEEK_SECONDS = 60 * 60 * 24 * 7
 # 定时任务
 UPDATE_TASK_TIME = get_env_or_raise("UPDATE_TASK_TIME", 30)  # 更新任务时间间隔
 UPDATE_TASK_MAX_WORKERS = get_env_or_raise("UPDATE_TASK_TIME", 10)  # 最大线程
-UPDATE_TASK_MAX_TIME = get_env_or_raise("UPDATE_TASK_TIME", 60 * 60 * 60)  # 任务保留时间
+UPDATE_TASK_MAX_TIME = get_env_or_raise("UPDATE_TASK_TIME", 24 * 60 * 60)  # 任务保留时间
 UPDATE_TASK_LOG = "task_log"
 UPDATE_TASK_PREFIX = "task_log_"  # 任务redis key前缀
 TASK_NOTICE_PREFIX = "task_notice"  # 机器人日志通知前缀
