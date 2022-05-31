@@ -58,7 +58,7 @@ class PlatformTask:
         @return:
         """
         with RedisClient() as r:
-            return r.keys(f"{UPDATE_TASK_PREFIX}{key}", [])
+            return r.keys(f"{UPDATE_TASK_PREFIX}{key}")
 
     def del_task_cache(self, key):
         """
