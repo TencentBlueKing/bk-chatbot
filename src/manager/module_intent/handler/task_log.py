@@ -125,14 +125,14 @@ class PlatformTask:
                 "param_list": param_list,
             }
 
-            # 如果存在缓存数据则进行通知
-            if self.get_task_cache(self.obj.id):
-                Message.notice(**params)
             # 如果出现状态为成功/移除 则删除
             if self.obj.status in [
                 ExecutionLog.TaskExecStatus.SUCCESS.value,
                 ExecutionLog.TaskExecStatus.REMOVE.value,
             ]:
+                # 如果存在缓存数据则进行通知
+                if self.get_task_cache(self.obj.id):
+                    Message.notice(**params)
                 self.del_task_cache(self.obj.id)
         except ValueError:
             traceback.print_exc()
