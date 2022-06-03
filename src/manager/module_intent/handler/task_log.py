@@ -130,9 +130,14 @@ class PlatformTask:
                 ExecutionLog.TaskExecStatus.SUCCESS.value,
                 ExecutionLog.TaskExecStatus.REMOVE.value,
             ]:
-                # 如果存在缓存数据则进行通知
-                if self.get_task_cache(self.obj.id):
-                    Message.notice(**params)
+                # 消息通知失败也不会再进行查询
+                try:
+                    # 如果存在缓存数据则进行通知
+                    if self.get_task_cache(self.obj.id):
+                        Message.notice(**params)
+                except Exception:  # pylint: disable=broad-except
+                    traceback.print_exc()
+                    logger.error(f"发送通知错误:{traceback.format_exc()}")
                 self.del_task_cache(self.obj.id)
         except ValueError:
             traceback.print_exc()
