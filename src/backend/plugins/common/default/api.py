@@ -34,7 +34,8 @@ class Flow:
         bk_biz_id = RedisClient(env="prod").hash_get('chat_single_biz', self.user_id)
         data = await self._search_business()
         if not data:
-            return self._session.send_template_msg('render_markdown_msg', f'>**CC:**\n{DEFAULT_BIND_BIZ_TIP}')
+            return self._session.send_template_msg('render_markdown_msg',
+                                                   f'>**CC:**\n{DEFAULT_BIND_BIZ_TIP}')
         return self._session.bot.send_template_msg('render_welcome_msg', data, bk_biz_id)
 
     async def render_biz_msg(self):
