@@ -13,11 +13,10 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import time
-
 from opsbot import CommandSession
 from opsbot.models import BKExecutionLog
 from component import RedisClient, CC, Backend, Plugin, OrmClient
+from .settings import DEFAULT_BIND_BIZ_TIP
 
 
 class Flow:
@@ -34,6 +33,9 @@ class Flow:
     async def render_welcome_msg(self):
         bk_biz_id = RedisClient(env="prod").hash_get('chat_single_biz', self.user_id)
         data = await self._search_business()
+        if not data:
+            return self._session.bot.send_template_msg('render_markdown_msg',
+                                                       f'>**CC:**\n{DEFAULT_BIND_BIZ_TIP}')
         return self._session.bot.send_template_msg('render_welcome_msg', data, bk_biz_id)
 
     async def render_biz_msg(self):
