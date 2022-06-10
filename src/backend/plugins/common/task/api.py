@@ -108,7 +108,7 @@ class BKTask:
         } for slot in self._slots if slot.get('type') == 1]
 
         global_var_list.extend([{'id': slot.get('id'), 'server': {
-            'ip_list': [{'bk_cloud_id': 0, 'ip': ip} for ip in re.split('[\n\s,]\s*', slot['value'])]
+            'ip_list': [{'bk_cloud_id': 0, 'ip': ip} for ip in re.split('[\n\s,;]\s*', slot['value'])]
         }} for slot in self._slots if slot.get('type') == 3 and _validate_pattern(PATTERN_IP, slot.get('value'))])
 
         response = await JOB().execute_job_plan(
