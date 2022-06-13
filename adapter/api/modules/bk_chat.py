@@ -25,6 +25,7 @@ class _BkChatApi(BaseApi):
     def __init__(self):
         self.handle_scheduler = ProxyDataAPI(_("回调机器人"))
         self.send_msg = ProxyDataAPI(_("发送消息"))
+        self.corpus_create = ProxyDataAPI(_("添加语料"))
 
 
 BkChatApi = _BkChatApi()
