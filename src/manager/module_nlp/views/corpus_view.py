@@ -106,7 +106,13 @@ class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
         @return:
         """
         payload = request.payload
-        corpus_intent_object = CorpusIntent.create_intent(**payload)
+        params = {
+            "domain_id": payload.get("domain_id"),
+            "intent_key": payload.get("intent_key"),
+            "intent_name": payload.get("intent_name"),
+            "slots": payload.get("slots"),
+        }
+        corpus_intent_object = CorpusIntent.create_intent(**params)
         return Response(
             {
                 "id": corpus_intent_object.id,

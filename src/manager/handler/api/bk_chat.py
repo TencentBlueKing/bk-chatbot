@@ -46,7 +46,7 @@ class BkChat:
         return BkChatApi.send_msg(params=params, raw=True)
 
     @classmethod
-    def corpus_create(cls, domain_id, intent_key, intent_name, slots):
+    def corpus_intent_create(cls, domain_id, intent_key, intent_name, slots):
         """
         语料添加
         @param domain_id:   领域ID
@@ -61,4 +61,4 @@ class BkChat:
             "intent_name": intent_name,
             "slots": slots,
         }
-        return BkChatApi.corpus_create(params=params, raw=True)
+        return BkChatApi.corpus_intent_create(params=params, raw=True)
