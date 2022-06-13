@@ -74,10 +74,36 @@ class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
     serializer_class = CorpusIntentSerializer
     filterset_class = CorpusIntent.OpenApiFilter
 
+    @check_permission("gw_create")
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     @validation(ReqPostCorpusIntent)
     def create(self, request, *args, **kwargs):
         """
         数据添加
+        """
+        payload = request.payload
+        corpus_intent_object = CorpusIntent.create_intent(**payload)
+        return Response(
+            {
+                "id": corpus_intent_object.id,
+                "domain_id": corpus_intent_object.domain_id,
+                "intent_key": corpus_intent_object.intent_key,
+                "intent_name": corpus_intent_object.intent_name,
+                "slots": corpus_intent_object.slots,
+            }
+        )
+
+    @validation(ReqPostCorpusIntent)
+    @action(detail=False, methods=["POST"])
+    def gw_create(self, request, *args, **kwargs):
+        """
+        数据添加
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
         """
         payload = request.payload
         corpus_intent_object = CorpusIntent.create_intent(**payload)
@@ -106,7 +132,7 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
     queryset = Corpus.objects.all()
     serializer_class = CorpusSerializer
 
-    @check_permission("gw_list", "gw_create")
+    @check_permission("gw_list")
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -155,16 +181,3 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
         payload = request.payload
         corpus_list = Corpus.query_corpus(**payload)
         return Response(corpus_list)
-
-    @action(detail=False, methods=["POST"])
-    def gw_create(self, request, *args, **kwargs):
-        """
-        数据添加
-        @param request:
-        @param args:
-        @param kwargs:
-        @return:
-        """
-        payload = request.payload
-        Corpus.create_corpus(**payload)
-        return Response({})
