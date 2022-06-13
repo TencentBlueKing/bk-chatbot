@@ -16,6 +16,7 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.drf.validation import validation
 from common.drf.view_set import (
     BaseCreateViewSet,
     BaseDelViewSet,
@@ -23,7 +24,6 @@ from common.drf.view_set import (
     BaseUpdateViewSet,
 )
 from common.perm.permission import check_permission
-from common.drf.validation import validation
 from src.manager.module_nlp.models import Corpus, CorpusDomain, CorpusIntent
 from src.manager.module_nlp.proto import (
     CorpusDomainSerializer,
@@ -106,24 +106,11 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
     queryset = Corpus.objects.all()
     serializer_class = CorpusSerializer
 
-    @check_permission("gw_list")
+    @check_permission("gw_list", "gw_create")
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
-        """
-        数据查询
-        @param request:
-        @param args:
-        @param kwargs:
-        @return:
-        """
-        payload = request.payload
-        corpus_list = Corpus.query_corpus(**payload)
-        return Response(corpus_list)
-
-    @action(detail=False, methods=["GET"])
-    def gw_list(self, request, *args, **kwargs):
         """
         数据查询
         @param request:
@@ -154,4 +141,30 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
         corpus_list = payload.get("data", [])
         for corpus in corpus_list:
             Corpus.create_corpus(**corpus)
+        return Response({})
+
+    @action(detail=False, methods=["GET"])
+    def gw_list(self, request, *args, **kwargs):
+        """
+        数据查询
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        payload = request.payload
+        corpus_list = Corpus.query_corpus(**payload)
+        return Response(corpus_list)
+
+    @action(detail=False, methods=["POST"])
+    def gw_create(self, request, *args, **kwargs):
+        """
+        数据添加
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        payload = request.payload
+        Corpus.create_corpus(**payload)
         return Response({})
