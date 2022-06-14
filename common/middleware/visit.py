@@ -41,9 +41,9 @@ class VisitMiddleware(MiddlewareMixin):
         biz_id = get_request_biz_id(request)
         # biz_id为数字:该功能异常不会影响正常的业务逻辑
         try:
-            biz_id = int(biz_id)
             if not biz_id or not user_name:
                 return
+            biz_id = int(biz_id)
             key = f"{USER_VISIT}_{user_name}"
             with RedisClient() as r:
                 r.set(key, biz_id, 60 * 60 * 24 * 7)
