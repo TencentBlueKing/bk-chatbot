@@ -16,11 +16,14 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from src.manager.module_trigger.views.trigger_view import TriggerViewSet
+from src.manager.module_notice.views.notice_view import NoticeGroupViewSet
+from src.manager.module_notice.views.trigger_view import TriggerViewSet
+from src.manager.module_notice.views.whitelist_view import WhiteListViewSet
 
 router = routers.DefaultRouter()
 
-router.register(r"trigger", TriggerViewSet, basename="trigger")  # 领域
-
+router.register(r"trigger", TriggerViewSet, basename="trigger")  # 触发器
+router.register(r"notice_group", NoticeGroupViewSet, basename="notice")  # 通知群组
+router.register(r"whitelist", WhiteListViewSet, basename="whitelist")  # 白名单
 
 urlpatterns = (url(r"^", include(router.urls)),)
