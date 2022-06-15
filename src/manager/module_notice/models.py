@@ -13,6 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from enum import Enum
+
 from django.db import models
 from django_filters import filters
 
@@ -26,7 +28,7 @@ class TriggerModel(BaseModel):
     触发器
     """
 
-    biz_id = models.CharField("名称", default="system", max_length=256)
+    biz_id = models.CharField("业务ID", default="system", max_length=256)
     name = models.CharField("名称", default="", max_length=256)
     trigger_key = models.CharField("触发器key", max_length=64, unique=True, default="")
     im_platform = models.CharField("平台", max_length=256, default=0)
@@ -48,3 +50,61 @@ class TriggerModel(BaseModel):
         im_platform = filters.CharFilter(field_name="im_platform")
         im_type = filters.CharFilter(field_name="im_type")
         trigger_key = filters.CharFilter(field_name="trigger_key")
+
+
+class NoticeGroupModel(BaseModel):
+    """
+    通知群组
+    """
+
+    class NoticeType(Enum):
+        """
+        通知类型
+        """
+
+        SINGLE = 1
+        GROUP = 2
+
+    biz_id = models.CharField("业务ID", max_length=256)
+    name = models.CharField("名称", default="", max_length=256)
+    trigger_id = models.IntegerField("触发器id")
+    trigger_name = models.CharField("触发器名称", max_length=256)
+    group_type = models.CharField("类型", max_length=64)
+    group_value = models.TextField("通知类型的值")
+
+    class Meta:
+        db_table = "tab_notice_group"
+        verbose_name = "【通知群组】"
+        verbose_name_plural = "【通知群组】"
+
+    class OpenApiFilter(BaseOpenApiFilter):
+        """
+        提供给rest查询使用
+        """
+
+        biz_id = filters.CharFilter(field_name="biz_id")
+        name = filters.CharFilter(field_name="name")
+        trigger_name = filters.CharFilter(field_name="trigger_name")
+        group_value = filters.CharFilter(field_name="group_value", lookup_expr="icontains")
+
+
+class WhitelistModel(BaseModel):
+    """
+    白名单
+    """
+
+    biz_id = models.CharField("业务ID", max_length=256)
+    whitelist_ip = models.CharField("外网IP", max_length=32)
+
+    class Meta:
+        db_table = "tab_whitelist"
+        verbose_name = "【业务白名单】"
+        verbose_name_plural = "【业务白名单】"
+
+    class OpenApiFilter(BaseOpenApiFilter):
+        """
+        提供给rest查询使用
+        """
+
+        biz_id = filters.CharFilter(field_name="biz_id")
+        white_ip = filters.CharFilter(field_name="white_ip")

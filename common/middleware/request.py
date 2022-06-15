@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -19,6 +17,7 @@ import json
 import traceback
 
 from blueapps.utils.logger import logger
+from django.conf import settings
 
 from common.http.html import error_response
 from common.utils.local import local
@@ -74,8 +73,13 @@ class CommonMiddleware(MiddlewareMixin):
         """
         用来处理异常
         """
+
+        # debug模式打印错误信息
+        if getattr(settings, "DEBUG"):
+            traceback.print_exc()
         # 记录错误日志
-        logger.error(f"{traceback.format_exc()}")
+        logger.error(json.dumps({"message": traceback.format_exc()}))
+        return error_response(str(error))
 
 
 class RequestProvider:

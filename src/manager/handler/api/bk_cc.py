@@ -13,9 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import traceback
-
-from blueapps.utils.logger import logger
 
 from adapter.api import CCApi
 from common.requests.batch import batch_request
@@ -27,27 +24,33 @@ class CC:
     """
 
     @classmethod
-    def search_business(self, bk_username, condition, fields=None):
+    def search_business(self, bk_username, biz_ids: list = None, fields=None, **kwargs):
         """
         业务信息查询
-        cc.search_business({"bk_biz_id": 820})
-        :param bk_username:用户名
-        :param condition: 查询条件
-        :param fields: 展示字段
-        :return:
+        @param bk_username:  用户名称
+        @param biz_ids:      业务id列表
+        @param fields:       查询字段
+        @param kwargs:       自定义查询字段biz_property_filter优先级高于biz_id
+        @return:
         """
-        data = []
-        kwargs = {
+        params = {
             "bk_username": bk_username,
-            "condition": condition,
             "fields": fields,
         }
-        try:
-            data = CCApi.search_business(kwargs)["info"]
-        except Exception as e:  # pylint: disable=broad-except
-            traceback.print_exc()
-            logger.error(f"[API]search_business error {e}")
-        return data
+
+        # 通过业务ID列表查询
+        if biz_ids:
+            params.setdefault(
+                "biz_property_filter",
+                {"condition": "AND", "rules": [{"field": "bk_biz_id", "operator": "in", "value": biz_ids}]},
+            )
+        # 通过自定义属性进行查询
+        biz_property_filter = kwargs.get("biz_property_filter")
+        if biz_property_filter:
+            params.setdefault("biz_property_filter", biz_property_filter)
+        data = CCApi.search_business(params)
+        info = data.get("info", [])
+        return info
 
     @classmethod
     def list_biz_hosts(cls, bk_username, query_params):

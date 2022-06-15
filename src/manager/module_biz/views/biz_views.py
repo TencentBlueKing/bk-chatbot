@@ -59,8 +59,7 @@ class BizViewSet(BaseViewSet):
         """
         username = get_request_user(request)
         data = CC().search_business(
-            username,
-            {},
+            bk_username=username,
             fields=["bk_biz_id", "bk_biz_name"],
         )
 

@@ -17,25 +17,25 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.drf.view_set import BaseGetViewSet
+from common.drf.view_set import BaseGetViewSet, BaseViewSet
 from src.manager.module_other.models import IMTypeModel
 from src.manager.module_other.proto.im import (
     ImSerializer,
-    ReqGetPlatformSerializer,
     im_list_docs,
     im_platform_list_docs,
 )
 
 
 @method_decorator(name="list", decorator=im_list_docs)
-@method_decorator(name="platform", decorator=im_platform_list_docs)
 class IMViewSet(BaseGetViewSet):
     queryset = IMTypeModel.objects.all()
     serializer_class = ImSerializer
-    platform_serializer_class = ReqGetPlatformSerializer
     filterset_class = IMTypeModel.OpenApiFilter
 
-    @action(detail=False, methods=["POST"])
+
+@method_decorator(name="platform", decorator=im_platform_list_docs)
+class IMPlatFormViewSet(BaseViewSet):
+    @action(detail=False, methods=["GET"])
     def platform(self, request, **kwargs):
         """
         平台

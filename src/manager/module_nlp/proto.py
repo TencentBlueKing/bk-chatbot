@@ -313,6 +313,13 @@ corpus_delete_docs = swagger_auto_schema(
 )
 
 ############################################################
+
+corpus_intent_gw_create_docs = swagger_auto_schema(
+    tags=corpus_tag,
+    request_body=ReqPostCorpusIntent,
+    operation_id="语料意图管理APIGW-添加意图",
+    responses={200: RspPostCorpusIntent()},
+)
 corpus_gw_list_docs = swagger_auto_schema(
     tags=corpus_tag,
     operation_id="语料管理APIGW-展示",

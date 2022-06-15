@@ -55,7 +55,7 @@ class IntentPermission(permissions.BasePermission):
     @record_user_visited
     def has_permission(self, request, view):
         username = get_request_user(request)
-        data = CC.search_business(username, {"bk_biz_id": int(view.kwargs.get("biz", "-1"))}, fields=["bk_biz_id"])
+        data = CC.search_business(bk_username=username, fields=["bk_biz_id"])
         if not data:
             logger.error(f"[Intent] user permission:{username}-{str(request.COOKIES)}")
             return False

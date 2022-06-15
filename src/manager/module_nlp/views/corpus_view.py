@@ -42,6 +42,7 @@ from src.manager.module_nlp.proto import (
     corpus_gw_list_docs,
     corpus_intent_create_docs,
     corpus_intent_delete_docs,
+    corpus_intent_gw_create_docs,
     corpus_intent_list_docs,
     corpus_list_docs,
     corpus_put_docs,
@@ -64,6 +65,7 @@ class DomainViewSet(BaseGetViewSet, BaseCreateViewSet, BaseUpdateViewSet, BaseDe
 
 @method_decorator(name="list", decorator=corpus_intent_list_docs)
 @method_decorator(name="create", decorator=corpus_intent_create_docs)
+@method_decorator(name="gw_create", decorator=corpus_intent_gw_create_docs)
 @method_decorator(name="destroy", decorator=corpus_intent_delete_docs)
 class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
     """

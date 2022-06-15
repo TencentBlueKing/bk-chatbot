@@ -18,8 +18,8 @@ from django.utils.decorators import method_decorator
 
 from common.drf.view_set import BaseManageViewSet
 from common.http.request import get_request_biz_id
-from src.manager.module_trigger.models import TriggerModel
-from src.manager.module_trigger.proto.trigger import (
+from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
+from src.manager.module_notice.proto.trigger import (
     ReqPostTriggerViewSerializer,
     ReqPutTriggerViewSerializer,
     TriggerViewSerializer,
@@ -56,4 +56,24 @@ class TriggerViewSet(BaseManageViewSet):
             if not cookie_biz_id:
                 raise Exception("请求错误,请刷新重试")
             request.query_params["biz_id"] = cookie_biz_id
-        return super().list(self, request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        """
+        @param serializer:
+        @return:
+        """
+        # 同步触发器的名称给通知组
+        NoticeGroupModel.objects.filter(trigger_id=serializer.instance.id).update(trigger_name=serializer.instance.name)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """
+        @param instance:
+        @return:
+        """
+        notice_groups = NoticeGroupModel.objects.filter(trigger_id=instance.id).values("biz_id")
+        if len(notice_groups) > 0:
+            biz_ids = set(map(lambda x: x.get("biz_id"), notice_groups))
+            raise ValueError(f"业务:{''.join(biz_ids)} 还在使用该触发器,无法删除")
+        instance.delete()

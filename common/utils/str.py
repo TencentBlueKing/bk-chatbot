@@ -13,32 +13,26 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework import serializers
 
-from src.manager.module_other.models import IMTypeModel
-from src.manager.module_other.proto import other_tag
+import re
 
 
-class ImSerializer(serializers.ModelSerializer):
+def camel_to_snake(name: str) -> str:
     """
-    im
+    >>> camel_to_snake("FooBarBazQux")
+    'foo_bar_baz_qux'
+    >>> camel_to_snake("fooBarBazQux")
+    'foo_bar_baz_qux'
+    >>> camel_to_snake("aFooBarBazQux")
+    'a_foo_bar_baz_qux'
+    >>> camel_to_snake("FBI")
+    'fbi'
     """
-
-    define = serializers.ListField()
-
-    class Meta:
-        model = IMTypeModel
-        fields = ["id", "platform", "im_type", "alias", "define"]
+    name = re.sub("(.)([A-Z][a-z])+", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
-############################################################
-im_list_docs = swagger_auto_schema(
-    tags=other_tag,
-    operation_id="IM-查询",
-)
+if __name__ == "__main__":
+    import doctest
 
-im_platform_list_docs = swagger_auto_schema(
-    tags=other_tag,
-    operation_id="IM平台-查询",
-)
+    doctest.testmod(verbose=True)
