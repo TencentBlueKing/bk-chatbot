@@ -26,6 +26,6 @@ class ResponseFormatRenderer(UJSONRenderer):
     def format_data(self, data, renderer_context):
         data["request_id"] = str(uuid.uuid4())
         data["result"] = False if renderer_context["response"].exception else True
-        data["code"] = renderer_context["response"].status_code
+        data["code"] = 1 if renderer_context["response"].exception else 0
         data["message"] = data.get("message") if data.get("message", None) else renderer_context["response"].status_text
         return data
