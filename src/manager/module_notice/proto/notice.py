@@ -42,6 +42,8 @@ class NoticeGroupViewSerializer(serializers.ModelSerializer):
     查询所用的协议
     """
 
+    group_value = serializers.ListSerializer(child=serializers.CharField())
+
     class Meta:
         model = NoticeGroupModel
         fields = [
