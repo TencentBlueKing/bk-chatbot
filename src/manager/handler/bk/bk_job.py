@@ -111,7 +111,7 @@ class BkJob:
         返回job链接
         @return:
         """
-        return f"{JOB_HOST}/{self.biz_id}/execute/task/{self.instance_id}"
+        return f"{JOB_HOST}/biz/{self.biz_id}/execute/task/{self.instance_id}"
 
     def terminate(self):
         """
