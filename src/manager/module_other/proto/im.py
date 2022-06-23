@@ -22,16 +22,23 @@ from src.manager.module_other.proto import other_tag
 
 class ImSerializer(serializers.ModelSerializer):
     """
-    插件标签
+    im
     """
+
+    define = serializers.ListField()
 
     class Meta:
         model = IMTypeModel
-        fields = ["id", "platform", "im_type"]
+        fields = ["id", "platform", "im_type", "alias", "define"]
 
 
 ############################################################
 im_list_docs = swagger_auto_schema(
     tags=other_tag,
-    operation_id="im",
+    operation_id="IM-查询",
+)
+
+im_platform_list_docs = swagger_auto_schema(
+    tags=other_tag,
+    operation_id="IM平台-查询",
 )

@@ -16,6 +16,7 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.drf.validation import validation
 from common.drf.view_set import (
     BaseCreateViewSet,
     BaseDelViewSet,
@@ -23,7 +24,6 @@ from common.drf.view_set import (
     BaseUpdateViewSet,
 )
 from common.perm.permission import check_permission
-from common.drf.validation import validation
 from src.manager.module_nlp.models import Corpus, CorpusDomain, CorpusIntent
 from src.manager.module_nlp.proto import (
     CorpusDomainSerializer,
@@ -42,6 +42,7 @@ from src.manager.module_nlp.proto import (
     corpus_gw_list_docs,
     corpus_intent_create_docs,
     corpus_intent_delete_docs,
+    corpus_intent_gw_create_docs,
     corpus_intent_list_docs,
     corpus_list_docs,
     corpus_put_docs,
@@ -64,6 +65,7 @@ class DomainViewSet(BaseGetViewSet, BaseCreateViewSet, BaseUpdateViewSet, BaseDe
 
 @method_decorator(name="list", decorator=corpus_intent_list_docs)
 @method_decorator(name="create", decorator=corpus_intent_create_docs)
+@method_decorator(name="gw_create", decorator=corpus_intent_gw_create_docs)
 @method_decorator(name="destroy", decorator=corpus_intent_delete_docs)
 class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
     """
@@ -74,6 +76,10 @@ class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
     serializer_class = CorpusIntentSerializer
     filterset_class = CorpusIntent.OpenApiFilter
 
+    @check_permission("gw_create")
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     @validation(ReqPostCorpusIntent)
     def create(self, request, *args, **kwargs):
         """
@@ -81,6 +87,34 @@ class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
         """
         payload = request.payload
         corpus_intent_object = CorpusIntent.create_intent(**payload)
+        return Response(
+            {
+                "id": corpus_intent_object.id,
+                "domain_id": corpus_intent_object.domain_id,
+                "intent_key": corpus_intent_object.intent_key,
+                "intent_name": corpus_intent_object.intent_name,
+                "slots": corpus_intent_object.slots,
+            }
+        )
+
+    @validation(ReqPostCorpusIntent)
+    @action(detail=False, methods=["POST"])
+    def gw_create(self, request, *args, **kwargs):
+        """
+        数据添加
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        payload = request.payload
+        params = {
+            "domain_id": payload.get("domain_id"),
+            "intent_key": payload.get("intent_key"),
+            "intent_name": payload.get("intent_name"),
+            "slots": payload.get("slots"),
+        }
+        corpus_intent_object = CorpusIntent.create_intent(**params)
         return Response(
             {
                 "id": corpus_intent_object.id,
@@ -122,19 +156,6 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
         corpus_list = Corpus.query_corpus(**payload)
         return Response(corpus_list)
 
-    @action(detail=False, methods=["GET"])
-    def gw_list(self, request, *args, **kwargs):
-        """
-        数据查询
-        @param request:
-        @param args:
-        @param kwargs:
-        @return:
-        """
-        payload = request.payload
-        corpus_list = Corpus.query_corpus(**payload)
-        return Response(corpus_list)
-
     @validation(ReqPostCorpus)
     def create(self, request, *args, **kwargs):
         """
@@ -155,3 +176,16 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
         for corpus in corpus_list:
             Corpus.create_corpus(**corpus)
         return Response({})
+
+    @action(detail=False, methods=["GET"])
+    def gw_list(self, request, *args, **kwargs):
+        """
+        数据查询
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        payload = request.payload
+        corpus_list = Corpus.query_corpus(**payload)
+        return Response(corpus_list)

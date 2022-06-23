@@ -16,25 +16,14 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from src.manager.module_api.views import (
-    admin_views,
-    biz_variable_views,
-    bkmonitor_views,
-    cmdb_views,
-    intent_view,
-)
+from src.manager.module_notice.views.notice_view import NoticeGroupViewSet
+from src.manager.module_notice.views.trigger_view import TriggerViewSet
+from src.manager.module_notice.views.whitelist_view import WhiteListViewSet
 
 router = routers.DefaultRouter()
 
-# 路由注册
-router.register(r"bkmonitor", bkmonitor_views.BkMonitorViewSet, basename="bkmonitor")
-router.register(r"cmdb", cmdb_views.CmdbViewSet, basename="cmdb")
-router.register(r"admin/intent", intent_view.IntentViewSet, basename="intent_api")
-router.register(r"biz/variable", biz_variable_views.BizVariableViewSet, basename="biz_variable_api")
+router.register(r"trigger", TriggerViewSet, basename="trigger")  # 触发器
+router.register(r"notice_group", NoticeGroupViewSet, basename="notice")  # 通知群组
+router.register(r"whitelist", WhiteListViewSet, basename="whitelist")  # 白名单
 
-urlpatterns = (
-    url(r"^exec/admin_describe_intents", admin_views.admin_describe_intents),
-    url(r"^exec/admin_describe_tasks", admin_views.admin_describe_tasks),
-    url(r"^exec/admin_describe_utterances", admin_views.admin_describe_utterances),
-    url(r"^", include(router.urls)),
-)
+urlpatterns = (url(r"^", include(router.urls)),)

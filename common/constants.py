@@ -64,3 +64,7 @@ class TaskExecStatus(Enum):
 # 环境变量获取
 JOB_HOST = get_env_or_raise("BKAPP_JOB_HOST")
 DEVOPS_HOST = get_env_or_raise("BKAPP_DEVOPS_HOST")
+
+
+# 用户相关
+USER_VISIT = "USER_VISIT"

@@ -17,6 +17,47 @@ import time
 
 from rest_framework import serializers
 
+from common.http.request import get_request_biz_id
+from common.utils.str import camel_to_snake
+
+
+class DefaultFiled:
+    def __init__(self):
+        """
+        初始化
+        @return:
+        """
+
+        self.attribute_name = camel_to_snake(self.__class__.__name__)
+        super().__init__()
+
+    def __call__(self, *args, **kwargs):
+        """
+        通过类名获取数据
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        attribute = camel_to_snake(self.attribute_name)
+        value = getattr(self, attribute)
+        return value
+
+    def __repr__(self):
+        return
+
+
+class BizId(DefaultFiled):
+    def set_context(self, instance):
+        """
+        设置默认值
+        """
+
+        setattr(
+            self,
+            self.attribute_name,
+            get_request_biz_id(instance.context["request"]),
+        )
+
 
 class TimeStampSerializer(serializers.CharField):
     """

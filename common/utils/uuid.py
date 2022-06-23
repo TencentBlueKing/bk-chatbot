@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -13,10 +12,16 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from common.utils.managers import SoftManager
+
+import random
+import string
 
 
-class ChatBindBusinessManager(SoftManager):
-    """支持软删除"""
-
-    pass
+def get_random_str(num=8):
+    """
+    获取随机数
+    @param num:
+    @return:
+    """
+    seed = string.digits + string.ascii_lowercase
+    return "".join([random.choice(seed) for _ in range(num)])

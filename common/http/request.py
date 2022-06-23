@@ -42,4 +42,19 @@ def init_views(request):
 
 
 def get_request_user(request) -> str:
+    """
+    获取用户名称
+    @param request:
+    @return:
+    """
     return request.user.username or request.COOKIES.get("bk_uid")
+
+
+def get_request_biz_id(request) -> str:
+    """
+    返回biz_id
+    @param request:
+    @return:
+    """
+    logger.info(json.dumps({"cookies": request.COOKIES}))
+    return request.COOKIES.get("biz_id")

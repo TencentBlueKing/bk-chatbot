@@ -15,15 +15,32 @@ specific language governing permissions and limitations under the License.
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 
+from common.drf.field import BizId, DefaultFiled
 from common.drf.serializers import BaseRspSerializer
-from src.manager.module_trigger.models import TriggerModel
+from common.utils.uuid import get_random_str
+from src.manager.module_notice.models import TriggerModel
+from src.manager.module_notice.proto import notice_tag
+from src.manager.module_other.models import IMTypeModel
 
-trigger_tag = ["触发器"]
+
+class TriggerKey(DefaultFiled):
+    def set_context(self, instance):
+        """
+        设置默认值
+        """
+
+        payload = instance.context["request"].payload
+        im_platform = payload.get("im_platform")
+        im_type = payload.get("im_type")
+        im_objects = IMTypeModel.objects.filter(platform=im_platform, im_type=im_type).first()
+        if not im_objects:
+            raise Exception("缺失im类型")
+        setattr(self, self.attribute_name, f"{im_objects.alias}-{get_random_str()}")
 
 
 class TriggerViewSerializer(serializers.ModelSerializer):
     """
-    语料领域验证器
+    触发器验证器
     """
 
     info = serializers.DictField(label="触发器key")
@@ -33,14 +50,38 @@ class TriggerViewSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
-            "platform",
             "trigger_key",
-            "trigger_type",
+            "im_platform",
+            "im_type",
             "info",
+            "biz_id",
             "created_by",
             "created_at",
             "updated_at",
         ]
+
+
+class ReqPostTriggerViewSerializer(TriggerViewSerializer):
+    """
+    添加
+    """
+
+    biz_id = serializers.HiddenField(default=BizId())
+    trigger_key = serializers.HiddenField(default=TriggerKey())
+
+    class Meta:
+        model = TriggerModel
+        fields = ["name", "biz_id", "im_platform", "im_type", "info", "trigger_key"]
+
+
+class ReqPutTriggerViewSerializer(TriggerViewSerializer):
+    """
+    修改
+    """
+
+    class Meta:
+        model = TriggerModel
+        fields = ["name", "info"]
 
 
 # 查询响应
@@ -57,25 +98,25 @@ class RspCreateTriggerSerializer(BaseRspSerializer):
 #######################################
 
 trigger_list_docs = swagger_auto_schema(
-    tags=trigger_tag,
+    tags=notice_tag,
     operation_id="触发器-查询",
     responses={200: RspListTriggerSerializer()},
 )
 
 trigger_create_docs = swagger_auto_schema(
-    tags=trigger_tag,
+    tags=notice_tag,
     operation_id="触发器-添加",
     responses={200: RspListTriggerSerializer()},
 )
 
 trigger_update_docs = swagger_auto_schema(
-    tags=trigger_tag,
+    tags=notice_tag,
     operation_id="触发器-修改",
     responses={200: BaseRspSerializer()},
 )
 
 trigger_delete_docs = swagger_auto_schema(
-    tags=trigger_tag,
+    tags=notice_tag,
     operation_id="触发器-删除",
     responses={200: BaseRspSerializer()},
 )

@@ -74,7 +74,7 @@ class BaseModel(models.Model):
         if self._state.adding:
             self.created_by = local.request_username
 
-        self.updated_by = local.request_username
+        self.updated_by = local.request_username if local.request_username else self.updated_by
         super().save(*args, **kwargs)
 
     class Meta:

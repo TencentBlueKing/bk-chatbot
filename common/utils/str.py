@@ -13,19 +13,26 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import uuid
 
-from drf_ujson.renderers import UJSONRenderer
+import re
 
 
-class ResponseFormatRenderer(UJSONRenderer):
-    def render(self, data, media_type=None, renderer_context=None):
-        data = self.format_data(data, renderer_context)
-        return super().render(data, media_type, renderer_context)
+def camel_to_snake(name: str) -> str:
+    """
+    >>> camel_to_snake("FooBarBazQux")
+    'foo_bar_baz_qux'
+    >>> camel_to_snake("fooBarBazQux")
+    'foo_bar_baz_qux'
+    >>> camel_to_snake("aFooBarBazQux")
+    'a_foo_bar_baz_qux'
+    >>> camel_to_snake("FBI")
+    'fbi'
+    """
+    name = re.sub("(.)([A-Z][a-z])+", r"\1_\2", name)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
-    def format_data(self, data, renderer_context):
-        data["request_id"] = str(uuid.uuid4())
-        data["result"] = False if renderer_context["response"].exception else True
-        data["code"] = 1 if renderer_context["response"].exception else 0
-        data["message"] = data.get("message") if data.get("message", None) else renderer_context["response"].status_text
-        return data
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=True)

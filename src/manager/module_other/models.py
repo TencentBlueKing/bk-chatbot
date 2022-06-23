@@ -15,6 +15,7 @@ specific language governing permissions and limitations under the License.
 
 
 from django.db import models
+from django.db.models import Count
 from django.utils.translation import ugettext_lazy as _
 from django_filters import filters
 
@@ -131,6 +132,8 @@ class IMTypeModel(BaseModel):
 
     platform = models.CharField("平台", max_length=256)
     im_type = models.CharField("类型", max_length=256)
+    alias = models.CharField("别名", max_length=256)
+    define = DictCharField(default=[])
 
     class Meta:
         db_table = "tab_im_type"
@@ -144,3 +147,13 @@ class IMTypeModel(BaseModel):
 
         platform = filters.CharFilter(field_name="platform", lookup_expr="contains")
         im_type = filters.CharFilter(field_name="im_type", lookup_expr="contains")
+
+    @classmethod
+    def query_im_platform(cls, **kwargs):
+        """
+        查询平台
+        @param kwargs:
+        @return:
+        """
+        objects = cls.objects.values("platform").annotate(count=Count("platform"))
+        return list(objects)

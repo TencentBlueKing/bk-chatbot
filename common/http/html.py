@@ -25,7 +25,7 @@ def error_response(error_msg: str) -> JsonResponse:
     """
     return JsonResponse(
         {
-            "code": 400,
+            "code": 1,
             "result": False,
             "data": [],
             "message": error_msg,

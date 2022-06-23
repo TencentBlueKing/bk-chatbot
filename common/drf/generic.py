@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -284,6 +282,7 @@ class Meta:
 
 class APIModelViewSet(ResponseMixin, _ModelViewSet):
     model = None
+    schema = None
     pagination_class = DataPageNumberPagination
     filter_backends = (
         DjangoFilterBackend,

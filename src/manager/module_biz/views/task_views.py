@@ -24,7 +24,7 @@ from common.http.request import get_request_user
 from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
 from src.manager.handler.api.devops import DevOps
-from src.manager.module_biz.proto import (
+from src.manager.module_biz.proto.task import (
     DescribeDevopsPipelinesStartInfo,
     DescribeJob,
     DescribeSops,

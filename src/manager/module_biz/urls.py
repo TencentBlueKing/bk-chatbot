@@ -16,8 +16,12 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
+from src.manager.module_biz.views.biz_variable_view import BizVariableViewSet
 from src.manager.module_biz.views.biz_views import BizViewSet
-from src.manager.module_biz.views.chat_bind_views import ChatBindViewSet, OpenChatBindViewSet
+from src.manager.module_biz.views.chat_bind_views import (
+    ChatBindViewSet,
+    OpenChatBindViewSet,
+)
 from src.manager.module_biz.views.summary_chat_bind import SummaryChatBindViewSet
 from src.manager.module_biz.views.task_views import TaskViewSet
 
@@ -27,6 +31,8 @@ router.register(r"biz", BizViewSet, basename="biz")
 router.register(r"task/(?P<biz_id>.*)", TaskViewSet, basename="task")
 router.register(r"chat_bind", ChatBindViewSet, basename="chat_bind")
 router.register(r"open_chat_bind", OpenChatBindViewSet, basename="open_chat_bind")
+router.register(r"biz_variable", BizVariableViewSet, basename="biz_variable")
+
 
 router.register(
     r"summary_chat_bind",

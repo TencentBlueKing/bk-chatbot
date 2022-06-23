@@ -40,5 +40,14 @@ class _BkChatApi:
             module=self.MODULE,
         )
 
+    @property
+    def corpus_intent_create(self):
+        return DataAPI(
+            method="POST",
+            url=BK_CHAT_APIGW + "api/v1/corpus/intent/",
+            description=_("语料意图添加"),
+            module=self.MODULE,
+        )
+
 
 BkChatApi = _BkChatApi()

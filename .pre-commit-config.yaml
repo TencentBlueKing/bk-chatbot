@@ -31,7 +31,7 @@ repos:
 
   # Black 是一个官方的 Python 代码格式化工具
   - repo: https://github.com/psf/black
-    rev: 21.5b1
+    rev: 22.3.0
     hooks:
       - id: black
         language_version: python3
