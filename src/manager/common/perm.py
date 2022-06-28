@@ -22,14 +22,14 @@ from common.http.request import get_request_biz_id, get_request_user
 from src.manager.handler.api.bk_cc import CC
 
 
-def check_biz_ops(func: Callable) -> Callable:
+def check_biz_perm(func: Callable) -> Callable:
     """
     判断是不是业务负责人
     @return:
     """
 
     @wraps(func)
-    def _wrapper(self, request, *args, **kwargs):
+    def _wrapper(request, *args, **kwargs):
         """
         权限控制逻辑
         @param self:
@@ -65,6 +65,6 @@ def check_biz_ops(func: Callable) -> Callable:
 
         if username not in user_list:
             raise ValueError(f"{username}不属于业务PM或者业务运维")
-        return func(self, request, *args, **kwargs)
+        return func(request, *args, **kwargs)
 
     return _wrapper

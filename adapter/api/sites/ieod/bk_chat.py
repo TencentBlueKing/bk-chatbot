@@ -41,6 +41,15 @@ class _BkChatApi:
         )
 
     @property
+    def send_msg_v3(self):
+        return DataAPI(
+            method="POST",
+            url=BK_CHAT_APIGW + "im/api/v1/send_msg",
+            description=_("新发送消息"),
+            module=self.MODULE,
+        )
+
+    @property
     def corpus_intent_create(self):
         return DataAPI(
             method="POST",

@@ -42,7 +42,7 @@ class NoticeGroupViewSerializer(serializers.ModelSerializer):
     查询所用的协议
     """
 
-    group_value = serializers.ListSerializer(child=serializers.CharField())
+    group_value = serializers.ListField(required=False, default=[], label="审批人")
 
     class Meta:
         model = NoticeGroupModel

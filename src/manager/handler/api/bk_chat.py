@@ -18,6 +18,16 @@ from typing import Any
 from adapter.api import BkChatApi
 
 
+def set_im_headers(params):
+    """
+    自定设置headers
+    @param params:
+    @return:
+    """
+    headers = params.get("headers")
+    return headers
+
+
 class BkChat:
     @classmethod
     def handle_scheduler(cls, **params: Any) -> dict:
@@ -62,3 +72,23 @@ class BkChat:
             "slots": slots,
         }
         return BkChatApi.corpus_intent_create(params=params, raw=True)
+
+    @classmethod
+    def new_send_msg(cls, im, msg_type, msg_param, receiver, headers: dict):
+        """
+        发送消息(新)
+        @param im:
+        @param msg_type:
+        @param msg_param:
+        @param receiver:
+        @param headers:
+        @return:
+        """
+        params = {
+            "im": im,
+            "msg_type": msg_type,
+            "msg_param": msg_param,
+            "receiver": receiver,
+            "headers": headers,
+        }
+        return BkChatApi.send_msg_v3(params=params, headers=set_im_headers, raw=True)

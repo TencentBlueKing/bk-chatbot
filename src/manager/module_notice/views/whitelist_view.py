@@ -16,9 +16,9 @@ specific language governing permissions and limitations under the License.
 
 from django.utils.decorators import method_decorator
 
-from common.drf.decorator import biz_id
+from common.drf.decorator import get_cookie_biz_id
 from common.drf.view_set import BaseManageViewSet
-from src.manager.common.perm import check_biz_ops
+from src.manager.common.perm import check_biz_perm
 from src.manager.module_notice.models import WhitelistModel
 from src.manager.module_notice.proto.whitelist import (
     ReqPostWhiteListViewSerializer,
@@ -32,9 +32,13 @@ from src.manager.module_notice.proto.whitelist import (
 
 
 @method_decorator(name="list", decorator=white_list_list_docs)
+@method_decorator(name="list", decorator=get_cookie_biz_id)
 @method_decorator(name="create", decorator=white_list_create_docs)
+@method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
 @method_decorator(name="update", decorator=white_list_update_docs)
+@method_decorator(name="update", decorator=check_biz_perm)  # 判断是不是业务人员
 @method_decorator(name="destroy", decorator=white_list_del_docs)
+@method_decorator(name="destroy", decorator=check_biz_perm)  # 判断是不是业务人员
 class WhiteListViewSet(BaseManageViewSet):
 
     queryset = WhitelistModel.objects.all()
@@ -42,31 +46,3 @@ class WhiteListViewSet(BaseManageViewSet):
     create_serializer_class = ReqPostWhiteListViewSerializer
     update_serializer_class = ReqPutWhiteListViewSerializer
     filterset_class = WhitelistModel.OpenApiFilter
-
-    @biz_id
-    def list(self, request, *args, **kwargs):
-        """
-        查询
-        """
-        return super().list(request, *args, **kwargs)
-
-    @check_biz_ops
-    def create(self, request, *args, **kwargs):
-        """
-        添加
-        """
-        return super().create(request, *args, **kwargs)
-
-    @check_biz_ops
-    def update(self, request, *args, **kwargs):
-        """
-        修改
-        """
-        return super().update(request, *args, **kwargs)
-
-    @check_biz_ops
-    def destroy(self, request, *args, **kwargs):
-        """
-        删除
-        """
-        return super().destroy(request, *args, **kwargs)
