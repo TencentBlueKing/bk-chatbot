@@ -54,7 +54,7 @@ def check_biz_perm(func: Callable) -> Callable:
         )
         # 查询数量为0则进行异常处理
         if len(data) == 0:
-            raise ValueError(f"通过业务ID{biz_id}查询的业务数量为0")
+            raise ValueError(f"通过业务({biz_id})查询的业务数量为0")
 
         # 判断用户是否具有业务权限
         user_list = set(

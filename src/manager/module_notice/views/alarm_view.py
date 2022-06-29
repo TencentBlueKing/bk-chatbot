@@ -22,7 +22,8 @@ from rest_framework.response import Response
 from common.drf.decorator import get_cookie_biz_id
 from common.drf.view_set import BaseManageViewSet, BaseViewSet
 from common.http.request import get_request_biz_id
-from src.manager.common.perm import check_biz_perm
+
+# from src.manager.common.perm import check_biz_perm
 from src.manager.handler.api.bk_chat import BkChat
 from src.manager.module_notice.handler.action import DelAction, EditAction, SaveAction
 from src.manager.module_notice.handler.deal_alarm_msg import OriginalAlarm
@@ -81,8 +82,8 @@ class AlarmViewSet(BaseViewSet):
         return Response({"data": notice_groups})
 
 
-@method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
-@method_decorator(name="update", decorator=check_biz_perm)  # 判断是不是业务人员
+# @method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
+# @method_decorator(name="update", decorator=check_biz_perm)  # 判断是不是业务人员
 @method_decorator(name="list", decorator=get_cookie_biz_id)
 class AlarmConfigViewSet(BaseManageViewSet):
     """
