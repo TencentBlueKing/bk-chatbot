@@ -65,7 +65,7 @@ class AlarmViewSet(BaseViewSet):
         payload = request.payload
         config_id = payload.get("config_id")
         notice_groups = get_notices(config_id)  # 需要通知的群组
-        original_alarm = OriginalAlarm(payload)
+        original_alarm = OriginalAlarm(payload)  # 原始告警
         for notice_group in notice_groups:
             im_type = notice_group.get("im")
             # 通过im获取不同

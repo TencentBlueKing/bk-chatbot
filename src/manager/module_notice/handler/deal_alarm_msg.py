@@ -77,15 +77,22 @@ class OriginalAlarm:
         dimension_translation = origin_alarm.get("dimension_translation", {})
         bk_topo_node = dimension_translation.get("bk_topo_node", {})  # 业务topo
         bk_topo_node_display_value = bk_topo_node.get("display_value", [])
+
         # 相关信息
-        self.relation_info = ",".join(
-            list(
-                map(
-                    lambda x: f"{x.get('bk_obj_name')}({x.get('bk_inst_name')})",
-                    bk_topo_node_display_value,
+        relation_info = self.info.get("related_info")
+        self.relation_info = (
+            relation_info
+            if relation_info
+            else ",".join(
+                list(
+                    map(
+                        lambda x: f"{x.get('bk_obj_name')}({x.get('bk_inst_name')})",
+                        bk_topo_node_display_value,
+                    )
                 )
             )
         )
+
         # 云区域
         self.bk_target_cloud_id = dimension_translation.get("bk_target_cloud_id", {}).get("value")
         # 目标IP

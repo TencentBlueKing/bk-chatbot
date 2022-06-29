@@ -31,8 +31,7 @@ class Action(Strategy):
         url = deal_strategy_value.get("url")
         id = kwargs.get("config_id")
         my_content = {
-            "cc_id": "{{target.business.bk_biz_id}}",
-            "strategy_id": "{{strategy.strategy_id}}",
+            "callback_message": "{{alarm.callback_message}}",
             "config_id": "{{action.action_config_id}}",
         }
         params = {
@@ -135,7 +134,6 @@ def bkm_edit(**kwargs):
     @param biz_id: 业务ID
     @return:
     """
-
     params = Action.get_default_action(**kwargs)
     result = BkMonitor.edit_action_config(**params)
     config_id = result.get("id")
