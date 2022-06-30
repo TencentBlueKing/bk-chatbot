@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import ipaddress
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
@@ -27,7 +28,12 @@ class WhiteListViewSerializer(serializers.ModelSerializer):
     协议
     """
 
-    whitelist_ip = serializers.IPAddressField()
+    def validate_whitelist_ip(self, value):
+        try:
+            ipaddress.ip_address(value)
+        except Exception:  # pylint: disable=broad-except
+            raise ValueError(f"输入的IP白名单为:({value}) 不为IPv4或者IPv6")
+        return value
 
     class Meta:
         model = WhitelistModel
