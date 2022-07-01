@@ -56,7 +56,7 @@ class AlarmViewSet(BaseViewSet):
         return Response({"data": data})
 
     @action(detail=False, methods=["POST"])
-    def send_msg(self, request, *args, **kwargs):
+    def notice(self, request, *args, **kwargs):
         """
         @param request:
         @param args:
