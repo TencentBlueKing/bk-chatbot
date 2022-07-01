@@ -36,12 +36,12 @@ from src.manager.module_notice.proto.strategy import (
     ReqPostAlarmConfigSerializer,
     ReqPutAlarmConfigSerializer,
     alarm_strategy_list_docs,
-    alarm_strategy_send_msg_docs,
+    alarm_strategy_notice_docs,
 )
 
 
 @method_decorator(name="strategy", decorator=alarm_strategy_list_docs)
-@method_decorator(name="send_msg", decorator=alarm_strategy_send_msg_docs)
+@method_decorator(name="notice", decorator=alarm_strategy_notice_docs)
 class AlarmViewSet(BaseViewSet):
     @action(detail=False, methods=["GET"])
     def strategy(self, request, *args, **kwargs):

@@ -18,7 +18,6 @@ import traceback
 from blueapps.utils.logger import logger
 from django.db.utils import IntegrityError
 from rest_framework.response import Response
-from rest_framework.views import exception_handler
 
 
 def custom_exception_handler(exc, context):
@@ -26,16 +25,12 @@ def custom_exception_handler(exc, context):
     drf 异常处理
     """
     logger.error({"message": f"{traceback.format_exc()}"})
-    logger.error({"message": f"{exc}"})
-    response = exception_handler(exc, context)
-    if response is None:
-        if isinstance(exc, IntegrityError):
-            message = f"{exc.args[1]}" if len(exc.args) == 2 else f"{exc.args}"
-        else:
-            message = exc.args[0] if len(exc.args) == 1 else repr(exc)
-        return Response(
-            {"message": message},
-            status=getattr(exc, "ERROR_CODE", 400),
-        )
+    logger.error({"message": f"exc:{exc}"})
+    if isinstance(exc, IntegrityError):
+        message = f"{exc.args[1]}" if len(exc.args) == 2 else f"{exc.args}"
     else:
-        return response
+        message = exc.args[0] if len(exc.args) == 1 else repr(exc)
+    return Response(
+        {"message": message},
+        status=getattr(exc, "ERROR_CODE", 400),
+    )

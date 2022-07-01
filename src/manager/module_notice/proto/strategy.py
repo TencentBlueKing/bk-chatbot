@@ -127,6 +127,6 @@ alarm_strategy_list_docs = swagger_auto_schema(
     query_serializer=ReqGetAlarmStrategySerializer(),
 )
 
-alarm_strategy_send_msg_docs = swagger_auto_schema(
+alarm_strategy_notice_docs = swagger_auto_schema(
     request_body=ReqPostAlarmStrategySendMsgSerializer(),
 )
