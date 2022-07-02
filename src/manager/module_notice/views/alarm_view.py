@@ -23,7 +23,7 @@ from common.drf.decorator import get_cookie_biz_id
 from common.drf.validation import validation
 from common.drf.view_set import BaseManageViewSet, BaseViewSet
 from common.http.request import get_request_biz_id
-from common.perm.permission import check_permission
+from common.perm.permission import login_exempt_with_perm
 from src.manager.common.perm import check_biz_perm
 from src.manager.handler.api.bk_chat import BkChat
 from src.manager.module_notice.handler.action import DelAction, EditAction, SaveAction
@@ -47,12 +47,7 @@ from src.manager.module_notice.proto.alarm import (
 
 
 @method_decorator(name="strategy", decorator=alarm_strategy_list_docs)
-@method_decorator(name="notice", decorator=alarm_strategy_notice_docs)
 class AlarmViewSet(BaseViewSet):
-    @check_permission("notice")
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
     @action(detail=False, methods=["GET"])
     @validation(ReqGetAlarmStrategySerializer)
     def strategy(self, request, *args, **kwargs):
@@ -65,6 +60,13 @@ class AlarmViewSet(BaseViewSet):
         platform = payload.get("platform")
         data = PlatformStrategy.get(int(platform), int(biz_id))
         return Response({"data": data})
+
+
+@method_decorator(name="notice", decorator=alarm_strategy_notice_docs)
+class AlarmNoticeViewSet(BaseViewSet):
+    @login_exempt_with_perm
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     @action(detail=False, methods=["POST"])
     def notice(self, request, *args, **kwargs):
@@ -90,7 +92,7 @@ class AlarmViewSet(BaseViewSet):
                 }
             )
             BkChat.new_send_msg(**params)
-        return Response({"data": notice_groups})
+        return Response({"data": []})
 
 
 @method_decorator(name="list", decorator=alarm_config_list_docs)  # 文档装饰器
