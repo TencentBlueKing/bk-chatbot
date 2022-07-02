@@ -20,10 +20,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.drf.decorator import get_cookie_biz_id
+from common.drf.validation import validation
 from common.drf.view_set import BaseManageViewSet, BaseViewSet
 from common.http.request import get_request_biz_id
-
-# from src.manager.common.perm import check_biz_perm
+from common.perm.permission import check_permission
+from src.manager.common.perm import check_biz_perm
 from src.manager.handler.api.bk_chat import BkChat
 from src.manager.module_notice.handler.action import DelAction, EditAction, SaveAction
 from src.manager.module_notice.handler.deal_alarm_msg import OriginalAlarm
@@ -31,10 +32,15 @@ from src.manager.module_notice.handler.notice_cache import get_notices
 from src.manager.module_notice.handler.other_alarm import OtherPlatformAlarm
 from src.manager.module_notice.handler.strategy import PlatformStrategy
 from src.manager.module_notice.models import AlarmStrategyModel
-from src.manager.module_notice.proto.strategy import (
+from src.manager.module_notice.proto.alarm import (
     AlarmConfigSerializer,
+    ReqGetAlarmStrategySerializer,
     ReqPostAlarmConfigSerializer,
     ReqPutAlarmConfigSerializer,
+    alarm_config_create_docs,
+    alarm_config_delete_docs,
+    alarm_config_list_docs,
+    alarm_config_update_docs,
     alarm_strategy_list_docs,
     alarm_strategy_notice_docs,
 )
@@ -43,7 +49,12 @@ from src.manager.module_notice.proto.strategy import (
 @method_decorator(name="strategy", decorator=alarm_strategy_list_docs)
 @method_decorator(name="notice", decorator=alarm_strategy_notice_docs)
 class AlarmViewSet(BaseViewSet):
+    @check_permission("notice")
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     @action(detail=False, methods=["GET"])
+    @validation(ReqGetAlarmStrategySerializer)
     def strategy(self, request, *args, **kwargs):
         """
         策略获取
@@ -82,9 +93,13 @@ class AlarmViewSet(BaseViewSet):
         return Response({"data": notice_groups})
 
 
-# @method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
-# @method_decorator(name="update", decorator=check_biz_perm)  # 判断是不是业务人员
-@method_decorator(name="list", decorator=get_cookie_biz_id)
+@method_decorator(name="list", decorator=alarm_config_list_docs)  # 文档装饰器
+@method_decorator(name="create", decorator=alarm_config_create_docs)  # 文档装饰器
+@method_decorator(name="update", decorator=alarm_config_update_docs)  # 文档装饰器
+@method_decorator(name="destroy", decorator=alarm_config_delete_docs)  # 文档装饰器
+@method_decorator(name="list", decorator=get_cookie_biz_id)  # 业务id作为cookice
+@method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
+@method_decorator(name="update", decorator=check_biz_perm)  # 判断是不是业务人员
 class AlarmConfigViewSet(BaseManageViewSet):
     """
     告警配置

@@ -19,6 +19,7 @@ from rest_framework import serializers
 
 from common.drf.field import BizId
 from src.manager.module_notice.models import AlarmStrategyModel, NoticeGroupModel
+from src.manager.module_notice.proto import notice_tag
 
 # 需要处理的基础字段
 BaseMetaFields = [
@@ -46,8 +47,6 @@ class ReqPostAlarmStrategySendMsgSerializer(serializers.Serializer):
     """
 
     config_id = serializers.IntegerField(label="平台")
-    # msg_type = serializers.CharField(label="消息类型")
-    # msg_param = serializers.DictField(label="消息通知值")
 
 
 class AlarmConfigSerializer(serializers.ModelSerializer):
@@ -124,9 +123,31 @@ class ReqPutAlarmConfigSerializer(AlarmConfigSerializer):
 ###############################
 # 查询策略
 alarm_strategy_list_docs = swagger_auto_schema(
+    tags=notice_tag,
+    operation_id="群组-修改",
     query_serializer=ReqGetAlarmStrategySerializer(),
 )
-
+# 通知接口(api_gw)
 alarm_strategy_notice_docs = swagger_auto_schema(
+    tags=notice_tag,
+    auto_schema=None,
     request_body=ReqPostAlarmStrategySendMsgSerializer(),
+)
+
+# 告警配置相关
+alarm_config_list_docs = swagger_auto_schema(
+    tags=notice_tag,
+    operation_id="告警配置-展示",
+)
+alarm_config_create_docs = swagger_auto_schema(
+    tags=notice_tag,
+    operation_id="告警配置-添加",
+)
+alarm_config_update_docs = swagger_auto_schema(
+    tags=notice_tag,
+    operation_id="告警配置-修改",
+)
+alarm_config_delete_docs = swagger_auto_schema(
+    tags=notice_tag,
+    operation_id="告警配置-删除",
 )
