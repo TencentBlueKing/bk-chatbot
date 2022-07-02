@@ -124,7 +124,7 @@ class ReqPutAlarmConfigSerializer(AlarmConfigSerializer):
 # 查询策略
 alarm_strategy_list_docs = swagger_auto_schema(
     tags=notice_tag,
-    operation_id="群组-修改",
+    operation_id="告警配置-查询不同平台的策略",
     query_serializer=ReqGetAlarmStrategySerializer(),
 )
 # 通知接口(api_gw)
