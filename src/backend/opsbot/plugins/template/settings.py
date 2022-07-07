@@ -27,5 +27,8 @@ PLUGIN_START_SUCCESS = '启动成功'
 PLUGIN_START_FAIL = '启动失败'
 PLUGIN_FINISHED_CMD = '结束'
 PLUGIN_FINISHED_MSG = '本次会话结束，您可以开启新的会话'
+PLUGIN_NULL_MSG = '''>**{} TIP** 
+                ><font color=\"warning\">没有找到对应的信息...请检查任务配置</font> 
+                '''
 
 BIZ_NAME_SIMILARITY_RATE = 0.6

@@ -27,8 +27,9 @@ async def list_job_plan(session: CommandSession):
         bk_biz_id = None
 
     msg_template = await JobTask(session, bk_biz_id).render_job_plan_list()
-    if msg_template:
-        await session.send(**msg_template)
+    if not msg_template:
+        msg_template = render_null_msg('JOB')
+    await session.send(**msg_template)
 
 
 @on_command('bk_job_plan_sort')
