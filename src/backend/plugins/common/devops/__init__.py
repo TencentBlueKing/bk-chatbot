@@ -27,7 +27,9 @@ async def _(session: CommandSession):
         bk_biz_id = None
 
     msg_template = await DevOpsTask(session, bk_biz_id).render_devops_project_list()
-    msg_template and await session.send(**msg_template)
+    if msg_template and not msg_template.get('checkbox', {}).get('option_list'):
+        msg_template = job_task.render_null_msg('CI')
+    await session.send(**msg_template)
 
 
 @on_command('bk_devops_project_select')

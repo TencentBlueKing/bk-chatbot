@@ -26,9 +26,10 @@ async def list_job_plan(session: CommandSession):
     except KeyError:
         bk_biz_id = None
 
-    msg_template = await JobTask(session, bk_biz_id).render_job_plan_list()
+    job_task = JobTask(session, bk_biz_id)
+    msg_template = await job_task.render_job_plan_list()
     if msg_template and not msg_template.get('checkbox', {}).get('option_list'):
-        msg_template = render_null_msg('JOB')
+        msg_template = job_task.render_null_msg('JOB')
     await session.send(**msg_template)
 
 
