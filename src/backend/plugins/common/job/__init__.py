@@ -27,7 +27,7 @@ async def list_job_plan(session: CommandSession):
         bk_biz_id = None
 
     msg_template = await JobTask(session, bk_biz_id).render_job_plan_list()
-    if not msg_template:
+    if msg_template and not msg_template.get('checkbox', {}).get('option_list'):
         msg_template = render_null_msg('JOB')
     await session.send(**msg_template)
 
