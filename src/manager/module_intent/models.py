@@ -109,15 +109,15 @@ class Intent(BaseModel):
         """
 
         biz_id = filters.CharFilter(field_name="biz_id")
-        intent_name = filters.CharFilter(field_name="intent_name")
+        intent_name = filters.CharFilter(field_name="intent_name", lookup_expr="contains")
         status = filters.BooleanFilter(field_name="status")
         is_commit = filters.BooleanFilter(field_name="is_commit")
         created_by = filters.CharFilter(field_name="created_by")
         serial_number = filters.CharFilter(field_name="serial_number")
-        developer = filters.CharFilter(field_name="developer", lookup_expr="icontains")
-        approver = filters.CharFilter(field_name="approver", lookup_expr="icontains")
-        available_user = filters.CharFilter(field_name="available_user", lookup_expr="icontains")
-        available_group = filters.CharFilter(field_name="available_group", lookup_expr="icontains")
+        developer = filters.CharFilter(field_name="developer", lookup_expr="contains")
+        approver = filters.CharFilter(field_name="approver", lookup_expr="contains")
+        available_user = filters.CharFilter(field_name="available_user", lookup_expr="contains")
+        available_group = filters.CharFilter(field_name="available_group", lookup_expr="contains")
 
     @classmethod
     def query_intent_list(cls, **kwargs):
