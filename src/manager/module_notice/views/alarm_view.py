@@ -102,6 +102,7 @@ class AlarmNoticeViewSet(BaseViewSet):
 @method_decorator(name="list", decorator=get_cookie_biz_id)  # 业务id作为cookice
 @method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
 @method_decorator(name="update", decorator=check_biz_perm)  # 判断是不是业务人员
+@method_decorator(name="destroy", decorator=check_biz_perm)  # 判断是不是业务人员
 class AlarmConfigViewSet(BaseManageViewSet):
     """
     告警配置
@@ -214,5 +215,8 @@ class AlarmConfigViewSet(BaseManageViewSet):
         # 更新关联的策略
         alarm_class.update_strategy_action()
         # 删除处理套餐
-        DelAction.delete(int(instance.alarm_source_type), config_id=int(instance.config_id))
+        try:
+            DelAction.delete(int(instance.alarm_source_type), config_id=int(instance.config_id))
+        except Exception:
+            pass
         instance.delete()

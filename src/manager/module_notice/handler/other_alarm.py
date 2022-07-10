@@ -123,8 +123,9 @@ class OtherPlatformAlarm:
                 actions.append(self.action)
             tasks.append(self._update_single_strategy_action(k, actions))
 
+        # 如果tasks为空则无需进行处理
         if len(tasks) == 0:
-            raise ValueError("没有查询到对应的策略,请检查当前业务是否存在对应的策略关系")
+            return
         # 利用协程并发处理
         with MyAsyncio() as a:
             a.run_until_complete(tasks)
