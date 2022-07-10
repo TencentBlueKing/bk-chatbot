@@ -14,6 +14,8 @@ specific language governing permissions and limitations under the License.
 """
 
 
+import json
+
 from django.db import transaction
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
@@ -64,6 +66,8 @@ class AlarmViewSet(BaseViewSet):
 
 @method_decorator(name="notice", decorator=alarm_strategy_notice_docs)
 class AlarmNoticeViewSet(BaseViewSet):
+    auto_schema = None
+
     @login_exempt_with_perm
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -80,6 +84,36 @@ class AlarmNoticeViewSet(BaseViewSet):
         config_id = payload.get("config_id")
         notice_groups = get_notices(config_id)  # 需要通知的群组
         original_alarm = OriginalAlarm(payload)  # 原始告警
+        for notice_group in notice_groups:
+            im_type = notice_group.get("im")
+            # 通过im获取不同
+            params: dict = getattr(original_alarm, im_type.lower())()
+            params.update(
+                **{
+                    "im": im_type,
+                    "headers": notice_group.get("headers"),
+                    "receiver": notice_group.get("receiver"),
+                }
+            )
+            BkChat.new_send_msg(**params)
+        return Response({"data": []})
+
+    @action(detail=False, methods=["POST"])
+    def original_notice(self, request, *args, **kwargs):
+        """
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        payload = request.payload
+
+        payload_data = payload.get("data")
+        config_id = payload_data.get("config_id")
+        notice_groups = get_notices(config_id)  # 需要通知的群组
+        # 数据处理
+        callback_message = json.loads(payload_data.get("callback_message"))
+        original_alarm = OriginalAlarm(callback_message)  # 原始告警
         for notice_group in notice_groups:
             im_type = notice_group.get("im")
             # 通过im获取不同

@@ -143,7 +143,6 @@ alarm_strategy_list_docs = swagger_auto_schema(
 # 通知接口(api_gw)
 alarm_strategy_notice_docs = swagger_auto_schema(
     tags=notice_tag,
-    auto_schema=None,
     request_body=ReqPostAlarmStrategySendMsgSerializer(),
 )
 
