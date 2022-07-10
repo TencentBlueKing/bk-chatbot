@@ -59,7 +59,7 @@ class AlarmConfigSerializer(serializers.ModelSerializer):
         策略选择
         """
 
-        id = serializers.CharField(label="唯一ID")
+        id = serializers.IntegerField(label="唯一ID")
         name = serializers.CharField(label="策略名称")
 
     class AlarmConfigSerializerDealStrategyValue(serializers.Serializer):
@@ -114,6 +114,19 @@ class ReqPutAlarmConfigSerializer(AlarmConfigSerializer):
     """
     修改
     """
+
+    deal_strategy_value = AlarmConfigSerializer.AlarmConfigSerializerDealStrategyValue(
+        required=False,
+    )
+    alarm_strategy = serializers.ListField(
+        label="告警策略列表",
+        allow_empty=False,
+        child=AlarmConfigSerializer.AlarmConfigSerializerAlarmStrategy(),
+        required=False,
+    )
+    deal_alarm_name = serializers.CharField(label="名称", required=False)
+    alarm_source_type = serializers.IntegerField(label="告警源", required=False)
+    deal_strategy_type = serializers.IntegerField(label="处理策略类型", required=False)
 
     class Meta:
         model = AlarmStrategyModel

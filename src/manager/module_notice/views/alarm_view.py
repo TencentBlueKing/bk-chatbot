@@ -121,27 +121,28 @@ class AlarmConfigViewSet(BaseManageViewSet):
         """
 
         # 处理套餐保存到对应的平台
-        data = serializer.validated_data
-        params = {
-            "biz_id": data.get("biz_id"),
-            "name": data.get("deal_alarm_name"),
-            "deal_strategy_value": data.get("deal_strategy_value"),
-            "is_enabled": data.get("is_enabled"),
-        }
-        platform = data.get("alarm_source_type")
-        config_id = SaveAction.save(int(platform), **params)
-        # 更新数据
-        serializer.validated_data["config_id"] = config_id
-        serializer.save()
-        strategy_ids = list(map(lambda x: int(x.get("id")), data.get("alarm_strategy")))
-        alarm_class = OtherPlatformAlarm(
-            biz_id=data.get("biz_id"),
-            strategy_ids=strategy_ids,
-            config_id=config_id,
-            new_strategy_ids=strategy_ids,
-        )
-        # 处理套餐更新到对应的策略中
-        alarm_class.update_strategy_action()
+        with transaction.atomic():
+            data = serializer.validated_data
+            params = {
+                "biz_id": data.get("biz_id"),
+                "name": data.get("deal_alarm_name"),
+                "deal_strategy_value": data.get("deal_strategy_value"),
+                "is_enabled": data.get("is_enabled"),
+            }
+            platform = data.get("alarm_source_type")
+            config_id = SaveAction.save(int(platform), **params)
+            # 更新数据
+            serializer.validated_data["config_id"] = config_id
+            serializer.save()
+            strategy_ids = list(map(lambda x: int(x.get("id")), data.get("alarm_strategy")))
+            alarm_class = OtherPlatformAlarm(
+                biz_id=data.get("biz_id"),
+                strategy_ids=strategy_ids,
+                config_id=config_id,
+                new_strategy_ids=strategy_ids,
+            )
+            # 处理套餐更新到对应的策略中
+            alarm_class.update_strategy_action()
 
     def perform_update(self, serializer):
         """
@@ -154,7 +155,12 @@ class AlarmConfigViewSet(BaseManageViewSet):
             pk = self.kwargs.get("pk")
             original_alarm_strategy_obj = AlarmStrategyModel.objects.get(pk=pk)
             # 原始套餐策略
-            original_strategy_ids = list(map(lambda x: int(x.get("id")), original_alarm_strategy_obj.alarm_strategy))
+            original_strategy_ids = list(
+                map(
+                    lambda x: int(x.get("id")),
+                    original_alarm_strategy_obj.alarm_strategy,
+                )
+            )
             serializer.save()
             alarm_strategy_obj = AlarmStrategyModel.objects.get(pk=pk)
             params = {
@@ -166,8 +172,19 @@ class AlarmConfigViewSet(BaseManageViewSet):
             }
             # 编辑套餐
             EditAction.edit(alarm_strategy_obj.alarm_source_type, **params)
+
             # 新策略ID
-            new_strategy_ids = list(map(lambda x: int(x.get("id")), serializer.validated_data.get("alarm_strategy")))
+            new_alarm_strategy = serializer.validated_data.get("alarm_strategy")
+            new_strategy_ids = (
+                list(
+                    map(
+                        lambda x: int(x.get("id")),
+                        new_alarm_strategy,
+                    )
+                )
+                if new_alarm_strategy
+                else original_strategy_ids
+            )
             strategy_ids = list(set(original_strategy_ids + new_strategy_ids))
             alarm_class = OtherPlatformAlarm(
                 biz_id=alarm_strategy_obj.biz_id,
