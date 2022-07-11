@@ -107,7 +107,7 @@ class AlarmNoticeViewSet(BaseViewSet):
         @return:
         """
         payload = request.payload
-
+        print("payload:", payload)
         payload_data = payload.get("data")
         config_id = payload_data.get("config_id")
         notice_groups = get_notices(config_id)  # 需要通知的群组
