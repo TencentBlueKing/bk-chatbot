@@ -107,12 +107,10 @@ class AlarmNoticeViewSet(BaseViewSet):
         @return:
         """
         payload = request.payload
-        print("payload:", payload)
-        payload_data = payload.get("data")
-        config_id = payload_data.get("config_id")
+        config_id = payload.get("config_id")
         notice_groups = get_notices(config_id)  # 需要通知的群组
         # 数据处理
-        callback_message = json.loads(payload_data.get("callback_message"))
+        callback_message = json.loads(payload.get("callback_message"))
         original_alarm = OriginalAlarm(callback_message)  # 原始告警
         for notice_group in notice_groups:
             im_type = notice_group.get("im")
