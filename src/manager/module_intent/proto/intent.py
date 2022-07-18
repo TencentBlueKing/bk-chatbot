@@ -67,7 +67,7 @@ class ReqPostIntentSerializer(Serializer):
     is_commit = serializers.BooleanField(required=True, label="执行确认")
     notice_discern_success = serializers.BooleanField(required=True, label="识别成功通知")
     notice_start_success = serializers.BooleanField(required=True, label="启动成功通知")
-    notice_exec_success = serializers.BooleanField(required=True, label="启动成功通知")
+    notice_exec_success = serializers.BooleanField(required=True, label="执行成功通知")
     # 其余表需要
     utterances = serializers.ListField(label="语料信息")
 
