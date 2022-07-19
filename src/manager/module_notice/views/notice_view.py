@@ -18,10 +18,14 @@ from django.utils.decorators import method_decorator
 from rest_framework.response import Response
 
 from common.drf.decorator import get_cookie_biz_id
-from common.drf.view_set import BaseAllViewSet
+from common.drf.validation import validation
+from common.drf.view_set import BaseAllViewSet, BaseGetViewSet
+from common.perm.permission import login_exempt_with_perm
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto.notice import (
+    NoticeGroupViewGWSerializer,
     NoticeGroupViewSerializer,
+    ReqGetNoticeGroupGWViewSerializer,
     ReqPostNoticeGroupViewSerializer,
     notice_group_create_docs,
     notice_group_delete_docs,
@@ -70,3 +74,18 @@ class NoticeGroupViewSet(BaseAllViewSet):
             "created_at": instance.created_at,
         }
         return Response(data)
+
+
+class NoticeGroupGwViewSet(BaseGetViewSet):
+    schema = None
+    queryset = NoticeGroupModel.objects.all()
+    serializer_class = NoticeGroupViewGWSerializer
+    filterset_class = NoticeGroupModel.OpenApiFilter
+
+    @login_exempt_with_perm
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    @validation(ReqGetNoticeGroupGWViewSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(self, request, *args, **kwargs)

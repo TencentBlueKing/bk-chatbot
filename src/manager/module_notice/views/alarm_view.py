@@ -66,7 +66,7 @@ class AlarmViewSet(BaseViewSet):
 
 @method_decorator(name="notice", decorator=alarm_strategy_notice_docs)
 class AlarmNoticeViewSet(BaseViewSet):
-    auto_schema = None
+    schema = None
 
     @login_exempt_with_perm
     def dispatch(self, request, *args, **kwargs):

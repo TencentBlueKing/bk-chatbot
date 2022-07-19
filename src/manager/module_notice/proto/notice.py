@@ -60,6 +60,24 @@ class NoticeGroupViewSerializer(serializers.ModelSerializer):
         ]
 
 
+class NoticeGroupViewGWSerializer(serializers.ModelSerializer):
+    """
+    查询所用的协议
+    """
+
+    class Meta:
+        model = NoticeGroupModel
+        fields = ["id", "biz_id", "name"]
+
+
+class ReqGetNoticeGroupGWViewSerializer(serializers.Serializer):
+    """
+    查询协议
+    """
+
+    biz_id = serializers.CharField(label="业务ID")
+
+
 class ReqPostNoticeGroupViewSerializer(NoticeGroupViewSerializer):
     """
     添加协议
