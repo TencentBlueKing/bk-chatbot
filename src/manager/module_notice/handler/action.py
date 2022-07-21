@@ -39,9 +39,9 @@ class Action(Strategy):
                 "template_detail": {
                     "method": "POST",
                     "url": url,
-                    "need_poll": True,
+                    "notify_interval": 60,  # 告警周期（按s为单位，最小1分钟，默认1h）
                     "failed_retry": {
-                        "is_enabled": False,
+                        "is_enabled": True,  # 是否启动
                         "max_retry_times": 2,
                         "retry_interval": 2,
                         "timeout": 10,
