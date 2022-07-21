@@ -39,12 +39,14 @@ class Action(Strategy):
                 "template_detail": {
                     "method": "POST",
                     "url": url,
+                    "need_poll": True,
                     "failed_retry": {
                         "is_enabled": False,
                         "max_retry_times": 2,
                         "retry_interval": 2,
                         "timeout": 10,
                     },
+                    "authorize": {"auth_config": {}, "auth_type": "none", "insecure_skip_verify": False},
                     "body": {
                         "data_type": "raw",
                         "content_type": "json",
