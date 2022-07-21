@@ -14,6 +14,21 @@ specific language governing permissions and limitations under the License.
 """
 
 
+import datetime
+
+
+def get_time(text):
+    """
+    获取时间
+    :param text:
+    :return:
+    """
+    timestamp = datetime.datetime.strptime(text, "%Y-%m-%d %H:%M:%S")
+    utc_timestamp = timestamp + datetime.timedelta(hours=8)
+    str_time = utc_timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    return str_time
+
+
 class OriginalAlarm:
     """
     原始告警
@@ -56,8 +71,7 @@ class OriginalAlarm:
         """
         event = self.info.get("event")  # 告警事件
         self.event_level_name = event.get("level_name")  # 告警级别
-        self.begin_time = event.get("begin_time")  # 首次异常
-        self.create_time = event.get("create_time")  # 最近异常
+        self.begin_time = get_time(event.get("begin_time"))  # 首次异常
 
     def get_anomaly_info(self):
         """
@@ -65,6 +79,7 @@ class OriginalAlarm:
         @return:
         """
         latest_anomaly_record = self.info.get("latest_anomaly_record")
+        self.create_time = get_time(latest_anomaly_record.get("create_time"))  # 最近异常时间
         origin_alarm = latest_anomaly_record.get("origin_alarm")
         # 异常消息
         self.anomaly_message = "".join(
@@ -131,5 +146,38 @@ class OriginalAlarm:
         params = {
             "msg_type": "markdown",
             "msg_param": {"content": content},
+        }
+        return params
+
+    def get_text(self):
+        """
+
+        @return:
+        """
+        self.all_dimensions = "\n                    ".join(
+            [f"{k} = {v}" for k, v in self.dimensions.items()],
+        )
+        content = f"""
+        告警级别: {self.event_level_name}
+        首次异常: {self.begin_time}
+        最近异常: {self.create_time}
+        告警内容: {self.anomaly_message}
+        当前数值: {self.origin_alarm_value}
+        告警业务: {self.bk_biz_name}
+        告警目标: {self.bk_target_ip}
+        告警维度: {self.alarm_dimension}
+        关联信息: {self.relation_info}
+        全部维度: {self.all_dimensions}
+        """
+        return content
+
+    def slack(self):
+        """
+        @return:
+        """
+        content = self.get_text()
+        params = {
+            "msg_type": "text",
+            "msg_param": {"text": content},
         }
         return params
