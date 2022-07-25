@@ -124,30 +124,25 @@ class OriginalAlarm:
         # 全部维度
         self.dimensions = origin_alarm.get("dimensions", {})
 
-    def wework_bot(self):
+    def get_markdown(self):
         """
-        wework_bot
+        获取markdown
         @return:
         """
-
         self.all_dimensions = "\n                    ".join(
             [f"{k} = {v}" for k, v in self.dimensions.items()],
         )
         content = f"""`告警级别:` {self.event_level_name}
-`首次异常:` {self.begin_time}
-`最近异常:` {self.create_time}
-`告警内容:` {self.anomaly_message}
-`当前数值:` {self.origin_alarm_value}
-`告警业务:` {self.bk_biz_name}
-`告警目标:` {self.bk_target_ip}
-`告警维度:` {self.alarm_dimension}
-`关联信息:` {self.relation_info}
-`全部维度:` {self.all_dimensions}"""
-        params = {
-            "msg_type": "markdown",
-            "msg_param": {"content": content},
-        }
-        return params
+        `首次异常:` {self.begin_time}
+        `最近异常:` {self.create_time}
+        `告警内容:` {self.anomaly_message}
+        `当前数值:` {self.origin_alarm_value}
+        `告警业务:` {self.bk_biz_name}
+        `告警目标:` {self.bk_target_ip}
+        `告警维度:` {self.alarm_dimension}
+        `关联信息:` {self.relation_info}
+        `全部维度:` {self.all_dimensions}"""
+        return content
 
     def get_text(self):
         """
@@ -157,19 +152,29 @@ class OriginalAlarm:
         self.all_dimensions = "\n                    ".join(
             [f"{k} = {v}" for k, v in self.dimensions.items()],
         )
-        content = f"""
-        告警级别: {self.event_level_name}
-        首次异常: {self.begin_time}
-        最近异常: {self.create_time}
-        告警内容: {self.anomaly_message}
-        当前数值: {self.origin_alarm_value}
-        告警业务: {self.bk_biz_name}
-        告警目标: {self.bk_target_ip}
-        告警维度: {self.alarm_dimension}
-        关联信息: {self.relation_info}
-        全部维度: {self.all_dimensions}
+        content = f"""告警级别: {self.event_level_name}
+首次异常: {self.begin_time}
+最近异常: {self.create_time}
+告警内容: {self.anomaly_message}
+当前数值: {self.origin_alarm_value}
+告警业务: {self.bk_biz_name}
+告警目标: {self.bk_target_ip}
+告警维度: {self.alarm_dimension}
+关联信息: {self.relation_info}
+全部维度: {self.all_dimensions}
         """
         return content
+
+    def wework_bot(self):
+        """
+        wework_bot
+        @return:
+        """
+        params = {
+            "msg_type": "markdown",
+            "msg_param": {"content": self.get_markdown()},
+        }
+        return params
 
     def slack(self):
         """
