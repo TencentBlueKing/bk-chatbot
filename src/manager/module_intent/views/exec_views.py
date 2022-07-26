@@ -14,16 +14,14 @@ specific language governing permissions and limitations under the License.
 """
 import time
 
-from blueapps.account.decorators import login_exempt
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.control.throttle import ChatBotThrottle
 from common.drf.validation import validation
 from common.drf.view_set import BaseGetViewSet
-from common.perm.permission import check_permission
+from common.perm.permission import login_exempt_with_perm
 from common.redis import RedisClient
 from src.manager.handler.api.bk_job import JOB
 from src.manager.module_intent.constants import (
@@ -117,9 +115,7 @@ class TaskExecutionViewSet(BaseGetViewSet):
     task_info_serializer_class = RspGetTaskInfoData  # 验证类
     task_info_valida = True  # 是否验证返回结果
 
-    @login_exempt
-    @csrf_exempt
-    @check_permission()
+    @login_exempt_with_perm
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 

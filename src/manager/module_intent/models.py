@@ -277,6 +277,7 @@ class ExecutionLog(BaseModel):
         choices=[(tag.value, tag.name) for tag in TaskExecStatus],
     )
     params = DictCharField("执行参数", default=[])
+    notice_exec_success = models.BooleanField("执行成功是否通知", default=True)
 
     class Meta:
         db_table = "tab_intent_execution_log"
