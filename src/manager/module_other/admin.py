@@ -49,7 +49,7 @@ class FAQAdmin(admin.ModelAdmin):
 
 @admin.register(IMTypeModel)
 class IMTypeAdmin(admin.ModelAdmin):
-    fields = ["platform", "im_type", "alias", "define"]
-    list_display = ["platform", "im_type", "alias", "created_by", "updated_at"]
-    list_filter = ["platform", "im_type", "alias", "created_by", "updated_at"]
-    search_fields = ["platform", "im_type", "alias", "created_by", "updated_at"]
+    fields = ["platform", "im_type_id", "im_type", "alias", "define"]
+    list_display = ["platform", "im_type_id", "im_type", "alias", "created_by", "updated_at"]
+    list_filter = ["platform", "im_type_id", "im_type", "alias", "created_by", "updated_at"]
+    search_fields = ["platform", "im_type_id", "im_type", "alias", "created_by", "updated_at"]
