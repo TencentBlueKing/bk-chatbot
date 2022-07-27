@@ -16,8 +16,8 @@ specific language governing permissions and limitations under the License.
 
 from django.utils.decorators import method_decorator
 
+from common.drf.decorator import set_cookie_biz_id
 from common.drf.view_set import BaseManageViewSet
-from common.http.request import get_request_biz_id
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto.trigger import (
     ReqPostTriggerViewSerializer,
@@ -30,6 +30,7 @@ from src.manager.module_notice.proto.trigger import (
 )
 
 
+@method_decorator(name="list", decorator=set_cookie_biz_id(True))
 @method_decorator(name="list", decorator=trigger_list_docs)
 @method_decorator(name="create", decorator=trigger_create_docs)
 @method_decorator(name="update", decorator=trigger_update_docs)
@@ -40,23 +41,6 @@ class TriggerViewSet(BaseManageViewSet):
     create_serializer_class = ReqPostTriggerViewSerializer
     update_serializer_class = ReqPutTriggerViewSerializer
     filterset_class = TriggerModel.OpenApiFilter
-
-    def list(self, request, *args, **kwargs):
-        """
-        查询触发器
-        @param request:
-        @param args:
-        @param kwargs:
-        @return:
-        """
-        request.query_params._mutable = True
-        biz_id = request.payload.get("biz_id", None)
-        if not biz_id:
-            cookie_biz_id = get_request_biz_id(request)
-            if not cookie_biz_id:
-                raise Exception("没有获取到业务信息,请刷新页面后重试")
-            request.query_params["biz_id"] = cookie_biz_id
-        return super().list(request, *args, **kwargs)
 
     def perform_update(self, serializer):
         """

@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 from django.utils.decorators import method_decorator
 from rest_framework.response import Response
 
-from common.drf.decorator import get_cookie_biz_id
+from common.drf.decorator import set_cookie_biz_id
 from common.drf.validation import validation
 from common.drf.view_set import BaseAllViewSet, BaseGetViewSet
 from common.perm.permission import login_exempt_with_perm
@@ -36,7 +36,7 @@ from src.manager.module_notice.proto.notice import (
 
 
 @method_decorator(name="list", decorator=notice_group_list_docs)
-@method_decorator(name="list", decorator=get_cookie_biz_id)
+@method_decorator(name="list", decorator=set_cookie_biz_id())
 @method_decorator(name="retrieve", decorator=notice_group_retrieve_docs)
 @method_decorator(name="create", decorator=notice_group_create_docs)
 @method_decorator(name="update", decorator=notice_group_update_docs)

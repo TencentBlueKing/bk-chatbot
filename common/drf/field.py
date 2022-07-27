@@ -13,7 +13,9 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import abc
 import time
+from functools import wraps
 
 from rest_framework import serializers
 
@@ -21,7 +23,7 @@ from common.http.request import get_request_biz_id
 from common.utils.str import camel_to_snake
 
 
-class DefaultFiled:
+class DefaultFiled(abc.ABC):
     def __init__(self):
         """
         初始化
@@ -31,6 +33,21 @@ class DefaultFiled:
         self.attribute_name = camel_to_snake(self.__class__.__name__)
         super().__init__()
 
+    @staticmethod
+    def set_self_value(func):
+        @wraps(func)
+        def _wrapper(self, instance):
+            # value值获取
+            value = func(self, instance)
+            # 属性设置
+            setattr(self, self.attribute_name, value)
+
+        return _wrapper
+
+    @abc.abstractmethod
+    def set_context(self, instance):
+        pass
+
     def __call__(self, *args, **kwargs):
         """
         通过类名获取数据
@@ -39,24 +56,20 @@ class DefaultFiled:
         @return:
         """
         attribute = camel_to_snake(self.attribute_name)
-        value = getattr(self, attribute)
-        return value
+        return getattr(self, attribute)
 
     def __repr__(self):
         return
 
 
 class BizId(DefaultFiled):
+    @DefaultFiled.set_self_value
     def set_context(self, instance):
         """
         设置默认值
         """
-
-        setattr(
-            self,
-            self.attribute_name,
-            get_request_biz_id(instance.context["request"]),
-        )
+        value = get_request_biz_id(instance.context["request"])
+        return value
 
 
 class TimeStampSerializer(serializers.CharField):

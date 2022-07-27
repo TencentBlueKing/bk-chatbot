@@ -21,7 +21,7 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.drf.decorator import get_cookie_biz_id
+from common.drf.decorator import set_cookie_biz_id
 from common.drf.validation import validation
 from common.drf.view_set import BaseManageViewSet, BaseViewSet
 from common.http.request import get_request_biz_id
@@ -131,7 +131,7 @@ class AlarmNoticeViewSet(BaseViewSet):
 @method_decorator(name="create", decorator=alarm_config_create_docs)  # 文档装饰器
 @method_decorator(name="update", decorator=alarm_config_update_docs)  # 文档装饰器
 @method_decorator(name="destroy", decorator=alarm_config_delete_docs)  # 文档装饰器
-@method_decorator(name="list", decorator=get_cookie_biz_id)  # 业务id作为cookice
+@method_decorator(name="list", decorator=set_cookie_biz_id())  # 业务id作为cookice
 @method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
 @method_decorator(name="update", decorator=check_biz_perm)  # 判断是不是业务人员
 @method_decorator(name="destroy", decorator=check_biz_perm)  # 判断是不是业务人员

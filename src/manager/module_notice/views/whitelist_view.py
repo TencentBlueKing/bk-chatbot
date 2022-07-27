@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 
 from django.utils.decorators import method_decorator
 
-from common.drf.decorator import get_cookie_biz_id
+from common.drf.decorator import set_cookie_biz_id
 from common.drf.view_set import BaseManageViewSet
 from src.manager.common.perm import check_biz_perm
 from src.manager.module_notice.models import WhitelistModel
@@ -32,7 +32,7 @@ from src.manager.module_notice.proto.whitelist import (
 
 
 @method_decorator(name="list", decorator=white_list_list_docs)
-@method_decorator(name="list", decorator=get_cookie_biz_id)
+@method_decorator(name="list", decorator=set_cookie_biz_id())
 @method_decorator(name="create", decorator=white_list_create_docs)
 @method_decorator(name="create", decorator=check_biz_perm)  # 判断是不是业务人员
 @method_decorator(name="update", decorator=white_list_update_docs)

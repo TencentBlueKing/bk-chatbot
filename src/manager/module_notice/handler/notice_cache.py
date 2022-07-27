@@ -33,7 +33,11 @@ def get_notices(config_id):
     value = alarm_strategy_obj.deal_strategy_value
     notice_group_ids = value.get("notice_group_ids")
     notice_groups = NoticeGroupModel.objects.filter(id__in=notice_group_ids).values(
-        "id", "trigger_id", "biz_id", "group_type", "group_value"
+        "id",
+        "trigger_id",
+        "biz_id",
+        "group_type",
+        "group_value",
     )
     notice_groups_data = []
     for notice_group in notice_groups:
@@ -46,7 +50,7 @@ def get_notices(config_id):
                 trigger_obj = TriggerModel.objects.get(id=t_id)
                 notice_group_data = {
                     "notice_group": notice_group.get("id"),
-                    "im": trigger_obj.im_type,
+                    "im": trigger_obj.im_type_id,
                     "headers": trigger_obj.info,
                     "receiver": {},
                 }

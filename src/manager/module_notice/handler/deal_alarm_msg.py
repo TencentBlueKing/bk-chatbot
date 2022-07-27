@@ -176,6 +176,17 @@ class OriginalAlarm:
         }
         return params
 
+    def wework(self):
+        """
+        wework
+        @return:
+        """
+        params = {
+            "msg_type": "markdown",
+            "msg_param": {"content": self.get_markdown()},
+        }
+        return params
+
     def slack(self):
         """
         @return:

@@ -31,9 +31,10 @@ class TriggerModel(BaseModel):
     biz_id = models.CharField("业务ID", default="system", max_length=256)
     name = models.CharField("名称", default="", max_length=256)
     trigger_key = models.CharField("触发器key", max_length=64, unique=True, default="")
-    im_platform = models.CharField("平台", max_length=256, default=0)
-    im_type = models.CharField("im类型", max_length=256, default=0)
-    info = DictCharField("触发器信息", default="")
+    im_platform = models.CharField("平台", max_length=256)
+    im_type = models.CharField("im类型", max_length=256)
+    im_type_id = models.CharField("IM类型id", max_length=56, default="")
+    info = DictCharField("触发器信息", default=[])
 
     class Meta:
         db_table = "tab_trigger"
