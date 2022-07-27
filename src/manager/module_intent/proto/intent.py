@@ -24,8 +24,8 @@ from src.manager.module_intent.proto import intent_tag
 class IntentSerializer(serializers.ModelSerializer):
 
     # 意图表需要
-    available_user = serializers.ListField(required=True, label="可执行用户")
-    available_group = serializers.ListField(required=True, label="可执行群组")
+    available_user = serializers.ListField(required=False, label="可执行用户")
+    available_group = serializers.ListField(required=False, label="可执行群组")
     developer = serializers.ListField(required=False, default=[], label="开发商")
     approver = serializers.ListField(required=False, default=[], label="审批人")
 
