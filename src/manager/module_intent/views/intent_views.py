@@ -101,7 +101,12 @@ class IntentViewSet(BaseManageViewSet):
 
         with transaction.atomic():
             super().perform_update(serializer)
-            payload = self.request.payload
+            payload: dict = self.request.payload
+
+            # 如果只有status则不进行后面的操作
+            if len(payload.keys()) == 1 and list(payload.keys())[0] == "status":
+                return
+
             Utterances.update_utterance(
                 intent_id=serializer.instance.id,
                 biz_id=serializer.instance.biz_id,
