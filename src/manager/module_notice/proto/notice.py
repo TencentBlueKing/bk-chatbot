@@ -100,6 +100,16 @@ class ReqPutNoticeGroupViewSerializer(NoticeGroupViewSerializer):
         fields = ["name", "trigger_id", "trigger_name", "group_type", "group_value", "description"]
 
 
+class ReqPostNoticeGroupSendMsgGWViewSerializer(serializers.Serializer):
+    """
+    用户组发送通知协议
+    """
+
+    notice_group_id_list = serializers.ListField()
+    msg_type = serializers.ChoiceField(choices=["text", "markdown"], default="text")
+    msg_content = serializers.CharField()
+
+
 #######################################
 
 

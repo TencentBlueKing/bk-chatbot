@@ -13,19 +13,22 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from django.utils.decorators import method_decorator
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from common.drf.decorator import set_cookie_biz_id
 from common.drf.validation import validation
-from common.drf.view_set import BaseAllViewSet, BaseGetViewSet
+from common.drf.view_set import BaseViewSet, BaseAllViewSet, BaseGetViewSet
 from common.perm.permission import login_exempt_with_perm
+from src.manager.handler.api.bk_chat import BkChat
+from src.manager.module_notice.handler.notice_cache import get_notice_group_data
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto.notice import (
     NoticeGroupViewGWSerializer,
     NoticeGroupViewSerializer,
     ReqGetNoticeGroupGWViewSerializer,
+    ReqPostNoticeGroupSendMsgGWViewSerializer,
     ReqPostNoticeGroupViewSerializer,
     notice_group_create_docs,
     notice_group_delete_docs,
@@ -42,7 +45,6 @@ from src.manager.module_notice.proto.notice import (
 @method_decorator(name="update", decorator=notice_group_update_docs)
 @method_decorator(name="destroy", decorator=notice_group_delete_docs)
 class NoticeGroupViewSet(BaseAllViewSet):
-
     queryset = NoticeGroupModel.objects.all()
     serializer_class = NoticeGroupViewSerializer
     create_serializer_class = ReqPostNoticeGroupViewSerializer
@@ -89,3 +91,31 @@ class NoticeGroupGwViewSet(BaseGetViewSet):
     @validation(ReqGetNoticeGroupGWViewSerializer)
     def list(self, request, *args, **kwargs):
         return super().list(self, request, *args, **kwargs)
+
+
+class NoticeSendGwViewSet(BaseViewSet):
+    schema = None
+
+    @login_exempt_with_perm
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    @action(detail=False, methods=["POST"])
+    @validation(ReqPostNoticeGroupSendMsgGWViewSerializer)
+    def notice_group(self, request, *args, **kwargs):
+        payload = request.payload
+        notice_group_id_list = payload.get("notice_group_id_list")
+        msg_type = payload.get("msg_type")
+        msg_param = payload.get("msg_content")
+        notice_groups = get_notice_group_data(notice_group_id_list)
+        # 数据处理
+        for notice_group in notice_groups:
+            params = {
+                "im": notice_group.get("im"),
+                "msg_type": msg_type,
+                "msg_param": msg_param,
+                "receiver": notice_group.get("receiver"),
+                "headers": notice_group.get("receiver"),
+            }
+            BkChat.new_send_msg(**params)
+        return Response({"data": []})
