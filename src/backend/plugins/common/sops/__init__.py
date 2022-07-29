@@ -26,9 +26,11 @@ async def list_sops_template(session: CommandSession):
     except KeyError:
         bk_biz_id = None
 
-    msg_template = await SopsTask(session, bk_biz_id).render_sops_template_list()
-    if msg_template:
-        await session.send(**msg_template)
+    sops_task = SopsTask(session, bk_biz_id)
+    msg_template = await sops_task.render_sops_template_list()
+    if msg_template and not msg_template.get('checkbox', {}).get('option_list'):
+        msg_template = sops_task.render_null_msg('SOPS')
+    await session.send(**msg_template)
 
 
 @on_command('bk_sops_template_select')

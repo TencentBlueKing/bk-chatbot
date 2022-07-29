@@ -18,6 +18,13 @@ import os
 CUR_PATH = os.path.dirname(os.path.abspath(__file__))
 BASE_DICT_PATH = os.path.join(CUR_PATH, 'corpus', 'base_dict.txt')
 STOP_WORDS_PATH = os.path.join(CUR_PATH, 'corpus', 'stopwords.txt')
-SIMILAR_WORD_PATH = os.path.join(CUR_PATH, 'corpus', 'similar_word.json')
 BASE_CONFIDENCE = 0.6
 ADVANCED_CONFIDENCE = 0.75
+
+SIMILAR_WORD_LIB = {
+    "状态": ["状态", "情况", "形态"],
+    "增加": ["增加", "增长"],
+    "安装": ["安装", "安置", "装置", "部署"],
+    "日志": ["日志", "log"],
+    "拉取": ["拉取", "获取"]
+}

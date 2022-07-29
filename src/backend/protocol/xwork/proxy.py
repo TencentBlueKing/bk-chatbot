@@ -28,6 +28,7 @@ import requests
 from quart import request, abort, jsonify, render_template
 from jsonschema.exceptions import ValidationError
 
+from opsbot.log import logger
 from .message import Message
 from .decryption import Decryption
 from opsbot.proxy import (
@@ -83,8 +84,6 @@ class Proxy(BaseProxy):
         decryption = Decryption(request.args.get("msg_signature"), request.args.get("timestamp"),
                                 request.args.get("nonce"), await request.get_data())
         payload = decryption.parse()
-        if not payload:
-            return
         if not isinstance(payload, dict):
             abort(400)
 
@@ -124,8 +123,8 @@ class Proxy(BaseProxy):
     async def convert_to_name(self, msg_sender_id: str) -> str:
         try:
             r = await self._api.call_action('user/get', method='GET', params={'userid': msg_sender_id})
-            return r.get('alias')
-        except (HttpFailed, ActionFailed, IndexError):
+            return r['alias']
+        except (HttpFailed, ActionFailed, KeyError):
             return msg_sender_id
 
     async def get_media(self, media_id: str):
@@ -167,6 +166,7 @@ class HttpApi(BaseApi):
     def _handle_json_result(self, result: Optional[Dict[str, Any]]) -> Any:
         if isinstance(result, dict):
             if result.get('errcode') != 0:
+                logger.error(result)
                 raise ActionFailed(retcode=result.get('errcode'))
             return result
 
