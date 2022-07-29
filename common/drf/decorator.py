@@ -19,20 +19,23 @@ from typing import Callable
 from common.http.request import get_request_biz_id
 
 
-def biz_id(func: Callable) -> Callable:
+def set_cookie_biz_id(ok=False):
     """
-    动态获取装饰器的内容
-    @param func:
     @return:
     """
 
-    @wraps(func)
-    def _wrapper(self, request, *args, **kwargs) -> Callable:
-        request.query_params._mutable = True
-        cookie_biz_id = get_request_biz_id(request)
-        if not cookie_biz_id:
-            raise Exception("请求错误,请刷新重试")
-        request.query_params["biz_id"] = cookie_biz_id
-        return func(self, request, *args, **kwargs)
+    def set_biz_id(func: Callable) -> Callable:
+        @wraps(func)
+        def _wrapper(request, *args, **kwargs) -> Callable:
+            if ok and request.payload.get("biz_id", None):
+                return func(request, *args, **kwargs)
+            request.query_params._mutable = True
+            cookie_biz_id = get_request_biz_id(request)
+            if not cookie_biz_id:
+                raise Exception("请求错误,请刷新重试")
+            request.query_params["biz_id"] = cookie_biz_id
+            return func(request, *args, **kwargs)
 
-    return _wrapper
+        return _wrapper
+
+    return set_biz_id

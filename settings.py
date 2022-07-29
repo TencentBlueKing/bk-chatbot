@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import os
+import traceback
 
 # V3判断环境的环境变量为BKPAAS_ENVIRONMENT
 if "BKPAAS_ENVIRONMENT" in os.environ:
@@ -36,6 +37,8 @@ DJANGO_CONF_MODULE = f"config.{ENVIRONMENT}"
 try:
     _module = __import__(DJANGO_CONF_MODULE, globals(), locals(), ["*"])
 except ImportError as e:
+
+    traceback.print_exc()
     raise ImportError(f"Could not import config '{DJANGO_CONF_MODULE}' (Is it on sys.path?): {e}")
 
 for _setting in dir(_module):

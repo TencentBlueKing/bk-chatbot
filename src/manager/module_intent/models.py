@@ -94,6 +94,10 @@ class Intent(BaseModel):
     available_user = DictCharField(verbose_name=_("可执行用户"), default=[])
     available_group = DictCharField(verbose_name=_("可执行群组"), default=[])
     is_commit = models.BooleanField(_("执行确认"), default=True)
+    notice_discern_success = models.BooleanField(_("识别成功通知"), default=True)
+    notice_start_success = models.BooleanField(_("启动成功通知"), default=True)
+    notice_exec_success = models.BooleanField(_("启动成功通知"), default=True)
+    notice_single = models.BooleanField(_("通知个人"), default=False)
     serial_number = models.CharField(_("序列号"), default="-1", max_length=128)
     developer = DictCharField(_("开发商"), default=[])
     approver = DictCharField(_("审批人"), default=[])
@@ -109,15 +113,15 @@ class Intent(BaseModel):
         """
 
         biz_id = filters.CharFilter(field_name="biz_id")
-        intent_name = filters.CharFilter(field_name="intent_name")
+        intent_name = filters.CharFilter(field_name="intent_name", lookup_expr="contains")
         status = filters.BooleanFilter(field_name="status")
         is_commit = filters.BooleanFilter(field_name="is_commit")
         created_by = filters.CharFilter(field_name="created_by")
         serial_number = filters.CharFilter(field_name="serial_number")
-        developer = filters.CharFilter(field_name="developer", lookup_expr="icontains")
-        approver = filters.CharFilter(field_name="approver", lookup_expr="icontains")
-        available_user = filters.CharFilter(field_name="available_user", lookup_expr="icontains")
-        available_group = filters.CharFilter(field_name="available_group", lookup_expr="icontains")
+        developer = filters.CharFilter(field_name="developer", lookup_expr="contains")
+        approver = filters.CharFilter(field_name="approver", lookup_expr="contains")
+        available_user = filters.CharFilter(field_name="available_user", lookup_expr="contains")
+        available_group = filters.CharFilter(field_name="available_group", lookup_expr="contains")
 
     @classmethod
     def query_intent_list(cls, **kwargs):
@@ -273,6 +277,7 @@ class ExecutionLog(BaseModel):
         choices=[(tag.value, tag.name) for tag in TaskExecStatus],
     )
     params = DictCharField("执行参数", default=[])
+    notice_exec_success = models.BooleanField("执行成功是否通知", default=True)
 
     class Meta:
         db_table = "tab_intent_execution_log"

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -42,8 +40,6 @@ def check_permission(*actions):
                 return func(self, request, *args, **kwargs)
 
             func.login_exempt = True
-            # if request.META.get("HTTP_ORIGIN") in settings.CORS_ORIGIN_WHITELIST:
-            #     return func(self, request, *args, **kwargs)
 
             # 获取变量
             app_id = settings.APP_CODE
@@ -67,3 +63,34 @@ def check_permission(*actions):
         return _wrapper
 
     return perm_decorator
+
+
+def login_exempt_with_perm(view_func):
+    """
+    登录豁免并鉴权
+    @param view_func:
+    @return:
+    """
+
+    def wrapped_view(self, request, *args, **kwargs):
+        # 获取变量
+        app_id = settings.APP_CODE
+        app_token = settings.SECRET_KEY
+        if not app_id or not app_token:
+            raise PermissionError("app_id or app_token not setting")
+
+        bk_app_code = request.headers.get("App-Id", "")
+        bk_app_secret = request.headers.get("App-Token", "")
+        if bk_app_code == app_id and bk_app_secret == app_token:
+            return view_func(self, request, *args, **kwargs)
+
+        if (
+            settings.DEBUG
+            and request.payload.get("bk_app_code") == app_id
+            and request.payload.get("bk_app_secret") == app_token
+        ):
+            return view_func(self, request, *args, **kwargs)
+        raise PermissionError("bk_app_code or bk_app_secret is wrong")
+
+    wrapped_view.login_exempt = True
+    return wraps(view_func)(wrapped_view)

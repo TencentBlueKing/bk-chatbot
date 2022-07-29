@@ -141,7 +141,16 @@ class DataAPI(object):
 
         self._response_validation = response_validation  # 通过响应值判断
 
-    def __call__(self, params=None, files=None, raw=False, timeout=None, raise_exception=True, request_cookies=True):
+    def __call__(
+        self,
+        params=None,
+        files=None,
+        raw=False,
+        timeout=None,
+        raise_exception=True,
+        request_cookies=True,
+        headers=None,
+    ):
         """
         调用传参
 
@@ -153,6 +162,9 @@ class DataAPI(object):
         timeout = timeout or self.default_timeout
 
         request_id = get_request_id()
+        # 用户自定义headers
+        if headers:
+            self._headers = headers
         try:
             response = self._send_request(params, timeout, request_id, request_cookies)
             if raw:
@@ -201,7 +213,7 @@ class DataAPI(object):
                 if result is not None:
                     # 有缓存时返回
                     return DataResponse(result, request_id)
-        except Exception: # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             pass
 
         response = None
@@ -214,7 +226,7 @@ class DataAPI(object):
                 raw_response = self._send(params, timeout, request_id, request_cookies)
             except ReadTimeout as e:
                 raise DataAPIException(self, self.get_error_message(str(e)))
-            except Exception as e: # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except
                 raise DataAPIException(self, self.get_error_message(str(e)))
 
             # http层面的处理结果
@@ -232,7 +244,7 @@ class DataAPI(object):
             # 结果层面的处理结果
             try:
                 response_result = raw_response.json()
-            except Exception: # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 error_message = "data api response not json format url->[{}] content->[{}]".format(
                     self.url,
                     raw_response.text,
@@ -384,7 +396,7 @@ class DataAPI(object):
                 local_request = None
                 try:
                     local_request = get_request()
-                except Exception: # pylint: disable=broad-except
+                except Exception:  # pylint: disable=broad-except
                     pass
 
                 if local_request and local_request.COOKIES:

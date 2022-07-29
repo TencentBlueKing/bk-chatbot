@@ -22,8 +22,9 @@ from common.drf.view_set import (
     BaseDelViewSet,
     BaseGetViewSet,
     BaseUpdateViewSet,
+    BaseViewSet,
 )
-from common.perm.permission import check_permission
+from common.perm.permission import login_exempt_with_perm
 from src.manager.module_nlp.models import Corpus, CorpusDomain, CorpusIntent
 from src.manager.module_nlp.proto import (
     CorpusDomainSerializer,
@@ -65,7 +66,6 @@ class DomainViewSet(BaseGetViewSet, BaseCreateViewSet, BaseUpdateViewSet, BaseDe
 
 @method_decorator(name="list", decorator=corpus_intent_list_docs)
 @method_decorator(name="create", decorator=corpus_intent_create_docs)
-@method_decorator(name="gw_create", decorator=corpus_intent_gw_create_docs)
 @method_decorator(name="destroy", decorator=corpus_intent_delete_docs)
 class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
     """
@@ -75,10 +75,6 @@ class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
     queryset = CorpusIntent.objects.all()
     serializer_class = CorpusIntentSerializer
     filterset_class = CorpusIntent.OpenApiFilter
-
-    @check_permission("gw_create")
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     @validation(ReqPostCorpusIntent)
     def create(self, request, *args, **kwargs):
@@ -96,6 +92,16 @@ class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
                 "slots": corpus_intent_object.slots,
             }
         )
+
+
+@method_decorator(name="gw_create", decorator=corpus_intent_gw_create_docs)
+class IntentGWViewSet(BaseViewSet):
+    """
+    意图管理
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     @validation(ReqPostCorpusIntent)
     @action(detail=False, methods=["POST"])
@@ -127,7 +133,6 @@ class IntentViewSet(BaseGetViewSet, BaseCreateViewSet, BaseDelViewSet):
 
 
 @method_decorator(name="list", decorator=corpus_list_docs)
-@method_decorator(name="gw_list", decorator=corpus_gw_list_docs)
 @method_decorator(name="create", decorator=corpus_create_docs)
 @method_decorator(name="bulk_create", decorator=corpus_bulk_create_docs)
 @method_decorator(name="update", decorator=corpus_put_docs)
@@ -139,10 +144,6 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
 
     queryset = Corpus.objects.all()
     serializer_class = CorpusSerializer
-
-    @check_permission("gw_list")
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         """
@@ -176,6 +177,17 @@ class CorpusViewSet(BaseUpdateViewSet, BaseDelViewSet):
         for corpus in corpus_list:
             Corpus.create_corpus(**corpus)
         return Response({})
+
+
+@method_decorator(name="gw_list", decorator=corpus_gw_list_docs)
+class CorpusGwViewSet(BaseViewSet):
+    """
+    语料管理
+    """
+
+    @login_exempt_with_perm
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     @action(detail=False, methods=["GET"])
     def gw_list(self, request, *args, **kwargs):

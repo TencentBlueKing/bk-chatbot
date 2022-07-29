@@ -2,7 +2,7 @@
 
 from django.utils.translation import ugettext_lazy as _
 
-from ..base import ProxyDataAPI, BaseApi
+from ..base import BaseApi, ProxyDataAPI
 
 
 class _CCApi(BaseApi):

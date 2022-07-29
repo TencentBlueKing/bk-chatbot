@@ -127,9 +127,15 @@ class PlatformTask:
 
             # 消息通知失败也不会再进行查询
             try:
-                # 如果存在缓存数据则进行通知
-                if self.get_task_cache(self.obj.id):
+
+                # 不通知的情况
+                # 1、没有缓存
+                # 2、有缓存,状态为成功并且执行通知为false
+                if self.get_task_cache(self.obj.id) and (
+                    self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success
+                ):
                     Message.notice(**params)
+
             except Exception:  # pylint: disable=broad-except
                 traceback.print_exc()
                 logger.error(f"发送通知错误:{traceback.format_exc()}")

@@ -24,8 +24,8 @@ from src.manager.module_intent.proto import intent_tag
 class IntentSerializer(serializers.ModelSerializer):
 
     # 意图表需要
-    available_user = serializers.ListField(required=True, label="可执行用户")
-    available_group = serializers.ListField(required=True, label="可执行群组")
+    available_user = serializers.ListField(required=False, label="可执行用户")
+    available_group = serializers.ListField(required=False, label="可执行群组")
     developer = serializers.ListField(required=False, default=[], label="开发商")
     approver = serializers.ListField(required=False, default=[], label="审批人")
 
@@ -64,7 +64,10 @@ class ReqPostIntentSerializer(Serializer):
     available_group = serializers.ListField(required=True, label="可执行群组")
     developer = serializers.ListField(required=False, default=[], label="开发商")
     approver = serializers.ListField(required=False, default=[], label="审批人")
-
+    is_commit = serializers.BooleanField(required=True, label="执行确认")
+    notice_discern_success = serializers.BooleanField(required=True, label="识别成功通知")
+    notice_start_success = serializers.BooleanField(required=True, label="启动成功通知")
+    notice_exec_success = serializers.BooleanField(required=True, label="执行成功通知")
     # 其余表需要
     utterances = serializers.ListField(label="语料信息")
 

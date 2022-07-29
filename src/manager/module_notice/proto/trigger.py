@@ -24,18 +24,33 @@ from src.manager.module_other.models import IMTypeModel
 
 
 class TriggerKey(DefaultFiled):
+    @DefaultFiled.set_self_value
     def set_context(self, instance):
         """
         设置默认值
         """
-
         payload = instance.context["request"].payload
         im_platform = payload.get("im_platform")
         im_type = payload.get("im_type")
         im_objects = IMTypeModel.objects.filter(platform=im_platform, im_type=im_type).first()
         if not im_objects:
             raise Exception("缺失im类型")
-        setattr(self, self.attribute_name, f"{im_objects.alias}-{get_random_str()}")
+        return f"{im_objects.alias}-{get_random_str()}"
+
+
+class ImTypeId(DefaultFiled):
+    @DefaultFiled.set_self_value
+    def set_context(self, instance):
+        """
+        设置默认 im_type_id
+        @param instance:
+        @return:
+        """
+        payload = instance.context["request"].payload
+        im_platform = payload.get("im_platform")
+        im_type = payload.get("im_type")
+        im_objects = IMTypeModel.objects.filter(platform=im_platform, im_type=im_type).first()
+        return im_objects.im_type_id
 
 
 class TriggerViewSerializer(serializers.ModelSerializer):
@@ -68,10 +83,19 @@ class ReqPostTriggerViewSerializer(TriggerViewSerializer):
 
     biz_id = serializers.HiddenField(default=BizId())
     trigger_key = serializers.HiddenField(default=TriggerKey())
+    im_type_id = serializers.HiddenField(default=ImTypeId())
 
     class Meta:
         model = TriggerModel
-        fields = ["name", "biz_id", "im_platform", "im_type", "info", "trigger_key"]
+        fields = [
+            "name",
+            "biz_id",
+            "im_platform",
+            "im_type",
+            "info",
+            "trigger_key",
+            "im_type_id",
+        ]
 
 
 class ReqPutTriggerViewSerializer(TriggerViewSerializer):

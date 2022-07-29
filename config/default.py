@@ -187,7 +187,7 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.FormParser",
         "rest_framework.parsers.MultiPartParser",
     ],
-    # "EXCEPTION_HANDLER": "common.drf.handler.custom_exception_handler",
+    "EXCEPTION_HANDLER": "common.drf.handler.custom_exception_handler",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S",

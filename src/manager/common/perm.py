@@ -22,14 +22,14 @@ from common.http.request import get_request_biz_id, get_request_user
 from src.manager.handler.api.bk_cc import CC
 
 
-def check_biz_ops(func: Callable) -> Callable:
+def check_biz_perm(func: Callable) -> Callable:
     """
     判断是不是业务负责人
     @return:
     """
 
     @wraps(func)
-    def _wrapper(self, request, *args, **kwargs):
+    def _wrapper(request, *args, **kwargs):
         """
         权限控制逻辑
         @param self:
@@ -54,7 +54,7 @@ def check_biz_ops(func: Callable) -> Callable:
         )
         # 查询数量为0则进行异常处理
         if len(data) == 0:
-            raise ValueError(f"通过业务ID{biz_id}查询的业务数量为0")
+            raise ValueError(f"通过业务({biz_id})查询的业务数量为0")
 
         # 判断用户是否具有业务权限
         user_list = set(
@@ -65,6 +65,6 @@ def check_biz_ops(func: Callable) -> Callable:
 
         if username not in user_list:
             raise ValueError(f"{username}不属于业务PM或者业务运维")
-        return func(self, request, *args, **kwargs)
+        return func(request, *args, **kwargs)
 
     return _wrapper

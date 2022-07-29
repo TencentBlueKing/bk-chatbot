@@ -42,6 +42,8 @@ class NoticeGroupViewSerializer(serializers.ModelSerializer):
     查询所用的协议
     """
 
+    group_value = serializers.ListField(required=False, default=[], label="审批人")
+
     class Meta:
         model = NoticeGroupModel
         fields = [
@@ -56,6 +58,24 @@ class NoticeGroupViewSerializer(serializers.ModelSerializer):
             "created_by",
             "created_at",
         ]
+
+
+class NoticeGroupViewGWSerializer(serializers.ModelSerializer):
+    """
+    查询所用的协议
+    """
+
+    class Meta:
+        model = NoticeGroupModel
+        fields = ["id", "biz_id", "name"]
+
+
+class ReqGetNoticeGroupGWViewSerializer(serializers.Serializer):
+    """
+    查询协议
+    """
+
+    biz_id = serializers.CharField(label="业务ID")
 
 
 class ReqPostNoticeGroupViewSerializer(NoticeGroupViewSerializer):

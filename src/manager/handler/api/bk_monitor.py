@@ -201,3 +201,52 @@ class BkMonitor:
             logger.error(f"[API]get_metric_data error {e}")
 
         return None
+
+    @classmethod
+    def search_alarm_strategy_v3(cls, **kwargs):
+        """
+        查询告警策略
+        @return:
+        """
+        result = BkMonitorApi.search_alarm_strategy_v3(kwargs)
+        return result
+
+    @classmethod
+    def update_partial_strategy_v3(cls, **kwargs):
+        """
+        批量更新策略
+        @param kwargs:
+        @return:
+        """
+        result = BkMonitorApi.update_partial_strategy_v3(kwargs)
+        return result
+
+    @classmethod
+    def save_action_config(cls, **kwargs):
+        """
+        保存处理套餐
+        @return:
+        """
+
+        result = BkMonitorApi.save_action_config(kwargs)
+        return result
+
+    @classmethod
+    def edit_action_config(cls, **kwargs):
+        """
+        编辑处理套餐
+        @return:
+        """
+
+        result = BkMonitorApi.edit_action_config(kwargs)
+        return result
+
+    @classmethod
+    def delete_action_config(cls, **kwargs):
+        """
+        删除处理套餐
+        @param kwargs:
+        @return:
+        """
+        result = BkMonitorApi.delete_action_config(kwargs)
+        return result

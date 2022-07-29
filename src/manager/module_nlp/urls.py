@@ -16,13 +16,20 @@ specific language governing permissions and limitations under the License.
 from django.conf.urls import include, url
 from rest_framework import routers
 
-from src.manager.module_nlp.views.corpus_view import CorpusViewSet, DomainViewSet, IntentViewSet
+from src.manager.module_nlp.views.corpus_view import (
+    CorpusGwViewSet,
+    CorpusViewSet,
+    DomainViewSet,
+    IntentGWViewSet,
+    IntentViewSet,
+)
 
 router = routers.DefaultRouter()
 
 router.register(r"domain", DomainViewSet, basename="corpus_domain")  # 领域
 router.register(r"intent", IntentViewSet, basename="corpus_intent")  # 意图
+router.register(r"intent", IntentGWViewSet, basename="corpus_intent_gw")  # 意图
 router.register(r"manage", CorpusViewSet, basename="corpus")  # 语料
-
+router.register(r"manage", CorpusGwViewSet, basename="corpus_gw")  # 语料
 
 urlpatterns = (url(r"^corpus/", include(router.urls)),)
