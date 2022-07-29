@@ -21,8 +21,7 @@ from common.drf.decorator import set_cookie_biz_id
 from common.drf.validation import validation
 from common.drf.view_set import BaseViewSet, BaseAllViewSet, BaseGetViewSet
 from common.perm.permission import login_exempt_with_perm
-from src.manager.handler.api.bk_chat import BkChat
-from src.manager.module_notice.handler.notice_cache import get_notice_group_data
+from src.manager.module_notice.handler.notice import send_msg_to_notice_group
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto.notice import (
     NoticeGroupViewGWSerializer,
@@ -106,16 +105,6 @@ class NoticeSendGwViewSet(BaseViewSet):
         payload = request.payload
         notice_group_id_list = payload.get("notice_group_id_list")
         msg_type = payload.get("msg_type")
-        msg_param = payload.get("msg_content")
-        notice_groups = get_notice_group_data(notice_group_id_list)
-        # 数据处理
-        for notice_group in notice_groups:
-            params = {
-                "im": notice_group.get("im"),
-                "msg_type": msg_type,
-                "msg_param": msg_param,
-                "receiver": notice_group.get("receiver"),
-                "headers": notice_group.get("receiver"),
-            }
-            BkChat.new_send_msg(**params)
+        msg_content = payload.get("msg_content")
+        send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content)
         return Response({"data": []})

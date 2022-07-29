@@ -23,6 +23,9 @@ from src.manager.module_notice.models import (
 
 
 def get_notice_group_data(notice_group_ids):
+    """
+    获取通知群组信息
+    """
     notice_groups = NoticeGroupModel.objects.filter(id__in=notice_group_ids).values(
         "id",
         "trigger_id",
@@ -62,7 +65,7 @@ def get_notice_group_data(notice_group_ids):
 
 def get_notices(config_id):
     """
-    获取通知群组
+    根据策略获取通知群组
     @param config_id:
     @return:
     """
