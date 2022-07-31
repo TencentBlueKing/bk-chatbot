@@ -17,48 +17,41 @@ from src.manager.module_notice.handler.notice_cache import get_notice_group_data
 
 
 class Notice:
-    def __init__(self, msg_type, msg_content, receiver, headers):
+    def __init__(self, im_type, msg_type, msg_content, receiver, headers):
+        self.im_type = im_type.upper()
         self.msg_type = msg_type
         self.msg_content = msg_content
         self.receiver = receiver
         self.headers = headers
 
-    def send(self, im_type):
-        getattr(self, f"_{im_type.lower()}_send")()
-
-    def _wework_bot_send(self):
+    def send(self):
         params = {
-            "im": "WEWORK_BOT",
+            "im": self.im_type,
             "msg_type": self.msg_type,
             "msg_param": {"content": self.msg_content},
             "receiver": self.receiver,
             "headers": self.headers,
+            **self._extra_params,
         }
+
         BkChat.new_send_msg(**params)
 
-    def _wework_send(self):
-        params = {
-            "im": "WEWORK",
-            "msg_type": self.msg_type,
-            "msg_param": {"content": self.msg_content},
-            "receiver": self.receiver,
-            "headers": self.headers,
-        }
-        BkChat.new_send_msg(**params)
+    @property
+    def _extra_params(self):
+        params = {}
+        if self.im_type == "SLACK":
+            params = {
+                "msg_type": "text",
+                "msg_param": {"text": self.msg_content},
+            }
 
-    def _slack_send(self):
-        params = {
-            "im": "SLACK",
-            "msg_type": "text",
-            "msg_param": {"text": self.msg_content},
-            "receiver": self.receiver,
-            "headers": self.headers,
-        }
-        BkChat.new_send_msg(**params)
+        return params
 
 
 def send_msg_to_notice_group(group_id_list, msg_type, msg_content):
     notice_groups = get_notice_group_data(group_id_list)
     for notice_group in notice_groups:
-        notice = Notice(msg_type, msg_content, notice_group.get("receiver"), notice_group.get("headers"))
-        notice.send(notice_group.get("im"))
+        notice = Notice(
+            notice_group.get("im"), msg_type, msg_content, notice_group.get("receiver"), notice_group.get("headers")
+        )
+        notice.send()
