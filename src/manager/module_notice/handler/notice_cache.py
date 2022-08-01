@@ -22,16 +22,10 @@ from src.manager.module_notice.models import (
 )
 
 
-def get_notices(config_id):
+def get_notice_group_data(notice_group_ids):
     """
-    获取通知群组
-    @param config_id:
-    @return:
+    获取通知群组信息
     """
-    alarm_strategy_obj = AlarmStrategyModel.objects.get(config_id=config_id)
-    # 获取群组消息
-    value = alarm_strategy_obj.deal_strategy_value
-    notice_group_ids = value.get("notice_group_ids")
     notice_groups = NoticeGroupModel.objects.filter(id__in=notice_group_ids).values(
         "id",
         "trigger_id",
@@ -67,3 +61,16 @@ def get_notices(config_id):
                 notice_group_data = json.loads(notice_group_data)
             notice_groups_data.append(notice_group_data)
     return notice_groups_data
+
+
+def get_notices(config_id):
+    """
+    根据策略获取通知群组
+    @param config_id:
+    @return:
+    """
+    alarm_strategy_obj = AlarmStrategyModel.objects.get(config_id=config_id)
+    # 获取群组消息
+    value = alarm_strategy_obj.deal_strategy_value
+    notice_group_ids = value.get("notice_group_ids")
+    return get_notice_group_data(notice_group_ids)

@@ -13,19 +13,21 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from django.utils.decorators import method_decorator
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from common.drf.decorator import set_cookie_biz_id
 from common.drf.validation import validation
-from common.drf.view_set import BaseAllViewSet, BaseGetViewSet
+from common.drf.view_set import BaseViewSet, BaseAllViewSet, BaseGetViewSet
 from common.perm.permission import login_exempt_with_perm
+from src.manager.module_notice.handler.notice import send_msg_to_notice_group
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto.notice import (
     NoticeGroupViewGWSerializer,
     NoticeGroupViewSerializer,
     ReqGetNoticeGroupGWViewSerializer,
+    ReqPostNoticeGroupSendMsgGWViewSerializer,
     ReqPostNoticeGroupViewSerializer,
     notice_group_create_docs,
     notice_group_delete_docs,
@@ -42,7 +44,6 @@ from src.manager.module_notice.proto.notice import (
 @method_decorator(name="update", decorator=notice_group_update_docs)
 @method_decorator(name="destroy", decorator=notice_group_delete_docs)
 class NoticeGroupViewSet(BaseAllViewSet):
-
     queryset = NoticeGroupModel.objects.all()
     serializer_class = NoticeGroupViewSerializer
     create_serializer_class = ReqPostNoticeGroupViewSerializer
@@ -89,3 +90,21 @@ class NoticeGroupGwViewSet(BaseGetViewSet):
     @validation(ReqGetNoticeGroupGWViewSerializer)
     def list(self, request, *args, **kwargs):
         return super().list(self, request, *args, **kwargs)
+
+
+class NoticeSendGwViewSet(BaseViewSet):
+    schema = None
+
+    @login_exempt_with_perm
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    @action(detail=False, methods=["POST"])
+    @validation(ReqPostNoticeGroupSendMsgGWViewSerializer)
+    def notice_group(self, request, *args, **kwargs):
+        payload = request.payload
+        notice_group_id_list = payload.get("notice_group_id_list")
+        msg_type = payload.get("msg_type")
+        msg_content = payload.get("msg_content")
+        send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content)
+        return Response({"data": []})
