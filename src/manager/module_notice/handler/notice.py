@@ -34,7 +34,12 @@ class Notice:
             **self._extra_params,
         }
 
-        BkChat.new_send_msg(**params)
+        send_result = BkChat.new_send_msg(**params)
+
+        if send_result["code"] != 0:
+            return {"result": False, "message": send_result["message"]}
+
+        return {"result": True, "message": "OK"}
 
     @property
     def _extra_params(self):
@@ -54,4 +59,8 @@ def send_msg_to_notice_group(group_id_list, msg_type, msg_content):
         notice = Notice(
             notice_group.get("im"), msg_type, msg_content, notice_group.get("receiver"), notice_group.get("headers")
         )
-        notice.send()
+        send_result = notice.send()
+        if not send_result["result"]:
+            return send_result
+
+    return {"result": True, "message": "OK"}

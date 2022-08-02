@@ -106,5 +106,7 @@ class NoticeSendGwViewSet(BaseViewSet):
         notice_group_id_list = payload.get("notice_group_id_list")
         msg_type = payload.get("msg_type")
         msg_content = payload.get("msg_content")
-        send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content)
+        send_result = send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content)
+        if not send_result["result"]:
+            return Response({"message": send_result["message"]}, exception=True)
         return Response({"data": []})
