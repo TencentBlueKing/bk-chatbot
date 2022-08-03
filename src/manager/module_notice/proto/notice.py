@@ -85,7 +85,6 @@ class ReqPostNoticeGroupViewSerializer(NoticeGroupViewSerializer):
 
     biz_id = serializers.HiddenField(default=BizId())
     trigger_name = serializers.HiddenField(default=DefaultTriggerName())
-    created_by = serializers.HiddenField(default="")
 
 
 class ReqPutNoticeGroupViewSerializer(NoticeGroupViewSerializer):
