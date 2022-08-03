@@ -197,3 +197,14 @@ class OriginalAlarm:
             "msg_param": {"text": content},
         }
         return params
+
+    def slack_webhook(self):
+        """
+        @return:
+        """
+        content = self.get_text()
+        params = {
+            "msg_type": "text",
+            "msg_param": {"text": content},
+        }
+        return params
