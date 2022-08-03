@@ -85,7 +85,10 @@ class NoticeGroupViewSet(BaseAllViewSet):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            data = []
+            for group in serializer.data:
+                data.append({"webhook_url": make_notice_group_webhook_url([group.get("id")]), **group})
+            return self.get_paginated_response(data)
 
         serializer = self.get_serializer(queryset, many=True)
         data = []
