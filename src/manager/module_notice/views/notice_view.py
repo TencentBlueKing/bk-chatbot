@@ -22,12 +22,15 @@ from common.drf.validation import validation
 from common.drf.view_set import BaseViewSet, BaseAllViewSet, BaseGetViewSet
 from common.perm.permission import login_exempt_with_perm
 from src.manager.module_notice.handler.notice import send_msg_to_notice_group
+from src.manager.module_notice.handler.webhook import get_notice_group_by_webhook_key, make_notice_group_webhook_url
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto.notice import (
     NoticeGroupViewGWSerializer,
     NoticeGroupViewSerializer,
     ReqGetNoticeGroupGWViewSerializer,
+    ReqPutNoticeGroupViewSerializer,
     ReqPostNoticeGroupSendMsgGWViewSerializer,
+    ReqPostNoticeSendWebhookGWViewSerializer,
     ReqPostNoticeGroupViewSerializer,
     notice_group_create_docs,
     notice_group_delete_docs,
@@ -47,7 +50,7 @@ class NoticeGroupViewSet(BaseAllViewSet):
     queryset = NoticeGroupModel.objects.all()
     serializer_class = NoticeGroupViewSerializer
     create_serializer_class = ReqPostNoticeGroupViewSerializer
-    update_serializer_class = ReqPostNoticeGroupViewSerializer
+    update_serializer_class = ReqPutNoticeGroupViewSerializer
     filterset_class = NoticeGroupModel.OpenApiFilter
 
     def retrieve(self, request, *args, **kwargs):
@@ -76,6 +79,21 @@ class NoticeGroupViewSet(BaseAllViewSet):
         }
         return Response(data)
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        data = []
+        for group in serializer.data:
+            data.append({"webhook_url": make_notice_group_webhook_url([group.get("id")]), **group})
+
+        return Response(data)
+
 
 class NoticeGroupGwViewSet(BaseGetViewSet):
     schema = None
@@ -96,10 +114,6 @@ class NoticeSendGwViewSet(BaseViewSet):
     schema = None
 
     @login_exempt_with_perm
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
-    @action(detail=False, methods=["POST"])
     @validation(ReqPostNoticeGroupSendMsgGWViewSerializer)
     def notice_group(self, request, *args, **kwargs):
         payload = request.payload
@@ -107,6 +121,26 @@ class NoticeSendGwViewSet(BaseViewSet):
         msg_type = payload.get("msg_type")
         msg_content = payload.get("msg_content")
         send_result = send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content)
+        if not send_result["result"]:
+            return Response({"message": send_result["message"]}, exception=True)
+        return Response({"data": []})
+
+    @action(detail=False, methods=["POST"])
+    @validation(ReqPostNoticeSendWebhookGWViewSerializer)
+    def webhook(self, request, *args, **kwargs):
+        key = request.query_params.get("key")
+        payload = request.payload
+        msg_type = payload.get("msg_type")
+        msg_content = payload.get("msg_content")
+
+        if not key:
+            return Response({"message": "webhook key不能为空"}, exception=True)
+
+        result, data = get_notice_group_by_webhook_key(key)
+        if not result:
+            return Response({"message": data}, exception=True)
+
+        send_result = send_msg_to_notice_group(data, msg_type, msg_content)
         if not send_result["result"]:
             return Response({"message": send_result["message"]}, exception=True)
         return Response({"data": []})

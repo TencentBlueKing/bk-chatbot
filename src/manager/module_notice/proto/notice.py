@@ -109,6 +109,15 @@ class ReqPostNoticeGroupSendMsgGWViewSerializer(serializers.Serializer):
     msg_content = serializers.CharField()
 
 
+class ReqPostNoticeSendWebhookGWViewSerializer(serializers.Serializer):
+    """
+    用户组发送通知协议
+    """
+
+    msg_type = serializers.ChoiceField(choices=["text", "markdown"], default="text")
+    msg_content = serializers.CharField()
+
+
 #######################################
 
 
