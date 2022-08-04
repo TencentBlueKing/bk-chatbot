@@ -44,7 +44,7 @@ class Notice:
     @property
     def _extra_params(self):
         params = {}
-        if self.im_type == "SLACK":
+        if self.im_type in ["SLACK", "SLACK_WEBHOOK"]:
             params = {
                 "msg_type": "text",
                 "msg_param": {"text": self.msg_content},
