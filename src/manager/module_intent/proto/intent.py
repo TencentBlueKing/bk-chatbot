@@ -22,7 +22,6 @@ from src.manager.module_intent.proto import intent_tag
 
 
 class IntentSerializer(serializers.ModelSerializer):
-
     # 意图表需要
     available_user = serializers.ListField(required=False, label="可执行用户")
     available_group = serializers.ListField(required=False, label="可执行群组")
@@ -84,6 +83,12 @@ class ReqPostIntentSerializer(Serializer):
 
 class ReqPostFetchIntentCountSerializers(Serializer):
     pass
+
+
+class ReqPostBatchUpdateAvailableUserSerializers(Serializer):
+    intent_id_list = serializers.ListField(required=True)
+    operator_type = serializers.ChoiceField(choices=["add", "delete"])
+    operator_user_list = serializers.ListField(required=True)
 
 
 class RsqPostFetchIntentCountSerializers(BaseRspSerializer):

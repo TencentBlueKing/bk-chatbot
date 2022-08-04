@@ -17,9 +17,9 @@ from django.db import transaction
 from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from common.control.throttle import ChatBotThrottle
 from common.drf.view_set import BaseManageViewSet
+from common.drf.validation import validation
 from src.manager.module_intent.control.permission import IntentPermission
 from src.manager.module_intent.models import Intent, Task, Utterances
 from src.manager.module_intent.proto.intent import (
@@ -30,6 +30,7 @@ from src.manager.module_intent.proto.intent import (
     intent_del_docs,
     intent_list_docs,
     intent_update_docs,
+    ReqPostBatchUpdateAvailableUserSerializers,
 )
 
 
@@ -128,6 +129,25 @@ class IntentViewSet(BaseManageViewSet):
                 activities=payload.get("activities", []),
                 source=source,
             )
+
+    @action(detail=False, methods=["POST"])
+    @validation(ReqPostBatchUpdateAvailableUserSerializers)
+    def batch_update_available_user(self, request, *args, **kwargs):
+        payload = request.payload
+        intent_id_list = payload.get("intent_id_list")
+        operator_type = payload.get("operator_type")
+        operator_user_set = set(payload.get("operator_user_list"))
+
+        filter_queryset = self.queryset.filter(id__in=intent_id_list)
+        update_intent_list = []
+        for intent in filter_queryset:
+            if operator_type == "add":
+                intent.available_user = list(set(intent.available_user) | operator_user_set)
+            if operator_type == "delete":
+                intent.available_user = list(set(intent.available_user) - operator_user_set)
+            update_intent_list.append(intent)
+        Intent.objects.bulk_update(update_intent_list, ["available_user"])
+        return Response({"data": []})
 
     @action(detail=False, methods=["POST"])
     def fetch_intent_count(self, request, *args, **kwargs):
