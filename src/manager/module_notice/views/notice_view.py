@@ -117,6 +117,7 @@ class NoticeSendGwViewSet(BaseViewSet):
     schema = None
 
     @login_exempt_with_perm
+    @action(detail=False, methods=["POST"])
     @validation(ReqPostNoticeGroupSendMsgGWViewSerializer)
     def notice_group(self, request, *args, **kwargs):
         payload = request.payload
