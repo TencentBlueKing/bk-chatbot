@@ -101,10 +101,12 @@ async def func(session: CommandSession):
 > CC查询api
 ```python
 # api.py 目录下
+from typing import Dict
+
 from component import CC
 
 
-async def search_biz(bk_username: str, bk_biz_name: str):
+async def search_biz(bk_username: str, bk_biz_name: str) -> Dict:
     response = await CC().search_business(bk_username=bk_username,
                                           condition={'bk_biz_name': bk_biz_name})
     return response
@@ -113,6 +115,8 @@ async def search_biz(bk_username: str, bk_biz_name: str):
 > 利用业务识别算法，识别用户输入业务名称
 ```python
 # stdlib目录下
+from typing import List
+
 from component import BizMapper
 from .settings import TOP_RANK, PARSE_RATE
 
