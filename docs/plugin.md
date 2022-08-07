@@ -132,3 +132,27 @@ async def parse_biz(name: str) -> List:
         logger.exception(f'parse_biz_name error {name}')
         return None
 ```
+
+### 4.测试使用
+
+> 代码检查无误后，重启服务后
+
+```shell
+# 创建
+cd bk-chatbot/src/backend || exit
+sh control stop && sh control start
+```
+
+> 对话
+
+```shell
+> 业务查询
+你想查询哪个业务？
+> 业务A
+你是否查询以下业务:
+{
+    "bk_biz_name": 业务A
+    "bk_biz_id": 1234
+    "oper": "张三"
+    ...
+}
