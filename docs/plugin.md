@@ -82,10 +82,13 @@ from .stdlib import parse_biz
 
 @on_command('search_biz', aliases=('业务查询'))
 async def func(session: CommandSession):
+    # 获取参数名
     input_biz_name = session.current_arg_text.strip()
     while not input_biz_name:
         input_biz_name = (await session.get(prompt='你想查询哪个业务？')).strip()
+    # 调用解析函数
     real_biz_name = await self.parse_biz(input_biz_name)
+    # api查询业务
     if real_biz_name is None:
         await session.send(f'未找到您说的业务')
     else:
