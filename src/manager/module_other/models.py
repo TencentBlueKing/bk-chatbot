@@ -134,7 +134,7 @@ class IMTypeModel(BaseModel):
     im_type_id = models.CharField("im类型id", max_length=56)  # 用户后续用于IM类型使用
     im_type = models.CharField("类型", max_length=256)  # 显示给用户
     alias = models.CharField("别名", max_length=256)
-    define = DictCharField(default=[])
+    define = DictCharField(default=[], blank=True, null=True)
 
     class Meta:
         db_table = "tab_im_type"

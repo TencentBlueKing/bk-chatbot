@@ -208,3 +208,17 @@ class OriginalAlarm:
             "msg_param": {"text": content},
         }
         return params
+
+    def qq(self):
+        """
+        qq发送
+        @return:
+        """
+        content = self.get_text()
+        params = {
+            "msg_type": "0",
+            "msg_param": {
+                "content": [{"data": content}],
+            },
+        }
+        return params
