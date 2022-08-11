@@ -50,6 +50,14 @@ class Notice:
                 "msg_param": {"text": self.msg_content},
             }
 
+        # 支持QQ的告警类型
+        if self.im_type in ["QQ"]:
+            params = {
+                "msg_type": "0",
+                "msg_param": {
+                    "content": [{"data": self.msg_content}],
+                },
+            }
         return params
 
 
