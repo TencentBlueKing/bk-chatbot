@@ -19,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from common.drf.view_set import BaseUpdateViewSet
 from common.perm.permission import check_permission
-from src.manager.module_api.proto.intent import IntentSerializer, intent_update_docs
+from src.manager.module_api.proto.intent import IntentGWSerializer, intent_update_docs
 from src.manager.module_intent.models import Intent
 
 
@@ -30,7 +30,7 @@ class IntentViewSet(BaseUpdateViewSet):
     """
 
     queryset = Intent.objects.all()
-    serializer_class = IntentSerializer
+    serializer_class = IntentGWSerializer
 
     @login_exempt
     @csrf_exempt
