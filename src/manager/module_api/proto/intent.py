@@ -21,7 +21,7 @@ from src.manager.module_api.proto import api_tag
 from src.manager.module_intent.models import Intent
 
 
-class IntentSerializer(serializers.ModelSerializer):
+class IntentGWSerializer(serializers.ModelSerializer):
 
     # # 意图表需要
     available_user = serializers.ListField(required=False, label="可执行用户")
