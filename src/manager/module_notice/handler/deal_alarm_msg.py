@@ -13,8 +13,11 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 import datetime
+
+from common.utils.translation import translate_text
+
+from src.manager.module_notice.models import AlarmStrategyModel
 
 
 def get_time(text):
@@ -34,7 +37,7 @@ class OriginalAlarm:
     原始告警
     """
 
-    def __init__(self, info):
+    def __init__(self, info, config_id=None):
         """
         初始化数据
         @param info:
@@ -53,6 +56,9 @@ class OriginalAlarm:
         self.bk_target_ip = None  # 告警目标IP
         self.bk_target_cloud_id = None  # 云区域
         self.device_name = None  # 设备名称
+        self.config_id = config_id  # 策略配置ID
+        self.is_translated = False  # 是否翻译
+        self.translation_type = ""  # 翻译目标语言
         self.get_base_info()  # 初始化数据
 
     def get_base_info(self):
@@ -63,6 +69,14 @@ class OriginalAlarm:
         self.bk_biz_name = self.info.get("bk_biz_name")  # 告警业务
         self.get_event_info()
         self.get_anomaly_info()
+
+    def get_config_info(self):
+        if self.config_id:
+            alarm_strategy_obj = AlarmStrategyModel.objects.only("is_translated", "translation_type").get(
+                config_id=self.config_id
+            )
+            self.is_translated = alarm_strategy_obj.is_translated
+            self.translation_type = alarm_strategy_obj.translation_type
 
     def get_event_info(self):
         """
@@ -142,6 +156,11 @@ class OriginalAlarm:
 `告警维度:` {self.alarm_dimension}
 `关联信息:` {self.relation_info}
 `全部维度:` {self.all_dimensions}"""
+
+        if self.is_translated:
+            flag, target_text = translate_text(content, self.translation_type)
+            if flag:
+                content = target_text
         return content
 
     def get_text(self):
@@ -163,6 +182,10 @@ class OriginalAlarm:
 关联信息: {self.relation_info}
 全部维度: {self.all_dimensions}
         """
+        if self.is_translated:
+            flag, target_text = translate_text(content, self.translation_type)
+            if flag:
+                content = target_text
         return content
 
     def wework_bot(self):
