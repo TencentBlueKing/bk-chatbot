@@ -22,8 +22,8 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
 )
 from tencentcloud.tmt.v20180321 import models, tmt_client
 
-TencentCloudSecretId = os.getenv("TencentCloudSecretId", "")
-TencentCloudSecretKey = os.getenv("TencentCloudSecretKey", "")
+TencentCloudSecretId = os.getenv("TENCENT_CLOUD_SECRET_ID", "")
+TencentCloudSecretKey = os.getenv("TENCENT_CLOUD_SECRET_KEY", "")
 
 logger = logging.getLogger("root")
 
