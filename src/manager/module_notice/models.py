@@ -149,7 +149,7 @@ class AlarmStrategyModel(BaseModel):
     is_enabled = models.BooleanField("是否启动", default=False)
     config_id = models.CharField("处理套餐ID", max_length=256)
     is_translated = models.BooleanField("是否翻译", default=False)
-    translation_type = models.CharField("目标语言", max_length=32, default="")
+    translation_type = models.CharField("目标语言", max_length=32, default="", blank=True)
 
     class Meta:
         db_table = "tab_alarm_strategy"
