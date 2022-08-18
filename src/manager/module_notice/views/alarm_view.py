@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 import json
 
 from django.db import transaction
@@ -111,7 +110,7 @@ class AlarmNoticeViewSet(BaseViewSet):
         notice_groups = get_notices(config_id)  # 需要通知的群组
         # 数据处理
         callback_message = json.loads(payload.get("callback_message"))
-        original_alarm = OriginalAlarm(callback_message)  # 原始告警
+        original_alarm = OriginalAlarm(callback_message, config_id)  # 原始告警
         for notice_group in notice_groups:
             im_type = notice_group.get("im")
             # 通过im获取不同
@@ -161,6 +160,8 @@ class AlarmConfigViewSet(BaseManageViewSet):
                 "name": data.get("deal_alarm_name"),
                 "deal_strategy_value": data.get("deal_strategy_value"),
                 "is_enabled": data.get("is_enabled"),
+                "is_translated": data.get("is_translated"),
+                "translation_type": data.get("translation_type"),
             }
             platform = data.get("alarm_source_type")
             config_id = SaveAction.save(int(platform), **params)
@@ -202,6 +203,8 @@ class AlarmConfigViewSet(BaseManageViewSet):
                 "deal_strategy_value": alarm_strategy_obj.deal_strategy_value,
                 "config_id": int(alarm_strategy_obj.config_id),
                 "is_enabled": alarm_strategy_obj.is_enabled,
+                "is_translated": alarm_strategy_obj.is_translated,
+                "translation_type": alarm_strategy_obj.translation_type,
             }
             # 编辑套餐
             EditAction.edit(alarm_strategy_obj.alarm_source_type, **params)

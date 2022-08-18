@@ -30,6 +30,8 @@ BaseMetaFields = [
     "deal_strategy_type",
     "deal_strategy_value",
     "is_enabled",
+    "is_translated",
+    "translation_type",
 ]
 
 
