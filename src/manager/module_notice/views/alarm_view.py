@@ -29,7 +29,7 @@ from src.manager.common.perm import check_biz_perm
 from src.manager.handler.api.bk_chat import BkChat
 from src.manager.module_notice.handler.action import DelAction, EditAction, SaveAction
 from src.manager.module_notice.handler.deal_alarm_msg import OriginalAlarm
-from src.manager.module_notice.handler.notice_cache import get_notices
+from src.manager.module_notice.handler.notice_cache import get_config_info
 from src.manager.module_notice.handler.other_alarm import OtherPlatformAlarm
 from src.manager.module_notice.handler.strategy import PlatformStrategy
 from src.manager.module_notice.models import AlarmStrategyModel
@@ -71,19 +71,27 @@ class AlarmNoticeViewSet(BaseViewSet):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    @action(detail=False, methods=["POST"])
-    def notice(self, request, *args, **kwargs):
+    def __notice(self, payload):
         """
-        @param request:
-        @param args:
-        @param kwargs:
+        兼容2中告警方式
+        @param payload:
         @return:
         """
-        payload = request.payload
         config_id = payload.get("config_id")
-        notice_groups = get_notices(config_id)  # 需要通知的群组
-        original_alarm = OriginalAlarm(payload)  # 原始告警
-        for notice_group in notice_groups:
+        config_info = get_config_info(config_id)  # 需要通知的群组
+
+        # 获取配置信息
+        config_data = config_info.get("config_data", {})
+        is_translated = config_data.get("is_translated", False)
+        translation_type = config_data.get("translation_type", "")
+        original_alarm = OriginalAlarm(
+            payload,
+            is_translated=is_translated,
+            translation_type=translation_type,
+        )  # 原始告警
+
+        # 如果相同的发送类型可以只调用一次翻译接口
+        for notice_group in config_info.get("notice_groups", []):
             im_type = notice_group.get("im")
             # 通过im获取不同
             params: dict = getattr(original_alarm, im_type.lower())()
@@ -98,7 +106,7 @@ class AlarmNoticeViewSet(BaseViewSet):
         return Response({"data": []})
 
     @action(detail=False, methods=["POST"])
-    def original_notice(self, request, *args, **kwargs):
+    def notice(self, request, *args, **kwargs):
         """
         @param request:
         @param args:
@@ -106,24 +114,21 @@ class AlarmNoticeViewSet(BaseViewSet):
         @return:
         """
         payload = request.payload
-        config_id = payload.get("config_id")
-        notice_groups = get_notices(config_id)  # 需要通知的群组
-        # 数据处理
-        callback_message = json.loads(payload.get("callback_message"))
-        original_alarm = OriginalAlarm(callback_message, config_id)  # 原始告警
-        for notice_group in notice_groups:
-            im_type = notice_group.get("im")
-            # 通过im获取不同
-            params: dict = getattr(original_alarm, im_type.lower())()
-            params.update(
-                **{
-                    "im": im_type,
-                    "headers": notice_group.get("headers"),
-                    "receiver": notice_group.get("receiver"),
-                }
-            )
-            BkChat.new_send_msg(**params)
-        return Response({"data": []})
+        return self.__notice(payload)
+
+    @action(detail=False, methods=["POST"])
+    def original_notice(self, request, *args, **kwargs):
+        """
+        监控平台直接回调
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        payload = request.payload
+        callback_message: dict = json.loads(payload.get("callback_message"))  # 原始告警数据
+        params = callback_message.setdefault("config_id", payload.get("config_id"))
+        return self.__notice(params)
 
 
 @method_decorator(name="list", decorator=alarm_config_list_docs)  # 文档装饰器

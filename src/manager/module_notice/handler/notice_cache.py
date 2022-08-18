@@ -55,8 +55,7 @@ def get_notice_group_data(notice_group_ids):
                         "receiver_type": group_type,
                         "receiver_ids": receiver_ids,
                     }
-                with RedisClient() as r:
-                    r.set(f"""notice_group_{notice_group.get("id")}""", json.dumps(notice_group_data), 60)
+                r.set(f"""notice_group_{notice_group.get("id")}""", json.dumps(notice_group_data), 60)
             else:
                 notice_group_data = json.loads(notice_group_data)
             notice_groups_data.append(notice_group_data)
@@ -74,3 +73,23 @@ def get_notices(config_id):
     value = alarm_strategy_obj.deal_strategy_value
     notice_group_ids = value.get("notice_group_ids")
     return get_notice_group_data(notice_group_ids)
+
+
+def get_config_info(config_id):
+    """
+    根据策略获取通知群组
+    @param config_id:
+    @return:
+    """
+    alarm_strategy_obj = AlarmStrategyModel.objects.get(config_id=config_id)
+    # 获取群组消息
+    value = alarm_strategy_obj.deal_strategy_value
+    notice_group_ids = value.get("notice_group_ids")
+    data = {
+        "notice_groups": get_notice_group_data(notice_group_ids),
+        "config_data": {
+            "is_translated": alarm_strategy_obj.is_translated,
+            "translation_type": alarm_strategy_obj.translation_type,
+        },
+    }
+    return data
