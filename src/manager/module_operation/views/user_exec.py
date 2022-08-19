@@ -31,7 +31,7 @@ class UserExecViewSet(BaseViewSet):
         biz_id = get_request_biz_id(request)
         data = CC().search_business(
             bk_username=username,
-            biz_ids=[biz_id],
+            biz_ids=[int(biz_id)],
             fields=["bk_biz_developer", "bk_biz_maintainer", "bk_biz_productor", "bk_biz_tester"],
         )
         variables_map = {
