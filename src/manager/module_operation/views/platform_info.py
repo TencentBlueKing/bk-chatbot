@@ -33,5 +33,7 @@ class PlatformViewSet(BaseViewSet):
         )
         data = []
         for item in queryset:
-            data.append({"item": platform_map.get(item["platform"], "默认"), "value": item["config_num"]})
+            platform = platform_map.get(item["platform"])
+            if platform:
+                data.append({"item": platform, "value": item["config_num"]})
         return Response({"data": data})
