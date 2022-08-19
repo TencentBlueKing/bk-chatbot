@@ -27,7 +27,7 @@ class PlatformViewSet(BaseViewSet):
     @action(detail=False, methods=["GET"])
     def config_info(self, request, *args, **kwargs):
         biz_id = get_request_biz_id(request)
-        platform_map = {"0": "默认", "1": "作业平台", "2": "标准运维", "3": "蓝盾", "4": "自定义"}
+        platform_map = {"job": "作业平台", "sops": "标准运维", "devops": "蓝盾", "define": "自定义"}
         queryset = (
             Task.objects.filter(biz_id=biz_id, is_deleted=False).values("platform").annotate(config_num=Count("id"))
         )
