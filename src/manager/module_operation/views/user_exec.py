@@ -12,43 +12,76 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import pandas as pd
 from django.db.models import Count
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from common.drf.view_set import BaseViewSet
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from common.http.request import get_request_user, get_request_biz_id
+from common.http.request import get_request_biz_id, get_request_user
 from src.manager.handler.api.bk_cc import CC
 from src.manager.module_intent.models import ExecutionLog
 
+# 需要查询的用户列表
+user_arr = ["bk_biz_developer", "bk_biz_maintainer", "bk_biz_productor", "bk_biz_tester"]
+
+# 默认回退数据
+default_data = [
+    {"item:": v, "value": 0} for v in ["bk_biz_developer", "bk_biz_maintainer", "bk_biz_productor", "bk_biz_tester"]
+]
+
 
 class UserExecViewSet(BaseViewSet):
-    schema = None
+    # schema = None
+
+    def __get_exec_info(self, biz_user_info, queryset):
+        """
+        获取执行数据
+        @param biz_user_info: 用户信息
+        @param queryset:      执行数据
+        @return:
+        """
+        # 对用户信息表处理
+        user_info_arr = []
+        for k, v in biz_user_info.items():
+            if k not in user_arr:
+                continue
+            if v is None:
+                v = ""
+            user_info_arr += [{"name": name, "item": k} for name in v.split(",")]
+
+        # 利用pandas 处理数据
+        df_user_info = pd.DataFrame(user_info_arr)
+        df_queryset = pd.DataFrame(queryset)
+        df = df_user_info.merge(df_queryset, how="left", left_on="name", right_on="sender")
+        # 聚类
+        df_group = df.groupby("item").agg({"item": "first", "value": "sum"})
+        # 求百分比
+        df_group["percent"] = 100 * (df_group["value"] / df_group["value"].sum())
+        ret = df_group.to_dict("records")
+        return ret
 
     @action(detail=False, methods=["GET"])
     def exec_info(self, request, *args, **kwargs):
         username = get_request_user(request)
         biz_id = get_request_biz_id(request)
+
+        # 本地查询，如果为空快速返回
+        queryset = ExecutionLog.objects.filter(biz_id=biz_id).values("sender").annotate(value=Count("id"))
+
+        # 为空快速返回
+        if len(queryset) == 0:
+            return Response({"data": default_data})
+
         data = CC().search_business(
             bk_username=username,
             biz_ids=[int(biz_id)],
-            fields=["bk_biz_developer", "bk_biz_maintainer", "bk_biz_productor", "bk_biz_tester"],
+            fields=user_arr,
         )
-        variables_map = {
-            "default": "default",
-            "bk_biz_developer": "开发人员",
-            "bk_biz_maintainer": "运维人员",
-            "bk_biz_productor": "产品人员",
-            "bk_biz_tester": "测试人员",
-        }
-        user_info = {variables_map[k]: v.split(",") if v else [] for k, v in data[0].items()}
+        # 判断是否有该业务存在
+        if len(data) != 1:
+            raise ValueError("查询的业务数量不为1")
 
-        queryset = ExecutionLog.objects.filter(biz_id=biz_id).values("sender").annotate(exec_num=Count("id"))
-
-        result = {"开发人员": 0, "运维人员": 0, "产品人员": 0, "测试人员": 0}
-        for item in queryset:
-            for user_tag, user_list in user_info.items():
-                if item["sender"] in user_list:
-                    result[user_tag] += item["exec_num"]
-        result = [{"item": k, "value": v} for k, v in result.items()]
+        # 实际处理数据
+        result = self.__get_exec_info(data[0], queryset)
         return Response({"data": result})
