@@ -30,6 +30,10 @@ def get_time(text):
     return str_time
 
 
+# 告警等级颜色
+LEVEL_COLOR_MAP = {2: "#ff0000", 1: "#ffbf00", 0: "#66b2ff"}
+
+
 class OriginalAlarm:
     """
     原始告警
@@ -73,7 +77,8 @@ class OriginalAlarm:
         @return:
         """
         event = self.info.get("event")  # 告警事件
-        self.event_level_name = event.get("level_name")  # 告警级别
+        self.event_level_name = event.get("level_name")  # 告警级别名称
+        self.level = event.get("level")  # 告警级别
         self.begin_time = get_time(event.get("begin_time"))  # 首次异常
 
     def get_anomaly_info(self):
@@ -232,5 +237,26 @@ class OriginalAlarm:
             "msg_param": {
                 "content": [{"data": content}],
             },
+        }
+        return params
+
+    def mini_program(self):
+        """
+        微信小程序
+        @return:
+        """
+        remake = f"""告警目标: {self.bk_target_ip}\n告警维度: {self.relation_info}"""
+        params = {
+            "msg_type": "mini",
+            "msg_param": {
+                "keyword1": {
+                    "value": f"{self.event_level_name}-{self.bk_biz_name}",
+                    "color": LEVEL_COLOR_MAP.get(self.level, "#ff0000"),
+                },
+                "keyword2": {"value": self.anomaly_message, "color": "#173177"},
+                "keyword3": {"value": self.create_time, "color": "#173177"},
+                "remark": {"value": remake, "color": "#173177"},
+            },
+            "headers": {"MINI-PROGRAM-PATH": self.info.get("pagepath")},
         }
         return params

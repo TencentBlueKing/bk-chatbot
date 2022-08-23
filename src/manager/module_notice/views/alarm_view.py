@@ -95,10 +95,16 @@ class AlarmNoticeViewSet(BaseViewSet):
             im_type = notice_group.get("im")
             # 通过im获取不同
             params: dict = getattr(original_alarm, im_type.lower())()
+
+            # 处理headers
+            headers = params.get("headers", {})
+            headers.update(**notice_group.get("headers"))
+
+            # 更新数据到请求参数中
             params.update(
                 **{
                     "im": im_type,
-                    "headers": notice_group.get("headers"),
+                    "headers": headers,
                     "receiver": notice_group.get("receiver"),
                 }
             )
