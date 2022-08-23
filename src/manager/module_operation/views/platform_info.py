@@ -27,13 +27,12 @@ class PlatformViewSet(BaseViewSet):
     @action(detail=False, methods=["GET"])
     def config_info(self, request, *args, **kwargs):
         biz_id = get_request_biz_id(request)
-        platform_map = {"job": "作业平台", "sops": "标准运维", "devops": "蓝盾", "define": "自定义"}
         queryset = (
             Task.objects.filter(biz_id=biz_id, is_deleted=False).values("platform").annotate(config_num=Count("id"))
         )
         data = []
         for item in queryset:
-            platform = platform_map.get(item["platform"])
+            platform = item["platform"]
             if platform:
                 data.append({"item": platform, "value": item["config_num"]})
         return Response({"data": data})
