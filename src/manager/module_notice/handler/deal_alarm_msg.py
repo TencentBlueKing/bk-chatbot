@@ -260,3 +260,32 @@ class OriginalAlarm:
             "headers": {"MINI-PROGRAM-PATH": self.info.get("pagepath")},
         }
         return params
+
+    def lark_webhook(self):
+        """
+        飞书 webhook
+        @return:
+        """
+
+        content = self.get_text()
+        params = {
+            "msg_type": "post",
+            "msg_param": {
+                "post": {
+                    "zh-CN": {
+                        "title": "",
+                        "content": [[{"tag": "text", "text": content}]],
+                    }
+                }
+            },
+        }
+        return params
+
+    def ding_webhook(self):
+        """
+        钉钉 webhook
+        @return:
+        """
+        content = self.get_text()
+        params = {"msg_type": "text", "msg_param": {"content": content}}
+        return params
