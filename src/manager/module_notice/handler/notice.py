@@ -58,6 +58,37 @@ class Notice:
                     "content": [{"data": self.msg_content}],
                 },
             }
+
+        # 支持飞书
+        if self.im_type in ["LARK_WEBHOOK"]:
+            params = {
+                "msg_type": "post",
+                "msg_param": {
+                    "post": {
+                        "zh-CN": {
+                            "title": "",
+                            "content": [[{"tag": "text", "text": self.msg_content}]],
+                        }
+                    }
+                },
+            }
+
+        # 支持钉钉
+        if self.im_type in ["DING_WEBHOOK"]:
+            params = {
+                "msg_type": "text",
+                "msg_param": {"content": self.msg_content},
+            }
+
+        # 支持微信公众号
+        if self.im_type in ["MINI_PROGRAM"]:
+            params = {
+                "msg_type": "mini",
+                "msg_param": {
+                    "keynote1": {"value": self.msg_content},
+                },
+            }
+
         return params
 
 
