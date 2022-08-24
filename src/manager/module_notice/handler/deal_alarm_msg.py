@@ -31,7 +31,7 @@ def get_time(text):
 
 
 # 告警等级颜色
-LEVEL_COLOR_MAP = {2: "#ff0000", 1: "#ffbf00", 0: "#66b2ff"}
+LEVEL_COLOR_MAP = {1: "#ff0000", 2: "#ffbf00", 3: "#66b2ff"}
 
 
 class OriginalAlarm:
@@ -251,7 +251,7 @@ class OriginalAlarm:
             "msg_param": {
                 "keyword1": {
                     "value": f"{self.event_level_name}-{self.bk_biz_name}",
-                    "color": LEVEL_COLOR_MAP.get(self.level, "#ff0000"),
+                    "color": LEVEL_COLOR_MAP.get(self.level, "#66b2ff"),
                 },
                 "keyword2": {"value": self.anomaly_message, "color": "#173177"},
                 "keyword3": {"value": self.create_time, "color": "#173177"},
