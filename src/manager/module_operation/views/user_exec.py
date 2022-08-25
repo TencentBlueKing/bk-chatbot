@@ -27,7 +27,8 @@ user_arr = ["bk_biz_developer", "bk_biz_maintainer", "bk_biz_productor", "bk_biz
 
 # 默认回退数据
 default_data = [
-    {"item:": v, "value": 0} for v in ["bk_biz_developer", "bk_biz_maintainer", "bk_biz_productor", "bk_biz_tester"]
+    {"item:": v, "value": 0, "percent": 0}
+    for v in ["bk_biz_developer", "bk_biz_maintainer", "bk_biz_productor", "bk_biz_tester"]
 ]
 
 
@@ -58,6 +59,11 @@ class UserExecViewSet(BaseViewSet):
         df_group = df.groupby("item").agg({"item": "first", "value": "sum"})
         # 求百分比
         df_group["percent"] = 100 * (df_group["value"] / df_group["value"].sum())
+
+        # 转为int
+        df_group["value"] = df_group["value"].astype(int)
+        # 为空数据填充
+        df_group["percent"] = df_group["percent"].fillna(value=0)
         ret = df_group.to_dict("records")
         return ret
 
