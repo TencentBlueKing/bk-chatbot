@@ -35,7 +35,14 @@ class IntentViewSet(BaseViewSet):
         group_result = (
             queryset.annotate(exec_date=Trunc("created_at", "day")).values("exec_date").annotate(exec_num=Count("id"))
         )
-        data = []
+
+        exec_num_map = {}
         for item in group_result:
-            data.append({"date": item["exec_date"].split(" ")[0], "value": item["exec_num"]})
+            exec_num_map[item["exec_date"].split(" ")[0]] = item["exec_num"]
+
+        data = []
+        for i in range((end_time - start_time).days + 1):
+            day = (start_time + datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+            data.append({"item": day, "value": exec_num_map.get(day, 0)})
+
         return Response({"data": data})
