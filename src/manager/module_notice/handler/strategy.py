@@ -18,7 +18,7 @@ from common.design.strategy import Strategy
 from src.manager.handler.api.bk_monitor import BkMonitor
 from src.manager.module_notice.models import AlarmStrategyModel
 
-BKM_STRATEGY_MAX_PAGE_SIZE = os.getenv("BKM_STRATEGY_MAX_PAGE_SIZE", 500)
+BKM_STRATEGY_MAX_PAGE_SIZE = int(os.getenv("BKM_STRATEGY_MAX_PAGE_SIZE", 500))
 
 
 class PlatformStrategy(Strategy):
