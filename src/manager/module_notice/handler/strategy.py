@@ -12,14 +12,16 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import os
 
 from common.design.strategy import Strategy
 from src.manager.handler.api.bk_monitor import BkMonitor
 from src.manager.module_notice.models import AlarmStrategyModel
 
+BKM_STRATEGY_MAX_PAGE_SIZE = os.getenv("BKM_STRATEGY_MAX_PAGE_SIZE", 500)
+
 
 class PlatformStrategy(Strategy):
-
     _map = dict()
 
     @classmethod
@@ -45,7 +47,7 @@ def bkm(biz_id):
     """
     params = {
         "page": 1,
-        "page_size": 100,
+        "page_size": BKM_STRATEGY_MAX_PAGE_SIZE,
         "bk_biz_id": biz_id,
     }
     result = BkMonitor.search_alarm_strategy_v3(**params)
