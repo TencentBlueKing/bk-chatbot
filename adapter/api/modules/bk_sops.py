@@ -17,6 +17,7 @@ class _SopsApi(BaseApi):
         self.operate_task = ProxyDataAPI(_("操作任务"))
         self.operate_node = ProxyDataAPI(_("操作节点"))
         self.node_callback = ProxyDataAPI(_("回调任务的节点"))
-
+        self.get_task_list = ProxyDataAPI(_("获取任务列表"))
+        self.get_tasks_status = ProxyDataAPI(_("批量获取任务状态"))
 
 SopsApi = _SopsApi()

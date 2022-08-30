@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from enum import Enum
 
 from django.utils.translation import ugettext_lazy as _
@@ -28,7 +27,6 @@ CHAT_BOT_TYPE_SLACK = "slack"
 CHAT_BOT_TYPE_DEFAULT = "default"
 STAG_PLUGIN_URI_ENV = "STAG_PLUGIN_URI"
 PROD_PLUGIN_URI_ENV = "PROD_PLUGIN_URI"
-
 
 CHAT_BOT_TYPES = (
     (CHAT_BOT_TYPE_WEWORK, _("企业微信")),
@@ -61,10 +59,37 @@ class TaskExecStatus(Enum):
     REMOVE = 5  # 执行异常
 
 
+TASK_EXECUTE_STATUS_DICT = {
+    TaskExecStatus.INIT.value: "未执行",
+    TaskExecStatus.RUNNING.value: "执行中",
+    TaskExecStatus.SUCCESS.value: "执行成功",
+    TaskExecStatus.FAIL.value: "执行失败",
+    TaskExecStatus.SUSPENDED.value: "暂停",
+    TaskExecStatus.REMOVE.value: "执行终止",
+}
+
+# 任务执行颜色
+TASK_EXEC_STATUS_COLOR_DICT = {
+    TaskExecStatus.INIT.value: "#B0BEC5",
+    TaskExecStatus.RUNNING.value: "#4FC3F7",
+    TaskExecStatus.SUCCESS.value: "#00FF00",
+    TaskExecStatus.FAIL.value: "#E53935",
+    TaskExecStatus.SUSPENDED.value: "#FFEE58",
+    TaskExecStatus.REMOVE.value: "#E53935",
+}
+
+# 标准运维网关节点类型
+SOPS_GATEWAY_NODE_TYPE_MAP = {
+    "ExclusiveGateway": "分支网关",
+    "ParallelGateway": "并行网关",
+    "ConditionalParallelGateway": "条件并行网关",
+    "ConvergeGateway": "汇聚网关",
+}
 # 环境变量获取
 JOB_HOST = get_env_or_raise("BKAPP_JOB_HOST")
 DEVOPS_HOST = get_env_or_raise("BKAPP_DEVOPS_HOST")
 
-
 # 用户相关
 USER_VISIT = "USER_VISIT"
+
+MAX_WORKER = 10  # 多线程执行最大线程数
