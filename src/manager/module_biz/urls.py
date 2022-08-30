@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -18,6 +17,7 @@ from rest_framework import routers
 
 from src.manager.module_biz.views.biz_variable_view import BizVariableViewSet
 from src.manager.module_biz.views.biz_views import BizViewSet
+from src.manager.module_biz.views.exec_task_views import ExecTaskViewSet
 from src.manager.module_biz.views.chat_bind_views import (
     ChatBindViewSet,
     OpenChatBindViewSet,
@@ -29,10 +29,10 @@ router = routers.DefaultRouter()
 
 router.register(r"biz", BizViewSet, basename="biz")
 router.register(r"task/(?P<biz_id>.*)", TaskViewSet, basename="task")
+router.register(r"exec_task/(?P<biz_id>.*)", ExecTaskViewSet, basename="exec_task")
 router.register(r"chat_bind", ChatBindViewSet, basename="chat_bind")
 router.register(r"open_chat_bind", OpenChatBindViewSet, basename="open_chat_bind")
 router.register(r"biz_variable", BizVariableViewSet, basename="biz_variable")
-
 
 router.register(
     r"summary_chat_bind",

@@ -192,3 +192,25 @@ class SOPS:
         }
         rsp = SopsApi.node_callback(params, raw=True)
         return rsp
+
+    @classmethod
+    def get_task_list(cls, bk_username: str, bk_biz_id: int, **kwargs):
+        """
+        获取任务列表
+        """
+        params = {"bk_username": bk_username, "bk_biz_id": bk_biz_id, **kwargs}
+        rsp = SopsApi.get_task_list(params, raw=True)
+        return rsp
+
+    @classmethod
+    def get_tasks_status(cls, bk_username: str, bk_biz_id: int, task_id_list: list):
+        """
+        批量获取任务状态
+        """
+        params = {
+            "bk_username": bk_username,
+            "bk_biz_id": bk_biz_id,
+            "task_id_list": task_id_list,
+        }
+        rsp = SopsApi.get_tasks_status(params, raw=True)
+        return rsp

@@ -116,5 +116,25 @@ class _SopsApi:
             module=self.MODULE,
         )
 
+    @property
+    def get_task_list(self):
+        return DataAPI(
+            method="GET",
+            url=SOPS_APIGW + "/get_task_list/{bk_biz_id}/",
+            description="获取任务列表",
+            url_keys=["bk_biz_id"],
+            module=self.MODULE,
+        )
+
+    @property
+    def get_tasks_status(self):
+        return DataAPI(
+            method="POST",
+            url=SOPS_APIGW + "/get_tasks_status/{bk_biz_id}/",
+            description="批量查询任务状态",
+            url_keys=["bk_biz_id"],
+            module=self.MODULE,
+        )
+
 
 SopsApi = _SopsApi()
