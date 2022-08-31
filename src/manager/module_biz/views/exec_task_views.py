@@ -128,7 +128,7 @@ class ExecTaskViewSet(BaseViewSet):
         total_task_list = []
 
         # 处理job的执行历史
-        job_task_list = batch_result["job_manual_task"] or [] + batch_result["job_api_task"] or []
+        job_task_list = (batch_result["job_manual_task"] or []) + (batch_result["job_api_task"] or [])
         for task in job_task_list:
             total_task_list.append(
                 {
