@@ -19,6 +19,7 @@ from rest_framework import serializers
 from common.drf.field import BizId, DefaultFiled
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto import notice_tag
+from common.constants import TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS
 
 
 class DefaultTriggerName(DefaultFiled):
@@ -107,6 +108,27 @@ class ReqPostNoticeGroupSendMsgGWViewSerializer(serializers.Serializer):
     notice_group_id_list = serializers.ListField()
     msg_type = serializers.ChoiceField(choices=["text", "markdown"], default="text")
     msg_content = serializers.CharField()
+
+
+class ReqPostTaskBroadStratGWViewSerializer(serializers.Serializer):
+    """
+    请求任务播报开始协议
+    """
+
+    operator = serializers.CharField(label="操作人")
+    biz_id = serializers.IntegerField(label="业务ID")
+    session_id = serializers.CharField(label="触发播报的会话ID")
+    task_id = serializers.IntegerField(label="播报任务ID")
+    platform = serializers.ChoiceField(label="任务所属平台", choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS])
+    share_group_list = serializers.ListField(label="分享播报用户通知组列表", required=False, default=[])
+
+
+class ReqPostTaskBroadShareGWViewSerializer(serializers.Serializer):
+    """
+    分享播报协议
+    """
+
+    share_group_list = serializers.ListField(label="分享播报用户通知组列表")
 
 
 class ReqPostNoticeSendWebhookGWViewSerializer(serializers.Serializer):

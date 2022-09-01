@@ -76,8 +76,8 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             if not node_status_info:
                 continue
-
-            if current_task_state in TASK_STATUS_UNFINISHED and parse_data[0] is None:
+            node_state = sops_instance_status_map[node_status_info["state"]]
+            if node_state in TASK_STATUS_UNFINISHED and parse_data[0] is None:
                 parse_data[0] = len(parse_data) - 1
 
             current_step_index_list[-1] += 1
@@ -85,10 +85,11 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             node_start_time = node_status_info.get("start_time")
             node_finish_time = node_status_info.get("finish_time")
-            node_state = sops_instance_status_map[node_status_info["state"]]
             current_parse_data = {
                 "step_name": node["name"],
                 "step_index": current_step_index,
+                "step_id": node_id,
+                "step_duration": node_status_info.get("elapsed_time") or 0,
                 "step_status": TASK_EXECUTE_STATUS_DICT[node_state],
                 "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[node_state],
                 "start_time": node_start_time and node_start_time.strip(" +0800"),
@@ -96,9 +97,12 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
             }
 
             if node["type"] in SOPS_GATEWAY_NODE_TYPE_MAP.keys():
+                name = ""
+                if node["name"]:
+                    name = f"-{name}"
                 current_parse_data.update(
                     {
-                        "step_name": "{}-{}".format(SOPS_GATEWAY_NODE_TYPE_MAP[node["type"]], node["name"]),
+                        "step_name": "{}{}".format(SOPS_GATEWAY_NODE_TYPE_MAP[node["type"]], name),
                     }
                 )
 
@@ -130,7 +134,8 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
     data = {
         "task_name": "[标准运维] {}".format(status_info.get("name")),
         "task_status": TASK_EXECUTE_STATUS_DICT[exec_state],
-        "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_state],
+        "task_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_state],
+        "task_duration": status_info.get("elapsed_time") or 0,
         "step_data": parse_result,
         "start_time": start_time and start_time.strip(" +0800"),
         "finish_time": finish_time and finish_time.strip(" +0800"),
@@ -150,10 +155,16 @@ def parse_job_task_tree(task_info, is_parse_all=False):
         finish_time = step_instance.get("end_time")
         if exec_status in TASK_STATUS_UNFINISHED and running_index is None:
             running_index = len(parse_result)
+
+        total_time = step_instance.get("total_time") or 0
+        if not total_time:
+            total_time = (time.time() * 1000) - start_time
         parse_result.append(
             {
                 "step_name": step_instance.get("name"),
                 "step_index": f"1.{index + 1}",
+                "step_id": str(step_instance.get("step_instance_id")),
+                "step_duration": total_time / 1000,
                 "step_status": TASK_EXECUTE_STATUS_DICT[exec_status],
                 "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_status],
                 "start_time": start_time
@@ -176,11 +187,14 @@ def parse_job_task_tree(task_info, is_parse_all=False):
             parse_result = parse_result[_start:_end]
         if exec_status in TASK_STATUS_FINISHED:
             parse_result = parse_result[-5:]
-
+    total_time = job_instance_info.get("total_time") or 0
+    if not total_time:
+        total_time = (time.time() * 1000) - start_time
     data = {
         "task_name": "[作业平台] {}".format(job_instance_info.get("name")),
         "task_status": TASK_EXECUTE_STATUS_DICT[exec_status],
-        "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_status],
+        "task_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_status],
+        "task_duration": total_time / 1000,
         "step_data": parse_result,
         "start_time": start_time and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(start_time / 1000))),
         "finish_time": finish_time and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(finish_time / 1000))),
