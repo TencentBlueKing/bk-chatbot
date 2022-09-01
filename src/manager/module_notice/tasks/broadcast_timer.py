@@ -83,7 +83,7 @@ def task_broadcast(broadcast_id):
         broadcast_obj.step_id = current_step["step_id"]
         broadcast_obj.step_status = current_step["step_status"]
         broadcast_obj.broadcast_num = 1
-        broadcast_obj.next_broadcast_time = now
+        broadcast_obj.next_broadcast_time = now + datetime.timedelta(minutes=BROADCAST_LADDER[0])
         broadcast_obj.save()
 
     if is_send_msg and session_info:
