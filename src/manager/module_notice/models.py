@@ -19,8 +19,9 @@ from django.db import models
 from django_filters import filters
 
 from common.drf.filters import BaseOpenApiFilter
-from common.models.base import BaseModel
+from common.models.base import BaseModel, FormatDateTimeField
 from common.models.json import DictCharField
+from common.constants import TASK_PLATFORM_CHOICES
 
 
 class TriggerModel(BaseModel):
@@ -165,3 +166,27 @@ class AlarmStrategyModel(BaseModel):
         biz_id = filters.CharFilter(field_name="biz_id")
         alarm_source_type = filters.CharFilter(field_name="alarm_source_type")
         created_by = filters.CharFilter(field_name="created_by")
+
+
+class TaskBroadcast(models.Model):
+    biz_id = models.CharField("业务ID", max_length=256)
+    task_id = models.CharField("任务ID", max_length=256)
+    platform = models.CharField("任务所属平台", choices=TASK_PLATFORM_CHOICES, max_length=32)
+    session_id = models.CharField("触发实时播报的会话ID", max_length=256)
+
+    start_user = models.CharField("开始播报人", max_length=256)
+    stop_user = models.CharField("终止播报人", max_length=256, null=True, blank=True)
+    start_time = FormatDateTimeField("开始播报时间", auto_now_add=True, null=True, blank=True)
+    stop_time = FormatDateTimeField("终止播报时间", null=True, blank=True)
+    next_broadcast_time = FormatDateTimeField("阶梯播报下一次播报时间", null=True, blank=True)
+    broadcast_num = models.IntegerField("同一节点播报次数", default=0)
+
+    step_id = models.CharField("任务当前步骤ID", max_length=256, null=True, blank=True)
+    step_status = models.CharField("当前步骤状态", max_length=256, null=True, blank=True)
+    is_stop = models.BooleanField("是否停止播报", default=False)
+    share_group_list = DictCharField("分享播报用户组列表", default=[])
+
+    class Meta:
+        db_table = "tab_task_broadcast"
+        verbose_name = "【任务播报】"
+        verbose_name_plural = "【任务播报】"

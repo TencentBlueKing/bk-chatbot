@@ -71,8 +71,8 @@ TASK_EXECUTE_STATUS_DICT = {
 # 任务执行颜色
 TASK_EXEC_STATUS_COLOR_DICT = {
     TaskExecStatus.INIT.value: "#B0BEC5",
-    TaskExecStatus.RUNNING.value: "#4FC3F7",
-    TaskExecStatus.SUCCESS.value: "#00FF00",
+    TaskExecStatus.RUNNING.value: "#fd9e31",
+    TaskExecStatus.SUCCESS.value: "#3dca63",
     TaskExecStatus.FAIL.value: "#E53935",
     TaskExecStatus.SUSPENDED.value: "#FFEE58",
     TaskExecStatus.REMOVE.value: "#E53935",

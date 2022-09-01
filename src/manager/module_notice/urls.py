@@ -24,6 +24,7 @@ from src.manager.module_notice.views.alarm_view import (
 from src.manager.module_notice.views.notice_view import NoticeGroupViewSet, NoticeGroupGwViewSet, NoticeSendGwViewSet
 from src.manager.module_notice.views.trigger_view import TriggerViewSet
 from src.manager.module_notice.views.whitelist_view import WhiteListViewSet
+from src.manager.module_notice.views.broadcast_views import TaskBroadcastGwViewSet
 
 router = routers.DefaultRouter()
 
@@ -35,5 +36,6 @@ router.register(r"whitelist", WhiteListViewSet, basename="whitelist")  # 白名�
 router.register(r"alarm", AlarmViewSet, basename="alarm")  # 告警
 router.register(r"alarm", AlarmNoticeViewSet, basename="alarm_notice")  # 告警
 router.register(r"config/alarm", AlarmConfigViewSet, basename="alarm_config")  # 告警
+router.register(r"gw_task_broadcast", TaskBroadcastGwViewSet, basename="gw_task_broadcast")  # 发送通知
 
 urlpatterns = (url(r"^", include(router.urls)),)
