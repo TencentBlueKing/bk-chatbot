@@ -172,7 +172,7 @@ class TaskBroadcast(models.Model):
     biz_id = models.CharField("业务ID", max_length=256)
     task_id = models.CharField("任务ID", max_length=256)
     platform = models.CharField("任务所属平台", choices=TASK_PLATFORM_CHOICES, max_length=32)
-    session_id = models.CharField("触发实时播报的会话ID", max_length=256)
+    session_info = DictCharField("触发实时播报的信息", default={})
 
     start_user = models.CharField("开始播报人", max_length=256)
     stop_user = models.CharField("终止播报人", max_length=256, null=True, blank=True)

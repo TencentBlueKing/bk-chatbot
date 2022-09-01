@@ -44,7 +44,7 @@ def task_broadcast(broadcast_id):
     operator = broadcast_obj.start_user
     biz_id = broadcast_obj.biz_id
     task_id = broadcast_obj.task_id
-    session_id = broadcast_obj.session_id
+    session_info = broadcast_obj.session_info
     share_group_list = broadcast_obj.share_group_list
     if broadcast_obj.is_stop:
         return
@@ -83,7 +83,7 @@ def task_broadcast(broadcast_id):
         broadcast_obj.next_broadcast_time = now
         broadcast_obj.save()
 
-    if is_send_msg and session_id:
+    if is_send_msg and session_info:
         parse_result.update({"broadcast_id": broadcast_id})
         print("curl bk_chat wit parse_result")
 

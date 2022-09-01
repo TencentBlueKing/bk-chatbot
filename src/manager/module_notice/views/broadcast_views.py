@@ -38,7 +38,7 @@ class TaskBroadcastGwViewSet(BaseViewSet):
         broadcast_params = {
             "start_user": payload.get("operator"),
             "biz_id": payload.get("biz_id"),
-            "session_id": payload.get("session_id"),
+            "session_info": payload.get("session_info", {}),
             "platform": payload.get("platform"),
             "task_id": payload.get("task_id"),
             "share_group_list": payload.get("share_group_list", []),
