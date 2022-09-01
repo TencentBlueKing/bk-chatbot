@@ -77,7 +77,8 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
             if not node_status_info:
                 continue
             node_state = sops_instance_status_map[node_status_info["state"]]
-            if node_state in TASK_STATUS_UNFINISHED and parse_data[0] is None:
+
+            if node_state in TASK_STATUS_UNFINISHED and parse_data[0] is None and node["type"] != "SubProcess":
                 parse_data[0] = len(parse_data) - 1
 
             current_step_index_list[-1] += 1
@@ -108,7 +109,6 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             parse_data.append(current_parse_data)
             if node["type"] == "SubProcess":
-                parse_data[0] = None
                 if node_status_info.get("children"):
                     _unfold_pipeline_tree(
                         node["pipeline"], node_status_info.get("children"), parse_data, current_step_index_list
