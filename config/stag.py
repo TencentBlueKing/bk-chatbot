@@ -40,4 +40,4 @@ BK_STATIC_URL = STATIC_URL + "dist"
 
 
 # http重定向到https
-SECURE_SSL_REDIRECT = True
+# SECURE_SSL_REDIRECT = True
