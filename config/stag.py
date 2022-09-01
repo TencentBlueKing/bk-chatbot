@@ -37,3 +37,7 @@ RUN_MODE = "STAGING"
 # 预发布环境数据库可以在这里配置
 # 默认 default 请不要修改，如果使用了外部数据库，请联系【蓝鲸助手】授权
 BK_STATIC_URL = STATIC_URL + "dist"
+
+
+# http重定向到https
+SECURE_SSL_REDIRECT = True
