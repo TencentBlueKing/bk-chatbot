@@ -57,6 +57,9 @@ def task_broadcast(broadcast_id):
         task_info = SOPS().get_task_detail(operator, biz_id, task_id)
         status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
         parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
+
+    parse_result.update({"broadcast_id": broadcast_id})
+
     step_data = parse_result.get("step_data")
     current_step = step_data[math.floor(len(step_data) / 2)]
 
@@ -67,7 +70,7 @@ def task_broadcast(broadcast_id):
             broadcast_ladder_index = (
                 broadcast_obj.broadcast_num - 1 if broadcast_obj.broadcast_num - 1 < len(BROADCAST_LADDER) else -1
             )
-            broadcast_obj.broadcast_num = 2
+            broadcast_obj.broadcast_num = broadcast_obj.broadcast_num + 1
             broadcast_obj.next_broadcast_time = now + datetime.timedelta(
                 minutes=BROADCAST_LADDER[broadcast_ladder_index]
             )
@@ -84,7 +87,6 @@ def task_broadcast(broadcast_id):
         broadcast_obj.save()
 
     if is_send_msg and session_info:
-        parse_result.update({"broadcast_id": broadcast_id})
         print("curl bk_chat wit parse_result")
 
     if is_send_msg and share_group_list:
