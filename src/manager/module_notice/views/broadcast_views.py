@@ -45,7 +45,7 @@ class TaskBroadcastGwViewSet(BaseViewSet):
         }
         broadcast_obj = TaskBroadcast.objects.create(**broadcast_params)
         task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id})
-        return Response({"data": []})
+        return Response({"broadcast_id": broadcast_obj.id})
 
     @login_exempt_with_perm
     @action(detail=True, methods=["POST"])
