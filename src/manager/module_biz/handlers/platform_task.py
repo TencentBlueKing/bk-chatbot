@@ -18,7 +18,6 @@ import time
 from common.constants import (
     TASK_EXECUTE_STATUS_DICT,
     TASK_EXEC_STATUS_COLOR_DICT,
-    SOPS_GATEWAY_NODE_TYPE_MAP,
     TaskExecStatus,
 )
 from src.manager.handler.api.bk_sops import sops_instance_status_map
@@ -39,27 +38,13 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
     def _unfold_pipeline_tree(pipeline_data, status_data, parse_data, parent_step_index_list):
         node_info = {
             **pipeline_data.get("activities", {}),
-            **pipeline_data.get("gateways", {}),
         }
         location = pipeline_data.get("location", [])
-        if location:
-            location.insert(0, {})
-            location.append({})
+
         current_step_index_list = parent_step_index_list + [0]
         for index, node in enumerate(location):
-            if index == 0:
-                start_event = pipeline_data.get("start_event")
-                node_id = start_event.get("id")
-                start_event.update({"name": "开始节点"})
-                node = start_event
-            elif index == len(location) - 1:
-                end_event = pipeline_data.get("end_event")
-                node_id = end_event.get("id")
-                end_event.update({"name": "结束节点"})
-                node = end_event
-            else:
-                node_id = node["id"]
-                node = node_info.get(node_id)
+            node_id = node["id"]
+            node = node_info.get(node_id)
 
             if not node:
                 continue
@@ -76,6 +61,7 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             if not node_status_info:
                 continue
+
             node_state = sops_instance_status_map[node_status_info["state"]]
 
             if node_state in TASK_STATUS_UNFINISHED and parse_data[0] is None and node["type"] != "SubProcess":
@@ -96,16 +82,6 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
                 "start_time": node_start_time and node_start_time.strip(" +0800"),
                 "finish_time": node_finish_time and node_finish_time.strip(" +0800"),
             }
-
-            if node["type"] in SOPS_GATEWAY_NODE_TYPE_MAP.keys():
-                name = ""
-                if node["name"]:
-                    name = f"-{name}"
-                current_parse_data.update(
-                    {
-                        "step_name": "{}{}".format(SOPS_GATEWAY_NODE_TYPE_MAP[node["type"]], name),
-                    }
-                )
 
             parse_data.append(current_parse_data)
             if node["type"] == "SubProcess":
