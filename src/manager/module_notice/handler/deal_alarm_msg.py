@@ -150,13 +150,13 @@ class OriginalAlarm:
         self.all_dimensions = "\n                    ".join(
             [f"{k} = {v}" for k, v in self.dimensions.items()],
         )
-        content = f"""`策略名称:` {self.strategy_name}
+        content = f"""`告警业务:` {self.bk_biz_name}
+`策略名称:` {self.strategy_name}
 `告警级别:` {self.event_level_name}
 `首次异常:` {self.begin_time}
 `最近异常:` {self.create_time}
 `告警内容:` {self.anomaly_message}
 `当前数值:` {self.origin_alarm_value}
-`告警业务:` {self.bk_biz_name}
 `告警目标:` {self.bk_target_ip}
 `告警维度:` {self.alarm_dimension}
 `关联信息:` {self.relation_info}
@@ -172,13 +172,13 @@ class OriginalAlarm:
         self.all_dimensions = "\n                    ".join(
             [f"{k} = {v}" for k, v in self.dimensions.items()],
         )
-        content = f"""策略名称: {self.strategy_name}
+        content = f"""告警业务: {self.bk_biz_name}
+策略名称: {self.strategy_name}
 告警级别: {self.event_level_name}
 首次异常: {self.begin_time}
 最近异常: {self.create_time}
 告警内容: {self.anomaly_message}
 当前数值: {self.origin_alarm_value}
-告警业务: {self.bk_biz_name}
 告警目标: {self.bk_target_ip}
 告警维度: {self.alarm_dimension}
 关联信息: {self.relation_info}
