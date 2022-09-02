@@ -46,6 +46,7 @@ class OriginalAlarm:
         """
         self.info = info  # 基础信息
         self.bk_biz_name = None  # 业务名称
+        self.strategy_name = None  # 策略名称
         self.event_level_name = None  # 告警等级名称
         self.begin_time = None  # 开始时间
         self.create_time = None  # 告警出来的时间
@@ -70,6 +71,7 @@ class OriginalAlarm:
         self.bk_biz_name = self.info.get("bk_biz_name")  # 告警业务
         self.get_event_info()
         self.get_anomaly_info()
+        self.get_strategy()
 
     def get_event_info(self):
         """
@@ -132,6 +134,14 @@ class OriginalAlarm:
         # 全部维度
         self.dimensions = origin_alarm.get("dimensions", {})
 
+    def get_strategy(self):
+        """
+        策略信息处理
+        @return:
+        """
+        strategy = self.info.get("strategy")
+        self.strategy_name = strategy.get("name")
+
     def get_markdown(self):
         """
         获取markdown
@@ -140,7 +150,8 @@ class OriginalAlarm:
         self.all_dimensions = "\n                    ".join(
             [f"{k} = {v}" for k, v in self.dimensions.items()],
         )
-        content = f"""`告警级别:` {self.event_level_name}
+        content = f"""`策略名称:` {self.strategy_name}
+`告警级别:` {self.event_level_name}
 `首次异常:` {self.begin_time}
 `最近异常:` {self.create_time}
 `告警内容:` {self.anomaly_message}
@@ -161,7 +172,8 @@ class OriginalAlarm:
         self.all_dimensions = "\n                    ".join(
             [f"{k} = {v}" for k, v in self.dimensions.items()],
         )
-        content = f"""告警级别: {self.event_level_name}
+        content = f"""策略名称: {self.strategy_name}
+告警级别: {self.event_level_name}
 首次异常: {self.begin_time}
 最近异常: {self.create_time}
 告警内容: {self.anomaly_message}
