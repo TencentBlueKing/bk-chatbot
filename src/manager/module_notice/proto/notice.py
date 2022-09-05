@@ -119,7 +119,7 @@ class ReqPostTaskBroadStratGWViewSerializer(serializers.Serializer):
     biz_id = serializers.IntegerField(label="业务ID")
     task_id = serializers.IntegerField(label="播报任务ID")
     platform = serializers.ChoiceField(label="任务所属平台", choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS])
-    session_info = serializers.CharField(label="触发播报的会话ID", required=False, default={})
+    session_info = serializers.JSONField(label="触发播报的会话ID", required=False, default={})
     share_group_list = serializers.ListField(label="分享播报用户通知组列表", required=False, default=[])
 
 
