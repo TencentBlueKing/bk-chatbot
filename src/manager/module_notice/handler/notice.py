@@ -85,7 +85,9 @@ class Notice:
             params = {
                 "msg_type": "mini",
                 "msg_param": {
-                    "keynote1": {"value": self.msg_content},
+                    "first": {"value": self.msg_content},
+                    "keynote1": {"value": "     -"},
+                    "keynote2": {"value": "     -"},
                 },
             }
 
