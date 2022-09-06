@@ -337,7 +337,6 @@ def parse_job_task_tree(task_info, is_parse_all=False):
     start_time = job_instance_info.get("start_time")
     finish_time = job_instance_info.get("end_time")
     exec_status = job_instance_status_map[job_instance_info["status"]]
-    parse_result = [{**item, "step_num": index + 1} for index, item in enumerate(parse_result)]
     total_step_num = len(parse_result)
 
     if exec_status in TASK_STATUS_INIT:
