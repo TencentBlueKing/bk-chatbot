@@ -19,6 +19,7 @@ from celery.task import task
 
 from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
+from src.manager.handler.api.bk_chat import BkChat
 from src.manager.module_notice.handler.notice import Notice
 from src.manager.module_biz.handlers.platform_task import parse_job_task_tree, parse_sops_pipeline_tree
 from src.manager.module_notice.handler.notice_cache import get_notice_group_data
@@ -46,19 +47,18 @@ def task_broadcast(broadcast_id):
     task_id = broadcast_obj.task_id
     session_info = broadcast_obj.session_info
     share_group_list = broadcast_obj.share_group_list
+    task_platform = broadcast_obj.platform
     if broadcast_obj.is_stop:
         return
 
-    if broadcast_obj.platform == TAK_PLATFORM_JOB:
+    if task_platform == TAK_PLATFORM_JOB:
         task_info = JOB().get_job_instance_status(operator, biz_id, task_id).get("data")
         parse_result = parse_job_task_tree(task_info, is_parse_all=False)
 
-    if broadcast_obj.platform == TAK_PLATFORM_SOPS:
+    if task_platform == TAK_PLATFORM_SOPS:
         task_info = SOPS().get_task_detail(operator, biz_id, task_id)
         status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
         parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
-
-    parse_result.update({"broadcast_id": broadcast_id})
 
     step_data = parse_result.get("step_data")
     current_step = step_data[math.floor(len(step_data) / 2)]
@@ -87,7 +87,10 @@ def task_broadcast(broadcast_id):
         broadcast_obj.save()
 
     if is_send_msg and session_info:
-        print("curl bk_chat wit parse_result")
+        parse_result.update({"broadcast_id": broadcast_id, "session_info": session_info})
+        result = BkChat.send_broadcast(parse_result)
+        if result["code"] != 0:
+            logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
 
     if is_send_msg and share_group_list:
         origin_obj = OriginalBroadcast(parse_result)
@@ -99,9 +102,7 @@ def task_broadcast(broadcast_id):
             )
             result = notice.send()
             if not result["result"]:
-                logger.error(
-                    "[task_broadcast][error][broadcast_id={}][message={}]".format(broadcast_id, result["message"])
-                )
+                logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
     logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] finish broadcast")
     if parse_result["task_status"] not in TASK_FINISHED_STATUS:
         task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)

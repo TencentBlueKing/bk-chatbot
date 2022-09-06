@@ -19,6 +19,8 @@ from common.constants import (
     TASK_EXECUTE_STATUS_DICT,
     TASK_EXEC_STATUS_COLOR_DICT,
     TaskExecStatus,
+    TAK_PLATFORM_JOB,
+    TAK_PLATFORM_SOPS,
 )
 from src.manager.handler.api.bk_sops import sops_instance_status_map
 from src.manager.handler.api.bk_job import job_instance_status_map
@@ -28,7 +30,158 @@ TASK_STATUS_INIT = {
 }
 TASK_STATUS_UNFINISHED = {TaskExecStatus.RUNNING.value, TaskExecStatus.FAIL.value, TaskExecStatus.SUSPENDED.value}
 TASK_STATUS_FINISHED = {TaskExecStatus.REMOVE.value, TaskExecStatus.SUCCESS.value}
+TASK_STATUS_FINISHED = {}
+# 标准运维除过汇聚网关的网关
+SOPS_EXEC_GATEWAYS = {"ExclusiveGateway", "ParallelGateway", "ConditionalParallelGateway"}
+
+# 可能存在循环的网关
+SOPS_CYCLE_GATEWAYS = {"ExclusiveGateway", "ConditionalParallelGateway"}
 BKAPP_JOB_HOST = os.getenv("BKAPP_JOB_HOST", "")
+
+MAX_RANGE_NUM = 500
+
+# 网关之后最多经过多少个节点出现汇聚节点
+GATEWAY_MAX_RANGE_NUM = 30
+
+
+def get_converge_node_id(first_flow_id, second_flow_id, flows, nodes):
+    first_exec_node = []
+    second_exec_node = []
+    converge_node_id = "converge_node_id"
+    for range_index in range(1, GATEWAY_MAX_RANGE_NUM):
+        first_flow = flows.get(first_flow_id)
+        if first_flow:
+            first_flow_node_id = first_flow["target"]
+            if first_flow_node_id in second_exec_node:
+                converge_node_id = first_flow_node_id
+                break
+            first_exec_node.append(first_flow_node_id)
+            first_flow_node_outgoing = nodes.get(first_flow_node_id).get("outgoing")
+            first_flow_id = (
+                first_flow_node_outgoing if isinstance(first_flow_node_outgoing, str) else first_flow_node_outgoing[0]
+            )
+
+        second_flow = flows.get(second_flow_id)
+        if second_flow:
+            second_flow_node_id = second_flow["target"]
+            if second_flow_node_id in first_exec_node:
+                converge_node_id = second_flow_node_id
+                break
+            second_exec_node.append(second_flow_node_id)
+            second_flow_node_outgoing = nodes.get(second_flow_node_id).get("outgoing")
+            second_flow_id = (
+                second_flow_node_outgoing
+                if isinstance(second_flow_node_outgoing, str)
+                else second_flow_node_outgoing[0]
+            )
+    return converge_node_id
+
+
+def judge_cycle_flow(flow_id, flows, nodes):
+    cycle_exec_node_id_list = []
+
+    def _judge_cycle_flow(_flow_id):
+        for range_index in range(1, GATEWAY_MAX_RANGE_NUM):
+            flow = flows.get(_flow_id)
+            if not flow:
+                break
+            flow_node_id = flow["target"]
+            if flow_node_id in cycle_exec_node_id_list:
+                return True
+            cycle_exec_node_id_list.append(flow_node_id)
+            flow_node_outgoing = nodes.get(flow_node_id).get("outgoing")
+            if isinstance(flow_node_outgoing, str):
+                _flow_id = flow_node_outgoing
+            elif isinstance(flow_node_outgoing, list):
+                for _outgoing in flow_node_outgoing:
+                    return _judge_cycle_flow(_outgoing)
+        return False
+
+    is_cycle = _judge_cycle_flow(flow_id)
+
+    return is_cycle
+
+
+def deal_cycle_flow(gateway_node, node_exec_list, flows, nodes):
+    def _deal_cycle_flow(_flow_id):
+        for range_index in range(1, GATEWAY_MAX_RANGE_NUM):
+            node_exec_id_list = [n["id"] for n in node_exec_list]
+            flow = flows.get(_flow_id)
+            if not flow:
+                break
+            source_node_id = flow["source"]
+            if source_node_id not in node_exec_id_list:
+                node_exec_list.append({"id": source_node_id, "many_flows": True})
+            else:
+                break
+            node_incoming = nodes.get(source_node_id).get("incoming")
+            if isinstance(node_incoming, str):
+                _flow_id = node_incoming
+            elif isinstance(node_incoming, list):
+                for _incoming in node_incoming:
+                    _deal_cycle_flow(_incoming)
+
+    for flow_id in gateway_node.get("incoming"):
+        _deal_cycle_flow(flow_id)
+
+
+def parse_sops_node_order(pipeline_tree):
+    start_event = pipeline_tree.get("start_event")
+    end_event = pipeline_tree.get("end_event")
+    flows = pipeline_tree.get("flows")
+    gateways = pipeline_tree.get("gateways", {})
+    activities = pipeline_tree.get("activities", {})
+    nodes = {
+        **gateways,
+        **activities,
+        start_event.get("id"): start_event,
+        end_event.get("id"): end_event,
+    }
+    node_exec_list = []
+
+    def _parse_sops_node_order(next_flow_id, end_node_id, many_flows=False, end_node_many_flows=False):
+        for _ in range(1, MAX_RANGE_NUM):
+            if isinstance(next_flow_id, str):
+                flow = flows.get(next_flow_id)
+                target_node_id = flow["target"]
+            elif isinstance(next_flow_id, list):
+                converge_flow_id_list = []
+                for _flow_id in next_flow_id:
+                    is_cycle = judge_cycle_flow(_flow_id, flows, nodes)
+                    if not is_cycle:
+                        converge_flow_id_list.append(_flow_id)
+
+                if len(converge_flow_id_list) >= 2:
+                    converge_node_id = get_converge_node_id(
+                        converge_flow_id_list[0], converge_flow_id_list[1], flows, nodes
+                    )
+                    for _flow_id in converge_flow_id_list:
+                        _parse_sops_node_order(_flow_id, converge_node_id, True, False)
+                        node_exec_list.pop()
+                    target_node_id = converge_node_id
+                elif len(converge_flow_id_list) == 1:
+                    flow = flows.get(converge_flow_id_list[0])
+                    target_node_id = flow["target"]
+
+            if target_node_id in [n["id"] for n in node_exec_list]:
+                break
+
+            if target_node_id == end_node_id:
+                node_exec_list.append({"id": target_node_id, "many_flows": end_node_many_flows})
+                break
+            elif isinstance(next_flow_id, list) and len(next_flow_id) == 1:
+                node_exec_list.append({"id": target_node_id, "many_flows": True})
+            else:
+                node_exec_list.append({"id": target_node_id, "many_flows": many_flows})
+
+            current_node = nodes.get(target_node_id)
+            if current_node["type"] in SOPS_CYCLE_GATEWAYS:
+                deal_cycle_flow(current_node, node_exec_list, flows, nodes)
+            next_flow_id = current_node.get("outgoing")
+
+    _parse_sops_node_order(start_event.get("outgoing"), end_event.get("id"), False, False)
+
+    return node_exec_list
 
 
 def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
@@ -38,12 +191,13 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
     def _unfold_pipeline_tree(pipeline_data, status_data, parse_data, parent_step_index_list):
         node_info = {
             **pipeline_data.get("activities", {}),
+            **pipeline_data.get("gateways", {}),
         }
-        location = pipeline_data.get("location", [])
+        node_exec_list = parse_sops_node_order(pipeline_data)
 
-        current_step_index_list = parent_step_index_list + [0]
-        for index, node in enumerate(location):
-            node_id = node["id"]
+        current_step_index_list = parent_step_index_list + [0, ".", 0, "-"]
+        for index, _node in enumerate(node_exec_list):
+            node_id = _node["id"]
             node = node_info.get(node_id)
 
             if not node:
@@ -67,8 +221,19 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
             if node_state in TASK_STATUS_UNFINISHED and parse_data[0] is None and node["type"] != "SubProcess":
                 parse_data[0] = len(parse_data) - 1
 
-            current_step_index_list[-1] += 1
-            current_step_index = ".".join([str(i) for i in current_step_index_list])
+            if node["type"] == "ConvergeGateway":
+                continue
+
+            if _node["many_flows"]:
+                current_step_index_list[-2] += 1
+            else:
+                current_step_index_list[-4] += 1
+                current_step_index_list[-2] = 0
+
+            if node["type"] in SOPS_EXEC_GATEWAYS:
+                continue
+
+            current_step_index = "".join([str(i) for i in current_step_index_list[:-1]])
 
             node_start_time = node_status_info.get("start_time")
             node_finish_time = node_status_info.get("finish_time")
@@ -76,7 +241,7 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
                 "step_name": node["name"],
                 "step_index": current_step_index,
                 "step_id": node_id,
-                "step_duration": node_status_info.get("elapsed_time") or 0,
+                "step_duration": node_status_info.get("elapsed_time") or 1,
                 "step_status": TASK_EXECUTE_STATUS_DICT[node_state],
                 "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[node_state],
                 "start_time": node_start_time and node_start_time.strip(" +0800"),
@@ -90,9 +255,10 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
                         node["pipeline"], node_status_info.get("children"), parse_data, current_step_index_list
                     )
 
-    _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [1])
+    _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [])
     running_index = parse_result[0]
-    parse_result = parse_result[1:]
+    parse_result = [{**item, "current_step_num": index + 1} for index, item in enumerate(parse_result[1:])]
+    total_step_num = len(parse_result)
     task_state = sops_instance_status_map[status_info.get("state")]
     if not is_parse_all:
         if task_state in TASK_STATUS_INIT:
@@ -111,11 +277,14 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
         "task_name": "[标准运维] {}".format(status_info.get("name")),
         "task_status": TASK_EXECUTE_STATUS_DICT[exec_state],
         "task_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_state],
-        "task_duration": status_info.get("elapsed_time") or 0,
+        "task_duration": status_info.get("elapsed_time") or 1,
         "step_data": parse_result,
+        "total_step_num": total_step_num,
         "start_time": start_time and start_time.strip(" +0800"),
         "finish_time": finish_time and finish_time.strip(" +0800"),
         "task_url": task_info.get("task_url"),
+        "task_platform": TAK_PLATFORM_SOPS,
+        "task_id": task_info.get("id"),
     }
     return data
 
@@ -132,7 +301,7 @@ def parse_job_task_tree(task_info, is_parse_all=False):
         if exec_status in TASK_STATUS_UNFINISHED and running_index is None:
             running_index = len(parse_result)
 
-        total_time = step_instance.get("total_time") or 0
+        total_time = step_instance.get("total_time") or 1
         if not total_time:
             total_time = (time.time() * 1000) - start_time
         parse_result.append(
@@ -153,7 +322,8 @@ def parse_job_task_tree(task_info, is_parse_all=False):
     start_time = job_instance_info.get("start_time")
     finish_time = job_instance_info.get("end_time")
     exec_status = job_instance_status_map[job_instance_info["status"]]
-
+    parse_result = [{**item, "current_step_num": index + 1} for index, item in enumerate(parse_result)]
+    total_step_num = len(parse_result)
     if not is_parse_all:
         if exec_status in TASK_STATUS_INIT:
             parse_result = parse_result[:5]
@@ -163,11 +333,14 @@ def parse_job_task_tree(task_info, is_parse_all=False):
             parse_result = parse_result[_start:_end]
         if exec_status in TASK_STATUS_FINISHED:
             parse_result = parse_result[-5:]
-    total_time = job_instance_info.get("total_time") or 0
+    total_time = job_instance_info.get("total_time") or 1
     if not total_time:
         total_time = (time.time() * 1000) - start_time
     data = {
         "task_name": "[作业平台] {}".format(job_instance_info.get("name")),
+        "task_id": job_instance_info.get("job_instance_id"),
+        "task_platform": TAK_PLATFORM_JOB,
+        "total_step_num": total_step_num,
         "task_status": TASK_EXECUTE_STATUS_DICT[exec_status],
         "task_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_status],
         "task_duration": total_time / 1000,

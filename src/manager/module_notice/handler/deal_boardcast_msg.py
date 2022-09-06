@@ -53,7 +53,7 @@ class OriginalBroadcast:
         step_line_list = []
         for step in step_data:
             step_status_str = f"""<font color=\"{step.get("step_status_color")}\">{step.get("step_status")}</font>"""
-            step_line = "Step{} [{}] {}".format(step["step_index"], step_status_str, step["step_name"])
+            step_line = " Step{} [{}] {}".format(step["step_index"], step_status_str, step["step_name"])
             if step["start_time"]:
                 step_line += " [开始时间:{} 耗时{}]".format(step["start_time"], self._format_time(step["step_duration"]))
 
@@ -70,18 +70,17 @@ class OriginalBroadcast:
                 task_start_time, self._format_time(self.parse_result.get("task_duration"))
             )
 
-        self.markdown_content = f"""
-**任务实时播报如下:**
-**任务名:** {self.parse_result.get("task_name")}
-**执行时间:** {task_exec_time}
-**执行状态:** <font color=\"{self.parse_result.get("task_status_color")}\">{self.parse_result.get("task_status")}</font>
-{step_line_list_str}"""
+        self.markdown_content = f""" **任务实时播报如下:**
+ **任务名:** {self.parse_result.get("task_name")}
+ **执行时间:** {task_exec_time}
+ **执行状态:** <font color=\"{self.parse_result.get("task_status_color")}\">{self.parse_result.get("task_status")}</font>
+ {step_line_list_str}"""
 
     def init_text(self):
         step_data = self.parse_result.get("step_data", [])
         step_line_list = []
         for step in step_data:
-            step_line = "Step{} [{}] {}".format(step["step_index"], step["step_status"], step["step_name"])
+            step_line = " Step{} [{}] {}".format(step["step_index"], step["step_status"], step["step_name"])
             if step["start_time"]:
                 step_line += " [开始时间:{} 耗时{}]".format(step["start_time"], self._format_time(step["step_duration"]))
 
@@ -95,11 +94,11 @@ class OriginalBroadcast:
                 task_start_time, self._format_time(self.parse_result.get("task_duration"))
             )
 
-        self.text_content = f"""任务实时播报如下:
-任务名: {self.parse_result.get("task_name")}
-执行时间: {task_exec_time}
-执行状态: [{self.parse_result.get("task_status")}]
-{step_line_list_str}"""
+        self.text_content = f""" 任务实时播报如下:
+ 任务名: {self.parse_result.get("task_name")}
+ 执行时间: {task_exec_time}
+ 执行状态: [{self.parse_result.get("task_status")}]
+ {step_line_list_str}"""
 
     def init_mini_program(self):
         self.mini_program_content = ""
