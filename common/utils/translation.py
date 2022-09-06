@@ -21,6 +21,8 @@ from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
     TencentCloudSDKException,
 )
 from tencentcloud.tmt.v20180321 import models, tmt_client
+from tencentcloud.nlp.v20190408 import nlp_client
+from tencentcloud.nlp.v20190408 import models as nlp_models
 
 TencentCloudSecretId = os.getenv("TENCENT_CLOUD_SECRET_ID", "")
 TencentCloudSecretKey = os.getenv("TENCENT_CLOUD_SECRET_KEY", "")
@@ -32,6 +34,7 @@ class TencentCloudClient:
     def __init__(self):
         cred = credential.Credential(TencentCloudSecretId, TencentCloudSecretKey)
         self.client = tmt_client.TmtClient(cred, "ap-beijing")
+        self.nlp_client = nlp_client.NlpClient(cred, "ap-guangzhou")
 
     def translate_text(self, source_text, target_type, source_type="zh"):
         """
@@ -59,3 +62,23 @@ class TencentCloudClient:
         except Exception as ex:
             logger.exception(ex)
             return source_text
+
+    def chat(self, chat_content):
+        """
+        闲聊
+        @param chat_content:
+        @return:
+        """
+        try:
+            req = nlp_models.ChatBotRequest()
+            params = {"Query": chat_content}
+            req.from_json_string(json.dumps(params))
+            resp = self.nlp_client.ChatBot(req)
+            result = json.loads(resp.to_json_string())
+            result.update({"result": True})
+            return result
+        except TencentCloudSDKException as ex:
+            result = {"result": False, "message": str(ex)}
+        except Exception as ex:
+            result = {"result": False, "message": str(ex)}
+        return result
