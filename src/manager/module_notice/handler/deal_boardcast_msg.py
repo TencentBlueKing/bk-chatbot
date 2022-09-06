@@ -50,7 +50,9 @@ class OriginalBroadcast:
 
     def init_markdown(self):
         step_data = self.parse_result.get("step_data", [])
+        else_executing_step_list = self.parse_result.get("else_executing_step_list", [])
         step_line_list = []
+        else_executing_line_list = []
         for step in step_data:
             step_status_str = f"""<font color=\"{step.get("step_status_color")}\">{step.get("step_status")}</font>"""
             step_line = " Step{} [{}] {}".format(step["step_index"], step_status_str, step["step_name"])
@@ -58,11 +60,22 @@ class OriginalBroadcast:
                 step_line += " [开始时间:{} 耗时{}]".format(step["start_time"], self._format_time(step["step_duration"]))
 
             if step["step_status"] == "执行中":
-                step_line = f"**{step_line}**"
+                step_line = step_line.strip(" ")
+                step_line = f" **{step_line}**"
 
             step_line_list.append(step_line)
 
+        for step in else_executing_step_list:
+            step_status_str = f"""<font color=\"{step.get("step_status_color")}\">{step.get("step_status")}</font>"""
+            step_line = "Step{} [{}] {}".format(step["step_index"], step_status_str, step["step_name"])
+            if step["start_time"]:
+                step_line += " [开始时间:{} 耗时{}]".format(step["start_time"], self._format_time(step["step_duration"]))
+
+            step_line = f" **{step_line}**"
+            else_executing_line_list.append(step_line)
+
         step_line_list_str = "\n".join(step_line_list)
+        else_executing_line_list_str = "\n".join(else_executing_line_list)
         task_start_time = self.parse_result.get("start_time")
         task_exec_time = "开始时间:-- 耗时--"
         if task_start_time:
@@ -80,10 +93,16 @@ class OriginalBroadcast:
             f"""({step_schedule})
 {step_line_list_str}"""
         )
+        if else_executing_step_list:
+            self.markdown_content = f"""{self.markdown_content}
+ ...
+{else_executing_line_list_str}"""
 
     def init_text(self):
         step_data = self.parse_result.get("step_data", [])
+        else_executing_step_list = self.parse_result.get("else_executing_step_list", [])
         step_line_list = []
+        else_executing_line_list = []
         for step in step_data:
             step_line = " Step{} [{}] {}".format(step["step_index"], step["step_status"], step["step_name"])
             if step["start_time"]:
@@ -91,7 +110,15 @@ class OriginalBroadcast:
 
             step_line_list.append(step_line)
 
+        for step in else_executing_step_list:
+            step_line = " Step{} [{}] {}".format(step["step_index"], step["step_status"], step["step_name"])
+            if step["start_time"]:
+                step_line += " [开始时间:{} 耗时{}]".format(step["start_time"], self._format_time(step["step_duration"]))
+
+            else_executing_line_list.append(step_line)
+
         step_line_list_str = "\n".join(step_line_list)
+        else_executing_line_list_str = "\n".join(else_executing_line_list)
         task_start_time = self.parse_result.get("start_time")
         task_exec_time = "开始时间:-- 耗时--"
         if task_start_time:
@@ -106,6 +133,12 @@ class OriginalBroadcast:
  执行时间: {task_exec_time}
  执行状态: [{self.parse_result.get("task_status")}]({step_schedule})
 {step_line_list_str}"""
+
+        if else_executing_line_list:
+            self.text_content = f"""{self.text_content}
+ ...
+{else_executing_line_list_str}
+            """
 
     def init_mini_program(self):
         self.mini_program_content = ""
