@@ -248,8 +248,8 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
                 "step_duration": node_status_info.get("elapsed_time") or 1,
                 "step_status": TASK_EXECUTE_STATUS_DICT[node_state],
                 "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[node_state],
-                "start_time": node_start_time and node_start_time.strip(" +0800"),
-                "finish_time": node_finish_time and node_finish_time.strip(" +0800"),
+                "start_time": node_start_time and node_start_time.replace(" +0800", ""),
+                "finish_time": node_finish_time and node_finish_time.replace(" +0800", ""),
             }
 
             parse_data.append(current_parse_data)
@@ -274,12 +274,16 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
                 current_step_num = index + 1
                 break
 
+    else_executing_step_list = []
     if not is_parse_all:
         if task_state in TASK_STATUS_INIT:
             parse_result = parse_result[:5]
         if task_state in TASK_STATUS_UNFINISHED:
             _start = running_index - 2 if running_index - 2 > 0 else 0
             _end = running_index + 3
+            for step in parse_result[_end:]:
+                if step["step_status"] in {"执行中", "执行失败"}:
+                    else_executing_step_list.append(step)
             parse_result = parse_result[_start:_end]
         if task_state in TASK_STATUS_SUCCESS:
             parse_result = parse_result[-5:]
@@ -295,8 +299,9 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
         "step_data": parse_result,
         "total_step_num": total_step_num,
         "current_step_num": current_step_num,
-        "start_time": start_time and start_time.strip(" +0800"),
-        "finish_time": finish_time and finish_time.strip(" +0800"),
+        "else_executing_step_list": else_executing_step_list,
+        "start_time": start_time and start_time.replace(" +0800", ""),
+        "finish_time": finish_time and finish_time.replace(" +0800", ""),
         "task_url": task_info.get("task_url"),
         "task_platform": TAK_PLATFORM_SOPS,
         "task_id": task_info.get("id"),
