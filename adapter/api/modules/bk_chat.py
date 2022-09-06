@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from django.utils.translation import ugettext_lazy as _
 
 from adapter.api.base import BaseApi, ProxyDataAPI
@@ -27,6 +26,7 @@ class _BkChatApi(BaseApi):
         self.send_msg = ProxyDataAPI(_("发送消息"))
         self.corpus_intent_create = ProxyDataAPI(_("语料意图添加"))
         self.send_msg_v3 = ProxyDataAPI(_("发送消息(新)"))
+        self.send_broadcast = ProxyDataAPI(_("发送消息(新)"))
 
 
 BkChatApi = _BkChatApi()

@@ -92,3 +92,13 @@ class BkChat:
             "headers": headers,
         }
         return BkChatApi.send_msg_v3(params=params, headers=set_im_headers, raw=True)
+
+    @classmethod
+    def send_broadcast(cls, broadcast_body):
+        """
+        推送任务实时播报
+        @param broadcast_body: 播报内容结构体
+        @return:
+        """
+        params = {**broadcast_body}
+        return BkChatApi.send_broadcast(params=params, raw=True)

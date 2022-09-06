@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from django.utils.translation import ugettext_lazy as _
 
 from adapter.api.base import DataAPI
-from adapter.sites.ieod.config.domains import BK_CHAT_APIGW
+from adapter.sites.ieod.config.domains import BK_CHAT_APIGW,BK_CHAT_NEW_APIGW
 
 
 class _BkChatApi:
@@ -46,6 +46,15 @@ class _BkChatApi:
             method="POST",
             url=BK_CHAT_APIGW + "im/api/v1/send_msg",
             description=_("新发送消息"),
+            module=self.MODULE,
+        )
+
+    @property
+    def send_broadcast(self):
+        return DataAPI(
+            method="POST",
+            url=BK_CHAT_NEW_APIGW + "api/v1/send_broadcast",
+            description=_("推送任务实时播报"),
             module=self.MODULE,
         )
 

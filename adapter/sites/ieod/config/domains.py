@@ -57,3 +57,6 @@ BK_ITSM_APIGW = settings.BK_ITSM_APIGW
 
 # bkchat接口
 BK_CHAT_APIGW = settings.BK_CHAT_APIGW
+
+# bkchat新网关接口
+BK_CHAT_NEW_APIGW = settings.BK_CHAT_NEW_APIGW
