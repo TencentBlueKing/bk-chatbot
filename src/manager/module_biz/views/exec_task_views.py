@@ -206,6 +206,8 @@ class ExecTaskViewSet(BaseViewSet):
             status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
             parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all)
 
+        parse_result.update({"start_user": operator})
+
         return Response(parse_result)
 
     @login_exempt_with_perm
