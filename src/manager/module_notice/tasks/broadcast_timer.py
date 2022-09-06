@@ -91,6 +91,7 @@ def task_broadcast(broadcast_id):
             {
                 "broadcast_id": broadcast_id,
                 "session_info": session_info,
+                "start_user": operator,
             }
         )
         result = BkChat.send_broadcast(parse_result)
