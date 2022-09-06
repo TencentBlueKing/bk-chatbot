@@ -87,7 +87,12 @@ def task_broadcast(broadcast_id):
         broadcast_obj.save()
 
     if is_send_msg and session_info:
-        parse_result.update({"broadcast_id": broadcast_id, "session_info": session_info})
+        parse_result.update(
+            {
+                "broadcast_id": broadcast_id,
+                "session_info": session_info,
+            }
+        )
         result = BkChat.send_broadcast(parse_result)
         if result["code"] != 0:
             logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")

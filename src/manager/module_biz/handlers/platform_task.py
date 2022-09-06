@@ -28,9 +28,13 @@ from src.manager.handler.api.bk_job import job_instance_status_map
 TASK_STATUS_INIT = {
     TaskExecStatus.INIT.value,
 }
-TASK_STATUS_UNFINISHED = {TaskExecStatus.RUNNING.value, TaskExecStatus.FAIL.value, TaskExecStatus.SUSPENDED.value}
-TASK_STATUS_FINISHED = {TaskExecStatus.REMOVE.value, TaskExecStatus.SUCCESS.value}
-TASK_STATUS_FINISHED = {}
+TASK_STATUS_UNFINISHED = {
+    TaskExecStatus.RUNNING.value,
+    TaskExecStatus.FAIL.value,
+    TaskExecStatus.SUSPENDED.value,
+    TaskExecStatus.REMOVE.value,
+}
+TASK_STATUS_SUCCESS = {TaskExecStatus.SUCCESS.value}
 # 标准运维除过汇聚网关的网关
 SOPS_EXEC_GATEWAYS = {"ExclusiveGateway", "ParallelGateway", "ConditionalParallelGateway"}
 
@@ -204,7 +208,7 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
                 continue
 
             current_task_state = sops_instance_status_map[status_info.get("state")]
-            if current_task_state in TASK_STATUS_FINISHED:
+            if current_task_state in TASK_STATUS_SUCCESS:
                 default_status_info = {}
             else:
                 default_status_info = {
@@ -257,9 +261,19 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
     _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [])
     running_index = parse_result[0]
-    parse_result = [{**item, "current_step_num": index + 1} for index, item in enumerate(parse_result[1:])]
+    parse_result = parse_result[1:]
     total_step_num = len(parse_result)
     task_state = sops_instance_status_map[status_info.get("state")]
+    if task_state in TASK_STATUS_INIT:
+        current_step_num = 0
+    elif task_state in TASK_STATUS_SUCCESS:
+        current_step_num = total_step_num
+    else:
+        for index, item in enumerate(parse_result):
+            if item["step_status"] in {"执行中", "执行失败"}:
+                current_step_num = index + 1
+                break
+
     if not is_parse_all:
         if task_state in TASK_STATUS_INIT:
             parse_result = parse_result[:5]
@@ -267,7 +281,7 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
             _start = running_index - 2 if running_index - 2 > 0 else 0
             _end = running_index + 3
             parse_result = parse_result[_start:_end]
-        if task_state in TASK_STATUS_FINISHED:
+        if task_state in TASK_STATUS_SUCCESS:
             parse_result = parse_result[-5:]
 
     start_time = status_info.get("start_time")
@@ -280,6 +294,7 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
         "task_duration": status_info.get("elapsed_time") or 1,
         "step_data": parse_result,
         "total_step_num": total_step_num,
+        "current_step_num": current_step_num,
         "start_time": start_time and start_time.strip(" +0800"),
         "finish_time": finish_time and finish_time.strip(" +0800"),
         "task_url": task_info.get("task_url"),
@@ -322,8 +337,19 @@ def parse_job_task_tree(task_info, is_parse_all=False):
     start_time = job_instance_info.get("start_time")
     finish_time = job_instance_info.get("end_time")
     exec_status = job_instance_status_map[job_instance_info["status"]]
-    parse_result = [{**item, "current_step_num": index + 1} for index, item in enumerate(parse_result)]
+    parse_result = [{**item, "step_num": index + 1} for index, item in enumerate(parse_result)]
     total_step_num = len(parse_result)
+
+    if exec_status in TASK_STATUS_INIT:
+        current_step_num = 0
+    elif exec_status in TASK_STATUS_SUCCESS:
+        current_step_num = total_step_num
+    else:
+        for index, item in enumerate(parse_result):
+            if item["step_status"] in {"执行中", "执行失败", "执行终止"}:
+                current_step_num = index + 1
+                break
+
     if not is_parse_all:
         if exec_status in TASK_STATUS_INIT:
             parse_result = parse_result[:5]
@@ -331,8 +357,9 @@ def parse_job_task_tree(task_info, is_parse_all=False):
             _start = running_index - 2 if running_index - 2 > 0 else 0
             _end = running_index + 3
             parse_result = parse_result[_start:_end]
-        if exec_status in TASK_STATUS_FINISHED:
+        if exec_status in TASK_STATUS_SUCCESS:
             parse_result = parse_result[-5:]
+
     total_time = job_instance_info.get("total_time") or 1
     if not total_time:
         total_time = (time.time() * 1000) - start_time
@@ -341,6 +368,7 @@ def parse_job_task_tree(task_info, is_parse_all=False):
         "task_id": job_instance_info.get("job_instance_id"),
         "task_platform": TAK_PLATFORM_JOB,
         "total_step_num": total_step_num,
+        "current_step_num": current_step_num,
         "task_status": TASK_EXECUTE_STATUS_DICT[exec_status],
         "task_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_status],
         "task_duration": total_time / 1000,
