@@ -33,7 +33,7 @@ class ChatReplyGwViewSet(BaseViewSet):
     @validation(ChatReplyGWViewSerializer)
     def reply(self, request, *args, **kwargs):
         payload = request.payload
-        chat_content = payload.get("chat_content1")
+        chat_content = payload.get("chat_content")
 
         cli = TencentCloudClient()
         result = cli.chat(chat_content)
