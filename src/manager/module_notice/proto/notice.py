@@ -110,6 +110,14 @@ class ReqPostNoticeGroupSendMsgGWViewSerializer(serializers.Serializer):
     msg_content = serializers.CharField()
 
 
+class ChatReplyGWViewSerializer(serializers.Serializer):
+    """
+    闲聊接口调用协议
+    """
+
+    chat_content = serializers.CharField()
+
+
 class ReqPostTaskBroadStratGWViewSerializer(serializers.Serializer):
     """
     请求任务播报开始协议
