@@ -137,8 +137,7 @@ class OriginalBroadcast:
         if else_executing_line_list:
             self.text_content = f"""{self.text_content}
  ...
-{else_executing_line_list_str}
-            """
+{else_executing_line_list_str}"""
 
     def init_mini_program(self):
         self.mini_program_content = ""
