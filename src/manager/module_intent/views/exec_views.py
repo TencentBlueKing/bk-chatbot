@@ -12,6 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import os
 import time
 
 from django.utils.decorators import method_decorator
@@ -46,6 +47,11 @@ from src.manager.module_intent.proto.log import (
     log_describe_records_docs,
     log_list_docs,
 )
+from src.manager.handler.api.bk_sops import SOPS
+
+BKAPP_JOB_HOST = os.getenv("BKAPP_JOB_HOST", "")
+BKAPP_DEVOPS_HOST = os.getenv("BKAPP_DEVOPS_HOST", "")
+BKAPP_SOPS_HOST = os.getenv("BKAPP_SOPS_HOST", "")
 
 
 @method_decorator(name="list", decorator=log_list_docs)
@@ -60,6 +66,20 @@ class ExecutionLogViewSet(BaseGetViewSet):
     filterset_class = ExecutionLog.OpenApiFilter
     throttle_classes = [ChatBotThrottle]
     ordering = "-created_at"
+
+    def list(self, request, *args, **kwargs):
+        username = request.user.username
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            data = self.make_task_url(username, serializer.data)
+            return self.get_paginated_response(data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        data = self.make_task_url(username, serializer.data)
+        return Response(data)
 
     @action(detail=False, methods=["POST"])
     def describe_records(self, request):
@@ -94,6 +114,33 @@ class ExecutionLogViewSet(BaseGetViewSet):
             )
 
         return Response({"data": data})
+
+    @staticmethod
+    def make_task_url(username, task_data):
+        result = SOPS().get_user_project_list(username)
+        sop_biz_project_map = {}
+        if result["result"]:
+            sop_biz_project_map = {item["bk_biz_id"]: item["project_id"] for item in result["data"]}
+
+        data = []
+        for item in task_data:
+            task_url = ""
+            if item["platform"] == ExecutionLog.PlatformType.SOPS.value:
+                project_id = sop_biz_project_map.get(item["biz_id"])
+                if project_id:
+                    task_url = "{}/taskflow/execute/{}/?instance_id={}".format(
+                        BKAPP_SOPS_HOST, project_id, item["task_id"]
+                    )
+                else:
+                    task_url = None
+            if item["platform"] == ExecutionLog.PlatformType.JOB.value:
+                task_url = "{}/biz/{}/execute/task/{}".format(BKAPP_JOB_HOST, item["biz_id"], item["task_id"])
+            if item["platform"] == ExecutionLog.PlatformType.DEV_OPS.value:
+                task_url = "{}/console/pipeline/{}/{}/detail/{}".format(
+                    BKAPP_DEVOPS_HOST, item["project_id"], item["feature_id"], item["task_id"]
+                )
+            data.append({"task_url": task_url, **item})
+        return data
 
 
 @method_decorator(name="list", decorator=exec_log_list_apigw_docs)

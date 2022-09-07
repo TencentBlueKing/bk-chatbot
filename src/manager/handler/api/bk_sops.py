@@ -214,3 +214,14 @@ class SOPS:
         }
         rsp = SopsApi.get_tasks_status(params, raw=True)
         return rsp
+
+    @classmethod
+    def get_user_project_list(cls, bk_username: str):
+        """
+        获取用户有权限的项目列表
+        """
+        params = {
+            "bk_username": bk_username,
+        }
+        rsp = SopsApi.get_user_project_list(params, raw=True)
+        return rsp
