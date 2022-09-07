@@ -37,6 +37,10 @@ class ExecutionLogSerializer(serializers.ModelSerializer):
             "platform",
             "params",
             "created_at",
+            "project_id",
+            "feature_id",
+            "task_id",
+            "biz_id",
         ]
 
 

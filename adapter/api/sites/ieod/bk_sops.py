@@ -136,5 +136,14 @@ class _SopsApi:
             module=self.MODULE,
         )
 
+    @property
+    def get_user_project_list(self):
+        return DataAPI(
+            method="GET",
+            url=SOPS_APIGW + "/get_user_project_list/",
+            description="获取用户有权限的项目列表",
+            module=self.MODULE,
+        )
+
 
 SopsApi = _SopsApi()
