@@ -95,7 +95,7 @@ class OriginalAlarm:
         self.anomaly_message = "".join(
             [f"{v.get('anomaly_message')}" for k, v in origin_alarm.get("anomaly", {}).items()]
         )
-        # 异常告警信息的data
+        # 异常告警信息的
         origin_alarm_data = origin_alarm.get("data", {})  # 异常数据
         self.origin_alarm_value = origin_alarm_data.get("value")  # 异常值
         # 异常维度信息
@@ -131,6 +131,12 @@ class OriginalAlarm:
             self.alarm_dimension += f",目标IP={self.bk_target_ip}"
         if self.device_name:
             self.alarm_dimension += f",设备名={self.device_name}"
+
+        # 如果出现alarm_dimension为空通过获取所有key,value进行操作
+        if not self.alarm_dimension:
+            self.alarm_dimension = ",".join([f'{k}={v.get("value")}' for k, v in dimension_translation.items()])
+            # 设置IP
+            self.bk_target_ip = dimension_translation.get("serverIp", {}).get("value")
         # 全部维度
         self.dimensions = origin_alarm.get("dimensions", {})
 
@@ -141,28 +147,6 @@ class OriginalAlarm:
         """
         strategy = self.info.get("strategy")
         self.strategy_name = strategy.get("name")
-
-    def get_markdown(self):
-        """
-        获取markdown
-        @return:
-        """
-        self.all_dimensions = "\n                    ".join(
-            [f"{k} = {v}" for k, v in self.dimensions.items()],
-        )
-        content = f"""`告警业务:` {self.bk_biz_name}
-`策略名称:` {self.strategy_name}
-`告警级别:` {self.event_level_name}
-`首次异常:` {self.begin_time}
-`最近异常:` {self.create_time}
-`告警内容:` {self.anomaly_message}
-`当前数值:` {self.origin_alarm_value}
-`告警目标:` {self.bk_target_ip}
-`告警维度:` {self.alarm_dimension}
-`关联信息:` {self.relation_info}
-`全部维度:` {self.all_dimensions}"""
-
-        return self.content_translated(content)
 
     def get_text(self):
         """
@@ -200,8 +184,8 @@ class OriginalAlarm:
         @return:
         """
         params = {
-            "msg_type": "markdown",
-            "msg_param": {"content": self.get_markdown()},
+            "msg_type": "text",
+            "msg_param": {"content": self.get_text()},
         }
         return params
 
@@ -211,8 +195,8 @@ class OriginalAlarm:
         @return:
         """
         params = {
-            "msg_type": "markdown",
-            "msg_param": {"content": self.get_markdown()},
+            "msg_type": "text",
+            "msg_param": {"content": self.get_text()},
         }
         return params
 
