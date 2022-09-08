@@ -85,6 +85,7 @@ class FAQModel(BaseModel):
     faq_collection = models.CharField(_("知识库表名"), default="", max_length=128)
     num = models.CharField(_("QA数量"), default="", max_length=128)
     member = models.TextField(_("维护人员"), default="")
+    remote_url = models.URLField("远程知识库的数据url", default="")
 
     class Meta:
         db_table = "tab_faq"
