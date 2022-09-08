@@ -38,7 +38,7 @@ class DevOps:
         获取项目的流水线列表
         """
 
-        params = {"bk_username": bk_username}
+        params = {"bk_username": bk_username, "pageSize": 500}
         ret = DevOpsApi.app_project_list(params=params, raw=True)
         return ret
 

@@ -12,7 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
+import json
 from typing import Any
 
 from adapter.api import BkChatApi
@@ -102,3 +102,60 @@ class BkChat:
         """
         params = {**broadcast_body}
         return BkChatApi.send_broadcast(params=params, raw=True)
+
+    @classmethod
+    def msg_push(cls, topic, key, value):
+        """
+        数据上报
+        @param topic:
+        @param key:
+        @param value:
+        @return:
+        """
+        params = {
+            "topic": topic,
+            "key": key,
+            "value": value,
+        }
+        return BkChatApi.msg_push(params=params)
+
+
+class BkChatFeature(BkChat):
+    @classmethod
+    def send_msg_and_report(cls, im, msg_type, msg_param, receiver, headers, raw_data: dict):
+        """
+        发送消息并且上报信息
+        @param im:
+        @param msg_type:
+        @param msg_param:
+        @param receiver:
+        @param headers:
+        @return:
+        """
+        # 发送消息
+        ret_send_msg = cls.new_send_msg(im, msg_type, msg_param, receiver, headers)
+        # 数据存储
+        raw_data.setdefault("send_result", ret_send_msg.get("code") == 0)
+        # 数据上报
+        topic = raw_data.get("topic", "bkchat_saas")  # 获取topic
+        key = raw_data.get("kafka_key", "bkchat")  # 获取key
+        ret_reported = cls.msg_push(topic, key, json.dumps(raw_data))
+        return ret_reported
+
+    @classmethod
+    def get_new_send_msg_task(cls, im, msg_type, msg_param, receiver, headers, raw_data):
+        """
+
+        @param im:
+        @param msg_type:
+        @param msg_param:
+        @param receiver:
+        @param headers:
+        @param raw_data:
+        @return:
+        """
+
+        return {
+            "func": cls.send_msg_and_report,
+            "args": (im, msg_type, msg_param, receiver, headers, raw_data),
+        }

@@ -20,13 +20,14 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.design.my_asyncio import MyAsyncio
 from common.drf.decorator import set_cookie_biz_id
 from common.drf.validation import validation
 from common.drf.view_set import BaseManageViewSet, BaseViewSet
 from common.http.request import get_request_biz_id
 from common.perm.permission import login_exempt_with_perm
 from src.manager.common.perm import check_biz_perm
-from src.manager.handler.api.bk_chat import BkChat
+from src.manager.handler.api.bk_chat import BkChatFeature
 from src.manager.module_notice.handler.action import DelAction, EditAction, SaveAction
 from src.manager.module_notice.handler.deal_alarm_msg import OriginalAlarm
 from src.manager.module_notice.handler.notice_cache import get_config_info
@@ -90,7 +91,7 @@ class AlarmNoticeViewSet(BaseViewSet):
             translation_type=translation_type,
         )  # 原始告警
 
-        # 如果相同的发送类型可以只调用一次翻译接口
+        tasks = []
         for notice_group in config_info.get("notice_groups", []):
             im_type = notice_group.get("im")
             # 通过im获取不同
@@ -99,16 +100,25 @@ class AlarmNoticeViewSet(BaseViewSet):
             # 处理headers
             headers = params.get("headers", {})
             headers.update(**notice_group.get("headers"))
-
             # 更新数据到请求参数中
             params.update(
                 **{
                     "im": im_type,
                     "headers": headers,
                     "receiver": notice_group.get("receiver"),
+                    "raw_data": payload,
                 }
             )
-            BkChat.new_send_msg(**params)
+            # 获取请求参数
+            tasks.append(BkChatFeature.get_new_send_msg_task(**params))
+
+        # 如果任务为则取消
+        if len(tasks) == 0:
+            return Response({"data": []})
+
+        # 异步处理
+        with MyAsyncio() as go:
+            go.async_run_until_complete(tasks)
         return Response({"data": []})
 
     @action(detail=False, methods=["POST"])

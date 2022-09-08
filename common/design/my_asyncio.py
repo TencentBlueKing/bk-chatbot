@@ -25,14 +25,69 @@ class MyAsyncio:
         asyncio.set_event_loop(new_loop)
         self.loop = asyncio.get_event_loop()
 
-    def run_until_complete(self, tasks):
+    async def __make_async(self, func, *args):
         """
-        执行任务
+        生成异步任务
+        @param func:
+        @param args:
+        @return:
+        """
+        loop = asyncio.get_event_loop()
+        # 实际利用多线程异步解决
+        future = loop.run_in_executor(None, func, *args)
+        resp = await future
+        return resp
+
+    def async_run_until_complete(self, tasks):
+        """
+        把同步任务异步执行
         @param tasks:
         @return:
         """
+
+        # 创建异步任务
+        async_tasks = list(
+            map(
+                lambda x: self.__make_async(x.get("func"), *x.get("args")),
+                tasks,
+            )
+        )
+
+        # 异步执行任务
+        data, _ = self.loop.run_until_complete(asyncio.wait(async_tasks))
+        return data
+
+    def run_until_complete(self, tasks):
+        """
+        直接执行异步任务
+        @param tasks:
+        @return:
+        """
+        # 异步执行任务
         data, _ = self.loop.run_until_complete(asyncio.wait(tasks))
         return data
+
+    @classmethod
+    def __get_single_result(self, ret):
+        """
+        获取单个处理结果
+        @param ret:
+        @return:
+        """
+        exception = ret.exception()
+        if exception:
+            return exception
+        return ret.result()
+
+    @classmethod
+    def get_task_result(cls, data):
+        """
+        批量获取结果
+        @param data:
+        @return:
+        """
+        result_list = list(map(lambda x: cls.__get_single_result(x), data))
+        return result_list
 
     def __enter__(self):
         """
