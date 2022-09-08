@@ -12,7 +12,9 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import json
 
+from blueapps.utils.logger import logger
 
 from common.design.my_asyncio import MyAsyncio
 from src.manager.handler.api.bk_monitor import BkMonitor
@@ -121,11 +123,20 @@ class OtherPlatformAlarm:
             # 删除策略
             if k in self.new_strategy_ids:
                 actions.append(self.action)
-            tasks.append(self._update_single_strategy_action(k, actions))
+            tasks.append(
+                {
+                    "func": self.update_single_strategy_action,
+                    "args": (k, actions),
+                }
+            )
 
         # 如果tasks为空则无需进行处理
         if len(tasks) == 0:
             return
         # 利用协程并发处理
-        with MyAsyncio() as a:
-            a.run_until_complete(tasks)
+        with MyAsyncio() as go:
+            data = go.async_run_until_complete(tasks)
+        # 结果数据保存
+        ret_list = MyAsyncio.get_task_result(data)
+        # 日志记录
+        logger.info({"message": f"更新策略结果:{json.dumps((ret_list))}"})

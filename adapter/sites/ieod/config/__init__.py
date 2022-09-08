@@ -25,7 +25,6 @@ SOPS_APIGW = get_env_or_raise("SOPS_APIGW")  # 标准运维
 BKMONITOR_APIGW = get_env_or_raise("BKMONITOR_APIGW")  # 蓝鲸监控
 BK_ITSM_APIGW = get_env_or_raise("BK_ITSM_APIGW")  # 蓝鲸流程管理
 BK_CHAT_APIGW = get_env_or_raise("BK_CHAT_APIGW")  # 蓝鲸信息流
-BK_CHAT_NEW_APIGW = get_env_or_raise("BK_CHAT_NEW_APIGW")  # 蓝鲸信息流
 LOG_SEARCH_APIGW = get_env_or_raise("LOG_SEARCH_APIGW")  # 日志平台
 NODEMAN_APIGW = get_env_or_raise("NODEMAN_APIGW")  # 节点管理
 DEVOPS_APIGW = get_env_or_raise("DEVOPS_APIGW")  # 蓝盾
