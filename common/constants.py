@@ -93,3 +93,6 @@ DEVOPS_HOST = get_env_or_raise("BKAPP_DEVOPS_HOST")
 USER_VISIT = "USER_VISIT"
 
 MAX_WORKER = 10  # 多线程执行最大线程数
+
+
+BKCHAT_CACHE_PREFIX = get_env_or_raise("BKCHAT_CACHE_PREFIX", "bkchat")

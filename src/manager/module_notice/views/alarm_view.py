@@ -28,6 +28,7 @@ from common.http.request import get_request_biz_id
 from common.perm.permission import login_exempt_with_perm
 from src.manager.common.perm import check_biz_perm
 from src.manager.handler.api.bk_chat import BkChatFeature
+from src.manager.module_notice.constants import ALARM
 from src.manager.module_notice.handler.action import DelAction, EditAction, SaveAction
 from src.manager.module_notice.handler.deal_alarm_msg import OriginalAlarm
 from src.manager.module_notice.handler.notice_cache import get_config_info
@@ -106,11 +107,27 @@ class AlarmNoticeViewSet(BaseViewSet):
                     "im": im_type,
                     "headers": headers,
                     "receiver": notice_group.get("receiver"),
-                    "raw_data": payload,
                 }
             )
+
+            # 发送消息
+            send_data = {
+                "biz_name": payload.get("bk_biz_name"),
+                "biz_id": payload.get("bk_biz_id"),
+                "msg_source": ALARM,  # 消息类型 alarm、custom、broadcast
+                "msg_data": params,  # 消息数据
+                "im_platform": notice_group.get("im_platform"),  # 平台
+                "group_name": notice_group.get("notice_group_name"),  # 群组名称
+                "raw_data": payload,  # 原始数据
+            }
+
             # 获取请求参数
-            tasks.append(BkChatFeature.get_new_send_msg_task(**params))
+            tasks.append(
+                {
+                    "func": BkChatFeature.send_msg_and_report,
+                    "args": (send_data,),
+                }
+            )
 
         # 如果任务为则取消
         if len(tasks) == 0:

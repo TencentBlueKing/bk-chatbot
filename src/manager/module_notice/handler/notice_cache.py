@@ -15,6 +15,7 @@ specific language governing permissions and limitations under the License.
 import json
 
 from common.redis import RedisClient
+from src.manager.module_notice.constants import NOTICE_GROUP_PREFIX
 from src.manager.module_notice.models import (
     AlarmStrategyModel,
     NoticeGroupModel,
@@ -28,6 +29,7 @@ def get_notice_group_data(notice_group_ids):
     """
     notice_groups = NoticeGroupModel.objects.filter(id__in=notice_group_ids).values(
         "id",
+        "name",
         "trigger_id",
         "biz_id",
         "group_type",
@@ -37,14 +39,16 @@ def get_notice_group_data(notice_group_ids):
     for notice_group in notice_groups:
         # 缓存数据获取
         with RedisClient() as r:
-            notice_group_data = r.get(f"""notice_group_{notice_group.get("id")}""")
+            notice_group_data = r.get(f"""{NOTICE_GROUP_PREFIX}_{notice_group.get("id")}""")
             if not notice_group_data:
                 # 查询出对应的触发器然后调用
                 t_id = notice_group.get("trigger_id")
                 trigger_obj = TriggerModel.objects.get(id=t_id)
                 notice_group_data = {
                     "notice_group": notice_group.get("id"),
+                    "notice_group_name": notice_group.get("name"),
                     "im": trigger_obj.im_type_id,
+                    "im_platform": trigger_obj.im_platform,
                     "headers": trigger_obj.info,
                     "receiver": {},
                 }
@@ -55,7 +59,7 @@ def get_notice_group_data(notice_group_ids):
                         "receiver_type": group_type,
                         "receiver_ids": receiver_ids,
                     }
-                r.set(f"""notice_group_{notice_group.get("id")}""", json.dumps(notice_group_data), 60)
+                r.set(f"""{NOTICE_GROUP_PREFIX}_{notice_group.get("id")}""", json.dumps(notice_group_data), 60)
             else:
                 notice_group_data = json.loads(notice_group_data)
             notice_groups_data.append(notice_group_data)

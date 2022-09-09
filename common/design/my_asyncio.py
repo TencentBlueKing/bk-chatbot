@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 import asyncio
+import traceback
 
 
 class MyAsyncio:
@@ -35,8 +36,11 @@ class MyAsyncio:
         loop = asyncio.get_event_loop()
         # 实际利用多线程异步解决
         future = loop.run_in_executor(None, func, *args)
-        resp = await future
-        return resp
+        try:
+            resp = await future
+            return resp
+        except Exception:
+            traceback.print_exc()
 
     def async_run_until_complete(self, tasks):
         """
