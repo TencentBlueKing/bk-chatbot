@@ -196,7 +196,7 @@ REST_FRAMEWORK = {
 BK_API_USE_BKCLOUDS_FIRST = True
 BK_API_USE_TEST_ENV = False
 
-TEMPLATES[0]["DIRS"] += (os.path.join(BASE_DIR, "static", "dist"),)
+TEMPLATES[0]["DIRS"] += (os.path.join(BASE_DIR, "src/manager/static", "dist"),)
 
 CORS_ALLOW_CREDENTIALS = True
 

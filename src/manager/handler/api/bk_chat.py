@@ -16,6 +16,7 @@ import json
 from typing import Any
 
 from adapter.api import BkChatApi
+from common.utils.time import mk_now_time
 
 
 def set_im_headers(params):
@@ -122,40 +123,27 @@ class BkChat:
 
 class BkChatFeature(BkChat):
     @classmethod
-    def send_msg_and_report(cls, im, msg_type, msg_param, receiver, headers, raw_data: dict):
+    def send_msg_and_report(cls, data):
         """
-        发送消息并且上报信息
-        @param im:
-        @param msg_type:
-        @param msg_param:
-        @param receiver:
-        @param headers:
-        @return:
-        """
-        # 发送消息
-        ret_send_msg = cls.new_send_msg(im, msg_type, msg_param, receiver, headers)
-        # 数据存储
-        raw_data.setdefault("send_result", ret_send_msg.get("code") == 0)
-        # 数据上报
-        topic = raw_data.get("topic", "bkchat_saas")  # 获取topic
-        key = raw_data.get("kafka_key", "bkchat")  # 获取key
-        ret_reported = cls.msg_push(topic, key, json.dumps(raw_data))
-        return ret_reported
-
-    @classmethod
-    def get_new_send_msg_task(cls, im, msg_type, msg_param, receiver, headers, raw_data):
-        """
-
-        @param im:
-        @param msg_type:
-        @param msg_param:
-        @param receiver:
-        @param headers:
-        @param raw_data:
-        @return:
-        """
-
-        return {
-            "func": cls.send_msg_and_report,
-            "args": (im, msg_type, msg_param, receiver, headers, raw_data),
+        {
+            "biz_name": "string",    # 业务名称
+            "biz_id": int,           # 业务id
+            "msg_source": "string",  # 消息来源 alarm、custom、broadcast
+            "msg_data": dict,        # 消息数据
+            "im_platform": "string", # 平台
+            "group_name": "string",  # 群组名称
+            "raw_data": dict,        # 原始数据
         }
+        """
+        msg_data = data.get("msg_data", {})
+        # 消息发送
+        ret_send_msg = cls.new_send_msg(**msg_data)
+        # 值设置
+        data.setdefault("send_time", mk_now_time())  # 设置发送时间
+        data.setdefault("send_result", ret_send_msg.get("code") == 0)  # 设置发送结果
+        data.setdefault("msg_type", msg_data.get("im"))  # 设置消息发送结果
+
+        topic = data.get("topic", "bkchat_saas")  # 获取topic
+        key = data.get("kafka_key", "bkchat")  # 获取key
+        ret_reported = cls.msg_push(topic, key, json.dumps(data))
+        return ret_reported
