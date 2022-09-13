@@ -453,7 +453,11 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
 
     start_time = pipeline_data.get("startTime")
     finish_time = pipeline_data.get("endTime")
-    total_time = pipeline_data.get("executeTime")
+    current_timestamp = pipeline_data.get("currentTimestamp")
+    if current_timestamp:
+        total_time = current_timestamp - start_time
+    else:
+        total_time = 0
     total_step_num = len(parse_result)
     task_status = dev_ops_instance_status_map[pipeline_data.get("status")]
 
