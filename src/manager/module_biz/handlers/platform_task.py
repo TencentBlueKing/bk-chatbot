@@ -405,7 +405,7 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
                 container_total_time = None
                 container_finish_time = None
             else:
-                container_total_time = container.get("elementElapsed") + container.get("systemElapsed")
+                container_total_time = container.get("elementElapsed", 0) + container.get("systemElapsed", 0)
                 container_finish_time = container_start_time + container_total_time
             parse_result.append(
                 {
