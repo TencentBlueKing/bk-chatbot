@@ -20,3 +20,4 @@ from .settings import BKCHAT_INSTALLED_APPS
 
 # 过滤出包含的url
 urlpatterns = list(map(lambda app_dir: url(r"^api/v1/", include(f"{app_dir}.urls")), BKCHAT_INSTALLED_APPS))
+urlpatterns += (url(r"^", include("src.manager.module_index.urls")),)
