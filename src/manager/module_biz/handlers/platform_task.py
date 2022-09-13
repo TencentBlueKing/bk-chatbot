@@ -14,6 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 import os
 import time
+import math
 
 from common.constants import (
     TASK_EXECUTE_STATUS_DICT,
@@ -21,9 +22,11 @@ from common.constants import (
     TaskExecStatus,
     TAK_PLATFORM_JOB,
     TAK_PLATFORM_SOPS,
+    TAK_PLATFORM_DEVOPS,
 )
 from src.manager.handler.api.bk_sops import sops_instance_status_map
 from src.manager.handler.api.bk_job import job_instance_status_map
+from src.manager.handler.api.devops import dev_ops_instance_status_map
 
 TASK_STATUS_INIT = {
     TaskExecStatus.INIT.value,
@@ -41,6 +44,7 @@ SOPS_EXEC_GATEWAYS = {"ExclusiveGateway", "ParallelGateway", "ConditionalParalle
 # 可能存在循环的网关
 SOPS_CYCLE_GATEWAYS = {"ExclusiveGateway", "ConditionalParallelGateway"}
 BKAPP_JOB_HOST = os.getenv("BKAPP_JOB_HOST", "")
+BKAPP_DEVOPS_HOST = os.getenv("BKAPP_DEVOPS_HOST", "")
 
 MAX_RANGE_NUM = 500
 
@@ -329,7 +333,7 @@ def parse_job_task_tree(task_info, is_parse_all=False):
                 "step_name": step_instance.get("name"),
                 "step_index": f"1.{index + 1}",
                 "step_id": str(step_instance.get("step_instance_id")),
-                "step_duration": total_time / 1000,
+                "step_duration": math.ceil(total_time / 1000),
                 "step_status": TASK_EXECUTE_STATUS_DICT[exec_status],
                 "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_status],
                 "start_time": start_time
@@ -375,12 +379,128 @@ def parse_job_task_tree(task_info, is_parse_all=False):
         "current_step_num": current_step_num,
         "task_status": TASK_EXECUTE_STATUS_DICT[exec_status],
         "task_status_color": TASK_EXEC_STATUS_COLOR_DICT[exec_status],
-        "task_duration": total_time / 1000,
+        "task_duration": math.ceil(total_time / 1000),
         "step_data": parse_result,
         "start_time": start_time and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(start_time / 1000))),
         "finish_time": finish_time and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(finish_time / 1000))),
         "task_url": "{}/biz/{}/execute/task/{}".format(
             BKAPP_JOB_HOST, job_instance_info.get("bk_biz_id"), job_instance_info.get("job_instance_id")
+        ),
+    }
+    return data
+
+
+def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
+    pipeline_data = pipeline_info.get("data", {})
+    model = pipeline_data.get("model", {})
+    stages = model.get("stages", [])
+    parse_result = []
+    running_index = None
+    for stage_index, stage in enumerate(stages):
+        containers = stage.get("containers", [])
+        for container_index, container in enumerate(containers):
+            container_status = dev_ops_instance_status_map[container.get("status", "QUEUE")]
+            container_start_time = container.get("startEpoch")
+            if container_status in TASK_STATUS_INIT:
+                container_total_time = None
+                container_finish_time = None
+            else:
+                container_total_time = container.get("elementElapsed") + container.get("systemElapsed")
+                container_finish_time = container_start_time + container_total_time
+            parse_result.append(
+                {
+                    "step_name": container.get("name"),
+                    "step_index": f"{stage_index + 1}-{container_index + 1}",
+                    "is_container": True,
+                    "step_id": container.get("id"),
+                    "step_duration": container_total_time and math.ceil(container_total_time / 1000),
+                    "step_status": TASK_EXECUTE_STATUS_DICT[container_status],
+                    "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[container_status],
+                    "start_time": container_start_time
+                    and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(container_start_time / 1000))),
+                    "finish_time": container_finish_time
+                    and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(container_finish_time / 1000))),
+                }
+            )
+            elements = container.get("elements", [])
+            for element_index, element in enumerate(elements):
+                element_status = dev_ops_instance_status_map[element.get("status", "QUEUE")]
+                element_start_time = element.get("startEpoch", container_start_time)
+                if element_status in TASK_STATUS_INIT:
+                    element_total_time = None
+                    element_finish_time = None
+                else:
+                    element_total_time = element.get("elapsed", 1000)
+                    element_finish_time = element_start_time + element_total_time
+
+                if element_status in TASK_STATUS_UNFINISHED and running_index is None:
+                    running_index = len(parse_result)
+                parse_result.append(
+                    {
+                        "step_name": element.get("name"),
+                        "step_index": f"{stage_index + 1}-{container_index + 1}-{element_index + 1}",
+                        "step_id": element.get("id"),
+                        "is_container": False,
+                        "step_duration": element_total_time and math.ceil(element_total_time / 1000),
+                        "step_status": TASK_EXECUTE_STATUS_DICT[element_status],
+                        "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[element_status],
+                        "start_time": element_start_time
+                        and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(element_start_time / 1000))),
+                        "finish_time": element_finish_time
+                        and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(element_finish_time / 1000))),
+                    }
+                )
+
+    start_time = pipeline_data.get("startTime")
+    finish_time = pipeline_data.get("endTime")
+    total_time = pipeline_data.get("executeTime")
+    total_step_num = len(parse_result)
+    task_status = dev_ops_instance_status_map[pipeline_data.get("status")]
+
+    if task_status in TASK_STATUS_INIT:
+        current_step_num = 0
+    elif task_status in TASK_STATUS_SUCCESS:
+        current_step_num = total_step_num
+    else:
+        for index, item in enumerate(parse_result):
+            if running_index is None:
+                if item["step_status"] in {"执行中", "执行失败", "执行终止"}:
+                    current_step_num = index + 1
+                    break
+            else:
+                if not item["is_container"] and item["step_status"] in {"执行中", "执行失败", "执行终止"}:
+                    current_step_num = index + 1
+                    break
+    if running_index is None:
+        running_index = current_step_num - 1
+    else_executing_step_list = []
+    if not is_parse_all:
+        if task_status in TASK_STATUS_INIT:
+            parse_result = parse_result[:5]
+        if task_status in TASK_STATUS_UNFINISHED:
+            _start = running_index - 2 if running_index - 2 > 0 else 0
+            _end = running_index + 3
+            for step in parse_result[_end:]:
+                if step["step_status"] in {"执行中", "执行失败", "执行终止"}:
+                    else_executing_step_list.append(step)
+            parse_result = parse_result[_start:_end]
+        if task_status in TASK_STATUS_SUCCESS:
+            parse_result = parse_result[-5:]
+
+    data = {
+        "task_name": "[蓝盾] {}".format(model.get("name")),
+        "task_platform": TAK_PLATFORM_DEVOPS,
+        "total_step_num": total_step_num,
+        "current_step_num": current_step_num,
+        "else_executing_step_list": else_executing_step_list,
+        "task_status": TASK_EXECUTE_STATUS_DICT[task_status],
+        "task_status_color": TASK_EXEC_STATUS_COLOR_DICT[task_status],
+        "task_duration": math.ceil(total_time / 1000),
+        "step_data": parse_result,
+        "start_time": start_time and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(start_time / 1000))),
+        "finish_time": finish_time and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(finish_time / 1000))),
+        "task_url": "{}/console/pipeline/{}/{}/detail/{}".format(
+            BKAPP_DEVOPS_HOST, devops_project_id, pipeline_data["pipelineId"], pipeline_data["id"]
         ),
     }
     return data

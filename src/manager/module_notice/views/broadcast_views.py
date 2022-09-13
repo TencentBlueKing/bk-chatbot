@@ -18,7 +18,9 @@ from rest_framework.decorators import action
 
 from common.drf.validation import validation
 from common.drf.view_set import BaseViewSet
+from common.constants import TAK_PLATFORM_DEVOPS
 from common.perm.permission import login_exempt_with_perm
+from src.manager.module_intent.models import ExecutionLog
 from src.manager.module_notice.proto.notice import (
     ReqPostTaskBroadStratGWViewSerializer,
     ReqPostTaskBroadShareGWViewSerializer,
@@ -43,6 +45,24 @@ class TaskBroadcastGwViewSet(BaseViewSet):
             "task_id": payload.get("task_id"),
             "share_group_list": payload.get("share_group_list", []),
         }
+        if payload.get("platform") == TAK_PLATFORM_DEVOPS:
+            if payload.get("is_devops_plugin"):
+                broadcast_params.update(
+                    {
+                        "devops_project_id": payload.get("devops_project_id"),
+                        "devops_pipeline_id": payload.get("devops_pipeline_id"),
+                        "devops_build_id": payload.get("devops_build_id"),
+                    }
+                )
+            else:
+                devops_task = ExecutionLog.objects.get(pk=payload.get("task_id"))
+                broadcast_params.update(
+                    {
+                        "devops_project_id": devops_task.project_id,
+                        "devops_pipeline_id": devops_task.feature_id,
+                        "devops_build_id": devops_task.task_id,
+                    }
+                )
         broadcast_obj = TaskBroadcast.objects.create(**broadcast_params)
         task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id})
         return Response({"broadcast_id": broadcast_obj.id})
