@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
-from common.constants import TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS
+from common.constants import TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS
 
 
 class ExecTaskListParamsSerializer(Serializer):
@@ -25,9 +25,13 @@ class ExecTaskListParamsSerializer(Serializer):
 
 class ExecTaskDetailParamsSerializer(Serializer):
     operator = serializers.CharField(required=True, label="操作人")
-    platform = serializers.ChoiceField(required=True, choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS], label="任务所属平台")
+    platform = serializers.ChoiceField(
+        required=True, choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS], label="任务所属平台"
+    )
 
 
 class ExecTaskParamsParamsSerializer(Serializer):
     operator = serializers.CharField(required=True, label="操作人")
-    platform = serializers.ChoiceField(required=True, choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS], label="任务所属平台")
+    platform = serializers.ChoiceField(
+        required=True, choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS], label="任务所属平台"
+    )

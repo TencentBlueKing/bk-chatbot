@@ -19,7 +19,7 @@ from rest_framework import serializers
 from common.drf.field import BizId, DefaultFiled
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto import notice_tag
-from common.constants import TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS
+from common.constants import TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS
 
 
 class DefaultTriggerName(DefaultFiled):
@@ -126,9 +126,16 @@ class ReqPostTaskBroadStratGWViewSerializer(serializers.Serializer):
     operator = serializers.CharField(label="操作人")
     biz_id = serializers.IntegerField(label="业务ID")
     task_id = serializers.IntegerField(label="播报任务ID")
-    platform = serializers.ChoiceField(label="任务所属平台", choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS])
+    platform = serializers.ChoiceField(
+        label="任务所属平台", choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS]
+    )
     session_info = serializers.JSONField(label="触发播报的会话ID", required=False, default={})
     share_group_list = serializers.ListField(label="分享播报用户通知组列表", required=False, default=[])
+
+    is_devops_plugin = serializers.BooleanField(label="是否来自蓝盾插件启动播报", required=False, default=False)
+    devops_project_id = serializers.CharField(label="蓝盾项目ID", required=False)
+    devops_pipeline_id = serializers.CharField(label="蓝盾流水线ID", required=False)
+    devops_build_id = serializers.CharField(label="蓝盾构建ID", required=False)
 
 
 class ReqPostTaskBroadShareGWViewSerializer(serializers.Serializer):

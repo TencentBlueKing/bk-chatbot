@@ -20,13 +20,24 @@ from celery.task import task
 from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
 from src.manager.handler.api.bk_chat import BkChat
+from src.manager.handler.api.devops import DevOps
 from src.manager.module_notice.handler.notice import Notice
-from src.manager.module_biz.handlers.platform_task import parse_job_task_tree, parse_sops_pipeline_tree
+from src.manager.module_biz.handlers.platform_task import (
+    parse_job_task_tree,
+    parse_sops_pipeline_tree,
+    parse_devops_pipeline,
+)
 from src.manager.module_notice.handler.notice_cache import get_notice_group_data
 from src.manager.module_notice.models import TaskBroadcast
 from src.manager.module_notice.handler.deal_boardcast_msg import OriginalBroadcast
 
-from common.constants import TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TASK_EXECUTE_STATUS_DICT, TaskExecStatus
+from common.constants import (
+    TAK_PLATFORM_JOB,
+    TAK_PLATFORM_SOPS,
+    TAK_PLATFORM_DEVOPS,
+    TASK_EXECUTE_STATUS_DICT,
+    TaskExecStatus,
+)
 
 logger = logging.getLogger("celery")
 
@@ -59,6 +70,13 @@ def task_broadcast(broadcast_id):
         task_info = SOPS().get_task_detail(operator, biz_id, task_id)
         status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
         parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
+
+    if task_platform == TAK_PLATFORM_DEVOPS:
+        build_detail = DevOps().app_build_detail(
+            operator, broadcast_obj.devops_project_id, broadcast_obj.devops_pipeline_id, broadcast_obj.devops_build_id
+        )
+        parse_result = parse_devops_pipeline(broadcast_obj.devops_project_id, build_detail, is_parse_all=False)
+        parse_result.update({"task_id": task_id})
 
     step_data = parse_result.get("step_data")
     current_step = step_data[math.floor(len(step_data) / 2)]

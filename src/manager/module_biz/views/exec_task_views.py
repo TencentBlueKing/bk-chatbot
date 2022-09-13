@@ -31,9 +31,14 @@ from common.constants import (
 )
 from src.manager.handler.api.bk_job import JOB, job_instance_status_map
 from src.manager.handler.api.bk_sops import SOPS, sops_instance_status_map
+from src.manager.handler.api.devops import DevOps
 from src.manager.module_intent.models import ExecutionLog
 from common.perm.permission import login_exempt_with_perm
-from src.manager.module_biz.handlers.platform_task import parse_sops_pipeline_tree, parse_job_task_tree
+from src.manager.module_biz.handlers.platform_task import (
+    parse_sops_pipeline_tree,
+    parse_job_task_tree,
+    parse_devops_pipeline,
+)
 from common.drf.validation import validation
 from src.manager.module_biz.proto.exec_task import (
     ExecTaskListParamsSerializer,
@@ -205,6 +210,13 @@ class ExecTaskViewSet(BaseViewSet):
             task_info = SOPS().get_task_detail(operator, biz_id, task_id)
             status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
             parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all)
+        if platform == TAK_PLATFORM_DEVOPS:
+            devops_task = ExecutionLog.objects.get(pk=task_id)
+            build_detail = DevOps().app_build_detail(
+                operator, devops_task.project_id, devops_task.feature_id, devops_task.task_id
+            )
+            parse_result = parse_devops_pipeline(devops_task.project_id, build_detail, is_parse_all)
+            parse_result.update({"task_id": task_id})
 
         parse_result.update({"start_user": operator})
 
@@ -247,6 +259,22 @@ class ExecTaskViewSet(BaseViewSet):
             data = {
                 "task_url": task_info.get("task_url"),
                 "task_name": "[标准运维] {}".format(task_info.get("name")),
+                "params": params_result,
+            }
+
+        if platform == TAK_PLATFORM_DEVOPS:
+            devops_task = ExecutionLog.objects.get(pk=task_id)
+            build_info = DevOps().app_build_status(
+                operator, devops_task.project_id, devops_task.feature_id, devops_task.task_id
+            )
+
+            build_params = build_info.get("data", {}).get("buildParameters", [])
+            params_result = [{"params_name": item["key"], "params_value": item["value"]} for item in build_params]
+            data = {
+                "task_url": "{}/console/pipeline/{}/{}/detail/{}".format(
+                    BKAPP_DEVOPS_HOST, devops_task.project_id, devops_task.feature_id, devops_task.task_id
+                ),
+                "task_name": "[蓝盾] {}".format(build_info["data"]["variables"]["pipeline.name"]),
                 "params": params_result,
             }
 

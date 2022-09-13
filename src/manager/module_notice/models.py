@@ -186,6 +186,10 @@ class TaskBroadcast(models.Model):
     is_stop = models.BooleanField("是否停止播报", default=False)
     share_group_list = DictCharField("分享播报用户组列表", default=[])
 
+    devops_project_id = models.CharField("蓝盾项目ID", max_length=256, null=True, blank=True)
+    devops_pipeline_id = models.CharField("蓝盾流水线ID", max_length=256, null=True, blank=True)
+    devops_build_id = models.CharField("蓝盾构建ID", max_length=256, null=True, blank=True)
+
     class Meta:
         db_table = "tab_task_broadcast"
         verbose_name = "【任务播报】"
