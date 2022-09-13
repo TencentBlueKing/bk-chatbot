@@ -35,6 +35,7 @@ bk-chatbot 有两项核心服务，一为插件集成服务：目前默认集成
 - [任务使用说明](docs/usage.md)
 - [知识库使用说明](docs/knowledge.md)
 - [迷你插件开发说明](docs/plugin.md)
+- [定时任务](docs/timer.md)
 
 ## Roadmap
 
