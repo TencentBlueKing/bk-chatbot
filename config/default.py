@@ -87,7 +87,7 @@ MIDDLEWARE += (
 #
 STATIC_VERSION = "1.0"
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "src/manager/static")]
 
 SENSITIVE_PARAMS = ["app_code", "app_secret", "bk_app_code", "bk_app_secret", "auth_info"]
 

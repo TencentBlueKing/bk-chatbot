@@ -13,8 +13,10 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views import static
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
@@ -37,6 +39,7 @@ urlpatterns = [
     url(r"^i18n/", include("django.conf.urls.i18n")),
     # 业务逻辑
     url(r"^", include("src.manager.urls")),  # 入口urls
+    url(r"^static/(?P<path>.*)$", static.serve, {"document_root": settings.STATICFILES_DIRS[0]}, name="static"),
     # 文档
     url(r"^swagger/$", schema_view.with_ui("swagger"), name="schema-swagger-ui"),
     url(r"^api-docs/$", schema_view.with_ui("redoc"), name="schema-docs"),
