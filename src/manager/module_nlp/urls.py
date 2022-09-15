@@ -28,7 +28,7 @@ router = routers.DefaultRouter()
 
 router.register(r"domain", DomainViewSet, basename="corpus_domain")  # 领域
 router.register(r"intent", IntentViewSet, basename="corpus_intent")  # 意图
-router.register(r"intent", IntentGWViewSet, basename="corpus_intent_gw")  # 意图
+router.register(r"intent_gw", IntentGWViewSet, basename="corpus_intent_gw")  # 意图
 router.register(r"manage", CorpusViewSet, basename="corpus")  # 语料
 router.register(r"manage_gw", CorpusGwViewSet, basename="corpus_gw")  # 语料
 
