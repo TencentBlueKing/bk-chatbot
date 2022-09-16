@@ -13,37 +13,16 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import datetime
-import time
+
+from ..base import BaseApi, ProxyDataAPI
 
 
-def mk_now_time():
-    """
-    返回时间字符串
-    """
-    return time.strftime("%Y-%m-%d %H:%M:%S")
+class _BKBaseApi(BaseApi):
+
+    MODULE = ("数据平台")
+
+    def __init__(self):
+        self.query_sync = ProxyDataAPI("查询数据")
 
 
-def mk_to_format_time(mk: int) -> str:
-    """
-    >>> mk_to_format_time(1625537379)
-    '2021-07-06 10:09:39'
-
-    """
-    return datetime.datetime.strftime(datetime.datetime.fromtimestamp(mk), "%Y-%m-%d %H:%M:%S")
-
-
-def mk_now_before_day(n: int) -> str:
-    """
-    获取多少天的日期
-    @param n:
-    @return:
-    """
-    before_day = datetime.datetime.now() - datetime.timedelta(days=n)
-    return datetime.datetime.strftime(before_day, "%Y-%m-%d 00:00:00")
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod(verbose=True)
+BKBaseApi = _BKBaseApi()

@@ -14,24 +14,29 @@ specific language governing permissions and limitations under the License.
 """
 
 from django.utils.decorators import method_decorator
-from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from common.drf.decorator import set_cookie_biz_id
 from common.drf.validation import validation
-from common.drf.view_set import BaseViewSet, BaseAllViewSet, BaseGetViewSet
+from common.drf.view_set import BaseAllViewSet, BaseGetViewSet, BaseViewSet
+from common.http.request import get_request_biz_id
 from common.perm.permission import login_exempt_with_perm
+from src.manager.module_notice.handler.deal_notice_log import NoticeLog
 from src.manager.module_notice.handler.notice import send_msg_to_notice_group
-from src.manager.module_notice.handler.webhook import get_notice_group_by_webhook_key, make_notice_group_webhook_url
+from src.manager.module_notice.handler.webhook import (
+    get_notice_group_by_webhook_key,
+    make_notice_group_webhook_url,
+)
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto.notice import (
     NoticeGroupViewGWSerializer,
     NoticeGroupViewSerializer,
     ReqGetNoticeGroupGWViewSerializer,
-    ReqPutNoticeGroupViewSerializer,
     ReqPostNoticeGroupSendMsgGWViewSerializer,
-    ReqPostNoticeSendWebhookGWViewSerializer,
     ReqPostNoticeGroupViewSerializer,
+    ReqPostNoticeSendWebhookGWViewSerializer,
+    ReqPutNoticeGroupViewSerializer,
     notice_group_create_docs,
     notice_group_delete_docs,
     notice_group_list_docs,
@@ -148,3 +153,32 @@ class NoticeSendGwViewSet(BaseViewSet):
         if not send_result["result"]:
             return Response({"message": send_result["message"]}, exception=True)
         return Response({"data": []})
+
+
+class NoticeLogViewSet(BaseGetViewSet):
+    """
+    通知历史展示
+    """
+
+    def list(self, request, *args, **kwargs):
+        """
+        业务查询
+        @param request:
+        @param args:
+        @param kwargs:
+        @return:
+        """
+        payload = request.payload
+        page = payload.get("page", 1)
+        pagesize = payload.get("pagesize", 10)
+        biz_id = get_request_biz_id(request)
+        # 获取业务信息错误
+        if not biz_id:
+            raise ValueError("get biz_id is error")
+        notice_log = NoticeLog(biz_id, page, pagesize)
+
+        # 获取数据
+        count = notice_log.get_count()
+        data = notice_log.get_data()
+        data = {"data": data, "count": count}
+        return Response(data)

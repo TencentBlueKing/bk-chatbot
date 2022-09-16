@@ -142,14 +142,7 @@ class DataAPI(object):
         self._response_validation = response_validation  # 通过响应值判断
 
     def __call__(
-        self,
-        params=None,
-        files=None,
-        raw=False,
-        timeout=None,
-        raise_exception=True,
-        request_cookies=True,
-        headers=None,
+        self, params=None, files=None, raw=False, timeout=None, raise_exception=True, request_cookies=True, headers=None
     ):
         """
         调用传参
