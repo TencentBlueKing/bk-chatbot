@@ -18,6 +18,7 @@ from rest_framework import serializers
 
 from common.constants import TAK_PLATFORM_DEVOPS, TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS
 from common.drf.field import BizId, DefaultFiled
+from common.drf.serializers import BaseRspSerializer
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto import notice_tag
 
@@ -157,7 +158,7 @@ class ReqPostNoticeSendWebhookGWViewSerializer(serializers.Serializer):
 
 class ReqGetNoticeLogViewSerializer(serializers.Serializer):
     """
-    日志查询协议
+    日志查询请求协议
     """
 
     page = serializers.IntegerField(label="页码")
@@ -166,6 +167,26 @@ class ReqGetNoticeLogViewSerializer(serializers.Serializer):
     msg_source = serializers.CharField(label="消息来源", required=False)
     im_platform = serializers.CharField(label="im平台", required=False)
     raw_data = serializers.CharField(label="", required=False)
+
+
+class RspGetNoticeLogViewSerializer(BaseRspSerializer):
+    """
+    日志查询响应协议
+    """
+
+    class RspGetNoticeLogData(serializers.Serializer):
+        biz_id = serializers.IntegerField(label="业务ID")
+        biz_name = serializers.CharField(label="业务名称")
+        msg_data = serializers.CharField(label="消息数据")
+        send_time = serializers.CharField(label="发送时间")
+        send_result = serializers.CharField(label="发送结果")
+        msg_source = serializers.CharField(label="消息来源")
+        group_name = serializers.CharField(label="发送群组名称")
+        msg_type = serializers.CharField(label="消息类型")
+        im_platform = serializers.CharField(label="平台类型")
+        raw_data = serializers.CharField(label="原始数据")
+
+    data = RspGetNoticeLogData()
 
 
 #######################################
@@ -202,4 +223,5 @@ notice_log_list_docs = swagger_auto_schema(
     tags=notice_tag,
     operation_id="日志-查询",
     query_serializer=ReqGetNoticeLogViewSerializer(),
+    responses={200: RspGetNoticeLogViewSerializer()},
 )
