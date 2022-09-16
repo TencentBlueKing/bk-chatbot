@@ -42,6 +42,7 @@ from src.manager.module_notice.proto.notice import (
     notice_group_list_docs,
     notice_group_retrieve_docs,
     notice_group_update_docs,
+    notice_log_list_docs,
 )
 
 
@@ -155,7 +156,8 @@ class NoticeSendGwViewSet(BaseViewSet):
         return Response({"data": []})
 
 
-class NoticeLogViewSet(BaseGetViewSet):
+@method_decorator(name="list", decorator=notice_log_list_docs)
+class NoticeLogViewSet(BaseViewSet):
     """
     通知历史展示
     """
