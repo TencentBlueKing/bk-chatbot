@@ -44,7 +44,7 @@ class NoticeLog:
         if send_result:
             query_list.append(f"send_result = '{send_result}'")
 
-        # 产寻消息来源
+        # 消息来源
         msg_source = kwargs.get("msg_source")  # 消息源
         if msg_source:
             query_list.append(f"msg_source = '{msg_source}'")

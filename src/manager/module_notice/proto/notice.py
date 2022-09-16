@@ -16,10 +16,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 
+from common.constants import TAK_PLATFORM_DEVOPS, TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS
 from common.drf.field import BizId, DefaultFiled
 from src.manager.module_notice.models import NoticeGroupModel, TriggerModel
 from src.manager.module_notice.proto import notice_tag
-from common.constants import TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS
 
 
 class DefaultTriggerName(DefaultFiled):
@@ -155,6 +155,19 @@ class ReqPostNoticeSendWebhookGWViewSerializer(serializers.Serializer):
     msg_content = serializers.CharField()
 
 
+class ReqGetNoticeLogViewSerializer(serializers.Serializer):
+    """
+    日志查询协议
+    """
+
+    page = serializers.IntegerField(label="页码")
+    pagesize = serializers.IntegerField(label="每页数据")
+    send_result = serializers.ChoiceField(label="消息结果", required=False, choices=["true", "false"])
+    msg_source = serializers.CharField(label="消息来源", required=False)
+    im_platform = serializers.CharField(label="im平台", required=False)
+    raw_data = serializers.CharField(label="", required=False)
+
+
 #######################################
 
 
@@ -182,4 +195,11 @@ notice_group_retrieve_docs = swagger_auto_schema(
     tags=notice_tag,
     operation_id="群组-单个",
     responses={},
+)
+
+
+notice_log_list_docs = swagger_auto_schema(
+    tags=notice_tag,
+    operation_id="日志-查询",
+    query_serializer=ReqGetNoticeLogViewSerializer(),
 )
