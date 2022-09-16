@@ -16,7 +16,7 @@ import json
 from typing import Any
 
 from adapter.api import BkChatApi
-from common.utils.time import mk_now_time
+from common.utils.my_time import mk_now_time
 
 
 def set_im_headers(params):

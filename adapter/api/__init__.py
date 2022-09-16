@@ -3,6 +3,7 @@
 
 from django.apps import AppConfig
 
+from .modules.bk_base import BKBaseApi
 from .modules.bk_cc import CCApi
 from .modules.bk_chat import BkChatApi
 from .modules.bk_gse import GseApi
@@ -56,6 +57,7 @@ __all__ = [
     "BkMonitorApi",
     "BkITSMApi",
     "BkChatApi",
+    "BKBaseApi",
 ]
 
 

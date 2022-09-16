@@ -21,16 +21,22 @@ from src.manager.module_notice.views.alarm_view import (
     AlarmNoticeViewSet,
     AlarmViewSet,
 )
-from src.manager.module_notice.views.notice_view import NoticeGroupViewSet, NoticeGroupGwViewSet, NoticeSendGwViewSet
-from src.manager.module_notice.views.trigger_view import TriggerViewSet
-from src.manager.module_notice.views.whitelist_view import WhiteListViewSet
 from src.manager.module_notice.views.broadcast_views import TaskBroadcastGwViewSet
 from src.manager.module_notice.views.chat_views import ChatReplyGwViewSet
+from src.manager.module_notice.views.notice_view import (
+    NoticeGroupGwViewSet,
+    NoticeGroupViewSet,
+    NoticeLogViewSet,
+    NoticeSendGwViewSet,
+)
+from src.manager.module_notice.views.trigger_view import TriggerViewSet
+from src.manager.module_notice.views.whitelist_view import WhiteListViewSet
 
 router = routers.DefaultRouter()
 
 router.register(r"trigger", TriggerViewSet, basename="trigger")  # 触发器
 router.register(r"notice_group", NoticeGroupViewSet, basename="notice")  # 通知群组
+router.register(r"notice_log", NoticeLogViewSet, basename="notice_log")  # 通知群组
 router.register(r"gw_notice_group", NoticeGroupGwViewSet, basename="gw_notice")  # 通知群组
 router.register(r"gw_notice_send", NoticeSendGwViewSet, basename="gw_notice_send")  # 发送通知
 router.register(r"whitelist", WhiteListViewSet, basename="whitelist")  # 白名单

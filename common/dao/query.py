@@ -71,7 +71,20 @@ def make_page(page: int, pagesize: int) -> (int, int):
     @return:
     """
     if not page or page < 1:
-        return 0, 10 ** 10
+        return 0, 10**10
     start = (page - 1) * pagesize
     end = page * pagesize
     return start, end
+
+
+def make_sql_query(config: dict):
+    """
+    生成原生sql的查询(暂时只支持全等查询)
+    @param config:
+    @return:
+    """
+
+    query_list = []
+    for k, v in config.items():
+        query_list.append(f"`{k}` = '{v}'")
+    return "AND".join(query_list)
