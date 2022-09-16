@@ -42,5 +42,5 @@ urlpatterns = [
     url(r"^static/(?P<path>.*)$", static.serve, {"document_root": settings.STATICFILES_DIRS[0]}, name="static"),
     # 文档
     url(r"^swagger/$", schema_view.with_ui("swagger"), name="schema-swagger-ui"),
-    url(r"^api-docs/$", schema_view.with_ui("redoc"), name="schema-docs"),
+    url(r"^api_docs/$", schema_view.with_ui("redoc"), name="schema-docs"),
 ]
