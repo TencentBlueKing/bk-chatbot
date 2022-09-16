@@ -140,6 +140,7 @@ class Corpus(BaseModel):
             x.id: {
                 "id": x.id,
                 "name": x.intent_name,
+                "key": x.intent_key,
                 "slots": {slot.get("key"): slot.get("value") for slot in x.slots},
             }
             for x in query_intent_obj_list
