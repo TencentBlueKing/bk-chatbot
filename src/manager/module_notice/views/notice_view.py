@@ -169,14 +169,11 @@ class NoticeLogViewSet(BaseGetViewSet):
         @return:
         """
         payload = request.payload
-        page = payload.get("page", 1)
-        pagesize = payload.get("pagesize", 10)
         biz_id = get_request_biz_id(request)
         # 获取业务信息错误
         if not biz_id:
             raise ValueError("get biz_id is error")
-        notice_log = NoticeLog(biz_id, page, pagesize)
-
+        notice_log = NoticeLog(biz_id, **payload)
         # 获取数据
         count = notice_log.get_count()
         data = notice_log.get_data()

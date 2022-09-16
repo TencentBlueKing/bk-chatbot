@@ -22,7 +22,7 @@ from common.drf.generic import APIModelViewSet, ValidationMixin
 from common.drf.pagination import ResultsSetPagination
 from common.http.request import init_views
 from common.mongodb.client import MongoDB
-from common.utils.time import mk_now_time
+from common.utils.my_time import mk_now_time
 from src.manager.module_other.control.permission import FaqPermission
 from src.manager.module_other.models import FAQModel
 from src.manager.module_other.proto.faq import FAQSerializer

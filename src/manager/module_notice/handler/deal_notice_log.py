@@ -21,10 +21,10 @@ BKAPP_NOTICE_LOG_TABLE = os.getenv("BKAPP_NOTICE_LOG_TABLE")  # 请求表
 
 
 class NoticeLog:
-    def __init__(self, biz_id, page, pagesize, **kwargs):
+    def __init__(self, biz_id, **kwargs):
         self.biz_id = biz_id  # 业务id
-        self.page = page  # 页码
-        self.pagesize = pagesize  # 每页数据
+        self.page = kwargs.get("page", 1)  # 页码
+        self.pagesize = kwargs.get("pagesize", 10)  # 每页数据
         self.the_date = mk_now_time("%Y%m%d")
         self.query = self.get_query(**kwargs)
 
@@ -59,7 +59,7 @@ class NoticeLog:
         if raw_data:
             query_list.append(f"raw_data like '%%{im_platform}%%'")
 
-        query = "AND".join(query_list)
+        query = " AND ".join(query_list)
 
         return query
 
