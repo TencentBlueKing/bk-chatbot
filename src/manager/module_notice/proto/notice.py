@@ -131,6 +131,7 @@ class ReqPostTaskBroadStratGWViewSerializer(serializers.Serializer):
         label="任务所属平台", choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS]
     )
     session_info = serializers.JSONField(label="触发播报的会话ID", required=False, default={})
+    extra_notice_info = serializers.ListField(label="使用bkchat通知的附加通知人和群组", required=False, default=[])
     share_group_list = serializers.ListField(label="分享播报用户通知组列表", required=False, default=[])
 
     is_devops_plugin = serializers.BooleanField(label="是否来自蓝盾插件启动播报", required=False, default=False)
@@ -217,7 +218,6 @@ notice_group_retrieve_docs = swagger_auto_schema(
     operation_id="群组-单个",
     responses={},
 )
-
 
 notice_log_list_docs = swagger_auto_schema(
     tags=notice_tag,

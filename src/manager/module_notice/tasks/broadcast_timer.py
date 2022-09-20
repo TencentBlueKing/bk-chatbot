@@ -57,6 +57,7 @@ def task_broadcast(broadcast_id):
     biz_id = broadcast_obj.biz_id
     task_id = broadcast_obj.task_id
     session_info = broadcast_obj.session_info
+    extra_notice_info = broadcast_obj.extra_notice_info
     share_group_list = broadcast_obj.share_group_list
     task_platform = broadcast_obj.platform
     if broadcast_obj.is_stop:
@@ -127,6 +128,16 @@ def task_broadcast(broadcast_id):
             result = notice.send()
             if not result["result"]:
                 logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
+
+    if is_send_msg and extra_notice_info:
+        origin_obj = OriginalBroadcast(parse_result)
+        for _notice_info in extra_notice_info:
+            msg_type, msg_content = getattr(origin_obj, "wework", ("text", "解析步骤出错,请联系管理员"))
+            notice = Notice("wework", msg_type, msg_content, _notice_info, headers={})
+            result = notice.send()
+            if not result["result"]:
+                logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
+
     logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] finish broadcast")
     if parse_result["task_status"] not in TASK_FINISHED_STATUS:
         task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
