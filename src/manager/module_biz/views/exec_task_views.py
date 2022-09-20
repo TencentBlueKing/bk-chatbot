@@ -297,3 +297,27 @@ class ExecTaskViewSet(BaseViewSet):
 
         parse_result.update({"start_user": operator})
         return Response(parse_result)
+
+    @login_exempt_with_perm
+    @validation(ExecDevopsTaskDetailParamsSerializer)
+    @swagger_auto_schema(tags=tags, operation_id="apigw获取蓝盾流水线构建启动参数")
+    @action(detail=False, methods=["GET"])
+    def devops_task_params(self, request, **kwargs):
+        operator = request.query_params.get("operator")
+        project_id = request.query_params.get("project_id")
+        pipeline_id = request.query_params.get("pipeline_id")
+        build_id = request.query_params.get("build_id")
+
+        build_info = DevOps().app_build_status(operator, project_id, pipeline_id, build_id)
+
+        build_params = build_info.get("data", {}).get("buildParameters", [])
+        params_result = [{"params_name": item["key"], "params_value": item["value"]} for item in build_params]
+        data = {
+            "task_url": "{}/console/pipeline/{}/{}/detail/{}".format(
+                BKAPP_DEVOPS_HOST, project_id, pipeline_id, build_id
+            ),
+            "task_name": "[蓝盾] {}".format(build_info["data"]["variables"]["pipeline.name"]),
+            "params": params_result,
+        }
+
+        return Response(data)
