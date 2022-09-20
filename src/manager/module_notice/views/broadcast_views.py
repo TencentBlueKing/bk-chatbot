@@ -44,6 +44,7 @@ class TaskBroadcastGwViewSet(BaseViewSet):
             "platform": payload.get("platform"),
             "task_id": payload.get("task_id"),
             "share_group_list": payload.get("share_group_list", []),
+            "extra_notice_info": payload.get("extra_notice_info", []),
         }
         if payload.get("platform") == TAK_PLATFORM_DEVOPS:
             if payload.get("is_devops_plugin"):

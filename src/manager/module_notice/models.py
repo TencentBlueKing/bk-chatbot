@@ -173,6 +173,7 @@ class TaskBroadcast(models.Model):
     task_id = models.CharField("任务ID", max_length=256)
     platform = models.CharField("任务所属平台", choices=TASK_PLATFORM_CHOICES, max_length=32)
     session_info = DictCharField("触发实时播报的信息", default={})
+    extra_notice_info = DictCharField("使用bkchat推送的额外人和群组", default=[])
 
     start_user = models.CharField("开始播报人", max_length=256)
     stop_user = models.CharField("终止播报人", max_length=256, null=True, blank=True)
