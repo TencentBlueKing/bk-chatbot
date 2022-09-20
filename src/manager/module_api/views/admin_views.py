@@ -13,10 +13,10 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from blueapps.account.decorators import login_exempt
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from blueapps.account.decorators import login_exempt
 from common.http.request import init_views
 from src.manager.module_intent.models import Intent, Task, Utterances
 
@@ -37,7 +37,9 @@ def admin_describe_intents(request):
 
     if deep_filter:
         ret_data["data"] = [
-            intent for intent in intents if all(set(intent[k]) >= set(v) for k, v in deep_filter.items())
+            intent
+            for intent in intents
+            if all("all" in intent[k] or set(intent[k]) >= set(v) for k, v in deep_filter.items())
         ]
     else:
         ret_data["data"] = intents
