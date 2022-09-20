@@ -44,6 +44,7 @@ from src.manager.module_biz.proto.exec_task import (
     ExecTaskListParamsSerializer,
     ExecTaskDetailParamsSerializer,
     ExecTaskParamsParamsSerializer,
+    ExecDevopsTaskDetailParamsSerializer,
 )
 
 tags = ["执行任务查询"]
@@ -279,3 +280,20 @@ class ExecTaskViewSet(BaseViewSet):
             }
 
         return Response(data)
+
+    @login_exempt_with_perm
+    @validation(ExecDevopsTaskDetailParamsSerializer)
+    @swagger_auto_schema(tags=tags, operation_id="apigw获取蓝盾流水线构建详情")
+    @action(detail=False, methods=["GET"])
+    def devops_task_detail(self, request, **kwargs):
+        operator = request.query_params.get("operator")
+        project_id = request.query_params.get("project_id")
+        pipeline_id = request.query_params.get("pipeline_id")
+        build_id = request.query_params.get("build_id")
+        is_parse_all = request.query_params.get("is_parse_all", "0") == "1"
+
+        build_detail = DevOps().app_build_detail(operator, project_id, pipeline_id, build_id)
+        parse_result = parse_devops_pipeline(project_id, build_detail, is_parse_all)
+
+        parse_result.update({"start_user": operator})
+        return Response(parse_result)

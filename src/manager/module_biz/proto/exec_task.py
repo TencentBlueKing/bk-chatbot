@@ -35,3 +35,11 @@ class ExecTaskParamsParamsSerializer(Serializer):
     platform = serializers.ChoiceField(
         required=True, choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS], label="任务所属平台"
     )
+
+
+class ExecDevopsTaskDetailParamsSerializer(Serializer):
+    operator = serializers.CharField(label="操作人", required=True)
+
+    project_id = serializers.CharField(label="蓝盾项目ID", required=True)
+    pipeline_id = serializers.CharField(label="蓝盾流水线ID", required=True)
+    build_id = serializers.CharField(label="蓝盾构建ID", required=True)
