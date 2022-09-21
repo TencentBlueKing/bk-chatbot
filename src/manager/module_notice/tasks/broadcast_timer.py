@@ -22,6 +22,7 @@ from src.manager.handler.api.bk_sops import SOPS
 from src.manager.handler.api.bk_chat import BkChat
 from src.manager.handler.api.devops import DevOps
 from src.manager.module_notice.handler.notice import Notice
+from src.manager.module_notice.constants import BROADCAST
 from src.manager.module_biz.handlers.platform_task import (
     parse_job_task_tree,
     parse_sops_pipeline_tree,
@@ -121,9 +122,19 @@ def task_broadcast(broadcast_id):
         origin_obj = OriginalBroadcast(parse_result)
         notice_groups = get_notice_group_data(share_group_list)
         for notice_group in notice_groups:
+            kwargs = {
+                "biz_id": biz_id,
+                "msg_source": BROADCAST,
+                "group_name": notice_group.get("notice_group_name"),
+            }
             msg_type, msg_content = getattr(origin_obj, notice_group.get("im").lower(), ("text", "解析步骤出错,请联系管理员"))
             notice = Notice(
-                notice_group.get("im"), msg_type, msg_content, notice_group.get("receiver"), notice_group.get("headers")
+                notice_group.get("im"),
+                msg_type,
+                msg_content,
+                notice_group.get("receiver"),
+                notice_group.get("headers"),
+                **kwargs,
             )
             result = notice.send()
             if not result["result"]:
@@ -132,8 +143,13 @@ def task_broadcast(broadcast_id):
     if is_send_msg and extra_notice_info:
         origin_obj = OriginalBroadcast(parse_result)
         for _notice_info in extra_notice_info:
+            kwargs = {
+                "biz_id": biz_id,
+                "msg_source": BROADCAST,
+                "group_name": "使用bkchat通知的附加通知人/群组",
+            }
             msg_type, msg_content = getattr(origin_obj, "wework", ("text", "解析步骤出错,请联系管理员"))
-            notice = Notice("wework", msg_type, msg_content, _notice_info, headers={})
+            notice = Notice("wework", msg_type, msg_content, _notice_info, headers={}, **kwargs)
             result = notice.send()
             if not result["result"]:
                 logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")

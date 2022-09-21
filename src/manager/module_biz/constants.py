@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -20,3 +19,5 @@ SUMMAYR_CHT_REQUEST_METHODS = ("GET",)
 
 CHAT_BOT_USE_SPACE = "chat_group_biz"
 COMMUNITY_RUN_VER = "open"
+
+REDIS_BIZ_INFO_PREFIX = "cc_biz_info"

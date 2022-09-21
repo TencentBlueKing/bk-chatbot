@@ -51,6 +51,7 @@ def get_notice_group_data(notice_group_ids):
                     "im_platform": trigger_obj.im_platform,
                     "headers": trigger_obj.info,
                     "receiver": {},
+                    "biz_id": notice_group.get("biz_id"),
                 }
                 group_type = notice_group.get("group_type")
                 receiver_ids = notice_group.get("group_value")
