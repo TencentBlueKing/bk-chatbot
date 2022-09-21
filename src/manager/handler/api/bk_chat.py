@@ -142,7 +142,8 @@ class BkChatFeature(BkChat):
         # 值设置
         data.setdefault("send_time", mk_now_time())  # 设置发送时间
         data.setdefault("send_result", ret_send_msg.get("code") == 0)  # 设置发送结果
-        data.setdefault("msg_type", msg_data.get("im"))  # 设置消息发送结果
+        data.setdefault("msg_type", "text")  # 设置消息类型
+        data.setdefault("im_type", msg_data.get("im"))  # 设置IM类型
 
         topic = data.get("topic", "bkchat_saas")  # 获取topic
         key = data.get("kafka_key", "bkchat")  # 获取key
