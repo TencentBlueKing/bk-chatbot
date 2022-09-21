@@ -54,10 +54,19 @@ class NoticeLog:
         if im_platform:
             query_list.append(f"im_platform = '{im_platform}'")
 
+        # 通过时间查询
+        self.start_time = kwargs.get("start_time")  # 发送开始时间
+        if self.start_time:
+            query_list.append(f"send_time>='{self.start_time}'")
+
+        self.end_time = kwargs.get("end_time")  # 发送结束时间
+        if self.end_time:
+            query_list.append(f"send_time<='{self.end_time}'")
+
         # 通过原始内容查询
         raw_data = kwargs.get("raw_data")  # 内容
         if raw_data:
-            query_list.append(f"raw_data like '%%{im_platform}%%'")
+            query_list.append(f"raw_data like '%%{raw_data}%%'")
 
         query = " AND ".join(query_list)
 
@@ -90,7 +99,7 @@ class NoticeLog:
         """
         sql = f"""
 SELECT
-    msg_data,
+    msg_context,
     send_time,
     send_result,
     msg_source,
