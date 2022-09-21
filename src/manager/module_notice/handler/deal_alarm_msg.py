@@ -61,6 +61,7 @@ class OriginalAlarm:
         self.device_name = None  # 设备名称
         self.is_translated = kwargs.get("is_translated", False)  # 是否翻译
         self.translation_type = kwargs.get("translation_type", "")  # 翻译目标语言
+        self._text = ""
         self.get_base_info()  # 初始化数据
 
     def get_base_info(self):
@@ -168,7 +169,17 @@ class OriginalAlarm:
 关联信息: {self.relation_info}
 全部维度: {self.all_dimensions}
         """
-        return self.content_translated(content)
+        self._text = self.content_translated(content)
+        return self._text
+
+    def text(self):
+        """
+        文本内容
+        @return:
+        """
+        if not self._text:
+            self.get_text()
+        return self._text
 
     def content_translated(self, content):
         """

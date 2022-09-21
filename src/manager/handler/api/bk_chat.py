@@ -130,6 +130,7 @@ class BkChatFeature(BkChat):
             "biz_id": int,           # 业务id
             "msg_source": "string",  # 消息来源 alarm、custom、broadcast
             "msg_data": dict,        # 消息数据
+            "msg_context": "string", # 消息内容(用于页面展示)
             "im_platform": "string", # 平台
             "group_name": "string",  # 群组名称
             "raw_data": dict,        # 原始数据
