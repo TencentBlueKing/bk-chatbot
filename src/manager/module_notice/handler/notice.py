@@ -43,8 +43,9 @@ class Notice:
             "biz_id": biz_id,
             "msg_source": self.kwargs.get("msg_source"),
             "msg_data": params,
+            "msg_type": self.msg_type,
             "msg_context": self.msg_content,
-            "im_platform": self.im_type,
+            "im_platform": self.kwargs.get("im_platform"),
             "group_name": self.kwargs.get("group_name"),
             "raw_data": {},
         }
@@ -111,6 +112,7 @@ def send_msg_to_notice_group(group_id_list, msg_type, msg_content):
     notice_groups = get_notice_group_data(group_id_list)
     for notice_group in notice_groups:
         kwargs = {
+            "im_platform": notice_group.get("im_platform"),
             "biz_id": notice_group.get("biz_id"),
             "msg_source": CUSTOM,
             "group_name": notice_group.get("notice_group_name"),
