@@ -147,4 +147,4 @@ class BkChatFeature(BkChat):
         topic = data.get("topic", "bkchat_saas")  # 获取topic
         key = data.get("kafka_key", "bkchat")  # 获取key
         ret_reported = cls.msg_push(topic, key, json.dumps(data))
-        return ret_reported
+        return ret_reported, ret_send_msg

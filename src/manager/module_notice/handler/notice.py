@@ -12,17 +12,20 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from src.manager.handler.api.bk_chat import BkChat
+from src.manager.module_notice.constants import CUSTOM
+from src.manager.handler.api.bk_chat import BkChatFeature
+from src.manager.module_biz.handlers.biz_cache import get_biz_info
 from src.manager.module_notice.handler.notice_cache import get_notice_group_data
 
 
 class Notice:
-    def __init__(self, im_type, msg_type, msg_content, receiver, headers):
+    def __init__(self, im_type, msg_type, msg_content, receiver, headers, **kwargs):
         self.im_type = im_type.upper()
         self.msg_type = msg_type
         self.msg_content = msg_content
         self.receiver = receiver
         self.headers = headers
+        self.kwargs = kwargs
 
     def send(self):
         params = {
@@ -33,9 +36,19 @@ class Notice:
             "headers": self.headers,
             **self._extra_params,
         }
-
-        send_result = BkChat.new_send_msg(**params)
-
+        biz_id = self.kwargs.get("biz_id")
+        biz_info = get_biz_info(biz_id)
+        send_data = {
+            "biz_name": biz_info.get("bk_biz_name"),
+            "biz_id": biz_id,
+            "msg_source": self.kwargs.get("msg_source"),
+            "msg_data": params,
+            "msg_context": self.msg_content,
+            "im_platform": self.im_type,
+            "group_name": self.kwargs.get("group_name"),
+            "raw_data": {},
+        }
+        _, send_result = BkChatFeature.send_msg_and_report(send_data)
         if send_result["code"] != 0:
             return {"result": False, "message": send_result["message"]}
 
@@ -97,8 +110,18 @@ class Notice:
 def send_msg_to_notice_group(group_id_list, msg_type, msg_content):
     notice_groups = get_notice_group_data(group_id_list)
     for notice_group in notice_groups:
+        kwargs = {
+            "biz_id": notice_group.get("biz_id"),
+            "msg_source": CUSTOM,
+            "group_name": notice_group.get("notice_group_name"),
+        }
         notice = Notice(
-            notice_group.get("im"), msg_type, msg_content, notice_group.get("receiver"), notice_group.get("headers")
+            notice_group.get("im"),
+            msg_type,
+            msg_content,
+            notice_group.get("receiver"),
+            notice_group.get("headers"),
+            **kwargs
         )
         send_result = notice.send()
         if not send_result["result"]:
