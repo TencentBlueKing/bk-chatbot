@@ -116,6 +116,7 @@ class AlarmNoticeViewSet(BaseViewSet):
                 "biz_id": payload.get("bk_biz_id"),
                 "msg_source": ALARM,  # 消息类型 alarm、custom、broadcast
                 "msg_data": params,  # 消息数据
+                "msg_context": original_alarm.text(),  # 消息内容
                 "im_platform": notice_group.get("im_platform"),  # 平台
                 "group_name": notice_group.get("notice_group_name"),  # 群组名称
                 "raw_data": payload,  # 原始数据
