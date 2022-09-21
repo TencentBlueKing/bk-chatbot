@@ -144,7 +144,9 @@ class BkChatFeature(BkChat):
         data.setdefault("send_result", ret_send_msg.get("code") == 0)  # 设置发送结果
         data.setdefault("msg_type", "text")  # 设置消息类型
         data.setdefault("im_type", msg_data.get("im"))  # 设置IM类型
-        data.setdefault("raw_data", data.get("msg_context"))  # 如果不存在raw则设置为msg_context
+        # 如果不存在raw则设置为msg_context
+        if len(data.get("raw_data", {}).keys()) == 0:
+            data["raw_data"] = {"msg_context": data.get("msg_context")}
 
         topic = data.get("topic", "bkchat_saas")  # 获取topic
         key = data.get("kafka_key", "bkchat")  # 获取key
