@@ -24,7 +24,7 @@ def get_biz_info(biz_id, operator="admin"):
     根据业务ID获取业务相关信息
     """
     biz_info = {"bk_biz_name": "未知业务名"}
-    if not biz_id or biz_id == -1:
+    if not biz_id or int(biz_id) == -1:
         return biz_info
 
     with RedisClient() as r:

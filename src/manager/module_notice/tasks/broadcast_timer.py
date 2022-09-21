@@ -123,6 +123,7 @@ def task_broadcast(broadcast_id):
         notice_groups = get_notice_group_data(share_group_list)
         for notice_group in notice_groups:
             kwargs = {
+                "im_platform": notice_group.get("im_platform"),
                 "biz_id": biz_id,
                 "msg_source": BROADCAST,
                 "group_name": notice_group.get("notice_group_name"),
@@ -142,14 +143,15 @@ def task_broadcast(broadcast_id):
 
     if is_send_msg and extra_notice_info:
         origin_obj = OriginalBroadcast(parse_result)
+        msg_type, msg_content = getattr(origin_obj, "wework", ("text", "解析步骤出错,请联系管理员"))
         for _notice_info in extra_notice_info:
             kwargs = {
+                "im_platform": "企业微信",
                 "biz_id": biz_id,
                 "msg_source": BROADCAST,
-                "group_name": "使用bkchat通知的附加通知人/群组",
+                "group_name": "附加通知人/群组",
             }
-            msg_type, msg_content = getattr(origin_obj, "wework", ("text", "解析步骤出错,请联系管理员"))
-            notice = Notice("wework", msg_type, msg_content, _notice_info, headers={}, **kwargs)
+            notice = Notice("WEWORK", msg_type, msg_content, _notice_info, headers={}, **kwargs)
             result = notice.send()
             if not result["result"]:
                 logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
