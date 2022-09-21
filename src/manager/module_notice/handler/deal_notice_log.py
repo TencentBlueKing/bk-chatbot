@@ -25,6 +25,7 @@ class NoticeLog:
         self.biz_id = biz_id  # 业务id
         self.page = kwargs.get("page", 1)  # 页码
         self.pagesize = kwargs.get("pagesize", 10)  # 每页数据
+        self.offset = (int(self.page) - 1) * int(self.pagesize)
         self.the_date = mk_now_time("%Y%m%d")
         self.query = self.get_query(**kwargs)
 
@@ -115,7 +116,8 @@ WHERE
    {self.query}
 ORDER BY
     dtEventTime DESC
-    LIMIT {self.pagesize} OFFSET {self.page}"""
+    LIMIT {self.pagesize} OFFSET {self.offset}"""
+
         # 请求数量
         ret = BKBASE.query_sync(sql)
         value_list = ret.get("list")
