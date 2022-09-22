@@ -413,7 +413,7 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
                     "step_index": f"{stage_index + 1}-{container_index + 1}",
                     "is_container": True,
                     "step_id": container.get("id"),
-                    "step_duration": container_total_time and math.ceil(container_total_time / 1000),
+                    "step_duration": (container_total_time and math.ceil(container_total_time / 1000)) or 1,
                     "step_status": TASK_EXECUTE_STATUS_DICT[container_status],
                     "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[container_status],
                     "start_time": container_start_time
@@ -441,7 +441,7 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
                         "step_index": f"{stage_index + 1}-{container_index + 1}-{element_index + 1}",
                         "step_id": element.get("id"),
                         "is_container": False,
-                        "step_duration": element_total_time and math.ceil(element_total_time / 1000),
+                        "step_duration": (element_total_time and math.ceil(element_total_time / 1000)) or 1,
                         "step_status": TASK_EXECUTE_STATUS_DICT[element_status],
                         "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[element_status],
                         "start_time": element_start_time
