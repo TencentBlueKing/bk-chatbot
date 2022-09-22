@@ -28,6 +28,23 @@ dev_ops_instance_status_map = {
     "CANCELED": TaskExecStatus.REMOVE.value,  # 已终止
     "TERMINATE": TaskExecStatus.REMOVE.value,  # 已终止
     "QUEUE_TIMEOUT": TaskExecStatus.REMOVE.value,  # 已终止
+    "SKIP": TaskExecStatus.INIT.value,  # 未执行,
+    "REVIEWING": TaskExecStatus.RUNNING.value,
+    "REVIEW_ABORT": TaskExecStatus.FAIL.value,
+    "REVIEW_PROCESSED": TaskExecStatus.SUCCESS.value,
+    "PREPARE_ENV": TaskExecStatus.RUNNING.value,
+    "UNEXEC": TaskExecStatus.INIT.value,
+    "QUALITY_CHECK_FAIL": TaskExecStatus.FAIL.value,
+    "LOOP_WAITING": TaskExecStatus.RUNNING.value,
+    "TRY_FINALLY": TaskExecStatus.RUNNING.value,
+    "EXEC_TIMEOUT": TaskExecStatus.FAIL.value,
+    "RETRY": TaskExecStatus.RUNNING.value,
+    "PAUSE": TaskExecStatus.SUSPENDED.value,
+    "DEPENDENT_WAITING": TaskExecStatus.RUNNING.value,
+    "QUALITY_CHECK_PASS": TaskExecStatus.SUCCESS.value,
+    "QUALITY_CHECK_WAIT": TaskExecStatus.RUNNING.value,
+    "TRIGGER_REVIEWING": TaskExecStatus.RUNNING.value,
+    "UNKNOWN": TaskExecStatus.INIT.value,
 }
 
 
