@@ -53,109 +53,118 @@ TASK_FINISHED_STATUS = {
 @task
 def task_broadcast(broadcast_id):
     logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] start broadcast")
-    broadcast_obj = TaskBroadcast.objects.get(pk=broadcast_id)
-    operator = broadcast_obj.start_user
-    biz_id = broadcast_obj.biz_id
-    task_id = broadcast_obj.task_id
-    session_info = broadcast_obj.session_info
-    extra_notice_info = broadcast_obj.extra_notice_info
-    share_group_list = broadcast_obj.share_group_list
-    task_platform = broadcast_obj.platform
-    if broadcast_obj.is_stop:
-        return
+    try:
+        broadcast_obj = TaskBroadcast.objects.get(pk=broadcast_id)
+        operator = broadcast_obj.start_user
+        biz_id = broadcast_obj.biz_id
+        task_id = broadcast_obj.task_id
+        session_info = broadcast_obj.session_info
+        extra_notice_info = broadcast_obj.extra_notice_info
+        share_group_list = broadcast_obj.share_group_list
+        task_platform = broadcast_obj.platform
+        if broadcast_obj.is_stop:
+            return
 
-    if task_platform == TAK_PLATFORM_JOB:
-        task_info = JOB().get_job_instance_status(operator, biz_id, task_id).get("data")
-        parse_result = parse_job_task_tree(task_info, is_parse_all=False)
+        if task_platform == TAK_PLATFORM_JOB:
+            task_info = JOB().get_job_instance_status(operator, biz_id, task_id).get("data")
+            parse_result = parse_job_task_tree(task_info, is_parse_all=False)
 
-    if task_platform == TAK_PLATFORM_SOPS:
-        task_info = SOPS().get_task_detail(operator, biz_id, task_id)
-        status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
-        parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
+        if task_platform == TAK_PLATFORM_SOPS:
+            task_info = SOPS().get_task_detail(operator, biz_id, task_id)
+            status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
+            parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
 
-    if task_platform == TAK_PLATFORM_DEVOPS:
-        build_detail = DevOps().app_build_detail(
-            operator, broadcast_obj.devops_project_id, broadcast_obj.devops_pipeline_id, broadcast_obj.devops_build_id
-        )
-        parse_result = parse_devops_pipeline(broadcast_obj.devops_project_id, build_detail, is_parse_all=False)
-        parse_result.update({"task_id": task_id})
+        if task_platform == TAK_PLATFORM_DEVOPS:
+            build_detail = DevOps().app_build_detail(
+                operator,
+                broadcast_obj.devops_project_id,
+                broadcast_obj.devops_pipeline_id,
+                broadcast_obj.devops_build_id,
+            )
+            parse_result = parse_devops_pipeline(broadcast_obj.devops_project_id, build_detail, is_parse_all=False)
+            parse_result.update({"task_id": task_id})
 
-    step_data = parse_result.get("step_data")
-    current_step = step_data[math.floor(len(step_data) / 2)]
+        step_data = parse_result.get("step_data")
+        current_step = step_data[math.floor(len(step_data) / 2)]
 
-    now = datetime.datetime.now()
-    if current_step["step_id"] == broadcast_obj.step_id and current_step["step_status"] == broadcast_obj.step_status:
-        if now > datetime.datetime.strptime(broadcast_obj.next_broadcast_time, "%Y-%m-%d %H:%M:%S"):
+        now = datetime.datetime.now()
+        if (
+            current_step["step_id"] == broadcast_obj.step_id
+            and current_step["step_status"] == broadcast_obj.step_status
+        ):
+            if now > datetime.datetime.strptime(broadcast_obj.next_broadcast_time, "%Y-%m-%d %H:%M:%S"):
+                is_send_msg = True
+                broadcast_ladder_index = (
+                    broadcast_obj.broadcast_num - 1 if broadcast_obj.broadcast_num - 1 < len(BROADCAST_LADDER) else -1
+                )
+                broadcast_obj.broadcast_num = broadcast_obj.broadcast_num + 1
+                broadcast_obj.next_broadcast_time = now + datetime.timedelta(
+                    minutes=BROADCAST_LADDER[broadcast_ladder_index]
+                )
+                broadcast_obj.save()
+
+            else:
+                is_send_msg = False
+        else:
             is_send_msg = True
-            broadcast_ladder_index = (
-                broadcast_obj.broadcast_num - 1 if broadcast_obj.broadcast_num - 1 < len(BROADCAST_LADDER) else -1
-            )
-            broadcast_obj.broadcast_num = broadcast_obj.broadcast_num + 1
-            broadcast_obj.next_broadcast_time = now + datetime.timedelta(
-                minutes=BROADCAST_LADDER[broadcast_ladder_index]
-            )
+            broadcast_obj.step_id = current_step["step_id"]
+            broadcast_obj.step_status = current_step["step_status"]
+            broadcast_obj.broadcast_num = 1
+            broadcast_obj.next_broadcast_time = now + datetime.timedelta(minutes=BROADCAST_LADDER[0])
             broadcast_obj.save()
 
-        else:
-            is_send_msg = False
-    else:
-        is_send_msg = True
-        broadcast_obj.step_id = current_step["step_id"]
-        broadcast_obj.step_status = current_step["step_status"]
-        broadcast_obj.broadcast_num = 1
-        broadcast_obj.next_broadcast_time = now + datetime.timedelta(minutes=BROADCAST_LADDER[0])
-        broadcast_obj.save()
-
-    if is_send_msg and session_info:
-        parse_result.update(
-            {
-                "broadcast_id": broadcast_id,
-                "session_info": session_info,
-                "start_user": operator,
-            }
-        )
-        result = BkChat.send_broadcast(parse_result)
-        if result["code"] != 0:
-            logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
-
-    if is_send_msg and share_group_list:
-        origin_obj = OriginalBroadcast(parse_result)
-        notice_groups = get_notice_group_data(share_group_list)
-        for notice_group in notice_groups:
-            kwargs = {
-                "im_platform": notice_group.get("im_platform"),
-                "biz_id": biz_id,
-                "msg_source": BROADCAST,
-                "group_name": notice_group.get("notice_group_name"),
-            }
-            msg_type, msg_content = getattr(origin_obj, notice_group.get("im").lower(), ("text", "解析步骤出错,请联系管理员"))
-            notice = Notice(
-                notice_group.get("im"),
-                msg_type,
-                msg_content,
-                notice_group.get("receiver"),
-                notice_group.get("headers"),
-                **kwargs,
+        if is_send_msg and session_info:
+            parse_result.update(
+                {
+                    "broadcast_id": broadcast_id,
+                    "session_info": session_info,
+                    "start_user": operator,
+                }
             )
-            result = notice.send()
-            if not result["result"]:
+            result = BkChat.send_broadcast(parse_result)
+            if result["code"] != 0:
                 logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
 
-    if is_send_msg and extra_notice_info:
-        origin_obj = OriginalBroadcast(parse_result)
-        msg_type, msg_content = getattr(origin_obj, "wework", ("text", "解析步骤出错,请联系管理员"))
-        for _notice_info in extra_notice_info:
-            kwargs = {
-                "im_platform": "企业微信",
-                "biz_id": biz_id,
-                "msg_source": BROADCAST,
-                "group_name": "附加通知人/群组",
-            }
-            notice = Notice("WEWORK", msg_type, msg_content, _notice_info, headers={}, **kwargs)
-            result = notice.send()
-            if not result["result"]:
-                logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
+        if is_send_msg and share_group_list:
+            origin_obj = OriginalBroadcast(parse_result)
+            notice_groups = get_notice_group_data(share_group_list)
+            for notice_group in notice_groups:
+                kwargs = {
+                    "im_platform": notice_group.get("im_platform"),
+                    "biz_id": biz_id,
+                    "msg_source": BROADCAST,
+                    "group_name": notice_group.get("notice_group_name"),
+                }
+                msg_type, msg_content = getattr(origin_obj, notice_group.get("im").lower(), ("text", "解析步骤出错,请联系管理员"))
+                notice = Notice(
+                    notice_group.get("im"),
+                    msg_type,
+                    msg_content,
+                    notice_group.get("receiver"),
+                    notice_group.get("headers"),
+                    **kwargs,
+                )
+                result = notice.send()
+                if not result["result"]:
+                    logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
 
-    logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] finish broadcast")
-    if parse_result["task_status"] not in TASK_FINISHED_STATUS:
-        task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
+        if is_send_msg and extra_notice_info:
+            origin_obj = OriginalBroadcast(parse_result)
+            msg_type, msg_content = getattr(origin_obj, "wework", ("text", "解析步骤出错,请联系管理员"))
+            for _notice_info in extra_notice_info:
+                kwargs = {
+                    "im_platform": "企业微信",
+                    "biz_id": biz_id,
+                    "msg_source": BROADCAST,
+                    "group_name": "附加通知人/群组",
+                }
+                notice = Notice("WEWORK", msg_type, msg_content, _notice_info, headers={}, **kwargs)
+                result = notice.send()
+                if not result["result"]:
+                    logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
+
+        logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] finish broadcast")
+        if parse_result["task_status"] not in TASK_FINISHED_STATUS:
+            task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
+    except Exception:
+        logger.exception(f"[task_broadcast-error-broadcast_id-{broadcast_id}]")
