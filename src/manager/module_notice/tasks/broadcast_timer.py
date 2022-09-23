@@ -164,6 +164,13 @@ def task_broadcast(broadcast_id):
                     logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
 
         logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] finish broadcast")
+        if (
+            task_platform == TAK_PLATFORM_DEVOPS
+            and broadcast_obj.step_status == "执行失败"
+            and broadcast_obj.broadcast_num >= 3
+        ):
+            return
+
         if parse_result["task_status"] not in TASK_FINISHED_STATUS:
             task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
     except Exception:

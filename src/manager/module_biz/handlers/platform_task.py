@@ -406,7 +406,7 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
                 container_finish_time = None
             else:
                 container_total_time = container.get("elementElapsed", 1) + container.get("systemElapsed", 1)
-                container_finish_time = container_start_time + container_total_time
+                container_finish_time = container_start_time and container_start_time + container_total_time
             parse_result.append(
                 {
                     "step_name": container.get("name"),
@@ -425,13 +425,13 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
             elements = container.get("elements", [])
             for element_index, element in enumerate(elements):
                 element_status = dev_ops_instance_status_map[element.get("status", "QUEUE")]
-                element_start_time = element.get("startEpoch", container_start_time)
+                element_start_time = element.get("startEpoch")
                 if element_status in TASK_STATUS_INIT:
                     element_total_time = None
                     element_finish_time = None
                 else:
                     element_total_time = element.get("elapsed", 1000)
-                    element_finish_time = element_start_time + element_total_time
+                    element_finish_time = element_start_time and element_start_time + element_total_time
 
                 if element_status in TASK_STATUS_UNFINISHED and running_index is None:
                     running_index = len(parse_result)
