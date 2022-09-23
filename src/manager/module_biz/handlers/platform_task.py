@@ -435,6 +435,15 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
 
                 if element_status in TASK_STATUS_UNFINISHED and running_index is None:
                     running_index = len(parse_result)
+
+                step_status = TASK_EXECUTE_STATUS_DICT[element_status]
+                if (
+                    element_status == TaskExecStatus.FAIL.value
+                    and element.get("additionalOptions", {}).get("continueWhenFailed", False)
+                    and not element.get("additionalOptions", {}).get("manualSkip", False)
+                ):
+                    step_status = "{}({})".format(TASK_EXECUTE_STATUS_DICT[element_status], "失败时继续")
+
                 parse_result.append(
                     {
                         "step_name": element.get("name"),
@@ -442,7 +451,7 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
                         "step_id": element.get("id"),
                         "is_container": False,
                         "step_duration": (element_total_time and math.ceil(element_total_time / 1000)) or 1,
-                        "step_status": TASK_EXECUTE_STATUS_DICT[element_status],
+                        "step_status": step_status,
                         "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[element_status],
                         "start_time": element_start_time
                         and time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(float(element_start_time / 1000))),
