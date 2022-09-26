@@ -16,14 +16,15 @@ specific language governing permissions and limitations under the License.
 from bson.objectid import ObjectId
 from django.http import JsonResponse
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
+from common.http.request import get_request_biz_id
 from common.control.throttle import ChatBotThrottle
 from common.drf.generic import APIModelViewSet, ValidationMixin
 from common.drf.pagination import ResultsSetPagination
 from common.http.request import init_views
 from common.mongodb.client import MongoDB
 from common.utils.my_time import mk_now_time
-from src.manager.module_other.control.permission import FaqPermission
 from src.manager.module_other.models import FAQModel
 from src.manager.module_other.proto.faq import FAQSerializer
 
@@ -36,11 +37,27 @@ class FaqViewSet(APIModelViewSet, ValidationMixin):
     queryset = FAQModel.objects.all()
     serializer_class = FAQSerializer
     filterset_class = FAQModel.OpenApiFilter
-    permission_classes = (FaqPermission,)
+    permission_classes = ()
     throttle_classes = (ChatBotThrottle,)
     ordering_fields = ["biz_id", "faq_name", "created_by", "updated_at"]
     ordering = "-updated_at"
     pagination_class = ResultsSetPagination
+
+    def get_queryset(self):
+        return self.queryset.filter(is_deleted=False)
+
+    def list(self, request, *args, **kwargs):
+        biz_id = get_request_biz_id(request)
+        queryset = self.filter_queryset(self.get_queryset().filter(biz_id=biz_id))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
 
     @action(detail=False, methods=["POST"])
     def describe_qas(self, request):
