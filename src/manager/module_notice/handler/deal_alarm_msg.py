@@ -48,6 +48,7 @@ class OriginalAlarm:
         self.bk_biz_name = None  # 业务名称
         self.strategy_name = None  # 策略名称
         self.event_level_name = None  # 告警等级名称
+        self.event_id = None  # 告警ID
         self.begin_time = None  # 开始时间
         self.create_time = None  # 告警出来的时间
         self.anomaly_message = None  # 告警消息
@@ -82,6 +83,7 @@ class OriginalAlarm:
         event = self.info.get("event")  # 告警事件
         self.event_level_name = event.get("level_name")  # 告警级别名称
         self.level = event.get("level")  # 告警级别
+        self.event_id = event.get("id")  # 告警ID
         self.begin_time = get_time(event.get("begin_time"))  # 首次异常
 
     def get_anomaly_info(self):
@@ -138,6 +140,12 @@ class OriginalAlarm:
             self.alarm_dimension = ",".join([f'{k}={v.get("value")}' for k, v in dimension_translation.items()])
             # 设置IP
             self.bk_target_ip = dimension_translation.get("serverIp", {}).get("value")
+
+        # 3.第三种格式兼容
+        if not self.alarm_dimension:
+            origin_alarm_data_dimensions = origin_alarm_data.get("dimensions", {})
+            self.alarm_dimension = ",".join([f"{k}={v}" for k, v in origin_alarm_data_dimensions.items()])
+            self.bk_target_ip = origin_alarm_data_dimensions.get("bk_target_ip")
         # 全部维度
         self.dimensions = origin_alarm.get("dimensions", {})
 
@@ -159,6 +167,7 @@ class OriginalAlarm:
         )
         content = f"""告警业务: {self.bk_biz_name}
 策略名称: {self.strategy_name}
+告警 ID: {self.event_id}
 告警级别: {self.event_level_name}
 首次异常: {self.begin_time}
 最近异常: {self.create_time}
