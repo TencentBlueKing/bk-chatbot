@@ -433,17 +433,16 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
                     element_total_time = element.get("elapsed") or int(time.time() * 1000) - element_start_time
                     element_finish_time = element_start_time and element_start_time + element_total_time
 
-                if element_status in TASK_STATUS_UNFINISHED and running_index is None:
-                    running_index = len(parse_result)
-
                 step_status = TASK_EXECUTE_STATUS_DICT[element_status]
                 if (
                     element_status == TaskExecStatus.FAIL.value
                     and element.get("additionalOptions", {}).get("continueWhenFailed", False)
                     and not element.get("additionalOptions", {}).get("manualSkip", False)
                 ):
-                    running_index = None
                     step_status = "{}({})".format(TASK_EXECUTE_STATUS_DICT[element_status], "失败时继续")
+
+                if element_status in TASK_STATUS_UNFINISHED and running_index is None and step_status != "执行失败(失败时继续)":
+                    running_index = len(parse_result)
 
                 parse_result.append(
                     {
