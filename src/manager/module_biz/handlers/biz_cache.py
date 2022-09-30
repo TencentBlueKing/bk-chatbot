@@ -37,7 +37,7 @@ def get_biz_info(biz_id, operator="admin"):
                 fields=["bk_biz_id", "bk_biz_name"],
             )
             if info:
-                biz_info = info
+                biz_info = info[0]
                 r.set(biz_key, json.dumps(info[0]), 60 * 60 * 24 * 7)
         else:
             biz_info = json.loads(biz_info)
