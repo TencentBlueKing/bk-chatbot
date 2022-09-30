@@ -442,6 +442,7 @@ def parse_devops_pipeline(devops_project_id, pipeline_info, is_parse_all=False):
                     and element.get("additionalOptions", {}).get("continueWhenFailed", False)
                     and not element.get("additionalOptions", {}).get("manualSkip", False)
                 ):
+                    running_index = None
                     step_status = "{}({})".format(TASK_EXECUTE_STATUS_DICT[element_status], "失败时继续")
 
                 parse_result.append(
