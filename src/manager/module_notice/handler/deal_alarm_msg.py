@@ -148,7 +148,7 @@ class OriginalAlarm:
             self.bk_target_ip = origin_alarm_data_dimensions.get("bk_target_ip")
 
         # 4.如果模板告警还是为空则用项目替换
-        if not self.alarm_dimension:
+        if not self.bk_target_ip:
             self.bk_target_ip = self.bk_biz_name
 
         # 全部维度
