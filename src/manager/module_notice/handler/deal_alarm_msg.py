@@ -146,6 +146,11 @@ class OriginalAlarm:
             origin_alarm_data_dimensions = origin_alarm_data.get("dimensions", {})
             self.alarm_dimension = ",".join([f"{k}={v}" for k, v in origin_alarm_data_dimensions.items()])
             self.bk_target_ip = origin_alarm_data_dimensions.get("bk_target_ip")
+
+        # 4.如果模板告警还是为空则用项目替换
+        if not self.alarm_dimension:
+            self.bk_target_ip = self.bk_biz_name
+
         # 全部维度
         self.dimensions = origin_alarm.get("dimensions", {})
 
