@@ -12,6 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import re
 import datetime
 import logging
 import math
@@ -48,6 +49,17 @@ TASK_FINISHED_STATUS = {
     TASK_EXECUTE_STATUS_DICT[TaskExecStatus.REMOVE.value],
     TASK_EXECUTE_STATUS_DICT[TaskExecStatus.SUCCESS.value],
 }
+BK_TIMING_DATE_REGX = re.compile(
+    r"%s %s"
+    % (
+        r"^(((\d{3}[1-9]|\d{2}[1-9]\d{1}|\d{1}[1-9]\d{2}|[1-9]\d{3}))|"
+        r"(29/02/((\d{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))))-"
+        r"((0[13578]|1[02])-((0[1-9]|[12]\d|3[01]))|"
+        r"((0[469]|11)-(0[1-9]|[12]\d|30))|(02)-(0[1-9]|[1]\d|2[0-8]))",
+        r"((0|[1])\d|2[0-3]):(0|[1-5])\d:(0|[1-5])\d$",
+    )
+)
+BK_TIMING_SECONDS_REGX = re.compile(r"^\d+$")
 
 
 @task
@@ -164,6 +176,22 @@ def task_broadcast(broadcast_id):
                     logger.error(f"[task_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
 
         logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] finish broadcast")
+
+        # 如果是标准运维定时插件,则在定时结束前唤醒
+        current_step_detail = parse_result.get("current_step_detail", {})
+        if task_platform == TAK_PLATFORM_SOPS and current_step_detail.get("plugin_code") == "sleep_timer":
+            node_detail = SOPS().get_task_node_detail(operator, biz_id, task_id, current_step_detail.get("step_id"))
+            bk_timing = node_detail.get("data", {}).get("inputs", {}).get("bk_timing", "")
+            if bk_timing:
+                if BK_TIMING_DATE_REGX.match(str(bk_timing)):
+                    eta = datetime.datetime.strptime(bk_timing, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=20)
+                    task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, eta=eta)
+                    return
+                elif BK_TIMING_SECONDS_REGX.match(str(bk_timing)):
+                    countdown = int(bk_timing) + 20
+                    task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=countdown)
+                    return
+
         if (
             task_platform == TAK_PLATFORM_DEVOPS
             and broadcast_obj.step_status == "执行失败"
