@@ -195,8 +195,9 @@ def parse_sops_node_order(pipeline_tree):
 def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
     pipeline_tree = task_info.get("pipeline_tree")
     parse_result = [None]
+    current_step_detail = {"plugin_code": "", "step_id": ""}
 
-    def _unfold_pipeline_tree(pipeline_data, status_data, parse_data, parent_step_index_list):
+    def _unfold_pipeline_tree(pipeline_data, status_data, parse_data, parent_step_index_list, cur_step_detail):
         node_info = {
             **pipeline_data.get("activities", {}),
             **pipeline_data.get("gateways", {}),
@@ -228,6 +229,8 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             if node_state in TASK_STATUS_UNFINISHED and parse_data[0] is None and node["type"] != "SubProcess":
                 parse_data[0] = len(parse_data) - 1
+                cur_step_detail["plugin_code"] = node.get("component", {}).get("code", "")
+                cur_step_detail["step_id"] = node.get("id", {})
 
             if node["type"] == "ConvergeGateway":
                 continue
@@ -263,7 +266,7 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
                         node["pipeline"], node_status_info.get("children"), parse_data, current_step_index_list
                     )
 
-    _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [])
+    _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [], current_step_detail)
     running_index = parse_result[0]
     parse_result = parse_result[1:]
     total_step_num = len(parse_result)
@@ -309,6 +312,7 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
         "task_url": task_info.get("task_url"),
         "task_platform": TAK_PLATFORM_SOPS,
         "task_id": task_info.get("id"),
+        "current_step_detail": current_step_detail,
     }
     return data
 
