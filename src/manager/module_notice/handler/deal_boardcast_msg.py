@@ -48,7 +48,7 @@ class OriginalBroadcast:
 
         return "--"
 
-    def init_markdown(self):
+    def init_markdown(self, task_name_link=False):
         step_data = self.parse_result.get("step_data", [])
         else_executing_step_list = self.parse_result.get("else_executing_step_list", [])
         step_line_list = []
@@ -85,9 +85,13 @@ class OriginalBroadcast:
         step_schedule = "{}/{}".format(
             self.parse_result.get("current_step_num"), self.parse_result.get("total_step_num")
         )
+        if task_name_link:
+            task_name = f"[{self.parse_result.get('task_name')}]({self.parse_result.get('task_url')})"
+        else:
+            task_name = self.parse_result.get("task_name")
         self.markdown_content = (
             f""" **任务实时播报如下:**
- **任务名:** {self.parse_result.get("task_name")}
+ **任务名:** {task_name}
  **执行时间:** {task_exec_time}
  **执行状态:** <font color=\"{self.parse_result.get("task_status_color")}\">{self.parse_result.get("task_status")}</font>"""
             f"""({step_schedule})
@@ -148,6 +152,7 @@ class OriginalBroadcast:
         wework_bot
         @return:
         """
+        self.init_markdown()
         return "markdown", self.markdown_content
 
     @property
@@ -156,6 +161,7 @@ class OriginalBroadcast:
         wework
         @return:
         """
+        self.init_markdown(task_name_link=True)
         return "markdown", self.markdown_content
 
     @property
