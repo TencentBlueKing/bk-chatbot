@@ -245,13 +245,19 @@ def task_params_broadcast(broadcast_id):
 
         if task_platform == TAK_PLATFORM_DEVOPS:
             build_info = DevOps().app_build_status(
-                operator, broadcast_obj.project_id, broadcast_obj.pipeline_id, broadcast_obj.build_id
+                operator,
+                broadcast_obj.devops_project_id,
+                broadcast_obj.devops_pipeline_id,
+                broadcast_obj.devops_build_id,
             )
 
             build_params = build_info.get("data", {}).get("buildParameters", [])
             task_params = [{"params_name": item["key"], "params_value": item["value"]} for item in build_params]
             task_url = "{}/console/pipeline/{}/{}/detail/{}".format(
-                BKAPP_DEVOPS_HOST, broadcast_obj.project_id, broadcast_obj.pipeline_id, broadcast_obj.build_id
+                BKAPP_DEVOPS_HOST,
+                broadcast_obj.devops_project_id,
+                broadcast_obj.devops_pipeline_id,
+                broadcast_obj.devops_build_id,
             )
             task_name = "[蓝盾] {}".format(build_info["data"]["variables"]["pipeline.name"])
 
