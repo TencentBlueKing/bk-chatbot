@@ -12,6 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import os
 import re
 import datetime
 import logging
@@ -31,7 +32,7 @@ from src.manager.module_biz.handlers.platform_task import (
 )
 from src.manager.module_notice.handler.notice_cache import get_notice_group_data
 from src.manager.module_notice.models import TaskBroadcast
-from src.manager.module_notice.handler.deal_boardcast_msg import OriginalBroadcast
+from src.manager.module_notice.handler.deal_boardcast_msg import OriginalBroadcast, OriginalParamsBroadcast
 
 from common.constants import (
     TAK_PLATFORM_JOB,
@@ -60,6 +61,8 @@ BK_TIMING_DATE_REGX = re.compile(
     )
 )
 BK_TIMING_SECONDS_REGX = re.compile(r"^\d+$")
+BKAPP_JOB_HOST = os.getenv("BKAPP_JOB_HOST", "")
+BKAPP_DEVOPS_HOST = os.getenv("BKAPP_DEVOPS_HOST", "")
 
 
 @task
@@ -203,3 +206,92 @@ def task_broadcast(broadcast_id):
             task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
     except Exception:
         logger.exception(f"[task_broadcast-error-broadcast_id-{broadcast_id}]")
+
+
+@task
+def task_params_broadcast(broadcast_id):
+    logger.info(f"[task_params_broadcast][info][broadcast_id={broadcast_id}] start broadcast")
+    try:
+        broadcast_obj = TaskBroadcast.objects.get(pk=broadcast_id)
+        operator = broadcast_obj.start_user
+        biz_id = broadcast_obj.biz_id
+        task_id = broadcast_obj.task_id
+        extra_notice_info = broadcast_obj.extra_notice_info
+        share_group_list = broadcast_obj.share_group_list
+        task_platform = broadcast_obj.platform
+        if task_platform == TAK_PLATFORM_JOB:
+            params_info = JOB().get_job_instance_global_var_value(operator, biz_id, task_id)
+            task_info = JOB().get_job_instance_status(operator, biz_id, task_id).get("data")
+            job_instance_id = params_info.get("job_instance_id")
+            step_instance_var_list = params_info.get("step_instance_var_list", [])
+            params_result = {}
+            global_var_list = [var for s in step_instance_var_list for var in s["global_var_list"]]
+            for var in global_var_list:
+                params_result.update({var["name"]: {"params_name": var["name"], "params_value": var["value"]}})
+            task_params = list(params_result.values())
+            task_url = f"{BKAPP_JOB_HOST}/biz/{biz_id}/execute/task/{job_instance_id}"
+            task_name = "[作业平台] {}".format(task_info.get("job_instance").get("name"))
+
+        if task_platform == TAK_PLATFORM_SOPS:
+            task_info = SOPS().get_task_detail(operator, biz_id, task_id)
+            constants = task_info.get("constants")
+            task_params = [
+                {"params_name": v["name"], "params_value": v["value"]}
+                for k, v in constants.items()
+                if v["show_type"] == "show"
+            ]
+            task_url = task_info.get("task_url")
+            task_name = "[标准运维] {}".format(task_info.get("name"))
+
+        if task_platform == TAK_PLATFORM_DEVOPS:
+            build_info = DevOps().app_build_status(
+                operator, broadcast_obj.project_id, broadcast_obj.pipeline_id, broadcast_obj.build_id
+            )
+
+            build_params = build_info.get("data", {}).get("buildParameters", [])
+            task_params = [{"params_name": item["key"], "params_value": item["value"]} for item in build_params]
+            task_url = "{}/console/pipeline/{}/{}/detail/{}".format(
+                BKAPP_DEVOPS_HOST, broadcast_obj.project_id, broadcast_obj.pipeline_id, broadcast_obj.build_id
+            )
+            task_name = "[蓝盾] {}".format(build_info["data"]["variables"]["pipeline.name"])
+
+        if share_group_list:
+            origin_obj = OriginalParamsBroadcast(task_name, task_url, task_params)
+            notice_groups = get_notice_group_data(share_group_list)
+            for notice_group in notice_groups:
+                kwargs = {
+                    "im_platform": notice_group.get("im_platform"),
+                    "biz_id": biz_id,
+                    "msg_source": BROADCAST,
+                    "group_name": notice_group.get("notice_group_name"),
+                }
+                msg_type, msg_content = getattr(origin_obj, notice_group.get("im").lower(), ("text", "解析参数出错,请联系管理员"))
+                notice = Notice(
+                    notice_group.get("im"),
+                    msg_type,
+                    msg_content,
+                    notice_group.get("receiver"),
+                    notice_group.get("headers"),
+                    **kwargs,
+                )
+                result = notice.send()
+                if not result["result"]:
+                    logger.error(f"[task_params_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
+
+        if extra_notice_info:
+            origin_obj = OriginalParamsBroadcast(task_name, task_url, task_params)
+            msg_type, msg_content = getattr(origin_obj, "wework", ("text", "解析参数出错,请联系管理员"))
+            for _notice_info in extra_notice_info:
+                kwargs = {
+                    "im_platform": "企业微信",
+                    "biz_id": biz_id,
+                    "msg_source": BROADCAST,
+                    "group_name": "附加通知人/群组",
+                }
+                notice = Notice("WEWORK", msg_type, msg_content, _notice_info, headers={}, **kwargs)
+                result = notice.send()
+                if not result["result"]:
+                    logger.error(f"[task_params_broadcast][error][broadcast_id={broadcast_id}][result={result}]")
+
+    except Exception:
+        logger.exception(f"[task_params_broadcast-error-broadcast_id-{broadcast_id}]")
