@@ -4,6 +4,8 @@ ignore =
     W503,
     ;E203 whitespace before ':'
     E203,
+    ;W605 invalid escape sequence '\w'
+    W605,
 
 ; exclude file
 exclude =
