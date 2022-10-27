@@ -12,7 +12,6 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
 from enum import Enum
 
 import django_filters
@@ -29,6 +28,7 @@ from common.constants import (
 from common.drf.filters import BaseOpenApiFilter
 from common.models.base import BaseModel
 from common.models.json import DictCharField
+from common.utils.uuid import get_random_str
 
 
 class Bot(BaseModel):
@@ -195,7 +195,12 @@ class Task(BaseModel):
 
     biz_id = models.PositiveIntegerField(_("业务ID"), default=0, db_index=True)
     index_id = models.BigIntegerField(_("索引ID"), default=-1)
-    platform = models.CharField(_("平台名称"), default=TAK_PLATFORM_JOB, max_length=128, choices=TASK_PLATFORM_CHOICES)
+    platform = models.CharField(
+        _("平台名称"),
+        default=TAK_PLATFORM_JOB,
+        max_length=128,
+        choices=TASK_PLATFORM_CHOICES,
+    )
     task_id = models.CharField(_("任务ID"), default="", max_length=128)
     project_id = models.CharField(_("项目id"), default="", max_length=128)
     activities = DictCharField(verbose_name=_("节点信息"), default=[])
@@ -278,6 +283,7 @@ class ExecutionLog(BaseModel):
     )
     params = DictCharField("执行参数", default=[])
     notice_exec_success = models.BooleanField("执行成功是否通知", default=True)
+    task_uuid = models.CharField(_("uuid"), default="", max_length=256)
 
     class Meta:
         db_table = "tab_intent_execution_log"
@@ -303,11 +309,17 @@ class ExecutionLog(BaseModel):
         bk_app_secret = filters.CharFilter(field_name="bk_app_secret", method="self_ignore")
 
     @classmethod
-    def query_log(cls, id: int):
+    def query_log(cls, **kwargs):
         """
-        获取日志列表
+        获取任务记录
+        :param kwargs:
+        :return:
         """
-        return cls.objects.get(pk=id)
+
+        obj = cls.objects.filter(**kwargs).first()
+        if not obj:
+            raise ValueError("没有查询到对应的任务信息")
+        return obj
 
     @classmethod
     def query_log_list(cls, **kwargs):
@@ -321,6 +333,8 @@ class ExecutionLog(BaseModel):
         """
         创建日志
         """
+        # 设置uuid
+        kwargs.setdefault("task_uuid", get_random_str(32))
         log = cls.objects.create(**kwargs)
         return log
 

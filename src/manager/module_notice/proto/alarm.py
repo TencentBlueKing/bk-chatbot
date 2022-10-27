@@ -70,9 +70,7 @@ class AlarmConfigSerializer(serializers.ModelSerializer):
         """
 
         url = serializers.CharField(label="http回调地址", required=False)
-        notice_group_ids = serializers.ListSerializer(
-            label="http回调地址", child=serializers.IntegerField(), required=False
-        )
+        notice_group_ids = serializers.ListSerializer(label="发送消息群组", child=serializers.IntegerField(), required=False)
 
         def validate_notice_group_ids(self, value):
             """

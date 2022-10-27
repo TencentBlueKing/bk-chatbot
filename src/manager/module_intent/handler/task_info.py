@@ -45,7 +45,17 @@ class TaskDetail(Strategy):
         更新状态
         """
 
-        execution_log_obj: ExecutionLog = ExecutionLog.query_log(id)
+        execution_log_obj: ExecutionLog = ExecutionLog.query_log(**{"id": id})
+        platform = int(execution_log_obj.platform)
+        return cls._map.value[platform](execution_log_obj)
+
+    @classmethod
+    def get_by_uuid(cls, id: str):
+        """
+        通过uuid查询错误信息
+        :return:
+        """
+        execution_log_obj: ExecutionLog = ExecutionLog.query_log(**{"task_uuid": id})
         platform = int(execution_log_obj.platform)
         return cls._map.value[platform](execution_log_obj)
 

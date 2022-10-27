@@ -19,12 +19,14 @@ from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.constants import TASK_EXECUTE_STATUS_DICT
 from common.control.throttle import ChatBotThrottle
 from common.drf.validation import validation
 from common.drf.view_set import BaseGetViewSet
 from common.perm.permission import login_exempt_with_perm
 from common.redis import RedisClient
 from src.manager.handler.api.bk_job import JOB
+from src.manager.handler.api.bk_sops import SOPS
 from src.manager.module_intent.constants import (
     ONE_WEEK_SECONDS,
     UPDATE_TASK_MAX_TIME,
@@ -47,7 +49,6 @@ from src.manager.module_intent.proto.log import (
     log_describe_records_docs,
     log_list_docs,
 )
-from src.manager.handler.api.bk_sops import SOPS
 
 BKAPP_JOB_HOST = os.getenv("BKAPP_JOB_HOST", "")
 BKAPP_DEVOPS_HOST = os.getenv("BKAPP_DEVOPS_HOST", "")
@@ -137,7 +138,10 @@ class ExecutionLogViewSet(BaseGetViewSet):
                 task_url = "{}/biz/{}/execute/task/{}".format(BKAPP_JOB_HOST, item["biz_id"], item["task_id"])
             if item["platform"] == ExecutionLog.PlatformType.DEV_OPS.value:
                 task_url = "{}/console/pipeline/{}/{}/detail/{}".format(
-                    BKAPP_DEVOPS_HOST, item["project_id"], item["feature_id"], item["task_id"]
+                    BKAPP_DEVOPS_HOST,
+                    item["project_id"],
+                    item["feature_id"],
+                    item["task_id"],
                 )
             data.append({"task_url": task_url, **item})
         return data
@@ -174,7 +178,10 @@ class TaskExecutionViewSet(BaseGetViewSet):
         """
         payload = request.payload["data"]
         log = ExecutionLog.create_log(**payload)
-        data = {"id": log.pk}
+        data = {
+            "id": log.pk,
+            "task_uuid": log.task_uuid,
+        }
         # 触发触发直接返回
         if payload.get("sender") == "trigger":
             return Response({"data": data})
@@ -222,3 +229,31 @@ class TaskExecutionViewSet(BaseGetViewSet):
             key = f"{UPDATE_TASK_PREFIX}{id}"  # 唯一key
             r.set(key, 1, UPDATE_TASK_MAX_TIME)  # 设置过期时间
         return Response({"data": ""})
+
+    @action(
+        detail=False,
+        methods=["GET"],
+        url_name="status",
+        url_path=r"status/(?P<uuid>\w+)",
+    )
+    def status(self, request, *args, **kwargs):
+        """
+        通过UUID查询执行状态
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        task_uuid = kwargs.get("uuid")
+        executionLog = ExecutionLog.query_log(
+            **{
+                "task_uuid": task_uuid,
+            }
+        )
+        return Response(
+            {
+                "status": executionLog.status,
+                "message": TASK_EXECUTE_STATUS_DICT.get(executionLog.status),
+                "l_message": ExecutionLog.TaskExecStatus(executionLog.status).name,
+            }
+        )
