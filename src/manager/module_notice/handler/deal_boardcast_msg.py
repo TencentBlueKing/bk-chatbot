@@ -206,3 +206,111 @@ class OriginalBroadcast:
     @property
     def ding_webhook(self):
         return "text", self.text_content
+
+
+class OriginalParamsBroadcast:
+    """
+    任务参数播报数据
+    """
+
+    def __init__(self, task_name, task_url, task_params, **kwargs):
+        """
+        初始化数据
+        """
+        self.task_name = task_name
+        self.task_url = task_url
+        self.task_params = task_params
+        self.text_content = ""
+        self.markdown_content = ""
+        self.mini_program_content = ""
+
+        self.init_markdown()
+        self.init_text()
+        self.init_mini_program()
+
+    def init_markdown(self, task_name_link=False):
+        if task_name_link:
+            task_name = f"[{self.task_name}]({self.task_url})"
+        else:
+            task_name = self.task_name
+        params_str_list = [f"**{item['params_name']}**: {item['params_value']}" for item in self.task_params]
+        params_str = "\n".join(params_str_list)
+        self.markdown_content = f"""**任务实时播报已开启，任务参数如下:**
+**任务名:** {task_name}
+**任务参数:**
+{params_str}
+        """
+
+    def init_text(self):
+        task_name = self.task_name
+        params_str_list = [f"{item['params_name']}: {item['params_value']}" for item in self.task_params]
+        params_str = "\n".join(params_str_list)
+        self.text_content = f"""任务实时播报已开启，任务参数如下:
+任务名: {task_name}
+任务参数:
+{params_str}
+                """
+
+    def init_mini_program(self):
+        self.mini_program_content = ""
+
+    @property
+    def wework_bot(self):
+        """
+        wework_bot
+        @return:
+        """
+        self.init_markdown()
+        return "markdown", self.markdown_content
+
+    @property
+    def wework(self):
+        """
+        wework
+        @return:
+        """
+        self.init_markdown(task_name_link=True)
+        return "markdown", self.markdown_content
+
+    @property
+    def slack(self):
+        """
+        @return:
+        """
+        return "text", self.text_content
+
+    @property
+    def slack_webhook(self):
+        """
+        @return:
+        """
+        return "text", self.text_content
+
+    @property
+    def qq(self):
+        """
+        qq发送
+        @return:
+        """
+        return "text", self.text_content
+
+    @property
+    def mini_program(self):
+        """
+        微信小程序
+        @return:
+        """
+        return "text", self.text_content
+
+    @property
+    def lark_webhook(self):
+        """
+        飞书 webhook
+        @return:
+        """
+
+        return "text", self.text_content
+
+    @property
+    def ding_webhook(self):
+        return "text", self.text_content
