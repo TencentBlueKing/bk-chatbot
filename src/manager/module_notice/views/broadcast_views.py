@@ -26,7 +26,7 @@ from src.manager.module_notice.proto.notice import (
     ReqPostTaskBroadShareGWViewSerializer,
 )
 from src.manager.module_notice.models import TaskBroadcast
-from src.manager.module_notice.tasks.broadcast_timer import task_broadcast
+from src.manager.module_notice.tasks.broadcast_timer import task_broadcast, task_params_broadcast
 
 
 class TaskBroadcastGwViewSet(BaseViewSet):
@@ -65,7 +65,8 @@ class TaskBroadcastGwViewSet(BaseViewSet):
                     }
                 )
         broadcast_obj = TaskBroadcast.objects.create(**broadcast_params)
-        task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id})
+        task_params_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id})
+        task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=10)
         return Response({"broadcast_id": broadcast_obj.id})
 
     @login_exempt_with_perm
