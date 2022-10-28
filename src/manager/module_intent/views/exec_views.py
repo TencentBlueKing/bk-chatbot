@@ -182,9 +182,6 @@ class TaskExecutionViewSet(BaseGetViewSet):
             "id": log.pk,
             "task_uuid": log.task_uuid,
         }
-        # 触发触发直接返回
-        if payload.get("sender") == "trigger":
-            return Response({"data": data})
 
         with RedisClient() as r:
             key = f"{UPDATE_TASK_PREFIX}{log.pk}"  # 唯一key
