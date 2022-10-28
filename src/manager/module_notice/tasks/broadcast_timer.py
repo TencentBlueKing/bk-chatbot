@@ -77,6 +77,7 @@ def task_broadcast(broadcast_id):
         extra_notice_info = broadcast_obj.extra_notice_info
         share_group_list = broadcast_obj.share_group_list
         task_platform = broadcast_obj.platform
+        current_step_detail = {}
         if broadcast_obj.is_stop:
             return
 
@@ -88,6 +89,7 @@ def task_broadcast(broadcast_id):
             task_info = SOPS().get_task_detail(operator, biz_id, task_id)
             status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
             parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
+            current_step_detail = parse_result.get("current_step_detail", {})
 
         if task_platform == TAK_PLATFORM_DEVOPS:
             build_detail = DevOps().app_build_detail(
@@ -101,6 +103,10 @@ def task_broadcast(broadcast_id):
 
         step_data = parse_result.get("step_data")
         current_step = step_data[math.floor(len(step_data) / 2)]
+
+        if current_step["step_duration"] >= 60 * 60 * 24 * 3:
+            broadcast_obj.is_stop = True
+            broadcast_obj.save()
 
         now = datetime.datetime.now()
         if (
@@ -120,6 +126,15 @@ def task_broadcast(broadcast_id):
 
             else:
                 is_send_msg = False
+
+            # 如果是标准运维暂停节点,只是第一次发送消息
+            if current_step_detail.get("plugin_code") == "pause_node":
+                is_send_msg = False
+
+            # 如果是标准运维任务状态失败,只是第一次发送消息
+            if current_step["step_status"] == "执行失败":
+                is_send_msg = False
+
         else:
             is_send_msg = True
             broadcast_obj.step_id = current_step["step_id"]
@@ -180,21 +195,6 @@ def task_broadcast(broadcast_id):
 
         logger.info(f"[task_broadcast][info][broadcast_id={broadcast_id}] finish broadcast")
 
-        # 如果是标准运维定时插件,则在定时结束前唤醒
-        current_step_detail = parse_result.get("current_step_detail", {})
-        if task_platform == TAK_PLATFORM_SOPS and current_step_detail.get("plugin_code") == "sleep_timer":
-            node_detail = SOPS().get_task_node_detail(operator, biz_id, task_id, current_step_detail.get("step_id"))
-            bk_timing = node_detail.get("data", {}).get("inputs", {}).get("bk_timing", "")
-            if bk_timing:
-                if BK_TIMING_DATE_REGX.match(str(bk_timing)):
-                    eta = datetime.datetime.strptime(bk_timing, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(seconds=20)
-                    task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, eta=eta)
-                    return
-                elif BK_TIMING_SECONDS_REGX.match(str(bk_timing)):
-                    countdown = int(bk_timing) + 20
-                    task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=countdown)
-                    return
-
         if (
             task_platform == TAK_PLATFORM_DEVOPS
             and broadcast_obj.step_status == "执行失败"
@@ -203,6 +203,22 @@ def task_broadcast(broadcast_id):
             return
 
         if parse_result["task_status"] not in TASK_FINISHED_STATUS:
+            # 如果是标准运维定时插件,则在定时结束前唤醒
+            if task_platform == TAK_PLATFORM_SOPS and current_step_detail.get("plugin_code") == "sleep_timer":
+                node_detail = SOPS().get_task_node_detail(operator, biz_id, task_id, current_step_detail.get("step_id"))
+                bk_timing = node_detail.get("data", {}).get("inputs", {}).get("bk_timing", "")
+                if bk_timing:
+                    if BK_TIMING_DATE_REGX.match(str(bk_timing)):
+                        eta = datetime.datetime.strptime(bk_timing, "%Y-%m-%d %H:%M:%S") + datetime.timedelta(
+                            seconds=20
+                        )
+                        task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, eta=eta)
+                        return
+                    elif BK_TIMING_SECONDS_REGX.match(str(bk_timing)):
+                        countdown = int(bk_timing) + 20
+                        task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=countdown)
+                        return
+
             task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
     except Exception:
         logger.exception(f"[task_broadcast-error-broadcast_id-{broadcast_id}]")

@@ -12,6 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import datetime
 import os
 import time
 import math
@@ -247,16 +248,26 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
             current_step_index = "".join([str(i) for i in current_step_index_list[:-1]])
 
             node_start_time = node_status_info.get("start_time")
+            node_start_time = node_start_time and node_start_time.replace(" +0800", "")
             node_finish_time = node_status_info.get("finish_time")
+            node_finish_time = node_finish_time and node_finish_time.replace(" +0800", "")
+            if node_start_time:
+                elapsed_time = int(
+                    (
+                        datetime.datetime.now() - datetime.datetime.strptime(node_start_time, "%Y-%m-%d %H:%M:%S")
+                    ).total_seconds()
+                )
+            else:
+                elapsed_time = 1
             current_parse_data = {
                 "step_name": node["name"],
                 "step_index": current_step_index,
                 "step_id": node_id,
-                "step_duration": node_status_info.get("elapsed_time") or 1,
+                "step_duration": elapsed_time,
                 "step_status": TASK_EXECUTE_STATUS_DICT[node_state],
                 "step_status_color": TASK_EXEC_STATUS_COLOR_DICT[node_state],
-                "start_time": node_start_time and node_start_time.replace(" +0800", ""),
-                "finish_time": node_finish_time and node_finish_time.replace(" +0800", ""),
+                "start_time": node_start_time,
+                "finish_time": node_finish_time,
             }
 
             parse_data.append(current_parse_data)
