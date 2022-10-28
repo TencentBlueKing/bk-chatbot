@@ -106,51 +106,48 @@ class PlatformTask:
         :param uri:
         :return:
         """
+
+        # 消息通知失败也不会再进行查询
         try:
-            status = TASK_EXECUTE_STATUS_DICT.get(self.obj.status)
-            color = TASK_EXEC_STATUS_COLOR_DICT.get(self.obj.status)
-            receiver = self.obj.rtx if self.obj.rtx else self.obj.sender
-            params = {
-                "log_id": self.obj.id,
-                "biz_id": self.obj.biz_id,
-                "bot_name": self.obj.bot_name,
-                "user": self.obj.sender,
-                "receiver": receiver,  # rtx(个人/群);游梯对象(openid)
-                "intent_name": self.obj.intent_name,
-                "intent_id": self.obj.intent_id,
-                "status": status,
-                "color": color,
-                "task_uri": task_uri,
-                "time": to_format_date(self.obj.updated_at),
-                "param_list": param_list,
-            }
 
-            # 消息通知失败也不会再进行查询
-            try:
+            # 不通知的情况
+            # 1、没有缓存
+            # 2、有缓存,状态为成功并且执行通知为false
+            # 3、触发器不同步
+            if (
+                self.get_task_cache(self.obj.id)
+                and self.obj.sender != "trigger"
+                and (self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success)
+            ):
 
-                # 不通知的情况
-                # 1、没有缓存
-                # 2、有缓存,状态为成功并且执行通知为false
-                if self.get_task_cache(self.obj.id) and (
-                    self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success
-                ):
-                    Message.notice(**params)
+                status = TASK_EXECUTE_STATUS_DICT.get(self.obj.status)
+                color = TASK_EXEC_STATUS_COLOR_DICT.get(self.obj.status)
+                receiver = self.obj.rtx if self.obj.rtx else self.obj.sender
+                params = {
+                    "log_id": self.obj.id,
+                    "biz_id": self.obj.biz_id,
+                    "bot_name": self.obj.bot_name,
+                    "user": self.obj.sender,
+                    "receiver": receiver,  # rtx(个人/群);游梯对象(openid)
+                    "intent_name": self.obj.intent_name,
+                    "intent_id": self.obj.intent_id,
+                    "status": status,
+                    "color": color,
+                    "task_uri": task_uri,
+                    "time": to_format_date(self.obj.updated_at),
+                    "param_list": param_list,
+                }
+                Message.notice(**params)
 
-            except Exception:  # pylint: disable=broad-except
-                traceback.print_exc()
-                logger.error(f"发送通知错误:{traceback.format_exc()}")
-            # 如果出现状态为成功/移除 则删除
-            if self.obj.status in [
-                ExecutionLog.TaskExecStatus.SUCCESS.value,
-                ExecutionLog.TaskExecStatus.REMOVE.value,
-            ]:
-                self.del_task_cache(self.obj.id)
-        except ValueError:
-            traceback.print_exc()
-            logger.error(f"发送通知错误:{traceback.format_exc()}")
         except Exception:  # pylint: disable=broad-except
             traceback.print_exc()
             logger.error(f"发送通知错误:{traceback.format_exc()}")
+        # 如果出现状态为成功/移除 则删除
+        if self.obj.status in [
+            ExecutionLog.TaskExecStatus.SUCCESS.value,
+            ExecutionLog.TaskExecStatus.REMOVE.value,
+        ]:
+            self.del_task_cache(self.obj.id)
 
 
 class TaskStatus(Strategy):
