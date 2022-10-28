@@ -43,7 +43,7 @@ def update_task_status(id: int) -> None:
     :return:
     """
     logger.info(f"更新任务ID:{id}")
-    execution_log_obj: ExecutionLog = ExecutionLog.query_log(id)
+    execution_log_obj: ExecutionLog = ExecutionLog.query_log(**{"id": id})
     TaskStatus.do(execution_log_obj)
 
 
