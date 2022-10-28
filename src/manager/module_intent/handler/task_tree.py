@@ -48,7 +48,7 @@ class Pipeline(Strategy):
         """
         生成执行树
         """
-        execution_log_obj: ExecutionLog = ExecutionLog.query_log(id)
+        execution_log_obj: ExecutionLog = ExecutionLog.query_log(**{"id": id})
         platform = int(execution_log_obj.platform)
         return cls._map.value[platform](execution_log_obj)
 
