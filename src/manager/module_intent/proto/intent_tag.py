@@ -21,6 +21,8 @@ class IntentTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = IntentTag
         exclude = [
+            "id",
+            "tag_index",
             "biz_id",
             "updated_by",
             "is_deleted",
