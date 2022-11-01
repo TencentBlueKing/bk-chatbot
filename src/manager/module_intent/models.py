@@ -101,6 +101,7 @@ class Intent(BaseModel):
     serial_number = models.CharField(_("序列号"), default="-1", max_length=128)
     developer = DictCharField(_("开发商"), default=[])
     approver = DictCharField(_("审批人"), default=[])
+    tag_name = models.CharField(verbose_name=_("标签分类"), max_length=128, default="")
 
     class Meta:
         db_table = "tab_intent"
@@ -344,3 +345,19 @@ class ExecutionLog(BaseModel):
         更新日志
         """
         cls.objects.filter(pk=log_id).update(**kwargs)
+
+
+class IntentTag(BaseModel):
+    """
+    技能标签
+    """
+
+    biz_id = models.PositiveIntegerField(_("业务ID"), default=0, db_index=True)
+    tag_name = models.CharField(_("标签名称"), max_length=128)
+    tag_index = models.IntegerField(_("标签索引"))
+
+    class Meta:
+        db_table = "tab_intent_tag"
+        verbose_name = _("【技能标签】")
+        verbose_name_plural = _("【技能标签】")
+        ordering = ("tag_index",)

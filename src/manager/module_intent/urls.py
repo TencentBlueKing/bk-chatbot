@@ -20,6 +20,7 @@ from src.manager.module_intent.views.intent_views import IntentViewSet
 from src.manager.module_intent.views.exec_views import TaskExecutionViewSet, ExecutionLogViewSet
 from src.manager.module_intent.views.tasks_views import TasksViewSet
 from src.manager.module_intent.views.utterance_views import UtterancesViewSet
+from src.manager.module_intent.views.intent_tag_views import IntentTagViewSet
 
 router = routers.DefaultRouter()
 
@@ -29,5 +30,6 @@ router.register(r"(?P<biz>\d+)/utterance", UtterancesViewSet)
 router.register(r"(?P<biz>\d+)/tasks", TasksViewSet)
 router.register(r"log", ExecutionLogViewSet)
 router.register(r"task/exec", TaskExecutionViewSet, basename="task_exec")
+router.register(r"intent_tag", IntentTagViewSet)
 
 urlpatterns = (url(r"^", include(router.urls)),)
