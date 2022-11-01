@@ -91,6 +91,11 @@ class ReqPostBatchUpdateAvailableUserSerializers(Serializer):
     operator_user_list = serializers.ListField(required=True)
 
 
+class ReqPostBatchUpdateIntentTagSerializers(Serializer):
+    intent_id_list = serializers.ListField(required=True)
+    tag_name = serializers.CharField(required=True)
+
+
 class RsqPostFetchIntentCountSerializers(BaseRspSerializer):
     """
     查看意图数量响应

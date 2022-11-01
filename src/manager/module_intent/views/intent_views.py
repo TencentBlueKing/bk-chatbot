@@ -31,6 +31,7 @@ from src.manager.module_intent.proto.intent import (
     intent_list_docs,
     intent_update_docs,
     ReqPostBatchUpdateAvailableUserSerializers,
+    ReqPostBatchUpdateIntentTagSerializers,
 )
 
 
@@ -147,6 +148,21 @@ class IntentViewSet(BaseManageViewSet):
                 intent.available_user = list(set(intent.available_user) - operator_user_set)
             update_intent_list.append(intent)
         Intent.objects.bulk_update(update_intent_list, ["available_user"])
+        return Response({"data": []})
+
+    @action(detail=False, methods=["POST"])
+    @validation(ReqPostBatchUpdateIntentTagSerializers)
+    def batch_update_intent_tag(self, request, *args, **kwargs):
+        payload = request.payload
+        intent_id_list = payload.get("intent_id_list")
+        tag_name = payload.get("tag_name")
+
+        filter_queryset = self.queryset.filter(id__in=intent_id_list)
+        update_intent_list = []
+        for intent in filter_queryset:
+            intent.tag_name = tag_name
+            update_intent_list.append(intent)
+        Intent.objects.bulk_update(update_intent_list, ["tag_name"])
         return Response({"data": []})
 
     @action(detail=False, methods=["POST"])
