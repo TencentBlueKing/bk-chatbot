@@ -75,7 +75,7 @@ def get_wecom_params(
     # md拼接
     ch_status = TASK_EXECUTE_STATUS_DICT.get(status)  # 获取中文状态
     color = TASK_EXEC_STATUS_COLOR_DICT.get(status)  # 获取md颜色
-    md = f"""`{user}` 您好！"""
+    md = f"""<font color="#E53935">{user}</font>您好！"""
     md += f"""您的任务[[{intent_name}]({task_uri})]<font color="{color}">{ch_status}</font>\n"""
     if len(param_list) > 0:
         md += "**参数列表**\n"

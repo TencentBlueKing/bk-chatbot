@@ -242,15 +242,15 @@ class TaskExecutionViewSet(BaseGetViewSet):
         :return:
         """
         task_uuid = kwargs.get("uuid")
-        executionLog = ExecutionLog.query_log(
+        execution_log = ExecutionLog.query_log(
             **{
                 "task_uuid": task_uuid,
             }
         )
         return Response(
             {
-                "status": executionLog.status,
-                "message": TASK_EXECUTE_STATUS_DICT.get(executionLog.status),
-                "l_message": ExecutionLog.TaskExecStatus(executionLog.status).name,
+                "status": execution_log.status,
+                "message": TASK_EXECUTE_STATUS_DICT.get(execution_log.status),
+                "l_message": ExecutionLog.TaskExecStatus(execution_log.status).name,
             }
         )
