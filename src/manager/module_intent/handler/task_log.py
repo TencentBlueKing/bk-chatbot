@@ -26,13 +26,7 @@ from src.manager.handler.api.message import Message
 from src.manager.handler.bk.bk_devops import BkDevOps
 from src.manager.handler.bk.bk_job import BkJob
 from src.manager.handler.bk.bk_sops import BkSops
-from src.manager.module_intent.constants import (
-    TASK_EXEC_STATUS_COLOR_DICT,
-    TASK_EXECUTE_STATUS_DICT,
-    TASK_NOTICE_PREFIX,
-    UPDATE_TASK_MAX_TIME,
-    UPDATE_TASK_PREFIX,
-)
+from src.manager.module_intent.constants import TASK_NOTICE_PREFIX, UPDATE_TASK_MAX_TIME, UPDATE_TASK_PREFIX
 from src.manager.module_intent.models import ExecutionLog
 
 
@@ -119,20 +113,15 @@ class PlatformTask:
                 and self.obj.sender != "trigger"
                 and (self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success)
             ):
-
-                status = TASK_EXECUTE_STATUS_DICT.get(self.obj.status)
-                color = TASK_EXEC_STATUS_COLOR_DICT.get(self.obj.status)
-                receiver = self.obj.rtx if self.obj.rtx else self.obj.sender
                 params = {
                     "log_id": self.obj.id,
                     "biz_id": self.obj.biz_id,
                     "bot_name": self.obj.bot_name,
                     "user": self.obj.sender,
-                    "receiver": receiver,  # rtx(个人/群);游梯对象(openid)
+                    "receiver": self.obj.rtx if self.obj.rtx else self.obj.sender,  # rtx(个人/群);游梯对象(openid)
                     "intent_name": self.obj.intent_name,
                     "intent_id": self.obj.intent_id,
-                    "status": status,
-                    "color": color,
+                    "status": self.obj.status,
                     "task_uri": task_uri,
                     "time": to_format_date(self.obj.updated_at),
                     "param_list": param_list,

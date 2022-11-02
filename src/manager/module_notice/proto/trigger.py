@@ -17,7 +17,7 @@ from rest_framework import serializers
 
 from common.drf.field import BizId, DefaultFiled
 from common.drf.serializers import BaseRspSerializer
-from common.utils.uuid import get_random_str
+from common.utils.m_uuid import get_random_str
 from src.manager.module_notice.models import TriggerModel
 from src.manager.module_notice.proto import notice_tag
 from src.manager.module_other.models import IMTypeModel

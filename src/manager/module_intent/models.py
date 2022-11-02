@@ -19,16 +19,11 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_filters import filters
 
-from common.constants import (
-    CHAT_BOT_TYPE_DEFAULT,
-    CHAT_BOT_TYPES,
-    TAK_PLATFORM_JOB,
-    TASK_PLATFORM_CHOICES,
-)
+from common.constants import CHAT_BOT_TYPE_DEFAULT, CHAT_BOT_TYPES, TAK_PLATFORM_JOB, TASK_PLATFORM_CHOICES
 from common.drf.filters import BaseOpenApiFilter
 from common.models.base import BaseModel
 from common.models.json import DictCharField
-from common.utils.uuid import get_random_str
+from common.utils.m_uuid import get_uuid4
 
 
 class Bot(BaseModel):
@@ -335,7 +330,7 @@ class ExecutionLog(BaseModel):
         创建日志
         """
         # 设置uuid
-        kwargs.setdefault("task_uuid", get_random_str(32))
+        kwargs.setdefault("task_uuid", get_uuid4())
         log = cls.objects.create(**kwargs)
         return log
 

@@ -32,6 +32,19 @@ def camel_to_snake(name: str) -> str:
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
 
 
+def check_reg(reg: str, my_str: str) -> bool:
+    """
+    >>> check_reg("^[a-z]+$","myname")
+    True
+    >>> check_reg("^[a-z]+$","my name")
+    False
+    """
+    result = re.search(reg, my_str)
+    if result:
+        return True
+    return False
+
+
 if __name__ == "__main__":
     import doctest
 

@@ -19,11 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 from celery.task import periodic_task
 
 from common.redis import RedisClient
-from src.manager.module_intent.constants import (
-    UPDATE_TASK_MAX_WORKERS,
-    UPDATE_TASK_PREFIX,
-    UPDATE_TASK_TIME,
-)
+from src.manager.module_intent.constants import UPDATE_TASK_MAX_WORKERS, UPDATE_TASK_PREFIX, UPDATE_TASK_TIME
 from src.manager.module_intent.handler.task_log import update_task_status
 
 
@@ -37,17 +33,4 @@ def task_status_timer():
 
     # 多线程更新状态
     with ThreadPoolExecutor(max_workers=UPDATE_TASK_MAX_WORKERS) as pool:
-        list(
-            map(
-                lambda x: pool.submit(
-                    update_task_status,
-                    int(
-                        x.replace(
-                            f"{UPDATE_TASK_PREFIX}",
-                            "",
-                        )
-                    ),
-                ),  # (网络IO)多线程获取状态
-                ids,
-            )
-        )
+        list(map(lambda x: pool.submit(update_task_status, int(x.replace(f"{UPDATE_TASK_PREFIX}", ""))), ids))
