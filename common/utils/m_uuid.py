@@ -15,6 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import random
 import string
+import uuid
 
 
 def get_random_str(num=8):
@@ -25,3 +26,13 @@ def get_random_str(num=8):
     """
     seed = string.digits + string.ascii_lowercase
     return "".join([random.choice(seed) for _ in range(num)])
+
+
+def get_uuid4() -> str:
+    """
+    获取uuid字符串
+    :return:
+    """
+
+    u = uuid.uuid4()
+    return str(u)
