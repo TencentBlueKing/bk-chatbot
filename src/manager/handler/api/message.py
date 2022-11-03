@@ -12,6 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import os
 
 from blueapps.utils.logger import logger_celery as logger
@@ -51,7 +52,7 @@ class Message(Strategy):
             params = cls._map.value[notice_type](**data)
             ret = BkChat.new_send_msg(**params)
             logger.info(ret)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception("消息发送错误")
 
 
