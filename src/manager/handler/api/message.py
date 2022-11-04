@@ -12,6 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+
 import os
 
 from blueapps.utils.logger import logger_celery as logger
@@ -51,7 +52,7 @@ class Message(Strategy):
             params = cls._map.value[notice_type](**data)
             ret = BkChat.new_send_msg(**params)
             logger.info(ret)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception("消息发送错误")
 
 
@@ -75,8 +76,8 @@ def get_wecom_params(
     # md拼接
     ch_status = TASK_EXECUTE_STATUS_DICT.get(status)  # 获取中文状态
     color = TASK_EXEC_STATUS_COLOR_DICT.get(status)  # 获取md颜色
-    md = f"""<font color="#E53935">{user}</font>您好！"""
-    md += f"""您的任务[[{intent_name}]({task_uri})]<font color="{color}">{ch_status}</font>\n"""
+    md = f"""<font color="#2151d1">{user}</font>，"""
+    md += f"""您的任务 [[{intent_name}]({task_uri})] <font color="{color}">{ch_status}</font>\n"""
     if len(param_list) > 0:
         md += "**参数列表**\n"
     for param in param_list:
