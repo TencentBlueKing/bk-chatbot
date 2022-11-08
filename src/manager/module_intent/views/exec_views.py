@@ -27,11 +27,7 @@ from common.perm.permission import login_exempt_with_perm
 from common.redis import RedisClient
 from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
-from src.manager.module_intent.constants import (
-    ONE_WEEK_SECONDS,
-    UPDATE_TASK_MAX_TIME,
-    UPDATE_TASK_PREFIX,
-)
+from src.manager.module_intent.constants import ONE_WEEK_SECONDS, UPDATE_TASK_MAX_TIME, UPDATE_TASK_PREFIX
 from src.manager.module_intent.handler.task_info import TaskDetail
 from src.manager.module_intent.handler.task_operation import Operation
 from src.manager.module_intent.handler.task_tree import Pipeline
@@ -227,12 +223,7 @@ class TaskExecutionViewSet(BaseGetViewSet):
             r.set(key, 1, UPDATE_TASK_MAX_TIME)  # 设置过期时间
         return Response({"data": ""})
 
-    @action(
-        detail=False,
-        methods=["GET"],
-        url_name="status",
-        url_path=r"status/(?P<uuid>\w+)",
-    )
+    @action(detail=False, methods=["GET"], url_name="status", url_path=r"status/(?P<uuid>\w+)")
     def status(self, request, *args, **kwargs):
         """
         通过UUID查询执行状态
