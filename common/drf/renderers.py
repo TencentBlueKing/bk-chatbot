@@ -15,10 +15,10 @@ specific language governing permissions and limitations under the License.
 
 import uuid
 
-from drf_ujson.renderers import UJSONRenderer
+from rest_framework.renderers import JSONRenderer
 
 
-class ResponseFormatRenderer(UJSONRenderer):
+class ResponseFormatRenderer(JSONRenderer):
     def render(self, data, media_type=None, renderer_context=None):
         data = self.format_data(data, renderer_context)
         return super().render(data, media_type, renderer_context)
