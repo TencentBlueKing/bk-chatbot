@@ -49,6 +49,9 @@ RUN_VER = "open"
 
 # 线上SaaS运行版本，如非必要请勿修改
 RUN_VER = os.environ.get("BKPAAS_ENGINE_REGION", RUN_VER)
+if RUN_VER == "default":
+    RUN_VER = "open"
+
 print(f"环境:{RUN_VER}")
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
