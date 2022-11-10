@@ -63,6 +63,7 @@ BK_TIMING_DATE_REGX = re.compile(
 BK_TIMING_SECONDS_REGX = re.compile(r"^\d+$")
 BKAPP_JOB_HOST = os.getenv("BKAPP_JOB_HOST", "")
 BKAPP_DEVOPS_HOST = os.getenv("BKAPP_DEVOPS_HOST", "")
+BK_BROADCAST_SLEEP_PLUGIN_CODE = os.getenv("BK_BROADCAST_SLEEP_PLUGIN_CODE", "").split(",")
 
 
 @task
@@ -128,7 +129,7 @@ def task_broadcast(broadcast_id):
                 is_send_msg = False
 
             # 如果是标准运维暂停节点,只是第一次发送消息
-            if current_step_detail.get("plugin_code") == "pause_node":
+            if current_step_detail.get("plugin_code") in BK_BROADCAST_SLEEP_PLUGIN_CODE:
                 is_send_msg = False
 
             # 如果是标准运维任务状态失败,只是第一次发送消息
