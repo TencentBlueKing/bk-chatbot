@@ -230,7 +230,13 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             if node_state in TASK_STATUS_UNFINISHED and parse_data[0] is None and node["type"] != "SubProcess":
                 parse_data[0] = len(parse_data) - 1
-                cur_step_detail["plugin_code"] = node.get("component", {}).get("code", "")
+                if node.get("component", {}).get("code", "") == "remote_plugin":
+                    cur_step_detail["plugin_code"] = (
+                        node.get("component", {}).get("data", {}).get("plugin_code", {}).get("value")
+                    )
+                else:
+                    cur_step_detail["plugin_code"] = node.get("component", {}).get("code", "")
+
                 cur_step_detail["step_id"] = node.get("id", {})
 
             if node["type"] == "ConvergeGateway":
@@ -274,7 +280,11 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
             if node["type"] == "SubProcess":
                 if node_status_info.get("children"):
                     _unfold_pipeline_tree(
-                        node["pipeline"], node_status_info.get("children"), parse_data, current_step_index_list
+                        node["pipeline"],
+                        node_status_info.get("children"),
+                        parse_data,
+                        current_step_index_list,
+                        current_step_detail,
                     )
 
     _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [], current_step_detail)
