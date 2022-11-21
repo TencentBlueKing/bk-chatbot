@@ -34,5 +34,5 @@ def get_uuid4() -> str:
     :return:
     """
 
-    u = uuid.uuid4()
+    u = uuid.uuid4().hex
     return str(u)
