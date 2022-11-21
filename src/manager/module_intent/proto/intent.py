@@ -93,7 +93,7 @@ class ReqPostBatchUpdateAvailableUserSerializers(Serializer):
 
 class ReqPostBatchUpdateIntentTagSerializers(Serializer):
     intent_id_list = serializers.ListField(required=True)
-    tag_name = serializers.CharField(required=True, blank=True)
+    tag_name = serializers.CharField(required=True, allow_blank=True)
 
 
 class RsqPostFetchIntentCountSerializers(BaseRspSerializer):
