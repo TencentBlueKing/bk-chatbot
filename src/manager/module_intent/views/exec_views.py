@@ -240,8 +240,10 @@ class TaskExecutionViewSet(BaseGetViewSet):
         )
         return Response(
             {
-                "status": execution_log.status,
-                "message": TASK_EXECUTE_STATUS_DICT.get(execution_log.status),
-                "l_message": ExecutionLog.TaskExecStatus(execution_log.status).name,
+                "data": {
+                    "status": execution_log.status,
+                    "message": TASK_EXECUTE_STATUS_DICT.get(execution_log.status),
+                    "l_message": ExecutionLog.TaskExecStatus(execution_log.status).name,
+                }
             }
         )
