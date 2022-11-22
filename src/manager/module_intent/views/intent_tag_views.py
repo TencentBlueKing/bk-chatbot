@@ -17,8 +17,9 @@ from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.drf.view_set import BaseManageViewSet
+from common.drf.view_set import BaseManageViewSet, BaseViewSet
 from common.http.request import get_request_biz_id
+from common.perm.permission import login_exempt_with_perm
 from src.manager.module_intent.control.permission import IntentPermission
 from src.manager.module_intent.models import IntentTag, Intent
 from src.manager.module_intent.proto.intent_tag import IntentTagSerializer
@@ -81,3 +82,29 @@ class IntentTagViewSet(BaseManageViewSet):
             IntentTag.objects.bulk_create(new_tag_obj_list)
 
         return Response()
+
+
+class IntentTagGwViewSet(BaseViewSet):
+    """
+    技能标签管理
+    """
+
+    queryset = IntentTag.objects.all()
+    ordering = "tag_index"
+
+    @login_exempt_with_perm
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        biz_id = request.query_params.get("biz_id", "")
+        qs = self.queryset.filter(biz_id=biz_id)
+        serializer = IntentTagSerializer(qs, many=True)
+        intent_qs = (
+            Intent.objects.filter(biz_id=biz_id, is_deleted=False).values("tag_name").annotate(quote_num=Count("id"))
+        )
+        tag_quote_map = {item["tag_name"]: item["quote_num"] for item in intent_qs}
+        data = []
+        for item in serializer.data:
+            data.append({"quote_num": tag_quote_map.get(item["tag_name"], 0), **item})
+        return Response({"data": data})
