@@ -90,9 +90,7 @@ class IntentTagGwViewSet(BaseViewSet):
     """
 
     queryset = IntentTag.objects.all()
-    serializer_class = IntentTagSerializer
     ordering = "tag_index"
-    permission_classes = (IntentPermission,)
 
     @login_exempt_with_perm
     def dispatch(self, request, *args, **kwargs):
@@ -101,7 +99,7 @@ class IntentTagGwViewSet(BaseViewSet):
     def list(self, request, *args, **kwargs):
         biz_id = request.query_params.get("biz_id", "")
         qs = self.queryset.filter(biz_id=biz_id)
-        serializer = self.get_serializer(qs, many=True)
+        serializer = IntentTagSerializer(qs, many=True)
         intent_qs = (
             Intent.objects.filter(biz_id=biz_id, is_deleted=False).values("tag_name").annotate(quote_num=Count("id"))
         )
