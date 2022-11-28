@@ -28,7 +28,7 @@ async def list_sops_template(session: CommandSession):
 
     sops_task = SopsTask(session, bk_biz_id)
     msg_template = await sops_task.render_sops_template_list()
-    if msg_template and not msg_template.get('checkbox', {}).get('option_list'):
+    if not msg_template:
         msg_template = sops_task.render_null_msg('SOPS')
     await session.send(**msg_template)
 
