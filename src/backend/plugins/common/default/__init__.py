@@ -42,6 +42,11 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
+@on_command('bk_env_bind')
+async def _(session: CommandSession):
+    pass
+
+
 @on_command('bk_cc_biz_bind', aliases=DEFAULT_BIND_BIZ_ALIAS)
 async def _(session: CommandSession):
     msg_template = await Flow(session).render_biz_msg()

@@ -31,13 +31,9 @@ class GenericTask:
     def set_biz(self, redis_client: Optional):
         # todo adjust bk_env
         if redis_client:
-            if self.biz_id:
-                redis_client.hash_set('chat_single_biz', self.user_id, self.biz_id)
-            else:
-                if self._session.ctx['msg_from_type'] == 'single':
-                    self.biz_id = redis_client.hash_get("chat_single_biz", self.user_id)
-                else:
-                    self.biz_id = redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
+            if not self.biz_id:
+                bk_data = GenericTool.get_biz_data(self._session, redis_client)
+                self.biz_id = bk_data.get('biz_id')
 
     @abc.abstractmethod
     def execute_task(self) -> bool:
@@ -67,3 +63,7 @@ class GenericTool:
         except (json.JSONDecodeError, TypeError):
             bk_data = {}
         return bk_data
+
+    @staticmethod
+    def set_biz_data(session: CommandSession, redis_client):
+        pass

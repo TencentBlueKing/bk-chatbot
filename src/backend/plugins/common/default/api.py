@@ -13,9 +13,12 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import json
+
 from opsbot import CommandSession
 from opsbot.models import BKExecutionLog
-from component import RedisClient, CC, Backend, Plugin, OrmClient
+from opsbot.plugins import GenericTool
+from component import RedisClient, OrmClient, BKCloud
 from .settings import DEFAULT_BIND_BIZ_TIP
 
 
@@ -23,15 +26,17 @@ class Flow:
     def __init__(self, session: CommandSession):
         self._session = session
         self.user_id = self._session.ctx['msg_sender_id']
+        self.cc = BKCloud(env='v7').bk_service.cc
 
     async def _search_business(self):
-        response = await CC().search_business(bk_username=self.user_id, fields=["bk_biz_id", "bk_biz_name"])
+        response = await self.cc.search_business(bk_username=self.user_id, fields=["bk_biz_id", "bk_biz_name"])
         data = [{'id': str(biz['bk_biz_id']), 'text': biz['bk_biz_name'], 'is_checked': False}
                 for biz in response.get('info')[:20]]
         return data
 
     async def render_welcome_msg(self):
-        bk_biz_id = RedisClient(env="prod").hash_get('chat_single_biz', self.user_id)
+        bk_data = GenericTool.get_biz_data(self._session, RedisClient(env="prod"))
+        bk_biz_id = bk_data.get('bk_biz_id')
         data = await self._search_business()
         if not data:
             return self._session.bot.send_template_msg('render_markdown_msg',
@@ -50,8 +55,13 @@ class Flow:
             bk_biz_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
         except KeyError:
             return None
-
-        RedisClient(env="prod").hash_set('chat_single_biz', self.user_id, bk_biz_id)
+        data = {'biz_id': bk_biz_id, 'biz_name': '', 'user_id': self.user_id, 'env': 'v7'}
+        if self._session.ctx['msg_from_type'] == 'single':
+            RedisClient(env="prod").hash_set(f'{self._session.ctx["msg_group_id"]}:chat_single_biz',
+                                             self.user_id, json.dumps(data))
+        else:
+            RedisClient(env="prod").hash_set(f'{self._session.ctx["msg_group_id"]}:chat_group_biz',
+                                             self._session.ctx['msg_group_id'], json.dumps(data))
         return bk_biz_id
 
 
