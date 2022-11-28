@@ -32,7 +32,7 @@ from .config import (
 
 
 class IntentRecognition:
-    def __init__(self, bk_env):
+    def __init__(self, bk_env: str = 'v7'):
         self._bk_cloud = BKCloud(bk_env)
         self._backend = self._bk_cloud.bk_service.backend
         jieba.load_userdict(BASE_DICT_PATH)
@@ -181,7 +181,7 @@ class SlotRecognition:
     DEFAULT_SLOTS = ['${USER_ID}', '${GROUP_ID}']
     STUPID_PATTERNS = ['.*', '^.+$']
 
-    def __init__(self, intent: Dict, bk_env):
+    def __init__(self, intent: Dict, bk_env: str = 'v7'):
         self._bk_cloud = BKCloud(bk_env)
         self._backend = self._bk_cloud.bk_service.backend
         self.intent = intent

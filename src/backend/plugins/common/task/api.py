@@ -82,7 +82,7 @@ class BKTask:
                  user_id: str,
                  group_id: str = None,
                  bot_id: str = None,
-                 bk_env: str = None):
+                 bk_env: str = 'v7'):
         self._intent = intent
         self._slots = slots
         self._user_id = user_id
@@ -189,7 +189,6 @@ async def validate_intent(intents: List, session: CommandSession):
     find most ratio intent and validate intent
     add some other nlp method
     """
-    await Backend().predict_intent(sentence=session.msg_text.strip())
 
     if not intents:
         return None
@@ -229,7 +228,7 @@ async def real_run(intent: Dict,
                    user_id: str,
                    group_id: str,
                    session: CommandSession = None,
-                   bk_env: str = None) -> Optional[Dict]:
+                   bk_env: str = 'v7') -> Optional[Dict]:
     response = defaultdict(dict)
     try:
         if 'timer' in intent:

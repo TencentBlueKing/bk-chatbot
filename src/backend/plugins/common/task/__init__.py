@@ -20,7 +20,7 @@ from plugins.common.sops import SopsTask
 
 from .api import (
     AppTask, BKTask, parse_slots, wait_commit, real_run, validate_intent,
-    Authority, Approval, Scheduler, CallbackHandler
+    Authority, Approval, Scheduler, CallbackHandler, Prediction
 )
 from .settings import (
     TASK_EXEC_SUCCESS, TASK_EXEC_FAIL, TASK_LIST_TIP, TASK_FINISH_TIP,
