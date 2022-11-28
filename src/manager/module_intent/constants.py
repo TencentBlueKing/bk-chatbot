@@ -14,6 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 from common.utils.os import get_env_or_raise
 from src.manager.module_intent.models import ExecutionLog
+from common.constants import BKCHAT_CACHE_PREFIX
 
 ONE_WEEK_SECONDS = 60 * 60 * 24 * 7
 
@@ -23,8 +24,8 @@ UPDATE_TASK_TIME = get_env_or_raise("UPDATE_TASK_TIME", 30)  # 更新任务时�
 UPDATE_TASK_MAX_WORKERS = get_env_or_raise("UPDATE_TASK_TIME", 10)  # 最大线程
 UPDATE_TASK_MAX_TIME = get_env_or_raise("UPDATE_TASK_TIME", 24 * 60 * 60)  # 任务保留时间
 UPDATE_TASK_LOG = "task_log"
-UPDATE_TASK_PREFIX = "task_log_"  # 任务redis key前缀
-TASK_NOTICE_PREFIX = "task_notice"  # 机器人日志通知前缀
+UPDATE_TASK_PREFIX = f"{BKCHAT_CACHE_PREFIX}_task_log_"  # 任务redis key前缀
+TASK_NOTICE_PREFIX = f"{BKCHAT_CACHE_PREFIX}_task_notice"  # 机器人日志通知前缀
 
 # 任务状态中文
 TASK_EXECUTE_STATUS_DICT = {

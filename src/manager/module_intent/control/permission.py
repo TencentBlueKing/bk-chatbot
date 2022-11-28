@@ -19,6 +19,7 @@ from rest_framework import permissions
 
 from common.http.request import get_request_user
 from common.redis import RedisClient
+from common.constants import BKCHAT_CACHE_PREFIX
 from src.manager.handler.api.bk_cc import CC
 
 
@@ -37,7 +38,7 @@ def record_user_visited(func):
             logger.error(f"[Decorator] args index error:{args}")
             return result
 
-        key = f"user_visited_{username}"
+        key = f"{BKCHAT_CACHE_PREFIX}_user_visited_{username}"
 
         with RedisClient() as r:
             r.set(key, json.dumps({"biz_id": biz_id}))

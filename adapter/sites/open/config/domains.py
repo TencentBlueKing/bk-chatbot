@@ -41,3 +41,9 @@ LOG_SEARCH_APIGATEWAY_ROOT = BK_PAAS_HOST + ESB_PREFIX_V2 + "bk_log/"
 
 # 蓝盾
 DEVOPS_APIGW = settings.BKAPP_DEVOPS_APIGW + "/prod/v3/apigw-app/"
+
+# 标准运维
+SOPS_APIGW = settings.SOPS_APIGW
+
+# bkchat接口
+BK_CHAT_APIGW = settings.BK_CHAT_APIGW

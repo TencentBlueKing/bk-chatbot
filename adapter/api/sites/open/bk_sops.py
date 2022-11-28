@@ -61,4 +61,77 @@ class _SopsApi(object):
             module=self.MODULE,
         )
 
+    @property
+    def get_task_node_detail(self):
+        """
+        查询任务节点执行详情
+        """
+        return DataAPI(
+            method="GET",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "get_task_node_detail/{task_id}/{bk_biz_id}/",
+            description="查询任务节点执行详情",
+            url_keys=["task_id", "bk_biz_id"],
+            module=self.MODULE,
+        )
+
+    @property
+    def operate_task(self):
+        return DataAPI(
+            method="POST",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "operate_task/{task_id}/{bk_biz_id}/",
+            description="操作任务",
+            url_keys=["task_id", "bk_biz_id"],
+            module=self.MODULE,
+        )
+
+    @property
+    def operate_node(self):
+        return DataAPI(
+            method="POST",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "operate_node/{bk_biz_id}/{task_id}/",
+            description="查询任务节点执行详情",
+            url_keys=["task_id", "bk_biz_id"],
+            module=self.MODULE,
+        )
+
+    @property
+    def node_callback(self):
+        return DataAPI(
+            method="POST",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "node_callback/{task_id}/{bk_biz_id}/",
+            description="回调任务的节点",
+            url_keys=["task_id", "bk_biz_id"],
+            module=self.MODULE,
+        )
+
+    @property
+    def get_task_list(self):
+        return DataAPI(
+            method="GET",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "get_task_list/{bk_biz_id}/",
+            description="获取任务列表",
+            url_keys=["bk_biz_id"],
+            module=self.MODULE,
+        )
+
+    @property
+    def get_tasks_status(self):
+        return DataAPI(
+            method="POST",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "get_tasks_status/{bk_biz_id}/",
+            description="批量查询任务状态",
+            url_keys=["bk_biz_id"],
+            module=self.MODULE,
+        )
+
+    @property
+    def get_user_project_list(self):
+        return DataAPI(
+            method="GET",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "get_user_project_list/",
+            description="获取用户有权限的项目列表",
+            module=self.MODULE,
+        )
+
+
 SopsApi = _SopsApi()

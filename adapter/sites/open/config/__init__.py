@@ -8,3 +8,5 @@ import os
 APP_CODE = os.environ.get("APP_ID", "")
 SECRET_KEY = os.environ.get("APP_TOKEN", "")
 BKAPP_DEVOPS_APIGW = os.getenv("BKAPP_DEVOPS_APIGW", "")  # 蓝盾host
+SOPS_APIGW = os.getenv("SOPS_APIGW")  # 标准运维
+BK_CHAT_APIGW = os.getenv("BK_CHAT_APIGW")  # bkchat

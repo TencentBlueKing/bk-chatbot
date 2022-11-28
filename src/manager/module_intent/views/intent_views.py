@@ -123,7 +123,7 @@ class IntentViewSet(BaseManageViewSet):
                 intent_id=serializer.instance.id,
                 biz_id=int(serializer.instance.biz_id),
                 index_id=serializer.instance.id,
-                project_id=payload.get("project_id", ""),
+                project_id=payload.get("project_id", "") or "",
                 platform=payload.get("platform", ""),
                 task_id=payload.get("task_id", ""),
                 slots=payload.get("slots", []),

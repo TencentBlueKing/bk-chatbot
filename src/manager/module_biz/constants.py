@@ -12,7 +12,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-
+from common.constants import BKCHAT_CACHE_PREFIX
 
 ALL_REQUEST_METHODS = ("GET", "POST", "HEAD", "OPTIONS", "PATCH", "DELETE")
 SUMMAYR_CHT_REQUEST_METHODS = ("GET",)
@@ -20,4 +20,4 @@ SUMMAYR_CHT_REQUEST_METHODS = ("GET",)
 CHAT_BOT_USE_SPACE = "chat_group_biz"
 COMMUNITY_RUN_VER = "open"
 
-REDIS_BIZ_INFO_PREFIX = "cc_biz_info"
+REDIS_BIZ_INFO_PREFIX = f"{BKCHAT_CACHE_PREFIX}_cc_biz_info"

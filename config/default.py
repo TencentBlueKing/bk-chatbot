@@ -72,6 +72,7 @@ MIDDLEWARE += (
     "common.middleware.request.CommonMiddleware",
     "common.middleware.visit.VisitMiddleware",
     "common.middleware.request.RequestProvider",
+    "blueapps.middleware.bkui.middlewares.BkuiPageMiddleware"
 )
 
 
@@ -115,7 +116,7 @@ INIT_SUPERUSER = ["admin"]
 MAKO_DEFAULT_FILTERS = ["h"]
 
 # BKUI是否使用了history模式
-IS_BKUI_HISTORY_MODE = False
+IS_BKUI_HISTORY_MODE = True
 
 # 是否需要对AJAX弹窗登录强行打开
 IS_AJAX_PLAIN_MODE = False
