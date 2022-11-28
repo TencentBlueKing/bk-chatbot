@@ -31,7 +31,7 @@ from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.plugins import GenericTask, GenericTool
 from opsbot.models import BKExecutionLog
 from component import (
-    JOB, SOPS, Backend, DevOps, ITSM, RedisClient, BK_PAAS_DOMAIN,
+    RedisClient, BK_PAAS_DOMAIN,
     BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer, OrmClient,
     IntentRecognition, BKCloud
 )
@@ -299,7 +299,8 @@ class Approval:
             {'key': 'approver', 'value': ','.join(intent['approver'])},
             {'key': 'id', 'value': base64.b64encode(bytes(key, encoding='utf-8')).decode('utf-8')},
         ]
-        await ITSM().create_ticket(creator=cls.user_id, fields=fields, service_id=116)
+        itsm = BKCloud().bk_service.itsm
+        await itsm.create_ticket(creator=cls.user_id, fields=fields, service_id=116)
         cls.redis_client.set(key, json.dumps({
             'intent': intent, 'slots': slots, 'user_id': cls.user_id,
             'group_id': cls.session.ctx['msg_group_id']
@@ -347,7 +348,7 @@ class Scheduler:
     def __new__(cls, session: CommandSession, is_callback=True):
         cls.session = session
         if not is_callback:
-            cls.backend = Backend()
+            cls.backend = BKCloud().bk_service.backend
         return cls
 
     @classmethod

@@ -21,13 +21,13 @@ from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
 from opsbot.models import BKExecutionLog
 from opsbot.plugins import GenericTask
-from component import SOPS, RedisClient, BK_SOPS_DOMAIN, OrmClient
+from component import RedisClient, BK_SOPS_DOMAIN, OrmClient, BKCloud
 
 
 class SopsTask(GenericTask):
-    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
+    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None, bk_env: str = 'v7'):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
-        self._sops = SOPS()
+        self._sops = BKCloud(bk_env).bk_service.sops
 
     async def _get_sops_template_list(self, **params) -> List:
         data = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id, **params)

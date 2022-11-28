@@ -16,14 +16,14 @@ specific language governing permissions and limitations under the License.
 import time
 
 from opsbot import CommandSession
-from component import ITSM, BK_ITSM_DOMAIN
+from component import BK_ITSM_DOMAIN, BKCloud
 
 
 class GenericIT:
-    def __init__(self, session: CommandSession):
+    def __init__(self, session: CommandSession, bk_env: str = 'v7'):
         self._session = session
         self.user_id = self._session.ctx['msg_sender_id']
-        self._itsm = ITSM()
+        self._itsm = BKCloud(bk_env).bk_service.itsm
 
     async def render_services(self):
         try:
