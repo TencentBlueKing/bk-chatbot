@@ -13,8 +13,13 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from opsbot import on_command, CommandSession, on_natural_language
+from opsbot import (
+    on_command, on_natural_language, IntentCommand,
+    NLPSession, CommandSession
+)
 from opsbot.log import logger
+from component import fetch_answer
+from plugins.common.task import Prediction as SelfPrediction
 from .api import Flow, Stat
 from .settings import (
     DEFAULT_SHOW_GROUP_ID_ALIAS, DEFAULT_BIND_BIZ_ALIAS, DEFAULT_BIND_BIZ_TIP,
@@ -81,3 +86,15 @@ async def _(session: CommandSession):
     content = f'''>**结果:**\n{content}'''
     msg_template = session.bot.send_template_msg('render_markdown_msg', content)
     await session.send(**msg_template)
+
+
+@on_natural_language
+async def _(session: NLPSession):
+    stripped_msg = session.msg_text.strip()
+    command = await SelfPrediction(session).run(stripped_msg)
+    if command:
+        return IntentCommand(*command[:2], args=command[2])
+
+    answers = fetch_answer(stripped_msg)
+    if answers:
+        return IntentCommand(100, 'bk_chat_search_knowledge', args={'answers': answers})

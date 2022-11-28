@@ -13,17 +13,17 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
 import re
-import copy
+import time
 import itertools
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Iterable
+from collections import deque
 
 import aiofiles
 import jieba
 from gensim import corpora, models, similarities
 
-from component import Backend
+from component import BKCloud
 from component.exceptions import SlotLocMatchError
 from .config import (
     BASE_DICT_PATH, STOP_WORDS_PATH,
@@ -32,8 +32,9 @@ from .config import (
 
 
 class IntentRecognition:
-    def __init__(self):
-        self._backend = Backend()
+    def __init__(self, bk_env):
+        self._bk_cloud = BKCloud(bk_env)
+        self._backend = self._bk_cloud.bk_service.backend
         jieba.load_userdict(BASE_DICT_PATH)
 
     async def _load_corpus_text(self, **kwargs) -> List:
@@ -55,7 +56,10 @@ class IntentRecognition:
                     'available_group': intent_map[utterance['index_id']]['available_group'],
                     'biz_id': intent_map[utterance['index_id']]['biz_id'],
                     'updated_by': intent_map[utterance['index_id']]['updated_by'],
-                    'approver': intent_map[utterance['index_id']]['approver']
+                    'approver': intent_map[utterance['index_id']]['approver'],
+                    'notice_discern_success': intent_map[utterance['index_id']].get('notice_discern_success', True),
+                    'notice_start_success': intent_map[utterance['index_id']].get('notice_start_success', True),
+                    'notice_exec_success': intent_map[utterance['index_id']].get('notice_exec_success', True)
                 } for sentence in utterance['content']
             ] for utterance in db_utterances
         ]))
@@ -139,7 +143,10 @@ class IntentRecognition:
                 'updated_by': utterances[word[0]]['updated_by'], 'approver': utterances[word[0]]['approver'],
                 'available_user': utterances[word[0]]['available_user'],
                 'available_group': utterances[word[0]]['available_group'],
-                'biz_id': utterances[word[0]]['biz_id'], 'similar': float(round(word[1], 2))
+                'biz_id': utterances[word[0]]['biz_id'], 'similar': float(round(word[1], 2)),
+                'notice_discern_success': utterances[word[0]].get('notice_discern_success', True),
+                'notice_start_success': utterances[word[0]].get('notice_start_success', True),
+                'notice_exec_success': utterances[word[0]].get('notice_exec_success', True)
             } for word in related_question_word if word[1] >= BASE_CONFIDENCE
         ]
 
@@ -159,6 +166,8 @@ class IntentRecognition:
 
     async def fetch_intent(self, text: str, **kwargs) -> List:
         utterances = await self._load_corpus_text(**kwargs)
+        if not utterances:
+            return None
         question_words, stop_words = await self.preprocess_text(text)
         similar_question_words = self._similar_questions(question_words)
         tf_idf, index, dictionary = self._train_model(utterances, stop_words)
@@ -169,19 +178,49 @@ class IntentRecognition:
 
 
 class SlotRecognition:
-    def __init__(self, intent: Dict):
-        self._default_slots = ['${USER_ID}', '${GROUP_ID}']
-        self._backend = Backend()
+    DEFAULT_SLOTS = ['${USER_ID}', '${GROUP_ID}']
+    STUPID_PATTERNS = ['.*', '^.+$']
+
+    def __init__(self, intent: Dict, bk_env):
+        self._bk_cloud = BKCloud(bk_env)
+        self._backend = self._bk_cloud.bk_service.backend
         self.intent = intent
 
     async def load_slots(self) -> List:
         tasks = await self._backend.describe('tasks', index_id=int(self.intent.get('id')))
         if tasks:
             slots = tasks[0]['slots']
+            slots.reverse()
             for slot in slots:
                 slot.setdefault('value', '')
             return slots
         return None
+
+    def _preprocess_text(self, text: str, slots: List) -> Iterable:
+        if all([slot['pattern'] in self.STUPID_PATTERNS for slot in slots]):
+            clean_params = re.split(r"\?+|\s+", text)[1:]
+        else:
+            params = re.split(r"\?+|\s+", str(''.join([letter if ord(letter) < 128 else '?' for letter in text])))
+            clean_params = [
+                letter.strip() for letter in params if letter and letter not in self.intent.get('utterance', '')
+            ]
+        return deque(clean_params)
+
+    def match_time(self, slots: List) -> bool:
+        if 'timer' in self.intent:
+            if 'timestamp' not in self.intent['timer'] or \
+                    self.intent['timer']['timestamp'] < time.strftime('%Y-%m-%d %H:%M:%S'):
+                return False
+
+            time_str = self.intent['timer']['time_str']
+            for slot in slots:
+                if slot['value'] in self.DEFAULT_SLOTS or slot['pattern'] in self.STUPID_PATTERNS:
+                    continue
+                result = re.compile(slot['pattern']).search(time_str)
+                if result:
+                    return False
+            return True
+        return False
 
     def match_slot(self, text: str, slots: List) -> List:
         """
@@ -190,13 +229,18 @@ class SlotRecognition:
         3, if contain special ${}, catch it by order
         4, add biz special function
         """
-        params = re.split(r"\?+|\s+", str(''.join([letter if ord(letter) < 128 else '?' for letter in text])))
-        clean_params = [
-            letter.strip() for letter in params if letter and letter not in self.intent.get('utterance', '')
-        ]
+        clean_params = self._preprocess_text(text, slots)
         for slot in slots:
-            if slot['value'] in self._default_slots:
+            if slot['value'] in self.DEFAULT_SLOTS:
                 continue
+
+            if slot['pattern'] in self.STUPID_PATTERNS:
+                try:
+                    slot['value'] = clean_params.popleft()
+                except IndexError:
+                    pass
+                continue
+
             max_len = 0
             pattern = re.compile(slot['pattern'])
             for segment in clean_params:
@@ -222,6 +266,12 @@ class SlotRecognition:
         return slots
 
     class BizFilter:
+        """
+        eg: you can define function like this
+        def filter_xxx(self, slots: List) -> List:
+            return self.loc_match(slots)
+        """
+
         def __init__(self, text: str):
             self.text = text
 

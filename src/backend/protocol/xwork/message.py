@@ -19,7 +19,8 @@ import time
 from typing import Iterable, Tuple, Union, List, Dict
 
 from opsbot.adapter import (
-    Message as BaseMessage, MessageSegment as BaseMessageSegment, MessageTemplate as BaseMessageTemplate
+    Message as BaseMessage, MessageSegment as BaseMessageSegment,
+    MessageTemplate as BaseMessageTemplate
 )
 from opsbot.stdlib import escape, unescape
 

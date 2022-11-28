@@ -15,16 +15,16 @@ specific language governing permissions and limitations under the License.
 
 import json
 import urllib
-from typing import Any, Optional, Dict
 
+from typing import Any, Optional, Dict
 import aiohttp
 
 from opsbot.log import logger
-from component.exceptions import *
-from component.api import Api
-from component.config import (
-    BK_APP_ID, BK_APP_SECRET
+from component.exceptions import (
+    ActionFailed, ApiNotAvailable, TokenNotAvailable,
+    HttpFailed, NetworkError
 )
+from component.api import Api
 
 _token = {}  # type: Dict[str, Any]
 
@@ -34,13 +34,19 @@ class BKApi(Api):
     Call Component APIs through HTTP.
     """
 
-    def __init__(self, api_root: Optional[str], *args, **kwargs):
+    def __init__(self,
+                 api_root: Optional[str],
+                 app_id: Optional[str],
+                 app_secret: Optional[str],
+                 *args, **kwargs):
         super().__init__('bk', api_root, *args, **kwargs)
+        self.app_id = app_id
+        self.app_secret = app_secret
         if not self._is_token_available():
             self._access_token = self._get_access_token()
-            _token[BK_APP_ID] = self._access_token
+            _token[self.app_id] = self._access_token
         else:
-            self._access_token = _token[BK_APP_ID]
+            self._access_token = _token[self.app_id]
 
     def _get_access_token(self) -> Any:
         """
@@ -49,10 +55,11 @@ class BKApi(Api):
         Outer version can update the db and
         add the appid the field
         """
-        return urllib.parse.urlencode({'bk_app_code': BK_APP_ID, 'bk_app_secret': BK_APP_SECRET})
+        return urllib.parse.urlencode({'bk_app_code': self.app_id,
+                                       'bk_app_secret': self.app_secret})
 
     def _is_token_available(self) -> bool:
-        if BK_APP_ID in _token:
+        if self.app_id in _token:
             return True
 
         return False
@@ -72,6 +79,10 @@ class BKApi(Api):
             raise TokenNotAvailable
 
         url = f"{self._api_root}/{action}?{self._access_token}"
+        if method == 'POST':
+            params['json']['bk_app_code'] = self.app_id
+            params['json']['bk_app_secret'] = self.app_secret
+
         try:
             async with aiohttp.request(method, url, **params) as resp:
                 if 200 <= resp.status < 300:
@@ -83,4 +94,4 @@ class BKApi(Api):
             raise NetworkError('HTTP request failed with client error')
 
     def _is_available(self) -> bool:
-        return bool(self._api_root and BK_APP_ID and BK_APP_SECRET)
+        return bool(self._api_root and self.app_id and self.app_secret)

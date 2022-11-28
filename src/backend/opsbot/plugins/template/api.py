@@ -14,7 +14,7 @@ specific language governing permissions and limitations under the License.
 """
 
 import abc
-import time
+import json
 from typing import Union, Optional, Dict, List
 
 from opsbot import CommandSession
@@ -29,6 +29,7 @@ class GenericTask:
         self.set_biz(redis_client)
 
     def set_biz(self, redis_client: Optional):
+        # todo adjust bk_env
         if redis_client:
             if self.biz_id:
                 redis_client.hash_set('chat_single_biz', self.user_id, self.biz_id)
@@ -50,3 +51,19 @@ class GenericTask:
     def render_null_msg(self, platform: str) -> Dict:
         return self._session.bot.send_template_msg('render_markdown_msg',
                                                    PLUGIN_NULL_MSG.format(platform))
+
+
+class GenericTool:
+    @staticmethod
+    def get_biz_data(session: CommandSession, redis_client) -> Dict:
+        if session.ctx['msg_from_type'] == 'single':
+            bk_data = redis_client.hash_get(f'{session.bot.config.ID}:chat_single_biz',
+                                            session.ctx['msg_sender_id'])
+        else:
+            bk_data = redis_client.hash_get(f'{session.bot.config.ID}:chat_group_biz',
+                                            session.ctx['msg_group_id'])
+        try:
+            bk_data = json.loads(bk_data)
+        except (json.JSONDecodeError, TypeError):
+            bk_data = {}
+        return bk_data

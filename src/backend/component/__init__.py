@@ -13,7 +13,14 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from .bk import BKApi, CC, JOB, SOPS, DevOps, Backend, BKData, Plugin, ITSM
+from .bk import (
+    BKApi, CC, JOB, SOPS, DevOps, Backend, BKBase, Plugin,
+    ITSM, BKCloud
+)
+from .config import (
+    BK_CHAT_DOMAIN, BK_JOB_DOMAIN, BK_SOPS_DOMAIN, BK_DEVOPS_DOMAIN,
+    BK_ITSM_DOMAIN, BK_PAAS_DOMAIN
+)
 from .nlu.v20220216 import IntentRecognition, SlotRecognition
 from .nlp.biz import BizMapper
 from .nlp.time import TimeNormalizer
@@ -22,15 +29,12 @@ from .public import (
     RedisClient, ESClient, OrmClient,
     regex_parse_entity, AesED, import_string, Cached
 )
-from .config import (
-    BK_CHAT_DOMAIN, BK_JOB_DOMAIN, BK_SOPS_DOMAIN, BK_DEVOPS_DOMAIN,
-    BK_ITSM_DOMAIN, BK_PAAS_DOMAIN
-)
 
-
-__all__ = ['BKApi', 'CC', 'JOB', 'SOPS', 'DevOps', 'BKData', 'ITSM', 'Backend', 'Plugin',
-           'IntentRecognition', 'SlotRecognition', 'BizMapper', 'TimeNormalizer', 'fetch_answer',
-           'RedisClient', 'ESClient', 'OrmClient',
-           'regex_parse_entity', 'AesED', 'import_string',
-           'BK_CHAT_DOMAIN', 'BK_JOB_DOMAIN', 'BK_SOPS_DOMAIN', 'BK_DEVOPS_DOMAIN',
-           'BK_ITSM_DOMAIN', 'BK_PAAS_DOMAIN']
+__all__ = [
+    'BKApi', 'CC', 'JOB', 'SOPS', 'DevOps', 'BKData', 'ITSM', 'Backend', 'Plugin',
+    'IntentRecognition', 'SlotRecognition', 'BizMapper', 'TimeNormalizer', 'fetch_answer',
+    'RedisClient', 'ESClient', 'OrmClient',
+    'regex_parse_entity', 'AesED', 'import_string',
+    'BK_CHAT_DOMAIN', 'BK_JOB_DOMAIN', 'BK_SOPS_DOMAIN', 'BK_DEVOPS_DOMAIN',
+    'BK_ITSM_DOMAIN', 'BK_PAAS_DOMAIN'
+]

@@ -13,11 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from typing import Coroutine
-
 from opsbot import on_command, CommandSession
-from opsbot import on_natural_language, NLPSession, IntentCommand
-from component import IntentRecognition, SlotRecognition, fetch_answer
+from component import SlotRecognition
 from plugins.common.job import JobTask
 from plugins.common.sops import SopsTask
 
@@ -171,22 +168,3 @@ async def _(session: CommandSession):
             return None
     await Scheduler(session, is_callback=False).delete_scheduler(int(timer_id))
     await session.send('定时器删除成功')
-
-
-@on_natural_language
-async def _(session: NLPSession):
-    intent_filter = getattr(Authority(session), f'pre_{session.bot.type}')()
-    if isinstance(intent_filter, Coroutine):
-        intent_filter = await intent_filter
-    if not intent_filter:
-        return
-    intents = await IntentRecognition().fetch_intent(session.msg_text.strip(), **intent_filter)
-    intent = await validate_intent(intents, session)
-    if intent:
-        return IntentCommand(intent.get('similar', 0) * 100, 'bk_chat_task_execute',
-                             args={'index': True, 'intent': intent,
-                                   'slots': None, 'user_id': session.ctx['msg_sender_id']})
-
-    answers = fetch_answer(session.msg_text.strip())
-    if answers:
-        return IntentCommand(100, 'bk_chat_search_knowledge', args={'answers': answers})

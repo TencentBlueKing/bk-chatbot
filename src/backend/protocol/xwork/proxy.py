@@ -25,16 +25,16 @@ from typing import (
 import aiohttp
 import aiofiles
 import requests
-from quart import request, abort, jsonify, render_template
+from quart import request, abort, jsonify
 from jsonschema.exceptions import ValidationError
 
 from opsbot.log import logger
-from .message import Message
-from .decryption import Decryption
 from opsbot.proxy import (
     Api as BaseApi, Proxy as BaseProxy, UnifiedApi, _deco_maker,
     ActionFailed, ApiNotAvailable, HttpFailed, NetworkError
 )
+from .message import Message
+from .decryption import Decryption
 
 
 class Proxy(BaseProxy):
