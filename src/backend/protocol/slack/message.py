@@ -16,3 +16,11 @@ specific language governing permissions and limitations under the License.
 
 class Message:
     pass
+
+
+class MessageSegment:
+    pass
+
+
+class MessageTemplate:
+    pass

@@ -32,6 +32,8 @@ class Proxy(BaseProxy):
         super().__init__(message_class=Message,
                          api_class=UnifiedApi(http_api=HttpApi(api_root, api_config)))
 
+    on_text = _deco_maker('text')
+
     @classmethod
     async def _handle_url_verify(cls):
         payload = await request.json
