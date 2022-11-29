@@ -197,7 +197,7 @@ class BotDockerFile(DockerFile):
         flow += self.pip_install()
         flow += self.copy('.', '.')
         flow += self.set_timezone()
-        flow += self.entry_point("python", "server.py")
+        flow += self.entry_point("python", "src/backend/server.py")
 
         if not os.path.isfile('./Dockerfile'):
             os.mknod('./Dockerfile')
