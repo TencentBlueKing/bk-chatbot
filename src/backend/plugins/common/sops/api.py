@@ -110,7 +110,7 @@ class SopsTask(GenericTask):
             schema = {'data': item['data'] for item in bk_sops_template_schemas
                       if item['id'] == bk_sops_template_schema_id}
             select_group = json.loads(schema.get('data', []))
-        except (KeyError, json.JSONDecodeError):
+        except (KeyError, TypeError, json.JSONDecodeError):
             select_group = None
 
         exclude_task_nodes_id = list(set(activities).difference(set(select_group))) if select_group else []
