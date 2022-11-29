@@ -301,7 +301,7 @@ class Approval:
         ]
         itsm = BKCloud().bk_service.itsm
         await itsm.create_ticket(creator=cls.user_id, fields=fields, service_id=116)
-        cls.redis_client.set(key, json.dumps({
+        cls.redis_client.set(f'{cls.session.bot.config.ID}:{key}', json.dumps({
             'intent': intent, 'slots': slots, 'user_id': cls.user_id,
             'group_id': cls.session.ctx['msg_group_id']
         }), ex=60 * 60 * 2)
@@ -309,7 +309,7 @@ class Approval:
     @classmethod
     def handle_approval_by_cache(cls, payload):
         key = base64.b64decode(payload.get('id')).decode('utf-8')
-        return Approval.redis_client.get(key)
+        return Approval.redis_client.get(f'{cls.session.bot.config.ID}:{key}')
 
     class BaseBot:
         @staticmethod

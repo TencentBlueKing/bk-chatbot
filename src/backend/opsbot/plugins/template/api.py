@@ -75,9 +75,9 @@ class GenericTool:
         data = {'biz_id': biz_id, 'biz_name': biz_name,
                 'user_id': session.ctx['msg_sender_id'], 'env': bk_env}
         if session.ctx['msg_from_type'] == 'single':
-            redis_client.hash_set(f'{session.ctx["msg_group_id"]}:chat_single_biz',
+            redis_client.hash_set(f'{session.bot.config.ID}:chat_single_biz',
                                   session.ctx['msg_sender_id'], json.dumps(data))
         else:
-            redis_client.hash_set(f'{session.ctx["msg_group_id"]}:chat_group_biz',
+            redis_client.hash_set(f'{session.bot.config.ID}:chat_group_biz',
                                   session.ctx['msg_group_id'], json.dumps(data))
         return data
