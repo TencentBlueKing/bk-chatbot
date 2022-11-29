@@ -43,6 +43,14 @@ class Proxy(BaseProxy):
         logger.info(request)
         return await self._handle_url_verify()
 
+    def run(self, host=None, port=None, *args, **kwargs):
+        self._server_app.run(host=host, port=port, *args, **kwargs)
+
+    async def send(self, context: Dict[str, Any],
+                   message: Union[str, Dict[str, Any], List[Dict[str, Any]]],
+                   **kwargs):
+        pass
+
 
 class HttpApi(BaseApi):
     pass

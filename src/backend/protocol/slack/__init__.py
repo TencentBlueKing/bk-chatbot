@@ -69,6 +69,9 @@ class Bot(BaseBot, SlackProxy):
     async def handle_message(self, ctx: Context_T):
         pass
 
+    async def handle_event(self, ctx: Context_T):
+        pass
+
     async def call_api(self, action: str, **params):
         pass
 
