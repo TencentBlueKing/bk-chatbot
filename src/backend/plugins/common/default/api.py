@@ -34,7 +34,7 @@ class Flow:
 
     async def render_welcome_msg(self):
         bk_data = GenericTool.get_biz_data(self._session, RedisClient(env="prod"))
-        bk_biz_id = bk_data.get('bk_biz_id')
+        bk_biz_id = bk_data.get('biz_id')
         data = await self._search_business()
         if not data:
             return self._session.bot.send_template_msg('render_markdown_msg',
