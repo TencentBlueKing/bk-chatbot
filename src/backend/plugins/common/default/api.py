@@ -13,8 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
-
 from opsbot import CommandSession
 from opsbot.models import BKExecutionLog
 from opsbot.plugins import GenericTool
@@ -55,13 +53,7 @@ class Flow:
             bk_biz_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
         except KeyError:
             return None
-        data = {'biz_id': bk_biz_id, 'biz_name': '', 'user_id': self.user_id, 'env': 'v7'}
-        if self._session.ctx['msg_from_type'] == 'single':
-            RedisClient(env="prod").hash_set(f'{self._session.ctx["msg_group_id"]}:chat_single_biz',
-                                             self.user_id, json.dumps(data))
-        else:
-            RedisClient(env="prod").hash_set(f'{self._session.ctx["msg_group_id"]}:chat_group_biz',
-                                             self._session.ctx['msg_group_id'], json.dumps(data))
+        GenericTool.set_biz_data(self._session, RedisClient(env="prod"), bk_biz_id)
         return bk_biz_id
 
 
