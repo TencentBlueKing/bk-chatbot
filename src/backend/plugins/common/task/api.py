@@ -31,8 +31,7 @@ from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.plugins import GenericTask, GenericTool
 from opsbot.models import BKExecutionLog
 from component import (
-    RedisClient, BK_PAAS_DOMAIN,
-    BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer, OrmClient,
+    RedisClient, Cached, TimeNormalizer, OrmClient,
     IntentRecognition, BKCloud
 )
 from .settings import (
@@ -63,7 +62,9 @@ class AppTask(GenericTask):
 
     async def render_app_task(self, task_name: str):
         bk_app_task = await self._get_app_task(task_name)
-        return self._session.bot.send_template_msg('render_task_filter_msg', bk_app_task, BK_PAAS_DOMAIN)
+        return self._session.bot.send_template_msg('render_task_filter_msg',
+                                                   bk_app_task,
+                                                   self._bk_cloud.bk_service.BK_PAAS_DOMAIN)
 
     async def describe_entity(self, entity: str, **params):
         if 'biz_id' in params:
