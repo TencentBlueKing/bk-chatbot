@@ -37,6 +37,8 @@ class Proxy(BaseProxy):
     @classmethod
     async def _handle_url_verify(cls):
         payload = await request.json
+        if not payload:
+            abort(405)
         return jsonify({'challenge': payload['challenge']})
 
     async def _handle_http(self):
@@ -53,4 +55,7 @@ class Proxy(BaseProxy):
 
 
 class HttpApi(BaseApi):
-    pass
+    def __init__(self, api_root: Optional[str], api_config: Dict, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._api_config = api_config
+        self._api_root = api_root.rstrip('/') if api_root else None
