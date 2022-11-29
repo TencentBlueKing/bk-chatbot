@@ -16,14 +16,15 @@ specific language governing permissions and limitations under the License.
 import time
 
 from opsbot import CommandSession
-from component import BK_ITSM_DOMAIN, BKCloud
+from component import BKCloud
 
 
 class GenericIT:
     def __init__(self, session: CommandSession, bk_env: str = 'v7'):
         self._session = session
         self.user_id = self._session.ctx['msg_sender_id']
-        self._itsm = BKCloud(bk_env).bk_service.itsm
+        self._bk_service = BKCloud(bk_env).bk_service
+        self._itsm = self._bk_service.itsm
 
     async def render_services(self):
         try:
@@ -90,6 +91,6 @@ class GenericIT:
             'task_id': str(int(time.time() * 100000)),
             'card_action': {
                 'type': 1,
-                'url': f'{BK_ITSM_DOMAIN}#/ticket/create?service_id={service_id}'
+                'url': f'{self._bk_service.BK_ITSM_DOMAIN}#/ticket/create?service_id={service_id}'
             }
         }

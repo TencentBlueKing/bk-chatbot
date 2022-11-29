@@ -20,13 +20,14 @@ from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
 from opsbot.plugins import GenericTask
 from opsbot.models import BKExecutionLog
-from component import RedisClient, BK_JOB_DOMAIN, OrmClient, BKCloud
+from component import RedisClient, OrmClient, BKCloud
 
 
 class JobTask(GenericTask):
     def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None, bk_env: str = 'v7'):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
-        self._job = BKCloud(bk_env).bk_service.job
+        self._bk_service = BKCloud(bk_env).bk_service
+        self._job = self._bk_service.job
 
     async def _get_job_plan_list(self, **params) -> List:
         data = await self._job.get_job_plan_list(**params)
@@ -101,4 +102,4 @@ class JobTask(GenericTask):
 
     def render_job_execute_msg(self, result, job_plan: Dict) -> Dict:
         return self.render_execute_msg('JOB', result, job_plan['job_plan_name'],
-                                       job_plan['global_var_list'], BK_JOB_DOMAIN)
+                                       job_plan['global_var_list'], self._bk_service.BK_JOB_DOMAIN)

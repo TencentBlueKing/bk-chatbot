@@ -20,13 +20,14 @@ from opsbot.plugins import GenericTask
 from opsbot.log import logger
 from opsbot.models import BKExecutionLog
 from opsbot.exceptions import ActionFailed, HttpFailed
-from component import RedisClient, BK_DEVOPS_DOMAIN, OrmClient, BKCloud
+from component import RedisClient, OrmClient, BKCloud
 
 
 class DevOpsTask(GenericTask):
     def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None, bk_env: str = 'v7'):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
-        self._devops = BKCloud(bk_env).bk_service.devops
+        self._bk_service = BKCloud(bk_env).bk_service
+        self._devops = self._bk_service.devops
 
     async def _get_devops_project_list(self):
         data = await self._devops.v3_app_project_list(self.user_id)
@@ -120,4 +121,4 @@ class DevOpsTask(GenericTask):
 
     def render_devops_execute_msg(self, result: bool, bk_devops_pipeline: Dict):
         return self.render_execute_msg('CI', result, bk_devops_pipeline['bk_devops_pipeline_name'],
-                                       bk_devops_pipeline['start_infos'], BK_DEVOPS_DOMAIN)
+                                       bk_devops_pipeline['start_infos'], self._bk_service.BK_DEVOPS_DOMAIN)
