@@ -23,9 +23,9 @@ import arrow
 import jieba
 import diskcache as dc
 
-from .config import BIZ_DISK_CACHE_PATH, BIZ_CORPUS_DATA_PATH
 from component import BKCloud
 from component.config import BK_SUPER_USERNAME
+from .config import BIZ_DISK_CACHE_PATH, BIZ_CORPUS_DATA_PATH
 
 
 class DiskCache(dc.Cache):
