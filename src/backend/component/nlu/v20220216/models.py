@@ -33,6 +33,7 @@ from .config import (
 
 class IntentRecognition:
     def __init__(self, bk_env: str = 'v7'):
+        self.bk_env = bk_env
         self._bk_cloud = BKCloud(bk_env)
         self._backend = self._bk_cloud.bk_service.backend
         jieba.load_userdict(BASE_DICT_PATH)
@@ -59,7 +60,8 @@ class IntentRecognition:
                     'approver': intent_map[utterance['index_id']]['approver'],
                     'notice_discern_success': intent_map[utterance['index_id']].get('notice_discern_success', True),
                     'notice_start_success': intent_map[utterance['index_id']].get('notice_start_success', True),
-                    'notice_exec_success': intent_map[utterance['index_id']].get('notice_exec_success', True)
+                    'notice_exec_success': intent_map[utterance['index_id']].get('notice_exec_success', True),
+                    'bk_env': self.bk_env
                 } for sentence in utterance['content']
             ] for utterance in db_utterances
         ]))
@@ -146,7 +148,8 @@ class IntentRecognition:
                 'biz_id': utterances[word[0]]['biz_id'], 'similar': float(round(word[1], 2)),
                 'notice_discern_success': utterances[word[0]].get('notice_discern_success', True),
                 'notice_start_success': utterances[word[0]].get('notice_start_success', True),
-                'notice_exec_success': utterances[word[0]].get('notice_exec_success', True)
+                'notice_exec_success': utterances[word[0]].get('notice_exec_success', True),
+                'bk_env': utterances[word[0]]['bk_env']
             } for word in related_question_word if word[1] >= BASE_CONFIDENCE
         ]
 
