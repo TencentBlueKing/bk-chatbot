@@ -31,18 +31,21 @@ class Proxy(BaseProxy):
     def __init__(self, api_root: Optional[str], api_config: Dict):
         super().__init__(message_class=Message,
                          api_class=UnifiedApi(http_api=HttpApi(api_root, api_config)))
+        self._server_app.register_error_handler(Exception, self._handle_bad_request)
 
     on_text = _deco_maker('text')
 
     @classmethod
     async def _handle_url_verify(cls):
         payload = await request.json
-        if not payload:
-            abort(405)
+        logger.info(payload)
         return jsonify({'challenge': payload['challenge']})
 
+    @classmethod
+    async def _handle_bad_request(cls, e: Exception):
+        return jsonify(error='bad request', code=405)
+
     async def _handle_http(self):
-        logger.info(request)
         return await self._handle_url_verify()
 
     def run(self, host=None, port=None, *args, **kwargs):
