@@ -46,6 +46,7 @@ class Proxy(BaseProxy):
         return jsonify(error='bad request', code=405)
 
     async def _handle_http(self):
+        logger.debug(f'remote_addr: {request.remote_addr}')
         return await self._handle_url_verify()
 
     def run(self, host=None, port=None, *args, **kwargs):
