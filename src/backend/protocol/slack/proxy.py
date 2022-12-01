@@ -31,7 +31,8 @@ class Proxy(BaseProxy):
     def __init__(self, api_root: Optional[str], api_config: Dict):
         super().__init__(message_class=Message,
                          api_class=UnifiedApi(http_api=HttpApi(api_root, api_config)))
-        # self._server_app.register_error_handler(Exception, self._handle_bad_request)
+        self._server_app.route('/open/callback/', methods=['POST'])(self._handle_http)
+        self._server_app.register_error_handler(Exception, self._handle_bad_request)
 
     on_text = _deco_maker('text')
 
