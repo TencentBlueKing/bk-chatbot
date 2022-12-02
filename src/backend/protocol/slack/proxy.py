@@ -42,11 +42,8 @@ class Proxy(BaseProxy):
 
     @classmethod
     async def _handle_url_verify(cls):
-        payload = await request.json
+        payload = await request.get_data()
         logger.info(payload)
-        if payload is None:
-            payload = await request.get_data()
-            logger.info(payload)
         return jsonify({'challenge': payload['challenge']})
 
     @classmethod
