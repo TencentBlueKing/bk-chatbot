@@ -137,7 +137,7 @@ class Proxy(BaseProxy):
                    message: Union[str, Dict[str, Any], List[Dict[str, Any]]],
                    **kwargs):
         payload = defaultdict(dict)
-        payload['touser'] = context['msg_sender_id']
+        payload['touser'] = context['msg_sender_code']
         payload['agentid'] = context.get('AgentID', None) or context.get('AgentId')
         if message:
             payload['text']['content'] = message
