@@ -19,6 +19,7 @@ from typing import Any, Optional, Dict
 import asyncio
 from aiocache import cached
 
+from . import config as SlackConfig
 from .proxy import Proxy as SlackProxy
 from .message import Message, MessageSegment, MessageTemplate
 from opsbot.adapter import Bot as BaseBot
@@ -47,7 +48,7 @@ class Bot(BaseBot, SlackProxy):
             from opsbot import default_config as config_object
 
         self.config = config_object
-        self.protocol_config = {k: v for k, v in SlackProxy.__dict__.items()}
+        self.protocol_config = {k: v for k, v in SlackConfig.__dict__.items()}
         SlackProxy.__init__(self, self.config.API_ROOT, self.protocol_config)
         self.asgi.debug = self.config.DEBUG
 
