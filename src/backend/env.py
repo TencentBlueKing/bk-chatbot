@@ -149,8 +149,20 @@ class BotDockerFile(DockerFile):
         """
         pass
 
-    def set_protocol_env(self, **kwargs):
-        return f'{self.env(**kwargs)}\n'
+    def set_protocol_env(self, cmdline_args: argparse.ArgumentParser):
+        protocol = ''
+        if cmdline_args.product == 'xwork':
+            protocol = self.env(corpid=cmdline_args.corpid,
+                                fwid=cmdline_args.fwid,
+                                service_id=cmdline_args.service_id,
+                                secret=cmdline_args.secret,
+                                token=cmdline_args.token,
+                                aes_key=cmdline_args.aes_key)
+        elif cmdline_args.product == 'slack':
+            protocol = self.env(oauth_token=cmdline_args.oauth_token,
+                                signing_secret=cmdline_args.signing_secret,
+                                verification_token=cmdline_args.verification_token)
+        return f'{protocol}\n'
 
     def generate(self, cmdline_args: argparse.ArgumentParser):
         flow = self.from_env(cmdline_args.base)
@@ -186,12 +198,7 @@ class BotDockerFile(DockerFile):
                                        db_port=cmdline_args.redis_db_port,
                                        db_password=cmdline_args.redis_db_password)
         flow += redis_env
-        protocol_env = self.set_protocol_env(corpid=cmdline_args.corpid,
-                                             fwid=cmdline_args.fwid,
-                                             service_id=cmdline_args.service_id,
-                                             secret=cmdline_args.secret,
-                                             token=cmdline_args.token,
-                                             aes_key=cmdline_args.aes_key)
+        protocol_env = self.set_protocol_env(cmdline_args)
         flow += protocol_env
         flow += self.copy()
         flow += self.pip_install()
@@ -234,12 +241,17 @@ class BotDockerFile(DockerFile):
         parser.add_argument('--redis_db_name', required=True, help="redis_db_name")
         parser.add_argument('--redis_db_port', required=True, help="redis_db_port")
         parser.add_argument('--redis_db_password', required=True, help="redis_db_password")
+        # xwork
         parser.add_argument('--corpid', required=False, help="corpid")
         parser.add_argument('--fwid', required=False, help="fwid")
         parser.add_argument('--service_id', required=False, help="service_id")
         parser.add_argument('--secret', required=False, help="secret")
         parser.add_argument('--token', required=False, help="token")
         parser.add_argument('--aes_key', required=False, help="aes_key")
+        # slack
+        parser.add_argument('--oauth_token', required=False, help="oauth_token")
+        parser.add_argument('--signing_secret', required=False, help="signing_secret")
+        parser.add_argument('--verification_token', required=False, help="verification_token")
         cmdline_args = parser.parse_args(args)
         self.generate(cmdline_args)
 
