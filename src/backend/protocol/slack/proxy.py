@@ -19,7 +19,7 @@ from typing import (
 from collections import defaultdict
 from ssl import SSLContext
 
-from quart import request, jsonify
+from quart import request, jsonify, abort
 from slack_sdk.web.async_client import AsyncWebClient
 from slack_sdk.errors import SlackApiError
 
@@ -29,6 +29,7 @@ from opsbot.proxy import (
     ActionFailed, ApiNotAvailable, HttpFailed, NetworkError
 )
 from .message import Message
+from .decryption import Decryption
 
 
 class Proxy(BaseProxy):
@@ -41,9 +42,16 @@ class Proxy(BaseProxy):
     on_text = _deco_maker('text')
 
     @classmethod
+    async def _validate_parameters(cls):
+        if request.method == 'POST':
+            payload = await request.get_data()
+        else:
+            payload = request.args
+        return payload
+
+    @classmethod
     async def _handle_url_verify(cls):
-        payload = await request.get_data()
-        logger.info(payload)
+        payload = await request.json
         return jsonify({'challenge': payload['challenge']})
 
     @classmethod
@@ -51,12 +59,18 @@ class Proxy(BaseProxy):
         return jsonify(error='bad request', code=405)
 
     async def _handle_http(self):
-        logger.debug(dict(request.headers))
-        logger.debug(f'remote_addr: {request.remote_addr}')
-        return await self._handle_url_verify()
+        data = await self._validate_parameters()
+        headers = dict(request.headers)
+        logger.debug(headers)
+        decryption = Decryption(self._api.api_config['SIGNING_SECRET'], data, headers)
+        if not decryption.is_valid():
+            abort(400)
+        payload = decryption.parse()
+        logger.debug(payload)
+        return jsonify({'code': 0})
 
-    async def call_action(self, channel: str, **params) -> Any:
-        return await self._api.call_action(channel, json=params)
+    async def call_action(self, **params) -> Any:
+        return await self._api.call_action(**params)
 
     def run(self, host=None, port=None, *args, **kwargs):
         self._server_app.run(host=host, port=port, *args, **kwargs)
@@ -65,24 +79,24 @@ class Proxy(BaseProxy):
                    message: Union[str, Dict[str, Any], List[Dict[str, Any]]],
                    **kwargs):
         payload = defaultdict(dict)
-        channel = context['event']['channel']
+        payload['channel'] = context['event']['channel']
         if not message:
             payload['text'] = message
         payload.update(kwargs)
-        return await self.call_action(channel, **payload)
+        return await self.call_action(**payload)
 
 
 class HttpApi(BaseApi):
     def __init__(self, api_config: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._api_config = api_config
+        self.api_config = api_config
         if not self._is_available():
             raise ApiNotAvailable
         self._client = AsyncWebClient(token=self._get_access_token(),
                                       ssl=SSLContext())
 
     def _get_access_token(self) -> Any:
-        return self._api_config['OAUTH_TOKEN']
+        return self.api_config['OAUTH_TOKEN']
 
     def _handle_api_result(self, result: Optional[Dict[str, Any]]) -> Any:
         if isinstance(result, dict):
@@ -91,17 +105,17 @@ class HttpApi(BaseApi):
                 raise ActionFailed(retcode=result.get('error'))
             return result
 
-    async def call_action(self, channel: str, **params) -> Optional[Dict[str, Any]]:
+    async def call_action(self, action: str = 'chat_postMessage', **params) -> Optional[Dict[str, Any]]:
         """
         Send API request to call the specified action.
         - text: "Hello world!"
         """
         try:
-            response = await self._client.chat_postMessage(channel=channel, **params)
+            response = await getattr(self._client, action)(**params)
             return self._handle_json_result(response)
         except SlackApiError as e:
             logger.error(f'Slack Api error: {str(e)}')
             raise SlackApiError
 
     def _is_available(self) -> bool:
-        return self._api_config.get('OAUTH_TOKEN')
+        return self.api_config.get('OAUTH_TOKEN')
