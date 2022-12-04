@@ -34,6 +34,7 @@ from .decryption import Decryption
 
 class Proxy(BaseProxy):
     def __init__(self, api_root: Optional[str], api_config: Dict):
+        self.signing_secret = api_config.get('SIGNING_SECRET')
         super().__init__(message_class=Message,
                          api_class=UnifiedApi(http_api=HttpApi(api_config)))
         self._server_app.route('/open/callback/', methods=['POST'])(self._handle_http)
@@ -56,13 +57,14 @@ class Proxy(BaseProxy):
 
     @classmethod
     async def _handle_bad_request(cls, e: Exception):
+        logger.error(e)
         return jsonify(error='bad request', code=405)
 
     async def _handle_http(self):
         data = await self._validate_parameters()
         headers = dict(request.headers)
         logger.debug(headers)
-        decryption = Decryption(self._api.api_config['SIGNING_SECRET'], data, headers)
+        decryption = Decryption(self.signing_secret, data, headers)
         if not decryption.is_valid():
             abort(400)
         payload = decryption.parse()
@@ -89,14 +91,14 @@ class Proxy(BaseProxy):
 class HttpApi(BaseApi):
     def __init__(self, api_config: Dict, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.api_config = api_config
+        self._api_config = api_config
         if not self._is_available():
             raise ApiNotAvailable
         self._client = AsyncWebClient(token=self._get_access_token(),
                                       ssl=SSLContext())
 
     def _get_access_token(self) -> Any:
-        return self.api_config['OAUTH_TOKEN']
+        return self._api_config['OAUTH_TOKEN']
 
     def _handle_api_result(self, result: Optional[Dict[str, Any]]) -> Any:
         if isinstance(result, dict):
@@ -118,4 +120,4 @@ class HttpApi(BaseApi):
             raise SlackApiError
 
     def _is_available(self) -> bool:
-        return self.api_config.get('OAUTH_TOKEN')
+        return self._api_config.get('OAUTH_TOKEN')

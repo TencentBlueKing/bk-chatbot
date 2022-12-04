@@ -51,6 +51,9 @@ class Decryption:
             data = parse.unquote(self.data.decode())
             payload = data.split('=')[1]
             return json.loads(payload)
-        except (TypeError, IndexError, json.JSONDecodeError) as e:
+        except IndexError:
+            data = self.data.decode()
+            return json.loads(data)
+        except (TypeError, json.JSONDecodeError) as e:
             logger.error(f'event data parse error: {str(e)}')
             return None
