@@ -84,8 +84,8 @@ class Proxy(BaseProxy):
                 context['message'] = self._message_class(event.get("text"))
             context['msg_id'] = context.get("event_id")
             context['msg_group_id'] = event['channel']
-            context['msg_sender_code'] = event['ts']
-            context['create_time'] = context.get("message_ts")
+            context['msg_sender_code'] = event['user']
+            context['create_time'] = event.get("ts")
             if event['channel_type'] == 'im':
                 context['msg_from_type'] = 'single'
             else:
@@ -97,7 +97,7 @@ class Proxy(BaseProxy):
             context['msg_from_type'] = 'single'
             context['create_time'] = context.get("message_ts")
             context['message'] = self._message_class(context.get("callback_id"))
-
+        context['msg_sender_id'] = context['msg_sender_code']
         logger.debug(context)
         event = post_type + '.' + detailed_type
         results = list(filter(lambda r: r is not None, await self._bus.emit(event, context)))
