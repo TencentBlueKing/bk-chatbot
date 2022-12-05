@@ -15,14 +15,11 @@ specific language governing permissions and limitations under the License.
 
 import base64
 from collections import namedtuple
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, Union
 
 import asyncio
 from aiocache import cached
 
-from . import config as XworkConfig
-from .proxy import Proxy as XworkProxy
-from .message import Message, MessageSegment, MessageTemplate
 from opsbot.adapter import Bot as BaseBot
 from opsbot.self_typing import Context_T
 from opsbot.log import logger
@@ -32,6 +29,11 @@ from opsbot.permission import (
     IS_SUPERUSER, IS_PRIVATE, IS_GROUP_MEMBER, OPEN_API
 )
 from opsbot.asr import ASR
+from . import config as XworkConfig
+from .proxy import Proxy as XworkProxy
+from .message import (
+    Message, MessageSegment, MessageTemplate, MessageParser
+)
 
 _message_preprocessors = set()
 
@@ -144,6 +146,9 @@ class Bot(BaseBot, XworkProxy):
 
     def send_template_msg(self, action, *args, **kwargs) -> Dict:
         return getattr(MessageTemplate, action)(*args, **kwargs)
+
+    def parse_action(self, action, ctx: Context_T) -> Union[str, Dict]:
+        return getattr(MessageParser, action)(ctx)
 
 
 def log_message(ctx: Context_T) -> None:

@@ -21,11 +21,7 @@ from .api import JobTask
 
 @on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', '作业平台', 'bk_job'))
 async def list_job_plan(session: CommandSession):
-    try:
-        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-    except KeyError:
-        bk_biz_id = None
-
+    bk_biz_id = session.bot.parse_action('parse_select', session.ctx)
     job_task = JobTask(session, bk_biz_id)
     msg_template = await job_task.render_job_plan_list()
     if not msg_template:
@@ -52,12 +48,9 @@ async def select_bk_job_plan(session: CommandSession):
 
 @on_command('bk_job_plan_execute')
 async def _(session: CommandSession):
-    _, job_plan = session.ctx['event_key'].split('|')
-    try:
-        job_plan = json.loads(job_plan)
-    except json.JSONDecodeError:
+    job_plan = session.bot.parse_action('parse_interaction', session.ctx)
+    if not job_plan:
         return
-
     flow = JobTask(session)
     result = await flow.execute_task(job_plan)
     msg_template = flow.render_job_execute_msg(result, job_plan)
@@ -66,14 +59,10 @@ async def _(session: CommandSession):
 
 @on_command('bk_job_plan_update')
 async def _(session: CommandSession):
-    if 'event_key' in session.ctx:
-        _, job_plan = session.ctx['event_key'].split('|')
-        try:
-            job_plan = json.loads(job_plan)
-        except json.JSONDecodeError:
-            return
-        session.state.update(job_plan)
-
+    job_plan = session.bot.parse_action('parse_interaction', session.ctx)
+    if not job_plan:
+        return
+    session.state.update(job_plan)
     content = f'''>**JOB TIP**
     >请顺序输入参数，**换行分隔**'''
     msg_template = session.bot.send_template_msg('render_markdown_msg', content)
@@ -89,7 +78,9 @@ async def _(session: CommandSession):
 
 @on_command('bk_job_plan_cancel')
 async def _(session: CommandSession):
-    _, bk_job_plan_name = session.ctx['event_key'].split('|')
+    bk_job_plan_name = session.bot.parse_action('parse_interaction', session.ctx)
+    if not bk_job_plan_name:
+        return 
     content = f'''>**JOB TIP** 
                 ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
                 '''

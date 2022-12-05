@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 import re
 import json
 import time
-from typing import Iterable, Tuple, Union, List, Dict
+from typing import Iterable, Tuple, Union, List, Dict, Optional
 
 from opsbot.adapter import (
     Message as BaseMessage, MessageSegment as BaseMessageSegment,
@@ -361,3 +361,22 @@ class MessageTemplate(BaseMessageTemplate):
             template['checkbox']['option_list'].extend(option_list)
 
         return template
+
+
+class MessageParser:
+    @classmethod
+    def parse_select(cls, ctx: Dict) -> Optional[str]:
+        try:
+            return ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        except KeyError:
+            return None
+
+    @classmethod
+    def parse_interaction(cls, ctx: Dict) -> Optional[Dict]:
+        if 'event_key' in ctx:
+            _, data = ctx['event_key'].split('|')
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                return data
+        return None
