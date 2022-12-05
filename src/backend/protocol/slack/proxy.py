@@ -40,7 +40,8 @@ class Proxy(BaseProxy):
         self._server_app.route('/open/callback/', methods=['POST'])(self._handle_http)
         self._server_app.register_error_handler(Exception, self._handle_bad_request)
 
-    on_text = _deco_maker('text')
+    on_event_callback = _deco_maker('event_callback')
+    on_interactive_message = _deco_maker('interactive_message')
 
     @classmethod
     async def _validate_parameters(cls):
@@ -63,13 +64,43 @@ class Proxy(BaseProxy):
     async def _handle_http(self):
         data = await self._validate_parameters()
         headers = dict(request.headers)
-        logger.debug(headers)
         decryption = Decryption(self.signing_secret, data, headers)
         if not decryption.is_valid():
             abort(400)
+
         payload = decryption.parse()
-        logger.debug(payload)
-        return jsonify({'code': 0})
+        post_type = payload.get('type')
+        detailed_type = payload.get('event', {}).get('type', 'default')
+        if not post_type or not detailed_type:
+            return
+
+        context = payload.copy()
+        if post_type == 'event_callback':
+            event = context['event']
+            if detailed_type == 'text':
+                if 'attachments' in event:
+                    # user usually does not send button msg
+                    return
+                context['message'] = self._message_class(event.get("text"))
+            context['msg_id'] = context.get("event_id")
+            context['msg_group_id'] = event['channel']
+            context['msg_sender_code'] = event['ts']
+            context['create_time'] = context.get("message_ts")
+            if event['channel_type'] == 'im':
+                context['msg_from_type'] = 'single'
+            else:
+                context['msg_from_type'] = 'group'
+        elif post_type == 'interactive_message':
+            context['msg_id'] = context.get("trigger_id")
+            context['msg_group_id'] = context.get('channel', {}).get('id')
+            context['msg_sender_code'] = context.get('user', {}).get('id')
+            context['msg_from_type'] = 'single'
+            context['create_time'] = context.get("message_ts")
+            context['message'] = self._message_class(context.get("callback_id"))
+
+        event = post_type + '.' + detailed_type
+        results = list(filter(lambda r: r is not None, await self._bus.emit(event, context)))
+        return jsonify(results[0]) if results else ''
 
     async def call_action(self, **params) -> Any:
         return await self._api.call_action(**params)

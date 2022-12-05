@@ -498,6 +498,7 @@ def parse_command(bot: Bot,
         # command is empty
         return None, None
 
+    # todo adjust english
     cmd_name_text, *cmd_remained = full_command.split(maxsplit=1)
     cmd_name = _aliases.get(cmd_name_text)
 
