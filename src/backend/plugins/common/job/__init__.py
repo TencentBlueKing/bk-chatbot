@@ -80,7 +80,7 @@ async def _(session: CommandSession):
 async def _(session: CommandSession):
     bk_job_plan_name = session.bot.parse_action('parse_interaction', session.ctx)
     if not bk_job_plan_name:
-        return 
+        return
     content = f'''>**JOB TIP** 
                 ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
                 '''
