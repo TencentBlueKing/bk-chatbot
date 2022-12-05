@@ -21,11 +21,7 @@ from .api import DevOpsTask
 
 @on_command('bk_devops_project_list', aliases=('蓝盾流水线', 'bk_devops'))
 async def _(session: CommandSession):
-    try:
-        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-    except KeyError:
-        bk_biz_id = None
-
+    bk_biz_id = session.bot.parse_action('parse_select', session.ctx)
     devops_task = DevOpsTask(session, bk_biz_id)
     msg_template = await devops_task.render_devops_project_list()
     if not msg_template:
@@ -47,9 +43,9 @@ async def _(session: CommandSession):
 
 @on_command('bk_devops_pipeline_update')
 async def _(session: CommandSession):
-    if 'event_key' in session.ctx:
-        _, bk_devops_pipeline = session.ctx['event_key'].split('|')
-        session.state['bk_devops_pipeline'] = json.loads(bk_devops_pipeline)
+    bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
+    if not bk_devops_pipeline:
+        session.state['bk_devops_pipeline'] = bk_devops_pipeline
 
     content = f'''>**CI TIP**
         >请顺序输入参数，**换行分隔**'''
@@ -65,9 +61,7 @@ async def _(session: CommandSession):
 
 @on_command('bk_devops_pipeline_execute')
 async def _(session: CommandSession):
-    _, bk_devops_pipeline = session.ctx['event_key'].split('|')
-    bk_devops_pipeline = json.loads(bk_devops_pipeline)
-
+    bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
     flow = DevOpsTask(session)
     result = await flow.execute_task(bk_devops_pipeline)
     msg_template = flow.render_devops_execute_msg(result, bk_devops_pipeline)
@@ -76,7 +70,7 @@ async def _(session: CommandSession):
 
 @on_command('bk_devops_pipeline_cancel')
 async def _(session: CommandSession):
-    _, bk_devops_pipeline_name = session.ctx['event_key'].split('|')
+    bk_devops_pipeline_name = session.bot.parse_action('parse_interaction', session.ctx)
     content = f'''>**CI TIP** 
               ><font color=\"warning\">您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...</font> 
               '''

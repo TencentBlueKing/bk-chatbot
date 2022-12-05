@@ -57,9 +57,8 @@ class DevOpsTask(GenericTask):
                                                    'bk_devops_project_select')
 
     async def render_devops_pipeline_list(self):
-        try:
-            bk_devops_project_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
+        bk_devops_project_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+        if not bk_devops_project_id:
             return None
 
         bk_devops_pipelines = await self._get_devops_pipeline_list(bk_devops_project_id)
@@ -70,7 +69,7 @@ class DevOpsTask(GenericTask):
     async def render_devops_pipeline_detail(self):
         if self._session.is_first_run:
             try:
-                bk_devops_pipeline_info = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+                bk_devops_pipeline_info = self._session.bot.parse_action('parse_select', self._session.ctx)
                 bk_devops_project_id, bk_devops_pipeline_id, bk_devops_pipeline_name = \
                     bk_devops_pipeline_info.split('|')
             except (KeyError, ValueError):
