@@ -55,9 +55,8 @@ class SopsTask(GenericTask):
 
     async def render_sops_template_info(self):
         if self._session.is_first_run:
-            try:
-                bk_sops_template_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-            except (KeyError, TypeError):
+            bk_sops_template_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+            if not bk_sops_template_id:
                 return None
 
             bk_sops_template = await self._get_sops_template_info(int(bk_sops_template_id))
@@ -107,7 +106,7 @@ class SopsTask(GenericTask):
         constants = bk_sops_template['constants']
 
         try:
-            bk_sops_template_schema_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+            bk_sops_template_schema_id = self._session.bot.parse_action('parse_select', self._session.ctx)
             schema = {'data': item['data'] for item in bk_sops_template_schemas
                       if item['id'] == bk_sops_template_schema_id}
             select_group = json.loads(schema.get('data', []))

@@ -13,19 +13,13 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
-
 from opsbot import on_command, CommandSession
 from .api import SopsTask
 
 
 @on_command('bk_sops_template_list', aliases=('标准运维', 'sops', 'bk_sops'))
 async def list_sops_template(session: CommandSession):
-    try:
-        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-    except KeyError:
-        bk_biz_id = None
-
+    bk_biz_id = session.bot.parse_action('parse_select', session.ctx)
     sops_task = SopsTask(session, bk_biz_id)
     msg_template = await sops_task.render_sops_template_list()
     if not msg_template:
@@ -42,9 +36,7 @@ async def select_sops_template(session: CommandSession):
 
 @on_command('bk_sops_template_execute')
 async def execute_sops_template(session: CommandSession):
-    _, bk_sops_template = session.ctx['event_key'].split('|')
-    bk_sops_template = json.loads(bk_sops_template)
-
+    bk_sops_template = session.bot.parse_action('parse_interaction', session.ctx)
     flow = SopsTask(session)
     result = await flow.execute_task(bk_sops_template)
     msg_template = flow.render_sops_execute_msg(result, bk_sops_template)
@@ -53,10 +45,9 @@ async def execute_sops_template(session: CommandSession):
 
 @on_command('bk_sops_template_update')
 async def update_sops_template(session: CommandSession):
-    if 'event_key' in session.ctx:
-        _, bk_sops_template = session.ctx['event_key'].split('|')
-        session.state['bk_sops_template'] = json.loads(bk_sops_template)
-
+    bk_sops_template = session.bot.parse_action('parse_interaction', session.ctx)
+    if bk_sops_template:
+        session.state['bk_sops_template'] = bk_sops_template
     content = f'''>**SOPS TIP**
         >请顺序输入参数，**换行分隔**'''
     msg_template = session.bot.send_template_msg('render_markdown_msg', content)
@@ -72,7 +63,7 @@ async def update_sops_template(session: CommandSession):
 
 @on_command('bk_sops_template_cancel')
 async def _(session: CommandSession):
-    _, bk_sops_template_name = session.ctx['event_key'].split('|')
+    bk_sops_template_name = session.bot.parse_action('parse_interaction', session.ctx)
     content = f'''>**SOPS TIP** 
                   ><font color=\"warning\">您的标准运维任务「{bk_sops_template_name}」已取消...</font> 
                   '''
