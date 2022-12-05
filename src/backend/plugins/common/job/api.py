@@ -52,9 +52,8 @@ class JobTask(GenericTask):
 
     async def render_job_plan_detail(self):
         if self._session.is_first_run:
-            try:
-                job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-            except KeyError:
+            job_plan_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+            if not job_plan_id:
                 return None
 
             bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
