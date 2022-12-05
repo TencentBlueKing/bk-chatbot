@@ -98,6 +98,7 @@ class Proxy(BaseProxy):
             context['create_time'] = context.get("message_ts")
             context['message'] = self._message_class(context.get("callback_id"))
 
+        logger.debug(context)
         event = post_type + '.' + detailed_type
         results = list(filter(lambda r: r is not None, await self._bus.emit(event, context)))
         return jsonify(results[0]) if results else ''
