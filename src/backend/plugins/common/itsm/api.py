@@ -28,7 +28,7 @@ class GenericIT:
 
     async def render_services(self):
         try:
-            _, page = self._session.ctx['event_key'].split('|')
+            page = self._session.bot.parse_action('parse_interaction', self._session.ctx)
             page = int(page)
         except ValueError:
             return None
@@ -71,9 +71,8 @@ class GenericIT:
         return template_card
 
     async def render_service_detail(self):
-        try:
-            service_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
+        service_id = self._session.bot.parse_interaction('parse_select', self._session.ctx)
+        if not service_id:
             return None
 
         service = await self._itsm.get_service_detail(service_id=int(service_id))
