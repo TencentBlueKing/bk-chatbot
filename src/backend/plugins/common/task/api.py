@@ -145,7 +145,7 @@ def summary_statement(intent: Dict, slots: List, other: str = '', is_click=False
     if is_click:
         params = [{'keyname': slot['name'], 'value': slot['value']} for slot in slots]
         statement = session.bot.send_template_msg('render_task_select_msg', 'BKCHAT', f'自定义任务_{intent_name}',
-                                                  params, 'bk_chat_task_execute', 'bk_chat_task_update',
+                                                  params, 'bk_chat_task_commit', 'bk_chat_task_update',
                                                   'bk_chat_task_cancel', intent, intent_name, ['执行', '取消'])
     else:
         params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
@@ -215,7 +215,7 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
         prompt = summary_statement(intent, slots, '', True, session)
         while True:
             is_commit, ctx = session.get('is_commit', prompt='...', **prompt)
-            if is_commit not in ['bk_chat_task_cancel', 'bk_chat_task_execute',
+            if is_commit not in ['bk_chat_task_cancel', 'bk_chat_task_commit',
                                  TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
                 del session.state['is_commit']
             else:
