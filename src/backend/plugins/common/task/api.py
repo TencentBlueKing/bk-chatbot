@@ -221,7 +221,7 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
             else:
                 break
 
-    return is_commit in ['bk_chat_task_execute', TASK_ALLOW_CMD]
+    return is_commit in ['bk_chat_task_commit', TASK_ALLOW_CMD]
 
 
 async def real_run(intent: Dict,
