@@ -185,6 +185,6 @@ def log_message(ctx: Context_T) -> None:
     msg_from: str = ctx['msg_sender_id']
     if ctx['msg_from_type'] == 'group':
         msg_from += f'@[Channel: {ctx["msg_group_id"]}]'
-        logger.info(f'User: {msg_from}, '
-                    f'Message {ctx["msg_id"]} from {msg_from}: '
-                    f'{ctx["message"][0]}')
+    logger.info(f'User: {msg_from}, '
+                f'Message {ctx["msg_id"]} from {msg_from}: '
+                f'{ctx["message"][0]}')
