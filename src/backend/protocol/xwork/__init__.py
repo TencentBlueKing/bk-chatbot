@@ -147,8 +147,8 @@ class Bot(BaseBot, XworkProxy):
     def send_template_msg(self, action, *args, **kwargs) -> Dict:
         return getattr(MessageTemplate, action)(*args, **kwargs)
 
-    def parse_action(self, action, ctx: Context_T) -> Union[str, Dict]:
-        return getattr(MessageParser, action)(ctx)
+    def parse_action(self, action, ctx: Context_T, *args, **kwargs) -> Union[str, Dict]:
+        return getattr(MessageParser, action)(ctx, *args, **kwargs)
 
 
 def log_message(ctx: Context_T) -> None:

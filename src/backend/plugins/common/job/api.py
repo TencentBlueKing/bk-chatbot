@@ -58,8 +58,14 @@ class JobTask(GenericTask):
 
             bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                                  job_plan_id=int(job_plan_id))
-            global_var_list = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
-                               for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
+            try:
+                global_var_list = [
+                    {
+                        'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'
+                    } for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1
+                ]
+            except TypeError:
+                global_var_list = []
             job_plan_name = bk_job_plan_detail["name"]
         else:
             job_plan_id = self._session.state['job_plan_id']

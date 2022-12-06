@@ -380,3 +380,7 @@ class MessageParser:
             except json.JSONDecodeError:
                 return data
         return None
+
+    @classmethod
+    def update_select(cls, ctx: Dict, val: str):
+        ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId'] = val

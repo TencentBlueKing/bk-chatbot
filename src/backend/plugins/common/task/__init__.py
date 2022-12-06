@@ -41,9 +41,9 @@ async def _(session: CommandSession):
 @on_command('bk_app_task_select')
 async def _(session: CommandSession):
     try:
-        app_task = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        app_task = session.bot.parse_action('parse_select', session.ctx)
         app, task_id = app_task.split('|')
-        session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId'] = task_id
+        session.bot.parse_action('update_select', session.ctx, task_id)
     except (KeyError, ValueError):
         return None
 
@@ -102,12 +102,10 @@ async def task(session: CommandSession):
             await session.send(msg)
             session.state['index'] = False
     else:
-        try:
-            intent_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-            user_id = session.ctx['msg_sender_id']
-        except KeyError:
+        intent_id = session.bot.parse_action('parse_select', session.ctx)
+        if not intent_id:
             return None
-
+        user_id = session.ctx['msg_sender_id']
         intent = (await AppTask(session).describe_entity('intents', id=int(intent_id)))[0]
         slots = await SlotRecognition(intent).fetch_slot()
         if slots:
@@ -162,9 +160,8 @@ async def _(session: CommandSession):
     delete scheduler
     """
     if session.is_first_run:
-        try:
-            timer_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
-            return None
+        timer_id = session.bot.parse_action('parse_select', session.ctx)
+        if not timer_id:
+            return
     await Scheduler(session, is_callback=False).delete_scheduler(int(timer_id))
     await session.send('定时器删除成功')
