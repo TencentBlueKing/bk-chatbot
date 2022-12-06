@@ -91,3 +91,7 @@ class MessageTemplate(BaseMessageTemplate):
     @classmethod
     def render_task_filter_msg(cls):
         pass
+
+
+class MessageParser:
+    pass

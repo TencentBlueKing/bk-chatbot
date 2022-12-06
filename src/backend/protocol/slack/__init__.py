@@ -15,14 +15,16 @@ specific language governing permissions and limitations under the License.
 
 import re
 from collections import namedtuple
-from typing import Any, Optional, Dict, Iterable
+from typing import Any, Optional, Dict, Iterable, Union
 
 import asyncio
 from aiocache import cached
 
 from . import config as SlackConfig
 from .proxy import Proxy as SlackProxy
-from .message import Message, MessageSegment, MessageTemplate
+from .message import (
+    Message, MessageSegment, MessageTemplate, MessageParser
+)
 from opsbot.adapter import Bot as BaseBot
 from opsbot.self_typing import Context_T
 from opsbot.log import logger
@@ -133,8 +135,8 @@ class Bot(BaseBot, SlackProxy):
     def send_template_msg(self, action, *args, **kwargs) -> Dict:
         return getattr(MessageTemplate, action)(*args, **kwargs)
 
-    def parse_action(self):
-        pass
+    def parse_action(self, action, ctx: Context_T, *args, **kwargs) -> Union[str, Dict]:
+        return getattr(MessageParser, action)(ctx, *args, **kwargs)
 
 
 def _check_at_me(bot: BaseBot, ctx: Context_T) -> None:
