@@ -258,6 +258,8 @@ class MessageTemplate(BaseMessageTemplate):
     def render_task_select_msg(cls, platform: str, title: str, params: List, execute_key: str,
                                update_key: str, cancel_key: str, data: Dict, task_name: str,
                                action=['执行', '修改', '取消', '快捷键'], **kwargs) -> Dict:
+        if isinstance(data, dict):
+            data.update({'platform': platform})
         button_map = {
             '执行': {
                 "text": "执行",
@@ -277,7 +279,7 @@ class MessageTemplate(BaseMessageTemplate):
             '快捷键': {
                 "text": "快捷键",
                 "style": 4,
-                "key": f"bk_shortcut_create|{platform}|{json.dumps(data)}"
+                "key": f"bk_shortcut_create|{json.dumps(data)}"
             }
         }
         button_list = [v for k, v in button_map.items() if k in action]

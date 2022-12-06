@@ -65,9 +65,8 @@ class ShortcutHandler(GenericTask):
                                                    submit_text='删除')
 
     def delete(self):
-        try:
-            shortcut_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
+        shortcut_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+        if not shortcut_id:
             return None
 
         shortcut = self.orm_client.query(BKShortcutTask, 'first', id=int(shortcut_id))

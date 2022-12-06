@@ -23,9 +23,10 @@ from .api import ShortcutHandler
 @on_command('bk_shortcut_create')
 async def create_bk_shortcut(session: CommandSession):
     if 'event_key' in session.ctx:
-        _, platform, info = session.ctx['event_key'].split('|')
-        session.state['platform'] = platform
-        session.state['info'] = json.loads(info)
+        info = session.bot.parse_action('parse_interaction', session.ctx)
+        platform = info.get('platform')
+        session.state['platform'] = info.get('platform')
+        session.state['info'] = info
     else:
         platform = session.state['platform']
         info = session.state['info']
