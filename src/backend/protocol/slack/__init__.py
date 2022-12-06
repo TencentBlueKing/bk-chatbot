@@ -165,7 +165,6 @@ def _check_calling_me_nickname(bot: BaseBot, ctx: Context_T) -> None:
         return
 
     first_text = first_msg_seg.data['text']
-
     if bot.config.NICKNAME:
         # check if the user is calling me with my nickname
         if isinstance(bot.config.NICKNAME, str) or not isinstance(bot.config.NICKNAME, Iterable):

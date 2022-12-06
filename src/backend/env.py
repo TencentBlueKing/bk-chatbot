@@ -143,6 +143,12 @@ class BotDockerFile(DockerFile):
         """
         return self.set_env('REDIS', **kwargs)
 
+    def set_orm_env(self, **kwargs):
+        """
+        set_orm_env(url=orm_url)
+        """
+        return self.set_env('ORM', **kwargs)
+
     def set_es_env(self):
         """
         set_es_env(key=key, iv=iv)
@@ -198,6 +204,8 @@ class BotDockerFile(DockerFile):
                                        db_port=cmdline_args.redis_db_port,
                                        db_password=cmdline_args.redis_db_password)
         flow += redis_env
+        orm_env = self.set_orm_env(url=cmdline_args.orm_url)
+        flow += orm_env
         protocol_env = self.set_protocol_env(cmdline_args)
         flow += protocol_env
         flow += self.copy()
@@ -241,6 +249,7 @@ class BotDockerFile(DockerFile):
         parser.add_argument('--redis_db_name', required=True, help="redis_db_name")
         parser.add_argument('--redis_db_port', required=True, help="redis_db_port")
         parser.add_argument('--redis_db_password', required=True, help="redis_db_password")
+        parser.add_argument('--orm_url', required=False, help="orm url")
         # xwork
         parser.add_argument('--corpid', required=False, help="corpid")
         parser.add_argument('--fwid', required=False, help="fwid")
