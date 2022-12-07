@@ -69,8 +69,14 @@ class Message(BaseMessage):
 
 class MessageTemplate(BaseMessageTemplate):
     @classmethod
-    def render_markdown_msg(cls, title: str, content: str):
-        # todo adapt
+    def render_markdown_msg(cls, title: str, content: str) -> Dict:
+        def normalize(text: str) -> str:
+            text = text.replace('<bold>', '*')
+            text = text.replace('<warning>', '`')
+            text = text.replace('<info>', '')
+            return text
+
+        # todo adapt more attribute
         return {
             "attachments": [
                 {
@@ -85,7 +91,7 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
-    def render_welcome_msg(cls):
+    def render_welcome_msg(cls, data: List, bk_biz_id: Union[int, str]) -> Dict:
         pass
 
     @classmethod

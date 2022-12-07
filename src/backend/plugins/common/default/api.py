@@ -28,9 +28,7 @@ class Flow:
 
     async def _search_business(self):
         response = await self.cc.search_business(bk_username=self.user_id, fields=["bk_biz_id", "bk_biz_name"])
-        data = [{'id': str(biz['bk_biz_id']), 'text': biz['bk_biz_name'], 'is_checked': False}
-                for biz in response.get('info')[:20]]
-        return data
+        return response.get('info', [])
 
     async def render_welcome_msg(self):
         bk_data = GenericTool.get_biz_data(self._session, RedisClient(env="prod"))

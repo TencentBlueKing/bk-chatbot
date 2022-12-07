@@ -155,6 +155,12 @@ class MessageTemplate(BaseMessageTemplate):
 
     @classmethod
     def render_welcome_msg(cls, data: List, bk_biz_id: Union[int, str]) -> Dict:
+        data = [
+            {
+                'id': str(biz['bk_biz_id']), 'text': biz['bk_biz_name'], 'is_checked': False
+            } for biz in data[:10]
+        ]
+
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -169,7 +175,7 @@ class MessageTemplate(BaseMessageTemplate):
                 'button_selection': {
                     'question_key': 'bk_biz_id',
                     'title': '业务',
-                    'option_list': data[:10],
+                    'option_list': data,
                     'selected_id': bk_biz_id if bk_biz_id else ''
                 },
                 'action_menu': {
@@ -207,6 +213,12 @@ class MessageTemplate(BaseMessageTemplate):
 
     @classmethod
     def render_biz_list_msg(cls, data: List) -> Dict:
+        data = [
+            {
+                'id': str(biz['bk_biz_id']), 'text': biz['bk_biz_name'], 'is_checked': False
+            } for biz in data[:20]
+        ]
+
         return {
             'msgtype': 'template_card',
             'template_card': {
