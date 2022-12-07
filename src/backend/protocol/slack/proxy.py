@@ -72,7 +72,7 @@ class Proxy(BaseProxy):
         post_type = payload.get('type')
         detailed_type = payload.get('event', {}).get('type', 'default')
         if not post_type or not detailed_type:
-            return
+            abort(400)
 
         context = payload.copy()
         if post_type == 'event_callback':
@@ -80,7 +80,7 @@ class Proxy(BaseProxy):
             if detailed_type == 'message':
                 if 'attachments' in event:
                     # user usually does not send button msg
-                    return
+                    abort(400)
                 context['message'] = self._message_class(event.get("text"))
             context['msg_id'] = context.get("event_id")
             context['msg_group_id'] = event['channel']
@@ -104,7 +104,7 @@ class Proxy(BaseProxy):
         return jsonify(results[0]) if results else ''
 
     async def call_action(self, action, **params) -> Any:
-        return await self._api.call_action(action, **params)
+        return await self._api.call_action(action=action, **params)
 
     def run(self, host=None, port=None, *args, **kwargs):
         self._server_app.run(host=host, port=port, *args, **kwargs)
@@ -140,7 +140,7 @@ class HttpApi(BaseApi):
                 raise ActionFailed(retcode=result.get('error'))
             return result
 
-    async def call_action(self, action, **params) -> Optional[Dict[str, Any]]:
+    async def call_action(self, action: str, **params) -> Optional[Dict[str, Any]]:
         """
         Send API request to call the specified action.
         - text: "Hello world!"
