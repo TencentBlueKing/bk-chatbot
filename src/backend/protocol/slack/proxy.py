@@ -146,7 +146,9 @@ class HttpApi(BaseApi):
         - text: "Hello world!"
         """
         try:
+            logger.debug(params)
             response = await getattr(self._client, action)(**params)
+            logger.debug(response)
             return self._handle_json_result(response)
         except SlackApiError as e:
             logger.error(f'Slack Api error: {str(e)}')
