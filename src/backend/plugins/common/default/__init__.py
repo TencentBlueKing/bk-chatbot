@@ -72,10 +72,9 @@ async def _(session: CommandSession):
 async def _(session: CommandSession):
     stat = Stat()
     count = stat.stat_execution()
-    content = f'''>**执行统计** 
-                ><font color=\"warning\">您当前执行数「{count}」</font> 
-                '''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>执行统计<bold>'
+    content = f'<warning>您当前执行数「{count}」<warning>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)
     del stat
 
@@ -83,13 +82,13 @@ async def _(session: CommandSession):
 @on_command('bk_chat_search_knowledge')
 async def _(session: CommandSession):
     answers = session.state.get('answers')
+    title = '<bold>结果:<bold>'
     content = '\n'.join([
-        f'''><font color=\"info\">问题：{item["question"]}</font>
-        ><font color=\"warning\">答案：{item["solution"]}</font>'''
+        f'''<info>问题：{item["question"]}<info>
+        <warning>答案：{item["solution"]}<warning>'''
         for item in answers
     ])
-    content = f'''>**结果:**\n{content}'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)
 
 

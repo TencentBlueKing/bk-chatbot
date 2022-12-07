@@ -30,9 +30,9 @@ from .settings import (
 
 @on_command('bk_app_task_filter', aliases=('任务查找', '查找任务'))
 async def _(session: CommandSession):
-    content = f'''>**BKCHAT TIP**
-            >请顺序输入任务名称，**支持模糊查询**'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>BKCHAT TIP<bold>'
+    content = '请顺序输入任务名称，<bold>支持模糊查询<bold>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     task_name, _ = session.get('task_name', prompt='...', **msg_template)
     msg_template = await AppTask(session).render_app_task(task_name)
     msg_template and await session.send(**msg_template)

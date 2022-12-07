@@ -47,9 +47,9 @@ async def _(session: CommandSession):
     if not bk_devops_pipeline:
         session.state['bk_devops_pipeline'] = bk_devops_pipeline
 
-    content = f'''>**CI TIP**
-        >请顺序输入参数，**换行分隔**'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>CI TIP<bold>'
+    content = '请顺序输入参数，<bold>换行分隔<bold>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
@@ -71,8 +71,7 @@ async def _(session: CommandSession):
 @on_command('bk_devops_pipeline_cancel')
 async def _(session: CommandSession):
     bk_devops_pipeline_name = session.bot.parse_action('parse_interaction', session.ctx)
-    content = f'''>**CI TIP** 
-              ><font color=\"warning\">您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...</font> 
-              '''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>CI TIP<bold>'
+    content = f'<warning>您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...<warning>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)

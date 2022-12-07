@@ -31,9 +31,9 @@ async def create_bk_shortcut(session: CommandSession):
         platform = session.state['platform']
         info = session.state['info']
 
-    content = f'''>**{platform} TIP**
-            >请输入快捷键名称，**最少输入8个字符**, 每个人每个业务最多10个快捷键'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = f'<bold>{platform} TIP<bold>'
+    content = '请输入快捷键名称，<bold>最少输入8个字符<bold>, 每个人每个业务最多10个快捷键'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     shortcut_name, _ = session.get('shortcut_name', prompt='...', **msg_template)
     sc_handler = ShortcutHandler(session, shortcut_name)
     while not sc_handler.validate_name():
@@ -41,9 +41,8 @@ async def create_bk_shortcut(session: CommandSession):
         shortcut_name, _ = session.get('shortcut_name', prompt='...', **msg_template)
 
     sc_handler.save(platform, info)
-    content = f'''>**{platform} TIP**
-                >快捷键「{shortcut_name}」保存成功'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    content = f'快捷键「{shortcut_name}」保存成功'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)
 
 
@@ -65,9 +64,9 @@ async def list_bk_shortcut(session: CommandSession):
 async def delete_bk_shortcut(session: CommandSession):
     sc_handler = ShortcutHandler(session)
     msg = sc_handler.delete()
-    content = f'''>**快捷键 TIP**
-                    >快捷键「{msg}」删除成功'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>快捷键 TIP<bold>'
+    content = f'快捷键「{msg}」删除成功'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     msg_template and await session.send(**msg_template)
 
 

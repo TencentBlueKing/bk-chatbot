@@ -37,8 +37,8 @@ class Flow:
         bk_biz_id = bk_data.get('biz_id')
         data = await self._search_business()
         if not data:
-            return self._session.bot.send_template_msg('render_markdown_msg',
-                                                       f'>**CC:**\n{DEFAULT_BIND_BIZ_TIP}')
+            return self._session.bot.send_template_msg('render_markdown_msg', '<bold>CC:<bold>',
+                                                       DEFAULT_BIND_BIZ_TIP)
         return self._session.bot.send_template_msg('render_welcome_msg', data, bk_biz_id)
 
     async def render_biz_msg(self):
@@ -49,9 +49,8 @@ class Flow:
         return self._session.bot.send_template_msg('render_biz_list_msg', data)
 
     def bind_cc_biz(self):
-        try:
-            bk_biz_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
+        bk_biz_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+        if not bk_biz_id:
             return None
         GenericTool.set_biz_data(self._session, RedisClient(env="prod"), bk_biz_id)
         return bk_biz_id

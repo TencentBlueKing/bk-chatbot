@@ -48,9 +48,9 @@ async def update_sops_template(session: CommandSession):
     bk_sops_template = session.bot.parse_action('parse_interaction', session.ctx)
     if bk_sops_template:
         session.state['bk_sops_template'] = bk_sops_template
-    content = f'''>**SOPS TIP**
-        >请顺序输入参数，**换行分隔**'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    msg_template = session.bot.send_template_msg('render_markdown_msg',
+                                                 '<bold>SOPS TIP<bold>',
+                                                 '请顺序输入参数，<bold>换行分隔<bold>')
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
@@ -64,8 +64,6 @@ async def update_sops_template(session: CommandSession):
 @on_command('bk_sops_template_cancel')
 async def _(session: CommandSession):
     bk_sops_template_name = session.bot.parse_action('parse_interaction', session.ctx)
-    content = f'''>**SOPS TIP** 
-                  ><font color=\"warning\">您的标准运维任务「{bk_sops_template_name}」已取消...</font> 
-                  '''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    msg_template = session.bot.send_template_msg('render_markdown_msg', '<bold>SOPS TIP<bold>',
+                                                 f'<warning>您的标准运维任务「{bk_sops_template_name}」已取消...<warning>')
     await session.send(**msg_template)

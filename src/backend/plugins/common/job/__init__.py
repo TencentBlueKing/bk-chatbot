@@ -61,9 +61,9 @@ async def _(session: CommandSession):
     if not job_plan:
         return
     session.state.update(job_plan)
-    content = f'''>**JOB TIP**
-    >请顺序输入参数，**换行分隔**'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>JOB TIP<bold>'
+    content = '请顺序输入参数，<bold>换行分隔<bold>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
@@ -79,8 +79,7 @@ async def _(session: CommandSession):
     bk_job_plan_name = session.bot.parse_action('parse_interaction', session.ctx)
     if not bk_job_plan_name:
         return
-    content = f'''>**JOB TIP** 
-                ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
-                '''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>JOB TIP<bold>'
+    content = f'<warning>您的JOB执行方案「{bk_job_plan_name}」已取消...<warning>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)

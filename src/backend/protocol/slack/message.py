@@ -69,8 +69,20 @@ class Message(BaseMessage):
 
 class MessageTemplate(BaseMessageTemplate):
     @classmethod
-    def render_markdown_msg(cls):
-        pass
+    def render_markdown_msg(cls, content: str):
+        # todo adapt
+        return {
+            "attachments": [
+                {
+                    "color": "#2eb886",
+                    "title": "Slack API Documentation",
+                    "title_link": "",
+                    "text": content,
+                    "footer": "bkchat",
+                    "footer_icon": "",
+                }
+            ]
+        }
 
     @classmethod
     def render_welcome_msg(cls):
