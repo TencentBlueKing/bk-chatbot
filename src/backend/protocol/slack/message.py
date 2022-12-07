@@ -81,10 +81,10 @@ class MessageTemplate(BaseMessageTemplate):
             "attachments": [
                 {
                     "color": "#2eb886",
-                    "title": title,
+                    "title": normalize(title),
                     "title_link": "",
-                    "text": content,
-                    "footer": "bkchat",
+                    "text": normalize(content),
+                    "footer": "BKCHAT",
                     "footer_icon": "",
                 }
             ]
@@ -92,7 +92,31 @@ class MessageTemplate(BaseMessageTemplate):
 
     @classmethod
     def render_welcome_msg(cls, data: List, bk_biz_id: Union[int, str]) -> Dict:
-        pass
+        data = [
+            {
+                'value': str(biz['bk_biz_id']), 'text': biz['bk_biz_name']
+            } for biz in data
+        ]
+
+        return {
+            'text': 'BKCHAT',
+            'attachments': [
+                {
+                    'text': '*欢迎使用蓝鲸信息流*',
+                    'callback_id': 'bk_chat_welcome',
+                    'color': '3AA3E3',
+                    'attachment_type': 'default',
+                    'actions': [
+                        {
+                            "name": "业务",
+                            "text": "请选择业务",
+                            "type": "select",
+                            "options": data
+                        }
+                    ]
+                }
+            ]
+        }
 
     @classmethod
     def render_biz_list_msg(cls):
