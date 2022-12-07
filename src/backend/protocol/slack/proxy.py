@@ -77,7 +77,7 @@ class Proxy(BaseProxy):
         context = payload.copy()
         if post_type == 'event_callback':
             event = context['event']
-            if detailed_type == 'text':
+            if detailed_type == 'message':
                 if 'attachments' in event:
                     # user usually does not send button msg
                     return
