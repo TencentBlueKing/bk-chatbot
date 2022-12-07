@@ -103,8 +103,8 @@ class Proxy(BaseProxy):
         results = list(filter(lambda r: r is not None, await self._bus.emit(event, context)))
         return jsonify(results[0]) if results else ''
 
-    async def call_action(self, **params) -> Any:
-        return await self._api.call_action(**params)
+    async def call_action(self, action, **params) -> Any:
+        return await self._api.call_action(action, **params)
 
     def run(self, host=None, port=None, *args, **kwargs):
         self._server_app.run(host=host, port=port, *args, **kwargs)
@@ -116,8 +116,9 @@ class Proxy(BaseProxy):
         payload['channel'] = context['event']['channel']
         if not message:
             payload['text'] = message
+        action = kwargs.pop('action', 'chat_postMessage')
         payload.update(kwargs)
-        return await self.call_action(**payload)
+        return await self.call_action(action, **payload)
 
 
 class HttpApi(BaseApi):
@@ -139,7 +140,7 @@ class HttpApi(BaseApi):
                 raise ActionFailed(retcode=result.get('error'))
             return result
 
-    async def call_action(self, action: str = 'chat_postMessage', **params) -> Optional[Dict[str, Any]]:
+    async def call_action(self, action, **params) -> Optional[Dict[str, Any]]:
         """
         Send API request to call the specified action.
         - text: "Hello world!"

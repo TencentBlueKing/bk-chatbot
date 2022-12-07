@@ -20,11 +20,6 @@ from typing import Any, Optional, Dict, Iterable, Union
 import asyncio
 from aiocache import cached
 
-from . import config as SlackConfig
-from .proxy import Proxy as SlackProxy
-from .message import (
-    Message, MessageSegment, MessageTemplate, MessageParser
-)
 from opsbot.adapter import Bot as BaseBot
 from opsbot.self_typing import Context_T
 from opsbot.log import logger
@@ -33,6 +28,11 @@ from opsbot.natural_language import handle_natural_language
 from opsbot.permission import (
     IS_SUPERUSER, IS_PRIVATE, IS_GROUP_MEMBER, OPEN_API
 )
+from .proxy import Proxy as SlackProxy
+from .message import (
+    Message, MessageSegment, MessageTemplate, MessageParser
+)
+from . import config as SlackConfig
 
 _message_preprocessors = set()
 
