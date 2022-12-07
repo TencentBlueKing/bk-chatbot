@@ -134,11 +134,11 @@ class HttpApi(BaseApi):
     def _get_access_token(self) -> Any:
         return self._api_config['OAUTH_TOKEN']
 
-    def _handle_api_result(self, result: SlackResponse) -> Any:
-        if not result.get('ok') or 'error' in result:
-            logger.error(result)
-            raise ActionFailed(retcode=result.get('error'))
-        return {'result': result['ok']}
+    def _handle_api_result(self, response: SlackResponse) -> Any:
+        if not response.get('ok') or 'error' in response:
+            logger.error(response)
+            raise ActionFailed(retcode=response.get('error'))
+        return {'result': response['ok']}
 
     async def call_action(self, action: str, **params) -> Optional[Dict[str, Any]]:
         """
@@ -147,7 +147,7 @@ class HttpApi(BaseApi):
         """
         try:
             response = await getattr(self._client, action)(**params)
-            return self._handle_json_result(response)
+            return self._handle_api_result(response)
         except SlackApiError as e:
             logger.error(f'Slack Api error: {str(e)}')
             raise SlackApiError
