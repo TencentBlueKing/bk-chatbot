@@ -22,6 +22,7 @@ from ssl import SSLContext
 from quart import request, jsonify, abort
 from slack_sdk.web.async_client import AsyncWebClient
 from slack_sdk.errors import SlackApiError
+from slack_sdk.web.slack_response import SlackResponse
 
 from opsbot.log import logger
 from opsbot.proxy import (
@@ -133,12 +134,11 @@ class HttpApi(BaseApi):
     def _get_access_token(self) -> Any:
         return self._api_config['OAUTH_TOKEN']
 
-    def _handle_api_result(self, result: Optional[Dict[str, Any]]) -> Any:
-        if isinstance(result, dict):
-            if not result.get('ok') or 'error' in result:
-                logger.error(result)
-                raise ActionFailed(retcode=result.get('error'))
-            return result
+    def _handle_api_result(self, result: SlackResponse) -> Any:
+        if not result.get('ok') or 'error' in result:
+            logger.error(result)
+            raise ActionFailed(retcode=result.get('error'))
+        return {'result': result['ok']}
 
     async def call_action(self, action: str, **params) -> Optional[Dict[str, Any]]:
         """
@@ -146,9 +146,7 @@ class HttpApi(BaseApi):
         - text: "Hello world!"
         """
         try:
-            logger.debug(params)
             response = await getattr(self._client, action)(**params)
-            logger.debug(response)
             return self._handle_json_result(response)
         except SlackApiError as e:
             logger.error(f'Slack Api error: {str(e)}')
