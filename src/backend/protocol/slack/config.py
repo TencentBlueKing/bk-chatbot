@@ -20,4 +20,5 @@ import json
 OAUTH_TOKEN = os.getenv('OAUTH_TOKEN')
 SIGNING_SECRET = os.getenv('SIGNING_SECRET')
 VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
+# this config used to add slack <-> bk
 USER_WHITE_MAP = json.loads(os.getenv('USER_WHITE_MAP', '{}'))
