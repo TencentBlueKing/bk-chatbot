@@ -33,8 +33,7 @@ class SopsTask(GenericTask):
     async def _get_sops_template_list(self, **params) -> List:
         data = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id, **params)
         data.sort(key=lambda x: x['edit_time'], reverse=True)
-        return [{'id': str(template['id']), 'text': template['name'], 'is_checked': False}
-                for template in data[:20]]
+        return data
 
     async def _get_sops_template_info(self, template_id: int) -> Dict:
         bk_sops_template_info = await self._sops.get_template_info(self.biz_id, template_id, bk_username=self.user_id)
@@ -50,8 +49,16 @@ class SopsTask(GenericTask):
             return None
 
         bk_sops_templates = await self._get_sops_template_list(**params)
-        return self._session.bot.send_template_msg('render_task_list_msg', 'SOPS', '欢迎使用标准运维', '请选择标准运维模板',
-                                                   'bk_sops_template_id', bk_sops_templates, 'bk_sops_template_select')
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   'SOPS',
+                                                   '欢迎使用标准运维',
+                                                   '请选择标准运维模板',
+                                                   'bk_sops_template_id',
+                                                   bk_sops_templates,
+                                                   'bk_sops_template_select',
+                                                   render=lambda x: {'id': str(x['id']),
+                                                                     'text': x['name'],
+                                                                     'is_checked': False})
 
     async def render_sops_template_info(self):
         if self._session.is_first_run:
