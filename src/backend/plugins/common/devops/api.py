@@ -32,14 +32,12 @@ class DevOpsTask(GenericTask):
     async def _get_devops_project_list(self):
         data = await self._devops.v3_app_project_list(self.user_id)
         data.sort(key=lambda x: x['updatedAt'], reverse=True)
-        return [{'id': str(project['projectCode']), 'text': project['projectName'], 'is_checked': False}
-                for project in data[:20]]
+        return data
 
     async def _get_devops_pipeline_list(self, project_id: str):
         data = (await self._devops.v3_app_pipeline_list(project_id, self.user_id)).get('records', [])
         data.sort(key=lambda x: x['latestBuildStartTime'], reverse=True)
-        return [{'id': f'{project_id}|{project["pipelineId"]}|{project["pipelineName"]}',
-                 'text': project['pipelineName'], 'is_checked': False} for project in data[:20]]
+        return data
 
     async def _get_devops_build_start_info(self, project_id: str, pipeline_id: str):
         start_infos = await self._devops.v3_app_build_start_info(project_id, pipeline_id, self.user_id)
@@ -52,9 +50,16 @@ class DevOpsTask(GenericTask):
             return None
 
         bk_devops_projects = await self._get_devops_project_list()
-        return self._session.bot.send_template_msg('render_task_list_msg', 'CI', '欢迎使用蓝盾平台', '请选择蓝盾项目',
-                                                   'bk_devops_project_id', bk_devops_projects,
-                                                   'bk_devops_project_select')
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   'CI',
+                                                   '欢迎使用蓝盾平台',
+                                                   '请选择蓝盾项目',
+                                                   'bk_devops_project_id',
+                                                   bk_devops_projects,
+                                                   'bk_devops_project_select',
+                                                   render=lambda x: {'id': str(x['projectCode']),
+                                                                     'text': x['projectName'],
+                                                                     'is_checked': False})
 
     async def render_devops_pipeline_list(self):
         bk_devops_project_id = self._session.bot.parse_action('parse_select', self._session.ctx)
@@ -62,9 +67,19 @@ class DevOpsTask(GenericTask):
             return None
 
         bk_devops_pipelines = await self._get_devops_pipeline_list(bk_devops_project_id)
-        return self._session.bot.send_template_msg('render_task_list_msg', 'CI', '欢迎使用蓝盾平台',
-                                                   f'请选择「{bk_devops_project_id}」下流水线', 'bk_devops_pipeline_id',
-                                                   bk_devops_pipelines, 'bk_devops_pipeline_select')
+        render_func = lambda x: {
+            'id': f'{bk_devops_project_id}|{x["pipelineId"]}|{x["pipelineName"]}',
+            'text': x['pipelineName'],
+            'is_checked': False
+        }
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   'CI',
+                                                   '欢迎使用蓝盾平台',
+                                                   f'请选择「{bk_devops_project_id}」下流水线',
+                                                   'bk_devops_pipeline_id',
+                                                   bk_devops_pipelines,
+                                                   'bk_devops_pipeline_select',
+                                                   render=render_func)
 
     async def render_devops_pipeline_detail(self):
         if self._session.is_first_run:
