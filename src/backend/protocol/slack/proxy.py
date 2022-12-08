@@ -114,7 +114,7 @@ class Proxy(BaseProxy):
                    message: Union[str, Dict[str, Any], List[Dict[str, Any]]],
                    **kwargs):
         payload = defaultdict(dict)
-        payload['channel'] = context['event']['channel']
+        payload['channel'] = context['msg_group_id']
         if not message:
             payload['text'] = message
         action = kwargs.pop('action', 'chat_postMessage')

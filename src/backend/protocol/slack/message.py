@@ -99,7 +99,7 @@ class MessageTemplate(BaseMessageTemplate):
         ]
 
         return {
-            'text': 'BKCHAT',
+            'text': '*BKCHAT*',
             'attachments': [
                 {
                     'title': '欢迎使用蓝鲸信息流',
@@ -111,12 +111,18 @@ class MessageTemplate(BaseMessageTemplate):
                             "name": "业务",
                             "text": "请选择业务",
                             "type": "select",
+                            'selected_options': [
+                                {
+                                    'text': biz['text'],
+                                    'value': biz['value']
+                                } for biz in data if biz['value'] == bk_biz_id
+                            ][:1],
                             "options": data
                         }
                     ]
                 },
                 {
-                    'text': '请选择产品',
+                    'text': '请选择应用',
                     'color': '3AA3E3',
                     'callback_id': 'bk_saas',
                     'actions': [
@@ -157,10 +163,10 @@ class MessageTemplate(BaseMessageTemplate):
             } for biz in data
         ]
         return {
-            'text': 'BKCHAT',
+            'text': '*BKCHAT*',
             'attachments': [
                 {
-                    'text': '*业务绑定*',
+                    'title': '业务绑定',
                     'callback_id': 'bk_cc_biz_select',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
