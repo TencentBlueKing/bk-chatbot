@@ -13,10 +13,9 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import re
-import json
-import time
-from typing import Iterable, Tuple, Union, List, Dict
+from typing import (
+    Iterable, Tuple, Union, List, Dict, Callable
+)
 
 from opsbot.adapter import (
     Message as BaseMessage, MessageSegment as BaseMessageSegment,
@@ -183,10 +182,27 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
-    def render_task_list_msg(cls, platform: str, title: str, desc: str, question_key: str,
-                             data: List, submit_key: str, submit_text: str = '确认'):
+    def render_task_list_msg(cls,
+                             platform: str,
+                             title: str,
+                             desc: str,
+                             question_key: str,
+                             data: List,
+                             submit_key: str,
+                             submit_text: str = '确认',
+                             render: Callable = None):
         if not data:
             return None
+
+        if render:
+            data = [render(x) for x in data]
+
+        data = [
+            {
+                'value': str(task['id']), 'text': task['text'], 'name': question_key
+            } for task in data
+        ]
+
         return {
             'text': f'*{platform}*',
             'attachments': {
