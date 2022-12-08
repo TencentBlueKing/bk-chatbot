@@ -102,7 +102,7 @@ class MessageTemplate(BaseMessageTemplate):
             'text': 'BKCHAT',
             'attachments': [
                 {
-                    'text': '*欢迎使用蓝鲸信息流*',
+                    'title': '欢迎使用蓝鲸信息流',
                     'callback_id': 'bk_chat_welcome',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
@@ -112,6 +112,37 @@ class MessageTemplate(BaseMessageTemplate):
                             "text": "请选择业务",
                             "type": "select",
                             "options": data
+                        }
+                    ]
+                },
+                {
+                    'text': '请选择产品',
+                    'color': '3AA3E3',
+                    'callback_id': 'bk_saas',
+                    'actions': [
+                        {
+                            "name": "task",
+                            "text": "CI",
+                            "type": "button",
+                            "value": "bk_devops"
+                        },
+                        {
+                            "name": "task",
+                            "text": "JOB",
+                            "type": "button",
+                            "value": "bk_job"
+                        },
+                        {
+                            "name": "task",
+                            "text": "SOPS",
+                            "type": "button",
+                            "value": "bk_sops"
+                        },
+                        {
+                            "name": "task",
+                            "text": "ITSM",
+                            "type": "button",
+                            "value": "bk_itsm"
                         }
                     ]
                 }
