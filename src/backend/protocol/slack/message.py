@@ -183,6 +183,12 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
+    def render_task_list_msg(cls, platform: str, title: str, desc: str, question_key: str,
+                             data: List, submit_key: str, submit_text: str = '确认'):
+        if not data:
+            return None
+
+    @classmethod
     def render_task_select_msg(cls):
         pass
 

@@ -48,7 +48,8 @@ class GenericTask:
 
     def render_null_msg(self, platform: str) -> Dict:
         return self._session.bot.send_template_msg('render_markdown_msg',
-                                                   PLUGIN_NULL_MSG.format(platform))
+                                                   f'<bold>{platform} TIP<bold>',
+                                                   PLUGIN_NULL_MSG)
 
 
 class GenericTool:
