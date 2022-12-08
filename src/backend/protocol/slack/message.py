@@ -187,6 +187,25 @@ class MessageTemplate(BaseMessageTemplate):
                              data: List, submit_key: str, submit_text: str = '确认'):
         if not data:
             return None
+        return {
+            'text': f'*{platform}*',
+            'attachments': {
+                'title': title,
+                'text': desc,
+                'callback_id': submit_key,
+                'color': '3AA3E3',
+                'attachment_type': 'default',
+                'actions': [
+                    {
+                        "name": "业务",
+                        "text": "请选择实例",
+                        "type": "select",
+                        'selected_options': [],
+                        "options": data
+                    }
+                ]
+            }
+        }
 
     @classmethod
     def render_task_select_msg(cls):

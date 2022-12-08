@@ -33,8 +33,7 @@ class JobTask(GenericTask):
         data = await self._job.get_job_plan_list(**params)
         bk_job_plans = data.get('data', [])
         bk_job_plans.sort(key=lambda x: x['last_modify_time'], reverse=True)
-        return [{'id': str(job_plan['id']), 'text': job_plan['name'], 'is_checked': False}
-                for job_plan in bk_job_plans[:20]]
+        return bk_job_plans
 
     async def _get_job_plan_detail(self, **params) -> Dict:
         data = await self._job.get_job_plan_detail(**params)
@@ -47,8 +46,16 @@ class JobTask(GenericTask):
         bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                      length=100, **params)
 
-        return self._session.bot.send_template_msg('render_task_list_msg', 'JOB', '欢迎使用JOB平台', '请选择JOB执行方案',
-                                                   'bk_job_plan_id', bk_job_plans, 'bk_job_plan_select')
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   'JOB',
+                                                   '欢迎使用JOB平台',
+                                                   '请选择JOB执行方案',
+                                                   'bk_job_plan_id',
+                                                   bk_job_plans,
+                                                   'bk_job_plan_select',
+                                                   render=lambda x: {'id': x['id'],
+                                                                     'text': x['name'],
+                                                                     'is_checked': False})
 
     async def render_job_plan_detail(self):
         if self._session.is_first_run:
