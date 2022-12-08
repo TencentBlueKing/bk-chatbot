@@ -115,7 +115,7 @@ class MessageTemplate(BaseMessageTemplate):
                                 {
                                     'text': biz['text'],
                                     'value': biz['value']
-                                } for biz in data if biz['value'] == bk_biz_id
+                                } for biz in data if biz['value'] == str(bk_biz_id)
                             ][:1],
                             "options": data
                         }
