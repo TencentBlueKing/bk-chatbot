@@ -79,6 +79,13 @@ class Bot(BaseBot, SlackProxy):
         return bool(permission & permission_required)
 
     async def check_permission(self, ctx: Context_T, permission_required: int) -> bool:
+        if self.config.IS_USE_SESSION_WHITELIST:
+            if ctx['msg_sender_code'] not in self.protocol_config['USER_WHITE_MAP']:
+                return False
+            else:
+                ctx['msg_sender_id'] = \
+                    self.protocol_config['USER_WHITE_MAP'][ctx['msg_sender_code']]
+
         min_ctx_kwargs = {}
         for field in _min_context_fields:
             if field in ctx:

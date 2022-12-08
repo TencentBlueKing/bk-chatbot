@@ -28,7 +28,10 @@ class Decryption:
     Parse
     Classify: Event text
     """
-    def __init__(self, signing_secret: str, data: Union[str, bytes], headers: Dict):
+    def __init__(self,
+                 signing_secret: str,
+                 data: Union[str, bytes],
+                 headers: Dict):
         self.data = data
         self.headers = headers
         self.verifier = SignatureVerifier(signing_secret=signing_secret)

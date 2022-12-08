@@ -119,8 +119,31 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
-    def render_biz_list_msg(cls):
-        pass
+    def render_biz_list_msg(cls, data: List):
+        data = [
+            {
+                'value': str(biz['bk_biz_id']), 'text': biz['bk_biz_name']
+            } for biz in data
+        ]
+        return {
+            'text': 'BKCHAT',
+            'attachments': [
+                {
+                    'text': '*业务绑定*',
+                    'callback_id': 'bk_cc_biz_select',
+                    'color': '3AA3E3',
+                    'attachment_type': 'default',
+                    'actions': [
+                        {
+                            "name": "业务",
+                            "text": "请选择业务",
+                            "type": "select",
+                            "options": data
+                        }
+                    ]
+                }
+            ]
+        }
 
     @classmethod
     def render_task_select_msg(cls):

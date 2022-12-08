@@ -14,8 +14,10 @@ specific language governing permissions and limitations under the License.
 """
 
 import os
+import json
 
 
 OAUTH_TOKEN = os.getenv('OAUTH_TOKEN')
 SIGNING_SECRET = os.getenv('SIGNING_SECRET')
 VERIFICATION_TOKEN = os.getenv('VERIFICATION_TOKEN')
+USER_WHITE_MAP = json.loads(os.getenv('USER_WHITE_MAP', '{}'))
