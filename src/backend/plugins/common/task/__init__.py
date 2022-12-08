@@ -69,14 +69,16 @@ async def _(session: CommandSession):
         await session.send('当前业务下无技能，请联系业务运维同学进行配置')
         return
 
-    tasks = [
-        {
-            'id': str(intent['id']), 'text': intent['intent_name'], 'is_checked': False
-        } for intent in intents[:20]
-    ]
-    msg_template = session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', TASK_LIST_TIP,
-                                                 f'请选择BKCHAT自定义技能 {TASK_FINISH_TIP}', 'bk_chat_intent_id',
-                                                 tasks, 'bk_chat_task_execute')
+    msg_template = session.bot.send_template_msg('render_task_list_msg',
+                                                 'BKCHAT',
+                                                 TASK_LIST_TIP,
+                                                 f'请选择BKCHAT自定义技能 {TASK_FINISH_TIP}',
+                                                 'bk_chat_intent_id',
+                                                 intents,
+                                                 'bk_chat_task_execute',
+                                                 render=lambda x: {'id': str(x['id']),
+                                                                   'text': x['intent_name'],
+                                                                   'is_checked': False})
     await session.send(**msg_template)
 
 

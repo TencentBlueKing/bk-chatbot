@@ -59,8 +59,13 @@ class ShortcutHandler(GenericTask):
 
     def render_shortcut_list(self):
         shortcuts = self.find_all()
-        return self._session.bot.send_template_msg('render_task_list_msg', '快捷键', '欢迎使用快捷键服务', '选择删除',
-                                                   'bk_shortcut_id', shortcuts, 'bk_shortcut_delete',
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   '快捷键',
+                                                   '欢迎使用快捷键服务',
+                                                   '选择删除',
+                                                   'bk_shortcut_id',
+                                                   shortcuts,
+                                                   'bk_shortcut_delete',
                                                    submit_text='删除')
 
     def delete(self):

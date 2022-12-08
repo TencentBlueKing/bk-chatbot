@@ -354,17 +354,22 @@ class Scheduler:
 
     @classmethod
     async def list_scheduler(cls):
-        data = await cls.backend.get_timer(timer_user=cls.session.ctx['msg_sender_id'])
-        timers = [
-            {
-                'id': str(item['id']),
-                'text': f'{item["biz_id"]} {item["timer_name"]} {item["execute_time"]}',
+        def render_func(x):
+            return {
+                'id': str(x['id']),
+                'text': f'{x["biz_id"]} {x["timer_name"]} {x["execute_time"]}',
                 'is_checked': False
-            } for item in data[:20]
-        ]
-        msg_template = cls.session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', 'BKCHAT定时任务',
-                                                         f'当前定时任务如下:', 'bk_chat_timer_id',
-                                                         timers, 'bk_chat_timer_select', submit_text='删除')
+            }
+        data = await cls.backend.get_timer(timer_user=cls.session.ctx['msg_sender_id'])
+        msg_template = cls.session.bot.send_template_msg('render_task_list_msg',
+                                                         'BKCHAT',
+                                                         'BKCHAT定时任务',
+                                                         f'当前定时任务如下:',
+                                                         'bk_chat_timer_id',
+                                                         data,
+                                                         'bk_chat_timer_select',
+                                                         submit_text='删除',
+                                                         render=render_func)
         return msg_template
 
     @classmethod
