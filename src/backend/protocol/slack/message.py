@@ -14,7 +14,8 @@ specific language governing permissions and limitations under the License.
 """
 
 from typing import (
-    Iterable, Tuple, Union, List, Dict, Callable
+    Iterable, Tuple, Union, List, Dict, Optional,
+    Callable
 )
 
 from opsbot.adapter import (
@@ -102,7 +103,7 @@ class MessageTemplate(BaseMessageTemplate):
             'attachments': [
                 {
                     'title': '欢迎使用蓝鲸信息流',
-                    'callback_id': 'bk_chat_welcome',
+                    'callback_id': 'bk_chat_common_callback|slack_select_bk_biz_id',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': [
@@ -123,7 +124,7 @@ class MessageTemplate(BaseMessageTemplate):
                 {
                     'text': '请选择应用',
                     'color': '3AA3E3',
-                    'callback_id': 'bk_saas',
+                    'callback_id': 'bk_chat_common_callback|slack_select_bk_app',
                     'actions': [
                         {
                             "name": "task",
@@ -216,7 +217,6 @@ class MessageTemplate(BaseMessageTemplate):
                         "name": "业务",
                         "text": "请选择实例",
                         "type": "select",
-                        'selected_options': [],
                         "options": data
                     }
                 ]
@@ -237,4 +237,10 @@ class MessageTemplate(BaseMessageTemplate):
 
 
 class MessageParser:
-    pass
+    @classmethod
+    def parse_select(cls, ctx: Dict) -> Optional[str]:
+        try:
+            for action in ctx['actions']:
+                return action['value']
+        except KeyError:
+            return None
