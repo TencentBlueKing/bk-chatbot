@@ -131,13 +131,28 @@ class Bot(BaseBot, SlackProxy):
             return
 
     async def handle_event(self, ctx: Context_T):
-        if 'actions' in ctx:
-            pass
+        if ctx['msg_type'] == 'interactive_message':
+            if ctx['callback_id'] == 'bk_chat_welcome|bk_cc_biz_select':
+                select_id = ctx['actions'][0]['select_options'][0]['value']
+                attachments = ctx['original_message']['attachments']
+                for option in attachments[0]['actions'][0]['options']:
+                    if select_id == option['value']:
+                        attachments[0]['actions'][0]['selected_options'] = [
+                            {
+                                'value': select_id,
+                                'text': option['text']
+                            }
+                        ]
+                await self.call_action('chat_update',
+                                       channel=ctx['msg_group_id'],
+                                       ts=ctx['message_ts'],
+                                       attachments=attachments)
+            return
         ctx['to_me'] = True
         await self.handle_message(ctx)
 
     async def call_api(self, action: str, **params):
-        pass
+        return await self.call_action(action, **params)
 
     def send_template_msg(self, action, *args, **kwargs) -> Dict:
         return getattr(MessageTemplate, action)(*args, **kwargs)

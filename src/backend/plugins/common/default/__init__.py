@@ -92,6 +92,11 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
+@on_command('bk_chat_common_callback')
+async def _(session: CommandSession):
+    pass
+
+
 @on_natural_language
 async def _(session: NLPSession):
     stripped_msg = session.msg_text.strip()

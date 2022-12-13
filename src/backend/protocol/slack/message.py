@@ -103,7 +103,7 @@ class MessageTemplate(BaseMessageTemplate):
             'attachments': [
                 {
                     'title': '欢迎使用蓝鲸信息流',
-                    'callback_id': 'bk_chat_common_callback|slack_select_bk_biz_id',
+                    'callback_id': 'bk_chat_welcome|bk_cc_biz_select',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': [
@@ -241,7 +241,10 @@ class MessageParser:
     def parse_select(cls, ctx: Dict) -> Optional[str]:
         try:
             for action in ctx['actions']:
-                for select_action in action['selected_options']:
-                    return select_action['value']
+                if action['type'] == 'select':
+                    for select_action in action['selected_options']:
+                        return select_action['value']
+                elif action['type'] == 'button':
+                    return action['value']
         except KeyError:
             return None
