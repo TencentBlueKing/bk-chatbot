@@ -124,7 +124,7 @@ class MessageTemplate(BaseMessageTemplate):
                 {
                     'text': '请选择应用',
                     'color': '3AA3E3',
-                    'callback_id': 'bk_chat_common_callback|slack_select_bk_app',
+                    'callback_id': 'bk_chat_welcome|bk_chat_select_app',
                     'actions': [
                         {
                             "name": "task",

@@ -147,7 +147,10 @@ class Bot(BaseBot, SlackProxy):
                                        channel=ctx['msg_group_id'],
                                        ts=ctx['message_ts'],
                                        attachments=attachments)
-            return
+                return
+            elif ctx['callback_id'] == 'bk_chat_welcome|bk_chat_select_app':
+                select_id = ctx['actions'][0]['value']
+                ctx['message'] = self._message_class(select_id)
         ctx['to_me'] = True
         await self.handle_message(ctx)
 
