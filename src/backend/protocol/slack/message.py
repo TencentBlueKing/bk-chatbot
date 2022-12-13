@@ -200,7 +200,7 @@ class MessageTemplate(BaseMessageTemplate):
 
         data = [
             {
-                'value': str(task['id']), 'text': task['text'], 'name': question_key
+                'value': str(task['id']), 'text': task['text']
             } for task in data
         ]
 
@@ -214,6 +214,7 @@ class MessageTemplate(BaseMessageTemplate):
                 'attachment_type': 'default',
                 'actions': [
                     {
+                        "action_id": question_key,
                         "name": "业务",
                         "text": "请选择实例",
                         "type": "select",
