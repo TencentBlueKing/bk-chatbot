@@ -240,8 +240,8 @@ class MessageParser:
     @classmethod
     def parse_select(cls, ctx: Dict) -> Optional[str]:
         try:
-            for actions in ctx['actions']:
-                for select_action in actions:
+            for action in ctx['actions']:
+                for select_action in action['selected_options']:
                     return select_action['value']
         except KeyError:
             return None
