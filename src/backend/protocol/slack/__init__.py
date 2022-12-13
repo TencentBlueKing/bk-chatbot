@@ -133,7 +133,7 @@ class Bot(BaseBot, SlackProxy):
     async def handle_event(self, ctx: Context_T):
         if ctx['msg_type'] == 'interactive_message':
             if ctx['callback_id'] == 'bk_chat_welcome|bk_cc_biz_select':
-                select_id = ctx['actions'][0]['select_options'][0]['value']
+                select_id = ctx['actions'][0]['selected_options'][0]['value']
                 attachments = ctx['original_message']['attachments']
                 for option in attachments[0]['actions'][0]['options']:
                     if select_id == option['value']:
