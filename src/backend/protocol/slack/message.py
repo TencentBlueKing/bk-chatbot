@@ -205,26 +205,26 @@ class MessageTemplate(BaseMessageTemplate):
             } for task in data
         ]
 
-        logger.info(data)
-
         return {
             'text': f'*{platform}*',
-            'attachments': {
-                'title': title,
-                'text': desc,
-                'callback_id': submit_key,
-                'color': '3AA3E3',
-                'attachment_type': 'default',
-                'actions': [
-                    {
-                        "action_id": question_key,
-                        "name": "任务",
-                        "text": "请选择实例",
-                        "type": "select",
-                        "options": data
-                    }
-                ]
-            }
+            'attachments': [
+                {
+                    'title': title,
+                    'text': desc,
+                    'callback_id': submit_key,
+                    'color': '3AA3E3',
+                    'attachment_type': 'default',
+                    'actions': [
+                        {
+                            "action_id": question_key,
+                            "name": "任务",
+                            "text": "请选择实例",
+                            "type": "select",
+                            "options": data
+                        }
+                    ]
+                }
+            ]
         }
 
     @classmethod
