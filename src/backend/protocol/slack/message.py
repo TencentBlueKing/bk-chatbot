@@ -248,25 +248,25 @@ class MessageTemplate(BaseMessageTemplate):
                 "name": "operation",
                 "text": "执行",
                 "type": "button",
-                "value": f'{execute_key}|{json.dumps(data)}'
+                "value": execute_key
             },
             {
                 "name": "operation",
                 "text": "修改",
                 "type": "button",
-                "value": f'{update_key}|{json.dumps(data)}'
+                "value": update_key
             },
             {
                 "name": "operation",
                 "text": "取消",
                 "type": "button",
-                "value": f'{cancel_key}|{task_name}'
+                "value": cancel_key
             },
             {
                 "name": "operation",
                 "text": "快捷键",
                 "type": "button",
-                "value": f"bk_shortcut_create|{json.dumps(data)}"
+                "value": 'bk_shortcut_create'
             }
         ]
 
@@ -295,6 +295,10 @@ class MessageTemplate(BaseMessageTemplate):
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': attachment_actions
+                },
+                {
+                    'task_name': task_name,
+                    'data': data
                 }
             ]
         }
