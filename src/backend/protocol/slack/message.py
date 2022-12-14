@@ -291,6 +291,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'fields': fields
                 },
                 {
+                    'text': '',
                     'callback_id': 'bk_chat_task_select',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
