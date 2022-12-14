@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import json
 from typing import (
     Iterable, Tuple, Union, List, Dict, Optional,
     Callable
@@ -228,8 +229,75 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
-    def render_task_select_msg(cls):
-        pass
+    def render_task_select_msg(cls,
+                               platform: str,
+                               title: str,
+                               params: List,
+                               execute_key: str,
+                               update_key: str,
+                               cancel_key: str,
+                               data: Dict,
+                               task_name: str,
+                               action=['执行', '修改', '取消', '快捷键'],
+                               **kwargs) -> Dict:
+        if isinstance(data, dict):
+            data.update({'platform': platform})
+
+        button_list = [
+            {
+                "name": "operation",
+                "text": "执行",
+                "type": "button",
+                "value": f'{execute_key}|{json.dumps(data)}'
+            },
+            {
+                "name": "operation",
+                "text": "修改",
+                "type": "button",
+                "value": f'{update_key}|{json.dumps(data)}'
+            },
+            {
+                "name": "operation",
+                "text": "取消",
+                "type": "button",
+                "value": f'{cancel_key}|{task_name}'
+            },
+            {
+                "name": "operation",
+                "text": "快捷键",
+                "type": "button",
+                "value": f"bk_shortcut_create|{json.dumps(data)}"
+            }
+        ]
+
+        attachment_actions = [item for item in button_list if item['text'] in action]
+
+        fields = [{
+            'title': item['keyname'],
+            'value': item['value'],
+            'short': False
+        } for item in params]
+
+        return {
+            'text': f'*{platform}*',
+            'attachments': [
+                {
+                    'title': title,
+                    'color': '3AA3E3'
+                },
+                {
+                    'text': '参数确认',
+                    'color': '3AA3E3',
+                    'fields': fields
+                },
+                {
+                    'callback_id': 'bk_chat_task_select',
+                    'color': '3AA3E3',
+                    'attachment_type': 'default',
+                    'actions': attachment_actions
+                }
+            ]
+        }
 
     @classmethod
     def render_task_execute_msg(cls):

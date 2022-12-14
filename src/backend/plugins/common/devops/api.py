@@ -105,7 +105,7 @@ class DevOpsTask(GenericTask):
             'start_infos': start_infos
         }
 
-        return self._session.bot.send_template_msg('render_task_select_msg', 'DevOps',
+        return self._session.bot.send_template_msg('render_task_select_msg', 'CI',
                                                    f'蓝盾流水线_{bk_devops_pipeline_name}', start_infos,
                                                    'bk_devops_pipeline_execute', 'bk_devops_pipeline_update',
                                                    'bk_devops_pipeline_cancel', info, bk_devops_pipeline_name)
