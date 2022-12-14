@@ -23,6 +23,7 @@ from opsbot.adapter import (
     MessageTemplate as BaseMessageTemplate
 )
 from opsbot.stdlib import escape, unescape
+from opsbot.log import logger
 
 
 class MessageSegment(BaseMessageSegment):
@@ -204,6 +205,8 @@ class MessageTemplate(BaseMessageTemplate):
             } for task in data
         ]
 
+        logger.info(data)
+
         return {
             'text': f'*{platform}*',
             'attachments': {
@@ -215,7 +218,7 @@ class MessageTemplate(BaseMessageTemplate):
                 'actions': [
                     {
                         "action_id": question_key,
-                        "name": "业务",
+                        "name": "任务",
                         "text": "请选择实例",
                         "type": "select",
                         "options": data
