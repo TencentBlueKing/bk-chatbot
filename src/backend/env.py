@@ -173,6 +173,7 @@ class BotDockerFile(DockerFile):
     def generate(self, cmdline_args: argparse.ArgumentParser):
         flow = self.from_env(cmdline_args.base)
         flow += self.work_dir(cmdline_args.work_dir)
+        flow += f'{self.env(lang="en_US.UTF-8")}\n'
         flow += f'{self.env(product=cmdline_args.product)}\n'
         flow += f'{self.env(id=cmdline_args.id)}\n'
         flow += f'{self.env(host=cmdline_args.host)}\n'

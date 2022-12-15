@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
 from typing import (
     Iterable, Tuple, Union, List, Dict, Optional,
     Callable
@@ -24,7 +23,7 @@ from opsbot.adapter import (
     MessageTemplate as BaseMessageTemplate
 )
 from opsbot.stdlib import escape, unescape
-from opsbot.log import logger
+from i18n import _
 
 
 class MessageSegment(BaseMessageSegment):
@@ -104,14 +103,14 @@ class MessageTemplate(BaseMessageTemplate):
             'text': '*BKCHAT*',
             'attachments': [
                 {
-                    'title': '欢迎使用蓝鲸信息流',
+                    'title': _('欢迎使用蓝鲸信息流'),
                     'callback_id': 'bk_chat_welcome|bk_cc_biz_select',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': [
                         {
-                            "name": "业务",
-                            "text": "请选择业务",
+                            "name": _("业务"),
+                            "text": _("请选择业务"),
                             "type": "select",
                             'selected_options': [
                                 {
@@ -124,7 +123,7 @@ class MessageTemplate(BaseMessageTemplate):
                     ]
                 },
                 {
-                    'text': '请选择应用',
+                    'text': _('请选择应用'),
                     'color': '3AA3E3',
                     'callback_id': 'bk_chat_welcome|bk_chat_select_app',
                     'actions': [
@@ -248,7 +247,13 @@ class MessageTemplate(BaseMessageTemplate):
                 "name": "operation",
                 "text": "执行",
                 "type": "button",
-                "value": execute_key
+                "value": execute_key,
+                "confirm": {
+                    "title": "提示",
+                    "text": "确认要执行该任务吗",
+                    "ok_text": "是",
+                    "dismiss_text": "否"
+                }
             },
             {
                 "name": "operation",
