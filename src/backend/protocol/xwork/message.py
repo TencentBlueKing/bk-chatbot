@@ -377,7 +377,10 @@ class MessageTemplate(BaseMessageTemplate):
             template['card_type'] = 'text_notice'
             template['main_title']['desc'] = '未找到对应任务'
             template['card_action'] = {'type': 1, 'url': bk_paas_domain}
-            return template
+            return {
+                'msgtype': 'template_card',
+                'template_card': template
+            }
 
         if bk_app_task['bk_job']:
             option_list = [

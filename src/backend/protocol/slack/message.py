@@ -167,14 +167,14 @@ class MessageTemplate(BaseMessageTemplate):
             'text': '*BKCHAT*',
             'attachments': [
                 {
-                    'title': '业务绑定',
+                    'title': _('业务绑定'),
                     'callback_id': 'bk_cc_biz_select',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': [
                         {
-                            "name": "业务",
-                            "text": "请选择业务",
+                            "name": _("业务"),
+                            "text": _("请选择业务"),
                             "type": "select",
                             "options": data
                         }
@@ -209,16 +209,16 @@ class MessageTemplate(BaseMessageTemplate):
             'text': f'*{platform}*',
             'attachments': [
                 {
-                    'title': title,
-                    'text': desc,
+                    'title': _(title),
+                    'text': _(desc),
                     'callback_id': submit_key,
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': [
                         {
                             "action_id": question_key,
-                            "name": "任务",
-                            "text": "请选择实例",
+                            "name": _("任务"),
+                            "text": _("请选择实例"),
                             "type": "select",
                             "options": data
                         }
@@ -237,7 +237,7 @@ class MessageTemplate(BaseMessageTemplate):
                                cancel_key: str,
                                data: Dict,
                                task_name: str,
-                               action=['执行', '修改', '取消', '快捷键'],
+                               action=[_('执行'), _('修改'), _('取消'), _('快捷键')],
                                **kwargs) -> Dict:
         if isinstance(data, dict):
             data.update({'platform': platform})
@@ -249,27 +249,27 @@ class MessageTemplate(BaseMessageTemplate):
                 "type": "button",
                 "value": execute_key,
                 "confirm": {
-                    "title": "提示",
-                    "text": "确认要执行该任务吗",
-                    "ok_text": "是",
-                    "dismiss_text": "否"
+                    "title": _("提示"),
+                    "text": _("确认要执行该任务吗"),
+                    "ok_text": _("是"),
+                    "dismiss_text": _("否")
                 }
             },
             {
                 "name": "operation",
-                "text": "修改",
+                "text": _("修改"),
                 "type": "button",
                 "value": update_key
             },
             {
                 "name": "operation",
-                "text": "取消",
+                "text": _("取消"),
                 "type": "button",
                 "value": cancel_key
             },
             {
                 "name": "operation",
-                "text": "快捷键",
+                "text": _("快捷键"),
                 "type": "button",
                 "value": 'bk_shortcut_create'
             }
@@ -291,7 +291,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'color': '3AA3E3'
                 },
                 {
-                    'text': '参数确认',
+                    'text': _('参数确认'),
                     'color': '3AA3E3',
                     'fields': fields
                 },
@@ -310,12 +310,88 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
-    def render_task_execute_msg(cls):
-        pass
+    def render_task_execute_msg(cls,
+                                platform: str,
+                                task_name: str,
+                                task_result: bool,
+                                params: List,
+                                task_domain: str):
+        fields = [{
+            'title': item['keyname'],
+            'value': item['value'],
+            'short': False
+        } for item in params]
+
+        return {
+            'text': f'*{platform}*',
+            'attachments': [
+                {
+                    'title':  _(f'{task_name}启动成功' if task_result else f'{task_name}启动失败'),
+                    'color': '3AA3E3'
+                },
+                {
+                    'text': _('参数'),
+                    'color': '3AA3E3',
+                    'fields': fields
+                }
+            ]
+        }
 
     @classmethod
-    def render_task_filter_msg(cls):
-        pass
+    def render_task_filter_msg(cls, bk_app_task: Dict[str, List], bk_paas_domain: str):
+        msg = {
+            'text': '*BKCHAT*',
+            'attachments': [
+                {
+                    'title': _('任务查询结果'),
+                    'color': '3AA3E3'
+                }
+            ]
+        }
+
+        data = []
+        if bk_app_task['bk_job']:
+            data.extend([
+                {'value': f'bk_job|{str(job_plan["id"])}', 'text': f'JOB {job_plan["name"]}'}
+                for job_plan in bk_app_task['bk_job']
+            ])
+
+        if bk_app_task['bk_sops']:
+            data.extend.extend([
+                {'value': f'bk_sops|{str(template["id"])}', 'text': f'SOPS {template["name"]}'}
+                for template in bk_app_task['bk_sops']
+            ])
+
+        if any(bk_app_task.values()):
+            msg['attachments'].append({
+                'text': '',
+                'callback_id': 'bk_app_task_filter|bk_app_task_select',
+                'color': '3AA3E3',
+                'attachment_type': 'default',
+                'actions': [
+                    {
+                        "type": "select",
+                        "options": data
+                    }
+                ]
+            })
+        else:
+            msg['attachments'].append({
+                'text': _('未找到对应任务'),
+                'color': '3AA3E3',
+                'actions': [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": _("平台")
+                        },
+                        "url": bk_paas_domain
+                    }
+                ]
+            })
+
+        return msg
 
 
 class MessageParser:
