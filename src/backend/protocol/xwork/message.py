@@ -393,7 +393,10 @@ class MessageTemplate(BaseMessageTemplate):
             ]
             template['checkbox']['option_list'].extend(option_list)
 
-        return template
+        return {
+            'msgtype': 'template_card',
+            'template_card': template
+        }
 
 
 class MessageParser:
