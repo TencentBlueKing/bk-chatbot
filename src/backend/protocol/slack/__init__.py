@@ -149,7 +149,7 @@ class Bot(BaseBot, SlackProxy):
                                        ts=ctx['message_ts'],
                                        attachments=attachments)
                 return
-            elif ctx['callback_id'] == 'bk_chat_welcome|bk_chat_select_app':
+            elif ctx['callback_id'] == 'bk_chat_welcome|bk_chat_app_select':
                 select_id = ctx['actions'][0]['value']
                 attachments = ctx['original_message']['attachments']
                 ctx['actions'][0] = {
@@ -157,7 +157,7 @@ class Bot(BaseBot, SlackProxy):
                     'selected_options': attachments[0]['actions'][0]['selected_options']
                 }
                 ctx['message'] = self._message_class(select_id)
-            elif ctx['callback_id'] == 'bk_chat_task_select':
+            elif ctx['callback_id'] == 'bk_chat_select_task|bk_task_option_select':
                 pass
         ctx['to_me'] = True
         await self.handle_message(ctx)

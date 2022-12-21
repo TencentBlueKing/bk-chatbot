@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import json
 from typing import (
     Iterable, Tuple, Union, List, Dict, Optional,
     Callable
@@ -125,7 +126,7 @@ class MessageTemplate(BaseMessageTemplate):
                 {
                     'text': _('请选择应用'),
                     'color': '3AA3E3',
-                    'callback_id': 'bk_chat_welcome|bk_chat_select_app',
+                    'callback_id': 'bk_chat_welcome|bk_chat_app_select',
                     'actions': [
                         {
                             "name": "task",
@@ -247,7 +248,7 @@ class MessageTemplate(BaseMessageTemplate):
                 "name": "operation",
                 "text": "执行",
                 "type": "button",
-                "value": execute_key,
+                "value": f"{execute_key}|{json.dumps(data)}",
                 "confirm": {
                     "title": _("提示"),
                     "text": _("确认要执行该任务吗"),
@@ -259,19 +260,19 @@ class MessageTemplate(BaseMessageTemplate):
                 "name": "operation",
                 "text": _("修改"),
                 "type": "button",
-                "value": update_key
+                "value": f"{update_key}|{json.dumps(data)}"
             },
             {
                 "name": "operation",
                 "text": _("取消"),
                 "type": "button",
-                "value": cancel_key
+                "value": f"{cancel_key}|{task_name}"
             },
             {
                 "name": "operation",
                 "text": _("快捷键"),
                 "type": "button",
-                "value": 'bk_shortcut_create'
+                "value": f"bk_shortcut_create|{json.dumps(data)}"
             }
         ]
 
@@ -297,14 +298,10 @@ class MessageTemplate(BaseMessageTemplate):
                 },
                 {
                     'text': '',
-                    'callback_id': 'bk_chat_task_select',
+                    'callback_id': 'bk_chat_select_task|bk_task_option_select',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': attachment_actions
-                },
-                {
-                    'task_name': task_name,
-                    'data': data
                 }
             ]
         }
