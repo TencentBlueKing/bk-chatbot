@@ -32,6 +32,7 @@ from .proxy import Proxy as SlackProxy
 from .message import (
     Message, MessageSegment, MessageTemplate, MessageParser
 )
+from .custom import SlackEventHandler
 from . import config as SlackConfig
 
 _message_preprocessors = set()
@@ -131,34 +132,13 @@ class Bot(BaseBot, SlackProxy):
             return
 
     async def handle_event(self, ctx: Context_T):
-        # todo add event handler toolbar
         if ctx['msg_type'] == 'interactive_message':
-            if ctx['callback_id'] == 'bk_chat_welcome|bk_cc_biz_select':
-                select_id = ctx['actions'][0]['selected_options'][0]['value']
-                attachments = ctx['original_message']['attachments']
-                for option in attachments[0]['actions'][0]['options']:
-                    if select_id == option['value']:
-                        attachments[0]['actions'][0]['selected_options'] = [
-                            {
-                                'value': select_id,
-                                'text': option['text']
-                            }
-                        ]
-                await self.call_action('chat_update',
-                                       channel=ctx['msg_group_id'],
-                                       ts=ctx['message_ts'],
-                                       attachments=attachments)
+            bar = SlackEventHandler(self, ctx)
+            result = await bar.run()
+            if result is None:
                 return
-            elif ctx['callback_id'] == 'bk_chat_welcome|bk_chat_app_select':
-                select_id = ctx['actions'][0]['value']
-                attachments = ctx['original_message']['attachments']
-                ctx['actions'][0] = {
-                    'type': 'select',
-                    'selected_options': attachments[0]['actions'][0]['selected_options']
-                }
-                ctx['message'] = self._message_class(select_id)
-            elif ctx['callback_id'] == 'bk_chat_select_task|bk_task_option_select':
-                pass
+            ctx['message'] = self._message_class(result)
+
         ctx['to_me'] = True
         await self.handle_message(ctx)
 

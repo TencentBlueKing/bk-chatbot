@@ -298,7 +298,7 @@ class MessageTemplate(BaseMessageTemplate):
                 },
                 {
                     'text': '',
-                    'callback_id': 'bk_chat_select_task|bk_task_option_select',
+                    'callback_id': 'bk_chat_select_task|bk_task_action_select',
                     'color': '3AA3E3',
                     'attachment_type': 'default',
                     'actions': attachment_actions
@@ -403,3 +403,13 @@ class MessageParser:
                     return action['value']
         except KeyError:
             return None
+
+    @classmethod
+    def parse_interaction(cls, ctx: Dict) -> Optional[Dict]:
+        if 'callback_data' in ctx:
+            data = ctx['callback_data']
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                return data
+        return None

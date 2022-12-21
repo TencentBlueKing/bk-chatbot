@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 import sys
 import types
-from typing import Optional, Callable, Union
+from typing import Optional, Callable, Union, Coroutine
 
 from .proxy.bus import EventBus
 from .adapter import Bot
@@ -97,7 +97,7 @@ class EventHandler:
             for event in event_names:
                 self.register_event(str(event))  # cast as str to be safe
 
-        print(f'{self.__str__()} has been init.', file=self.stream_output) if self.verbose else None
+        logger.info(f'{self.__str__()} has been init.', file=self.stream_output) if self.verbose else None
 
     @property
     def events(self) -> dict:
@@ -111,7 +111,7 @@ class EventHandler:
 
     @property
     def event_list(self) -> [str]:
-        """Retun  list of regitered events."""
+        """Return list of register events."""
         return self.__events.keys()
 
     @property
@@ -133,10 +133,9 @@ class EventHandler:
         Args:
             event_name (str): Event name as string.
         """
-        # print('registering event', event_name, self.events)
         if self.is_event_registered(event_name):
-            print(f'Omiting event {event_name} registration, already implemented',
-                  file=self.stream_output) if self.verbose else None
+            logger.info(f'Omiting event {event_name} registration, already implemented',
+                        file=self.stream_output) if self.verbose else None
             return False
 
         self.__events[event_name] = []
@@ -151,8 +150,8 @@ class EventHandler:
         if event_name in self.__events:
             del self.__events[event_name]
             return True
-        print(f'Omiting unregister_event. {event_name} '
-              f'is not implemented.', file=self.stream_output) if self.verbose else None
+        logger.info(f'Omiting unregister_event. {event_name} '
+                    f'is not implemented.', file=self.stream_output) if self.verbose else None
         return False
 
     @staticmethod
@@ -183,8 +182,8 @@ class EventHandler:
         """
 
         if not self.is_callable(callback):
-            print(f'Callback not registered. Type {type(callback)} '
-                  f'is not a callable function.', file=self.stream_output) if self.verbose else None
+            logger.info(f'Callback not registered. Type {type(callback)} '
+                        f'is not a callable function.', file=self.stream_output) if self.verbose else None
             return False
 
         if not self.is_event_registered(event_name):
@@ -196,8 +195,8 @@ class EventHandler:
             self.__events[event_name].append(callback)
             return True
 
-        print(f'Can not link callback {str(callback.__name__)}, already registered in '
-              f'{event_name} event.', file=self.stream_output) if self.verbose else None
+        logger.info(f'Can not link callback {str(callback.__name__)}, already registered in '
+                    f'{event_name} event.', file=self.stream_output) if self.verbose else None
         return False
 
     def unlink(self, callback: callable, event_name: str) -> bool:
@@ -208,21 +207,21 @@ class EventHandler:
             event_name (str): The event that will trigger the callback execution.
         """
         if not self.is_event_registered(event_name):
-            print(f'Can not unlink event {event_name}, not registered. Registered events '
-                  f'are: {", ".join(self.__events.keys())}. '
-                  f'Please register event {event_name} before unlink callbacks.', file=self.stream_output)
+            logger.info(f'Can not unlink event {event_name}, not registered. Registered events '
+                        f'are: {", ".join(self.__events.keys())}. '
+                        f'Please register event {event_name} before unlink callbacks.', file=self.stream_output)
             return False
 
         if callback in self.__events[event_name]:
             self.__events[event_name].remove(callback)
             return True
 
-        print(f'Can not unlink callback {str(callback.__name__)}, is not registered in '
-              f'{event_name} event.', file=self.stream_output) if self.verbose else None
+        logger.info(f'Can not unlink callback {str(callback.__name__)}, is not registered in '
+                    f'{event_name} event.', file=self.stream_output) if self.verbose else None
 
         return False
 
-    def fire(self, event_name: str, *args, **kwargs) -> bool:
+    async def fire(self, event_name: str, *args, **kwargs) -> bool:
         """Triggers all callbacks executions linked to given event.
 
         Args:
@@ -232,17 +231,21 @@ class EventHandler:
         """
         all_ok = True
         for callback in self.__events[event_name]:
+            if not callable(callback):
+                continue
             try:
-                callable(callback(*args, **kwargs))
+                result = callback(*args, **kwargs)
+                if isinstance(result, Coroutine):
+                    await result
             except Exception as e:
                 if not self.tolerate_exceptions:
                     raise e
                 else:
                     if self.verbose:
-                        print(f'WARNING: {str(callback.__name__)} produces an exception error.',
-                              file=self.stream_output)
-                        print('Arguments', args, file=self.stream_output)
-                        print(e, file=self.stream_output)
+                        logger.info(f'WARNING: {str(callback.__name__)} produces an exception error.',
+                                    file=self.stream_output)
+                        logger.info('Arguments', args, file=self.stream_output)
+                        logger.info(e, file=self.stream_output)
                     all_ok = False
                     continue
 

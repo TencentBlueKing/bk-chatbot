@@ -13,6 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+from typing import Optional
+
 from opsbot.adapter import Bot
 from opsbot.event import EventHandler
 from opsbot.self_typing import Context_T
@@ -32,7 +34,7 @@ class SlackEventHandler:
         # register
         self.event_handler.link(self._handle_biz_select, 'bk_chat_welcome|bk_cc_biz_select')
         self.event_handler.link(self._handle_app_select, 'bk_chat_welcome|bk_chat_app_select')
-        self.event_handler.link(self._handle_option_select, 'bk_chat_select_task|bk_task_option_select')
+        self.event_handler.link(self._handle_action_select, 'bk_chat_select_task|bk_task_action_select')
 
     async def _handle_biz_select(self):
         select_id = self.ctx['actions'][0]['selected_options'][0]['value']
@@ -49,18 +51,28 @@ class SlackEventHandler:
                                    channel=self.ctx['msg_group_id'],
                                    ts=self.ctx['message_ts'],
                                    attachments=attachments)
-        return True
+        return
 
-    def _handle_app_select(self):
+    def _handle_app_select(self) -> str:
         select_id = self.ctx['actions'][0]['value']
         attachments = self.ctx['original_message']['attachments']
         self.ctx['actions'][0] = {
             'type': 'select',
             'selected_options': attachments[0]['actions'][0]['selected_options']
         }
-        self.ctx['message'] = self.bot._message_class(select_id)
-        return False
+        return select_id
 
-    def _handle_option_select(self):
+    def _handle_action_select(self) -> str:
         select_id = self.ctx['actions'][0]['value']
-        return False
+        try:
+            cmd_id, data = select_id.split('|')
+        except ValueError:
+            return
+        self.ctx['callback_data'] = data
+        return cmd_id
+
+    async def run(self) -> Optional[str]:
+        try:
+            return await self.event_handler.fire(self.ctx['callback_id'])
+        except KeyError:
+            return
