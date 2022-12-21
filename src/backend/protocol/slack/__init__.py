@@ -131,6 +131,7 @@ class Bot(BaseBot, SlackProxy):
             return
 
     async def handle_event(self, ctx: Context_T):
+        # todo add event handler toolbar
         if ctx['msg_type'] == 'interactive_message':
             if ctx['callback_id'] == 'bk_chat_welcome|bk_cc_biz_select':
                 select_id = ctx['actions'][0]['selected_options'][0]['value']
@@ -156,6 +157,8 @@ class Bot(BaseBot, SlackProxy):
                     'selected_options': attachments[0]['actions'][0]['selected_options']
                 }
                 ctx['message'] = self._message_class(select_id)
+            elif ctx['callback_id'] == 'bk_chat_task_select':
+                pass
         ctx['to_me'] = True
         await self.handle_message(ctx)
 
