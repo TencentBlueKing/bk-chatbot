@@ -24,7 +24,7 @@ class SlackEventHandler:
     event = [
         'bk_chat_welcome|bk_cc_biz_select',
         'bk_chat_welcome|bk_chat_app_select',
-        'bk_chat_select_task|bk_task_option_select'
+        'bk_chat_select_task|bk_task_action_select'
     ]
 
     def __init__(self, bot: Bot, ctx: Context_T):
