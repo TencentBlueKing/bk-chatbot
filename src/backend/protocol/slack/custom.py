@@ -69,7 +69,7 @@ class SlackEventHandler:
             cmd_id, data = select_id.split('|')
         except ValueError:
             raise InterceptException(f'select_id parse error: {select_id}')
-        self.ctx['callback_data'] = data
+        self.ctx['callback_data'] = data.replace('+', '')
         return cmd_id
 
     async def run(self) -> Optional[str]:
