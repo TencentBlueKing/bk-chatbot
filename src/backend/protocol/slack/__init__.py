@@ -33,6 +33,7 @@ from .message import (
     Message, MessageSegment, MessageTemplate, MessageParser
 )
 from .custom import SlackEventHandler
+from .exceptions import InterceptException
 from . import config as SlackConfig
 
 _message_preprocessors = set()
@@ -133,11 +134,14 @@ class Bot(BaseBot, SlackProxy):
 
     async def handle_event(self, ctx: Context_T):
         if ctx['msg_type'] == 'interactive_message':
-            bar = SlackEventHandler(self, ctx)
-            result = await bar.run()
-            if result is None:
+            try:
+                bar = SlackEventHandler(self, ctx)
+                result = await bar.run()
+            except InterceptException:
                 return
-            ctx['message'] = self._message_class(result)
+
+            if result is not None:
+                ctx['message'] = self._message_class(result)
 
         ctx['to_me'] = True
         await self.handle_message(ctx)

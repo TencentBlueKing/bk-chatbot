@@ -18,6 +18,7 @@ from typing import Optional
 from opsbot.adapter import Bot
 from opsbot.event import EventHandler
 from opsbot.self_typing import Context_T
+from .exceptions import InterceptException
 
 
 class SlackEventHandler:
@@ -51,7 +52,7 @@ class SlackEventHandler:
                                    channel=self.ctx['msg_group_id'],
                                    ts=self.ctx['message_ts'],
                                    attachments=attachments)
-        return None
+        raise InterceptException('no response')
 
     def _handle_app_select(self) -> str:
         select_id = self.ctx['actions'][0]['value']
@@ -67,7 +68,7 @@ class SlackEventHandler:
         try:
             cmd_id, data = select_id.split('|')
         except ValueError:
-            return None
+            raise InterceptException(f'select_id parse error: {select_id}')
         self.ctx['callback_data'] = data
         return cmd_id
 
