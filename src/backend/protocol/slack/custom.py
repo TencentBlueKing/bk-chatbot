@@ -18,7 +18,6 @@ from typing import Optional
 from opsbot.adapter import Bot
 from opsbot.event import EventHandler
 from opsbot.self_typing import Context_T
-from opsbot.log import logger
 from .exceptions import InterceptException
 
 
@@ -70,7 +69,6 @@ class SlackEventHandler:
             cmd_id, data = select_id.split('|')
         except ValueError:
             raise InterceptException(f'select_id parse error: {select_id}')
-        logger.debug(data)
         self.ctx['callback_data'] = data
         return cmd_id
 

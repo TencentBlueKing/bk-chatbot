@@ -406,10 +406,13 @@ class MessageParser:
 
     @classmethod
     def parse_interaction(cls, ctx: Dict) -> Optional[Dict]:
+        from opsbot.log import logger
+        logger.debug(ctx)
         if 'callback_data' in ctx:
             data = ctx['callback_data']
             try:
                 return json.loads(data)
             except json.JSONDecodeError:
+                logger.debug('parse_interaction parse error')
                 return data
         return None
