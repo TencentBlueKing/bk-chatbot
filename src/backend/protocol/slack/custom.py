@@ -51,7 +51,7 @@ class SlackEventHandler:
                                    channel=self.ctx['msg_group_id'],
                                    ts=self.ctx['message_ts'],
                                    attachments=attachments)
-        return
+        return None
 
     def _handle_app_select(self) -> str:
         select_id = self.ctx['actions'][0]['value']
@@ -67,12 +67,13 @@ class SlackEventHandler:
         try:
             cmd_id, data = select_id.split('|')
         except ValueError:
-            return
+            return None
         self.ctx['callback_data'] = data
         return cmd_id
 
     async def run(self) -> Optional[str]:
         try:
-            return await self.event_handler.fire(self.ctx['callback_id'])
-        except KeyError:
-            return
+            results = await self.event_handler.fire(self.ctx['callback_id'])
+            return results[0]
+        except (KeyError, IndexError):
+            return None

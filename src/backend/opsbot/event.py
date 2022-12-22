@@ -15,7 +15,9 @@ specific language governing permissions and limitations under the License.
 
 import sys
 import types
-from typing import Optional, Callable, Union, Coroutine
+from typing import (
+    Optional, Callable, Union, Coroutine, List
+)
 
 from .proxy.bus import EventBus
 from .adapter import Bot
@@ -221,7 +223,7 @@ class EventHandler:
 
         return False
 
-    async def fire(self, event_name: str, *args, **kwargs) -> bool:
+    async def fire(self, event_name: str, *args, **kwargs) -> List:
         """Triggers all callbacks executions linked to given event.
 
         Args:
@@ -229,14 +231,16 @@ class EventHandler:
             *args: Arguments to be passed to callback functions execution.
             *kwargs: Keyword arguments to be passed to callback functions execution.
         """
-        all_ok = True
+        results = []
         for callback in self.__events[event_name]:
             if not callable(callback):
+                results.append(None)
                 continue
             try:
                 result = callback(*args, **kwargs)
                 if isinstance(result, Coroutine):
-                    await result
+                    result = await result
+                results.append(result)
             except Exception as e:
                 if not self.tolerate_exceptions:
                     raise e
@@ -246,10 +250,10 @@ class EventHandler:
                                     file=self.stream_output)
                         logger.info('Arguments', args, file=self.stream_output)
                         logger.info(e, file=self.stream_output)
-                    all_ok = False
+                    results.append(None)
                     continue
 
-        return all_ok
+        return results
 
     def __str__(self) -> str:
         """Return a string representation."""
