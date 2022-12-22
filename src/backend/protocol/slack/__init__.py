@@ -139,7 +139,7 @@ class Bot(BaseBot, SlackProxy):
                 result = await bar.run()
             except InterceptException:
                 return
-
+            logger.debug(result)
             if result is not None:
                 ctx['message'] = self._message_class(result)
 
