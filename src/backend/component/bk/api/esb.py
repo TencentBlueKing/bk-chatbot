@@ -40,7 +40,7 @@ class JOB:
     """
 
     def __init__(self, bk_job_api: BKApi):
-        self.bk_cc_api = bk_job_api
+        self.bk_job_api = bk_job_api
 
     async def execute_job_plan(self, **params) -> Any:
         """
@@ -51,14 +51,14 @@ class JOB:
         bk_supplier_account
         bk_username
         """
-        return await self.bk_cc_api.call_action('execute_job_plan/', 'POST', json=params)
+        return await self.bk_job_api.call_action('execute_job_plan/', 'POST', json=params)
 
     async def get_job_plan_list(self, **params) -> Any:
         """
         -params:
         bk_biz_id long
         """
-        return await self.bk_cc_api.call_action('get_job_plan_list/', 'GET', params=params)
+        return await self.bk_job_api.call_action('get_job_plan_list/', 'GET', params=params)
 
     async def get_job_plan_detail(self, **params) -> Any:
         """
@@ -66,7 +66,7 @@ class JOB:
         bk_biz_id long
         job_plan_id long
         """
-        return await self.bk_cc_api.call_action('get_job_plan_detail/', 'GET', params=params)
+        return await self.bk_job_api.call_action('get_job_plan_detail/', 'GET', params=params)
 
 
 class SOPS:
