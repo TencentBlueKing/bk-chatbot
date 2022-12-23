@@ -367,6 +367,8 @@ class MessageTemplate(BaseMessageTemplate):
                 'attachment_type': 'default',
                 'actions': [
                     {
+                        "name": "",
+                        "text": "",
                         "type": "select",
                         "options": data
                     }
