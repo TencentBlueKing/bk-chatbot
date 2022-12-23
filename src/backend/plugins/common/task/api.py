@@ -50,8 +50,6 @@ class AppTask(GenericTask):
         self._sops = self._bk_cloud.bk_service.sops
 
     async def _get_app_task(self, task_name: str) -> Dict:
-        time.sleep(0.5)
-        logger.info(f'task filter: {self.biz_id}')
         bk_job_plans = await self._job.get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                          length=10, name=task_name)
         bk_sops_templates = await self._sops.get_template_list(self.biz_id, bk_username=self.user_id,
