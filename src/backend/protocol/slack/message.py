@@ -354,7 +354,7 @@ class MessageTemplate(BaseMessageTemplate):
             ])
 
         if bk_app_task['bk_sops']:
-            data.extend.extend([
+            data.extend([
                 {'value': f'bk_sops|{str(template["id"])}', 'text': f'SOPS {template["name"]}'}
                 for template in bk_app_task['bk_sops']
             ])
