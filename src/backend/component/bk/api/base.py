@@ -79,8 +79,6 @@ class BKApi(Api):
             raise TokenNotAvailable
 
         url = f"{self._api_root}/{action}?{self._access_token}"
-        logger.info(url)
-        logger.info(params)
         if method == 'POST':
             params['json']['bk_app_code'] = self.app_id
             params['json']['bk_app_secret'] = self.app_secret
