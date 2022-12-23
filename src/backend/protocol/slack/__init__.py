@@ -81,13 +81,6 @@ class Bot(BaseBot, SlackProxy):
         return bool(permission & permission_required)
 
     async def check_permission(self, ctx: Context_T, permission_required: int) -> bool:
-        if self.config.IS_USE_SESSION_WHITELIST:
-            if ctx['msg_sender_code'] not in self.protocol_config['USER_WHITE_MAP']:
-                return False
-            else:
-                ctx['msg_sender_id'] = \
-                    self.protocol_config['USER_WHITE_MAP'][ctx['msg_sender_code']]
-
         min_ctx_kwargs = {}
         for field in _min_context_fields:
             if field in ctx:
@@ -97,8 +90,19 @@ class Bot(BaseBot, SlackProxy):
         min_ctx = _MinContext(**min_ctx_kwargs)
         return await self._check(min_ctx, permission_required)
 
+    def check_whitelist(self, ctx: Context_T) -> bool:
+        if self.config.IS_USE_SESSION_WHITELIST:
+            if ctx['msg_sender_code'] not in self.protocol_config['USER_WHITE_MAP']:
+                return False
+            else:
+                ctx['msg_sender_id'] = \
+                    self.protocol_config['USER_WHITE_MAP'][ctx['msg_sender_code']]
+        return True
+
     async def handle_message(self, ctx: Context_T):
         log_message(ctx)
+        if not self.check_whitelist(ctx):
+            return
 
         if not ctx['message']:
             ctx['message'].append(MessageSegment.text(''))
