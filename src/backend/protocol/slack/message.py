@@ -110,7 +110,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'attachment_type': 'default',
                     'actions': [
                         {
-                            "name": _("业务"),
+                            "name": "biz",
                             "text": _("请选择业务"),
                             "type": "select",
                             'selected_options': [
@@ -174,7 +174,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'attachment_type': 'default',
                     'actions': [
                         {
-                            "name": _("业务"),
+                            "name": "biz",
                             "text": _("请选择业务"),
                             "type": "select",
                             "options": data
@@ -218,7 +218,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'actions': [
                         {
                             "action_id": question_key,
-                            "name": _("任务"),
+                            "name": "task",
                             "text": _("请选择实例"),
                             "type": "select",
                             "options": data
@@ -367,7 +367,7 @@ class MessageTemplate(BaseMessageTemplate):
                 'attachment_type': 'default',
                 'actions': [
                     {
-                        "name": "",
+                        "name": "task_filter_result_list",
                         "text": "",
                         "type": "select",
                         "options": data
