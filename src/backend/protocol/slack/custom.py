@@ -25,7 +25,8 @@ class SlackEventHandler:
     event = [
         'bk_chat_welcome|bk_cc_biz_select',
         'bk_chat_welcome|bk_chat_app_select',
-        'bk_chat_select_task|bk_task_action_select'
+        'bk_chat_select_task|bk_task_action_select',
+        'bk_app_task_filter|bk_app_task_select',
     ]
 
     def __init__(self, bot: Bot, ctx: Context_T):
@@ -36,6 +37,7 @@ class SlackEventHandler:
         self.event_handler.link(self._handle_biz_select, 'bk_chat_welcome|bk_cc_biz_select')
         self.event_handler.link(self._handle_app_select, 'bk_chat_welcome|bk_chat_app_select')
         self.event_handler.link(self._handle_action_select, 'bk_chat_select_task|bk_task_action_select')
+        self.event_handler.link(self._handle_filter_result_select, 'bk_app_task_filter|bk_app_task_select')
 
     async def _handle_biz_select(self):
         select_id = self.ctx['actions'][0]['selected_options'][0]['value']
@@ -70,6 +72,14 @@ class SlackEventHandler:
         except ValueError:
             raise InterceptException(f'select_id parse error: {select_id}')
         self.ctx['callback_data'] = data.replace('+', '')
+        return cmd_id
+
+    def _handle_filter_result_select(self) -> str:
+        select_id = self.ctx['actions'][0]['selected_options'][0]['value']
+        try:
+            cmd_id, data = select_id.split('|')
+        except ValueError:
+            raise InterceptException(f'select_id parse error: {select_id}')
         return cmd_id
 
     async def run(self) -> Optional[str]:
