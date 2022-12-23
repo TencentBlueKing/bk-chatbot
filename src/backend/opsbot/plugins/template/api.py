@@ -31,7 +31,7 @@ class GenericTask:
     def set_biz(self, redis_client: Optional):
         # todo adjust bk_env
         if redis_client:
-            if not self.biz_id:
+            if not self.biz_id or str(self.biz_id) == '-1':
                 bk_data = GenericTool.get_biz_data(self._session, redis_client)
                 self.biz_id = bk_data.get('biz_id')
             else:
