@@ -21,5 +21,5 @@ from ..devops import DevOpsTask
 SHORTCUT_PROTO = {
     'JOB': JobTask,
     'SOPS': SopsTask,
-    'DevOps': DevOpsTask
+    'CI': DevOpsTask
 }

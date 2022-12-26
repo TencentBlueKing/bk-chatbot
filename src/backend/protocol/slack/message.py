@@ -73,7 +73,7 @@ class MessageTemplate(BaseMessageTemplate):
     @classmethod
     def render_markdown_msg(cls, title: str, content: str) -> Dict:
         def normalize(text: str) -> str:
-            text = text.replace('<bold>', '')
+            text = text.replace('<bold>', '*')
             text = text.replace('<warning>', '`')
             text = text.replace('<info>', '')
             return text
