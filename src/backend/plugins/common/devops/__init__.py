@@ -62,7 +62,7 @@ async def _(session: CommandSession):
     bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
     flow = DevOpsTask(session)
     result = await flow.execute_task(bk_devops_pipeline)
-    msg_template = flow.render_devops_execute_msg(result, bk_devops_pipeline)
+    msg_template = flow.render_ci_execute_msg(result, bk_devops_pipeline)
     await session.send(**msg_template)
 
 
