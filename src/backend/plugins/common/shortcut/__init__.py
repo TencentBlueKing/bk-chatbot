@@ -13,8 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
-
 from opsbot import on_command, CommandSession
 from opsbot import on_natural_language, NLPSession, IntentCommand
 from .api import ShortcutHandler
