@@ -52,11 +52,3 @@ class Flow:
             return None
         GenericTool.set_biz_data(self._session, RedisClient(env="prod"), bk_biz_id)
         return bk_biz_id
-
-
-class Stat:
-    def __init__(self):
-        self.orm_client = OrmClient()
-
-    def stat_execution(self):
-        return self.orm_client.query(BKExecutionLog, 'count')

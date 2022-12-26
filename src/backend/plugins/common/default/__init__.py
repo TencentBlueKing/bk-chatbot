@@ -20,7 +20,7 @@ from opsbot import (
 from opsbot.log import logger
 from component import fetch_answer
 from plugins.common.task import Prediction as SelfPrediction
-from .api import Flow, Stat
+from .api import Flow
 from .settings import (
     DEFAULT_SHOW_GROUP_ID_ALIAS, DEFAULT_BIND_BIZ_ALIAS, DEFAULT_BIND_BIZ_TIP,
     DEFAULT_BIZ_BIND_SUCCESS, DEFAULT_BIZ_BIND_FAIL, DEFAULT_HELPER, DEFAULT_INTENT_CATEGORY
@@ -66,17 +66,6 @@ async def _(session: CommandSession):
 
     msg_template = await flow.render_welcome_msg()
     await session.send(**msg_template)
-
-
-@on_command('bk_chat_stat_execution', aliases=('执行统计', ))
-async def _(session: CommandSession):
-    stat = Stat()
-    count = stat.stat_execution()
-    title = '<bold>执行统计<bold>'
-    content = f'<warning>您当前执行数「{count}」<warning>'
-    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
-    await session.send(**msg_template)
-    del stat
 
 
 @on_command('bk_chat_search_knowledge')
