@@ -57,7 +57,11 @@ async def execute_bk_shortcut(session: CommandSession):
 @on_command('bk_shortcut_list', aliases=('查看快捷键', '快捷键'))
 async def list_bk_shortcut(session: CommandSession):
     msg_template = ShortcutHandler(session).render_shortcut_list()
-    msg_template and await session.send(**msg_template)
+    if not msg_template:
+        title = '<bold>BKCHAT TIP<bold>'
+        content = '你还没有创建快捷键'
+        msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
+    await session.send(**msg_template)
 
 
 @on_command('bk_shortcut_delete')
