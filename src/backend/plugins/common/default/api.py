@@ -14,9 +14,8 @@ specific language governing permissions and limitations under the License.
 """
 
 from opsbot import CommandSession
-from opsbot.models import BKExecutionLog
 from opsbot.plugins import GenericTool
-from component import RedisClient, OrmClient, BKCloud
+from component import RedisClient, BKCloud
 from .settings import DEFAULT_BIND_BIZ_TIP
 
 
