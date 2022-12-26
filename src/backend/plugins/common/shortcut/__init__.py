@@ -22,14 +22,14 @@ from .api import ShortcutHandler
 
 @on_command('bk_shortcut_create')
 async def create_bk_shortcut(session: CommandSession):
-    if 'event_key' in session.ctx:
-        info = session.bot.parse_action('parse_interaction', session.ctx)
+    info = session.bot.parse_action('parse_interaction', session.ctx)
+    if info is None:
+        platform = session.state['platform']
+        info = session.state['info']
+    else:
         platform = info.get('platform')
         session.state['platform'] = info.get('platform')
         session.state['info'] = info
-    else:
-        platform = session.state['platform']
-        info = session.state['info']
 
     title = f'<bold>{platform} TIP<bold>'
     content = '请输入快捷键名称，<bold>最少输入8个字符<bold>, 每个人每个业务最多10个快捷键'

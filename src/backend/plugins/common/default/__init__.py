@@ -35,9 +35,9 @@ async def _(session: CommandSession):
 
 @on_command('bk_chat_welcome', aliases=('help', '帮助', '小鲸', '1'))
 async def _(session: CommandSession):
-    if 'event_key' in session.ctx:
+    info = session.bot.parse_action('parse_interaction', session.ctx)
+    if info is not None:
         return
-
     msg_template = await Flow(session).render_welcome_msg()
     await session.send(**msg_template)
 
