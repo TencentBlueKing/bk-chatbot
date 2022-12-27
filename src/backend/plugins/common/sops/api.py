@@ -22,6 +22,12 @@ from opsbot.log import logger
 from opsbot.models import BKExecutionLog
 from opsbot.plugins import GenericTask
 from component import RedisClient, OrmClient, BKCloud
+from .settings import (
+    SOPS_WELCOME_TIP, SOPS_TEMPLATE_SELECT_TIP,
+    SOPS_TEMPLATE_PARAM_PLACEHOLDER, SOPS_TEMPLATE_COMMON_PREFIX,
+    SOPS_TEMPLATE_START_SUCCESS_TIP, SOPS_TEMPLATE_PARAMS_ERROR_TIP,
+    SOPS_TEMPLATE_API_ABNORMAL_TIP
+)
 
 
 class SopsTask(GenericTask):
@@ -51,8 +57,8 @@ class SopsTask(GenericTask):
         bk_sops_templates = await self._get_sops_template_list(**params)
         return self._session.bot.send_template_msg('render_task_list_msg',
                                                    'SOPS',
-                                                   '欢迎使用标准运维',
-                                                   '请选择标准运维模板',
+                                                   SOPS_WELCOME_TIP,
+                                                   SOPS_TEMPLATE_SELECT_TIP,
                                                    'bk_sops_template_id',
                                                    bk_sops_templates,
                                                    'bk_sops_template_select',
@@ -72,8 +78,12 @@ class SopsTask(GenericTask):
             template_name = bk_sops_template_info['name']
             activities = [k for k, v in bk_sops_template_info.get('pipeline_tree', {}).get('activities').items()
                           if v['optional']]
-            constants = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
-                         for var in bk_sops_template_info['pipeline_tree']['constants'].values()]
+            constants = [
+                {
+                    'keyname': var['name'],
+                    'value': var['value'] if var['value'] else SOPS_TEMPLATE_PARAM_PLACEHOLDER
+                } for var in bk_sops_template_info['pipeline_tree']['constants'].values()
+            ]
         else:
             bk_sops_template = self._session.state['bk_sops_template']
             bk_sops_template_id = bk_sops_template['bk_sops_template_id']
@@ -98,9 +108,14 @@ class SopsTask(GenericTask):
                                 for template in bk_sops_template_schemas[:10]]
             }
         } if bk_sops_template_schemas else {}
-        return self._session.bot.send_template_msg('render_task_select_msg', 'SOPS', f'标准运维任务_{template_name}',
-                                                   constants, 'bk_sops_template_execute', 'bk_sops_template_update',
-                                                   'bk_sops_template_cancel', info, template_name, **extra)
+        return self._session.bot.send_template_msg('render_task_select_msg',
+                                                   'SOPS',
+                                                   f'{SOPS_TEMPLATE_COMMON_PREFIX}_{template_name}',
+                                                   constants,
+                                                   'bk_sops_template_execute',
+                                                   'bk_sops_template_update',
+                                                   'bk_sops_template_cancel',
+                                                   info, template_name, **extra)
 
     async def execute_task(self, bk_sops_template: Dict) -> bool:
         if not bk_sops_template:
@@ -130,12 +145,12 @@ class SopsTask(GenericTask):
                                                     exclude_task_nodes_id=exclude_task_nodes_id,
                                                     constants=constants)
             await self._sops.start_task(self.biz_id, response.get('task_id'), bk_username=self.user_id)
-            msg = f'{bk_sops_template_name} {constants} 任务启动成功'
+            msg = f'{bk_sops_template_name} {constants} {SOPS_TEMPLATE_START_SUCCESS_TIP}'
             return True
         except ActionFailed as e:
-            msg = f'{bk_sops_template_id} {constants} error: 参数有误 {e}'
+            msg = f'{bk_sops_template_id} {constants} error: {SOPS_TEMPLATE_PARAMS_ERROR_TIP} {e}'
         except HttpFailed as e:
-            msg = f'{bk_sops_template_id} {constants} error: 第三方服务异常 {e}'
+            msg = f'{bk_sops_template_id} {constants} error: {SOPS_TEMPLATE_API_ABNORMAL_TIP} {e}'
         finally:
             execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='SOPS', bk_username=self.user_id,
                                            feature_name=bk_sops_template_name, feature_id=str(bk_sops_template_id),

@@ -147,18 +147,22 @@ msgid "请选择蓝盾项目"
 msgstr "select CI project"
 
 #: plugins/common/devops/settings.py:27 plugins/common/job/settings.py:30
+#: plugins/common/sops/settings.py:27
 msgid "请顺序输入参数"
 msgstr "Enter the parameters in order"
 
 #: plugins/common/devops/settings.py:28 plugins/common/job/settings.py:31
+#: plugins/common/sops/settings.py:28
 msgid "换行分隔"
 msgstr "Newline separated"
 
 #: plugins/common/devops/settings.py:32 plugins/common/job/settings.py:32
+#: plugins/common/sops/settings.py:29
 msgid "已取消"
 msgstr "Cancelled"
 
 #: plugins/common/devops/settings.py:33 plugins/common/job/settings.py:34
+#: plugins/common/job/settings.py:32
 msgid "待输入"
 msgstr "Null"
 
@@ -167,14 +171,17 @@ msgid "请选择流水线"
 msgstr "select CI pipeline"
 
 #: plugins/common/devops/settings.py:35 plugins/common/job/settings.py:36
+#: plugins/common/job/settings.py:33
 msgid "任务启动成功"
 msgstr "task start successfully"
 
 #: plugins/common/devops/settings.py:36 plugins/common/job/settings.py:37
+#: plugins/common/job/settings.py:34
 msgid "参数有误"
 msgstr "params error"
 
 #: plugins/common/devops/settings.py:37 plugins/common/job/settings.py:38
+#: plugins/common/job/settings.py:35
 msgid "第三方服务异常"
 msgstr "api error"
 
@@ -197,3 +204,19 @@ msgstr "job platform"
 #: plugins/common/job/settings.py:34
 msgid "请选择JOB执行方案"
 msgstr "select job plan"
+
+#: plugins/common/sops/settings.py:18
+msgid "欢迎使用标准运维"
+msgstr "Welcome to use SOPS"
+
+#: plugins/common/sops/settings.py:21
+msgid "标准运维"
+msgstr "sops task"
+
+#: plugins/common/sops/settings.py:30
+msgid "标准运维作业"
+msgstr "sops template"
+
+#: plugins/common/sops/settings.py:31
+msgid "请选择标准运维作业模版"
+msgstr "select sops template"
