@@ -107,3 +107,4 @@ SESSION_RESERVED_WORD: Iterable[str] = [
 ]
 SESSION_RESERVED_CMD: Iterable[str] = os.getenv('SESSION_RESERVED_CMD', '').split(',')
 IS_USE_SESSION_WHITELIST: bool = os.getenv('IS_USE_SESSION_WHITELIST', True)
+IS_USE_I18N: bool = os.getenv('IS_I18N', False)

@@ -15,4 +15,10 @@ specific language governing permissions and limitations under the License.
 
 import gettext
 
+from .default_config import IS_USE_I18N
+
+if IS_USE_I18N:
+    gettext.bindtextdomain("i18n_messages", "translations/")
+    gettext.textdomain("i18n_messages")
+
 _ = gettext.gettext

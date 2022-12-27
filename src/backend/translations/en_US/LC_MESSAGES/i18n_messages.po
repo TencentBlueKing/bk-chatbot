@@ -1,0 +1,98 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-12-27 11:46+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: protocol/xwork/message.py:178
+msgid "欢迎使用蓝鲸信息流"
+msgstr "Welcome to use bkchat"
+
+#: protocol/xwork/message.py:183
+msgid "业务"
+msgstr "business"
+
+#: protocol/xwork/message.py:188
+msgid "更多操作"
+msgstr "actions"
+
+#: protocol/xwork/message.py:190
+msgid "查找任务"
+msgstr "search business"
+
+#: protocol/xwork/message.py:191
+msgid "绑定业务"
+msgstr "bind business"
+
+#: protocol/xwork/message.py:192 protocol/xwork/message.py:301
+#: protocol/xwork/message.py:321 protocol/xwork/message.py:322
+msgid "快捷键"
+msgstr "shortcurt"
+
+#: protocol/xwork/message.py:236
+msgid "欢迎使用配置平台"
+msgstr "Welcome to use cmdb"
+
+#: protocol/xwork/message.py:237
+msgid "请选择业务"
+msgstr "select business"
+
+#: protocol/xwork/message.py:245
+msgid "提交"
+msgstr "commit"
+
+#: protocol/xwork/message.py:259 protocol/xwork/message.py:387
+msgid "确认"
+msgstr "confirm"
+
+#: protocol/xwork/message.py:301 protocol/xwork/message.py:306
+#: protocol/xwork/message.py:307
+msgid "执行"
+msgstr "execute"
+
+#: protocol/xwork/message.py:301 protocol/xwork/message.py:311
+#: protocol/xwork/message.py:312
+msgid "修改"
+msgstr "update"
+
+#: protocol/xwork/message.py:301 protocol/xwork/message.py:316
+#: protocol/xwork/message.py:317
+msgid "取消"
+msgstr "cancel"
+
+#: protocol/xwork/message.py:340
+msgid "参数确认"
+msgstr "confirm params"
+
+#: protocol/xwork/message.py:351
+msgid "启动成功"
+msgstr "start successfully"
+
+#: protocol/xwork/message.py:352
+msgid "启动失败"
+msgstr "fail to start"
+
+#: protocol/xwork/message.py:380
+msgid "任务查询结果"
+msgstr "search task result"
+
+#: protocol/xwork/message.py:391
+msgid "未找到对应任务"
+msgstr "No matching task found"
+
+#: plugins/common/devops/api.py:56
+msgid "欢迎使用蓝盾平台"
+msgstr "Welcome to use Devops"
