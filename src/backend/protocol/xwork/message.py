@@ -149,7 +149,7 @@ class MessageTemplate(BaseMessageTemplate):
             text = text.replace('<warning>', '')
             text = text.replace('<info>', '')
             return text
-        content = f'>{normalize(title)}\n>{normalize(content)}'
+        content = f'>{normalize(title)}\n>{_(normalize(content))}'
         return {
             'msgtype': 'markdown',
             'markdown': {
@@ -231,8 +231,8 @@ class MessageTemplate(BaseMessageTemplate):
                     'desc': 'CC'
                 },
                 'main_title': {
-                    'title': '欢迎使用配置平台',
-                    'desc': '请选择业务'
+                    'title': _('欢迎使用配置平台'),
+                    'desc': _('请选择业务')
                 },
                 'task_id': str(int(time.time() * 100000)),
                 'checkbox': {
@@ -240,7 +240,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'option_list': data
                 },
                 'submit_button': {
-                    'text': '提交',
+                    'text': _('提交'),
                     'key': 'bk_cc_biz_select'
                 }
             }
@@ -254,7 +254,7 @@ class MessageTemplate(BaseMessageTemplate):
                              question_key: str,
                              data: List,
                              submit_key: str,
-                             submit_text: str = '确认',
+                             submit_text: str = _('确认'),
                              render: Callable = None) -> Dict:
         if not data:
             return None
@@ -287,29 +287,37 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
-    def render_task_select_msg(cls, platform: str, title: str, params: List, execute_key: str,
-                               update_key: str, cancel_key: str, data: Dict, task_name: str,
-                               action=['执行', '修改', '取消', '快捷键'], **kwargs) -> Dict:
+    def render_task_select_msg(cls,
+                               platform: str,
+                               title: str,
+                               params: List,
+                               execute_key: str,
+                               update_key: str,
+                               cancel_key: str,
+                               data: Dict,
+                               task_name: str,
+                               action=[_('执行'), _('修改'), _('取消'), _('快捷键')],
+                               **kwargs) -> Dict:
         if isinstance(data, dict):
             data.update({'platform': platform})
         button_map = {
-            '执行': {
-                "text": "执行",
+            _('执行'): {
+                "text": _("执行"),
                 "style": 1,
                 "key": f"{execute_key}|{json.dumps(data)}"
             },
-            '修改': {
-                "text": "修改",
+            _('修改'): {
+                "text": _("修改"),
                 "style": 2,
                 "key": f"{update_key}|{json.dumps(data)}"
             },
-            '取消': {
-                "text": "取消",
+            _('取消'): {
+                "text": _("取消"),
                 "style": 3,
                 "key": f"{cancel_key}|{task_name}"
             },
-            '快捷键': {
-                "text": "快捷键",
+            _('快捷键'): {
+                "text": _("快捷键"),
                 "style": 4,
                 "key": f"bk_shortcut_create|{json.dumps(data)}"
             }
@@ -327,7 +335,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'title': title
                 },
                 'task_id': str(int(time.time() * 100000)),
-                'sub_title_text': '参数确认',
+                'sub_title_text': _('参数确认'),
                 'horizontal_content_list': params,
                 'button_list': button_list
             }
@@ -346,7 +354,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'desc': platform
                 },
                 'main_title': {
-                    'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
+                    'title': _(f'{task_name}启动成功') if task_result else _(f'{task_name}启动失败')
                 },
                 'horizontal_content_list': params,
                 'task_id': str(int(time.time() * 100000)),
@@ -365,18 +373,18 @@ class MessageTemplate(BaseMessageTemplate):
                 'desc': 'BKCHAT'
             },
             'main_title': {
-                'title': '任务查询结果'
+                'title': _('任务查询结果')
             },
             'task_id': str(int(time.time() * 100000))
         }
 
         if any(bk_app_task.values()):
             template['card_type'] = 'vote_interaction'
-            template['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
+            template['submit_button'] = {'text': _('确认'), 'key': 'bk_app_task_select'}
             template['checkbox'] = {'question_key': 'bk_app_task_id', 'option_list': []}
         else:
             template['card_type'] = 'text_notice'
-            template['main_title']['desc'] = '未找到对应任务'
+            template['main_title']['desc'] = _('未找到对应任务')
             template['card_action'] = {'type': 1, 'url': bk_paas_domain}
             return {
                 'msgtype': 'template_card',
