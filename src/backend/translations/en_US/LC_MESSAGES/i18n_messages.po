@@ -194,10 +194,6 @@ msgstr "Job plan"
 msgid "作业平台"
 msgstr "job platform"
 
-#: plugins/common/job/settings.py:21
-msgid "作业平台"
-msgstr "job platform"
-
 #: plugins/common/job/settings.py:34
 msgid "请选择JOB执行方案"
 msgstr "select job plan"
