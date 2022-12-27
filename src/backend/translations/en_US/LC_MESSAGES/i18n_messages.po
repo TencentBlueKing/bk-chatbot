@@ -154,10 +154,6 @@ msgstr "Enter the parameters in order"
 msgid "换行分隔"
 msgstr "Newline separated"
 
-#: plugins/common/devops/settings.py:28
-msgid "换行分隔"
-msgstr "Newline separated"
-
 #: plugins/common/devops/settings.py:32
 msgid "已取消"
 msgstr "Cancelled"
