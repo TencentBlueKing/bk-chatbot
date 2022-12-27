@@ -22,18 +22,22 @@ from component import fetch_answer
 from plugins.common.task import Prediction as SelfPrediction
 from .api import Flow
 from .settings import (
-    DEFAULT_SHOW_GROUP_ID_ALIAS, DEFAULT_BIND_BIZ_ALIAS, DEFAULT_BIND_BIZ_TIP,
-    DEFAULT_BIZ_BIND_SUCCESS, DEFAULT_BIZ_BIND_FAIL, DEFAULT_HELPER, DEFAULT_INTENT_CATEGORY
+    DEFAULT_SHOW_GROUP_ID_ALIAS, DEFAULT_BIND_BIZ_ALIAS,
+    DEFAULT_QUERY_CHAT_KEY, DEFAULT_WELCOME_KEY,
+    DEFAULT_BIND_ENV_KEY, DEFAULT_BIND_BIZ_KEY,
+    DEFAULT_SELECT_BIZ_KEY, DEFAULT_SEARCH_QA_KEY,
+    DEFAULT_HANDLE_CALLBACK_KEY, DEFAULT_SEARCH_QA_RESULT,
+    DEFAULT_SEARCH_QA_QUESTION, DEFAULT_SEARCH_QA_ANSWER
 )
 
 
-@on_command('bk_chat_group_id', aliases=DEFAULT_SHOW_GROUP_ID_ALIAS)
+@on_command(DEFAULT_QUERY_CHAT_KEY, aliases=DEFAULT_SHOW_GROUP_ID_ALIAS)
 async def _(session: CommandSession):
     if session.ctx['msg_from_type'] == 'group':
         await session.send(session.ctx['msg_group_id'])
 
 
-@on_command('bk_chat_welcome', aliases=('help', '帮助', '小鲸', '1'))
+@on_command(DEFAULT_WELCOME_KEY, aliases=('help', '帮助', '小鲸', '1'))
 async def _(session: CommandSession):
     info = session.bot.parse_action('parse_interaction', session.ctx)
     if info is not None:
@@ -42,12 +46,12 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('bk_env_bind')
+@on_command(DEFAULT_BIND_ENV_KEY)
 async def _(session: CommandSession):
     pass
 
 
-@on_command('bk_cc_biz_bind', aliases=DEFAULT_BIND_BIZ_ALIAS)
+@on_command(DEFAULT_BIND_BIZ_KEY, aliases=DEFAULT_BIND_BIZ_ALIAS)
 async def _(session: CommandSession):
     msg_template = await Flow(session).render_biz_msg()
     if msg_template:
@@ -56,7 +60,7 @@ async def _(session: CommandSession):
         logger.info('no biz')
 
 
-@on_command('bk_cc_biz_select')
+@on_command(DEFAULT_SELECT_BIZ_KEY)
 async def _(session: CommandSession):
     flow = Flow(session)
     bk_biz_id = flow.bind_cc_biz()
@@ -68,20 +72,20 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('bk_chat_search_knowledge')
+@on_command(DEFAULT_SEARCH_QA_KEY)
 async def _(session: CommandSession):
     answers = session.state.get('answers')
-    title = '<bold>结果:<bold>'
+    title = f'<bold>{DEFAULT_SEARCH_QA_RESULT}:<bold>'
     content = '\n'.join([
-        f'''<info>问题：{item["question"]}<info>
-        <warning>答案：{item["solution"]}<warning>'''
+        f'''<info>{DEFAULT_SEARCH_QA_QUESTION}：{item["question"]}<info>
+        <warning>{DEFAULT_SEARCH_QA_ANSWER}：{item["solution"]}<warning>'''
         for item in answers
     ])
     msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)
 
 
-@on_command('bk_chat_common_callback')
+@on_command(DEFAULT_HANDLE_CALLBACK_KEY)
 async def _(session: CommandSession):
     pass
 

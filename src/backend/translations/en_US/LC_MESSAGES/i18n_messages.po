@@ -33,7 +33,7 @@ msgstr "actions"
 msgid "查找任务"
 msgstr "search business"
 
-#: protocol/xwork/message.py:191
+#: protocol/xwork/message.py:191 plugins/common/default/settings.py:26
 msgid "绑定业务"
 msgstr "bind business"
 
@@ -102,9 +102,9 @@ msgstr "No matching task found"
 msgid "请选择应用"
 msgstr "select app"
 
-#: protocol/slack/message.py:171
+#: protocol/slack/message.py:171 plugins/common/default/settings.py:27
 msgid "业务绑定"
-msgstr "bind business"
+msgstr "business bind"
 
 #: protocol/slack/message.py:222
 msgid "请选择实例"
@@ -220,3 +220,43 @@ msgstr "sops template"
 #: plugins/common/sops/settings.py:31
 msgid "请选择标准运维作业模版"
 msgstr "select sops template"
+
+#: plugins/common/default/settings.py:24
+msgid "群ID"
+msgstr "group ID"
+
+#: plugins/common/default/settings.py:24
+msgid "群id"
+msgstr "group id"
+
+#: plugins/common/default/settings.py:26
+msgid "切换业务"
+msgstr "update business"
+
+#: plugins/common/default/settings.py:26
+msgid "解绑业务"
+msgstr "unbind business"
+
+#: plugins/common/default/settings.py:27
+msgid "业务解绑"
+msgstr "business unbind"
+
+#: plugins/common/default/settings.py:27
+msgid "业务切换"
+msgstr "business update"
+
+#: plugins/common/default/settings.py:29
+msgid "查到你名下没有业务"
+msgstr "there is no business"
+
+#: plugins/common/default/settings.py:38
+msgid "结果"
+msgstr "Result"
+
+#: plugins/common/default/settings.py:39
+msgid "问题"
+msgstr "Question"
+
+#: plugins/common/default/settings.py:40
+msgid "答案"
+msgstr "Answer"
