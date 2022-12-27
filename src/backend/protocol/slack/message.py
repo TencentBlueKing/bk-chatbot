@@ -24,7 +24,7 @@ from opsbot.adapter import (
     MessageTemplate as BaseMessageTemplate
 )
 from opsbot.stdlib import escape, unescape
-from opsbot.i18n import _
+from i18n import _
 
 
 class MessageSegment(BaseMessageSegment):

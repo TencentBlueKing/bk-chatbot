@@ -13,11 +13,10 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
+import os
 import gettext
 
-from .default_config import IS_USE_I18N
-
-if IS_USE_I18N:
+if os.getenv('IS_USE_I18N', False):
     gettext.bindtextdomain("i18n_messages", "translations/")
     gettext.textdomain("i18n_messages")
 
