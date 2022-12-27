@@ -15,7 +15,7 @@ specific language governing permissions and limitations under the License.
 
 from i18n import _
 
-DEVOPS_WELCOME_TIP = '欢迎使用蓝盾平台'
+DEVOPS_WELCOME_TIP = _('欢迎使用蓝盾平台')
 
 DEVOPS_PROJECT_LIST_KEY = 'bk_devops_project_list'
 DEVOPS_PROJECT_LIST_ALIAS = (_('蓝盾流水线'), 'bk_devops')

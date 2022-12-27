@@ -15,9 +15,17 @@ specific language governing permissions and limitations under the License.
 
 from opsbot import on_command, CommandSession
 from .api import JobTask
+from .settings import (
+    JOB_PLAN_LIST_KEY, JOB_PLAN_LIST_ALIAS,
+    JOB_PLAN_LIST_SORT_KEY, JOB_PLAN_SEARCH_KEY,
+    JOB_PLAN_SELECT_KEY, JOB_PLAN_EXECUTE_KEY,
+    JOB_PLAN_UPDATE_KEY, JOB_PLAN_CANCEL_KEY,
+    JOB_PLAN_PARAM_PROMPT, JOB_PLAN_FORMAT_PROMPT,
+    JOB_PLAN_CANCEL_TIP, JOB_PLAN_COMMON_PREFIX
+)
 
 
-@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', '作业平台', 'bk_job'))
+@on_command(JOB_PLAN_LIST_KEY, aliases=JOB_PLAN_LIST_ALIAS)
 async def list_job_plan(session: CommandSession):
     bk_biz_id = session.bot.parse_action('parse_select', session.ctx)
     job_task = JobTask(session, bk_biz_id)
@@ -27,24 +35,24 @@ async def list_job_plan(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_sort')
+@on_command(JOB_PLAN_LIST_SORT_KEY)
 async def sort_job_plan(session: CommandSession):
     pass
 
 
-@on_command('bk_job_plan_search')
+@on_command(JOB_PLAN_SEARCH_KEY)
 async def search_job_plan(session: CommandSession):
     pass
 
 
-@on_command('bk_job_plan_select')
+@on_command(JOB_PLAN_SELECT_KEY)
 async def select_bk_job_plan(session: CommandSession):
     msg_template = await JobTask(session).render_job_plan_detail()
     if msg_template:
         await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_execute')
+@on_command(JOB_PLAN_EXECUTE_KEY)
 async def _(session: CommandSession):
     job_plan = session.bot.parse_action('parse_interaction', session.ctx)
     if not job_plan:
@@ -55,14 +63,14 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_update')
+@on_command(JOB_PLAN_UPDATE_KEY)
 async def _(session: CommandSession):
     job_plan = session.bot.parse_action('parse_interaction', session.ctx)
     if not job_plan:
         return
     session.state.update(job_plan)
     title = '<bold>JOB TIP<bold>'
-    content = '请顺序输入参数，<bold>换行分隔<bold>'
+    content = f'{JOB_PLAN_PARAM_PROMPT}，<bold>{JOB_PLAN_FORMAT_PROMPT}<bold>'
     msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
@@ -74,12 +82,12 @@ async def _(session: CommandSession):
         await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_cancel')
+@on_command(JOB_PLAN_CANCEL_KEY)
 async def _(session: CommandSession):
     bk_job_plan_name = session.bot.parse_action('parse_interaction', session.ctx)
     if not bk_job_plan_name:
         return
     title = '<bold>JOB TIP<bold>'
-    content = f'<warning>您的JOB执行方案「{bk_job_plan_name}」已取消...<warning>'
+    content = f'<warning>{JOB_PLAN_COMMON_PREFIX}「{bk_job_plan_name}」{JOB_PLAN_CANCEL_TIP}...<warning>'
     msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)

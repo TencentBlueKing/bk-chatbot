@@ -146,19 +146,19 @@ msgstr "CI pipeline"
 msgid "请选择蓝盾项目"
 msgstr "select CI project"
 
-#: plugins/common/devops/settings.py:27
+#: plugins/common/devops/settings.py:27 plugins/common/job/settings.py:30
 msgid "请顺序输入参数"
 msgstr "Enter the parameters in order"
 
-#: plugins/common/devops/settings.py:28
+#: plugins/common/devops/settings.py:28 plugins/common/job/settings.py:31
 msgid "换行分隔"
 msgstr "Newline separated"
 
-#: plugins/common/devops/settings.py:32
+#: plugins/common/devops/settings.py:32 plugins/common/job/settings.py:32
 msgid "已取消"
 msgstr "Cancelled"
 
-#: plugins/common/devops/settings.py:33
+#: plugins/common/devops/settings.py:33 plugins/common/job/settings.py:34
 msgid "待输入"
 msgstr "Null"
 
@@ -166,14 +166,38 @@ msgstr "Null"
 msgid "请选择流水线"
 msgstr "select CI pipeline"
 
-#: plugins/common/devops/settings.py:35
+#: plugins/common/devops/settings.py:35 plugins/common/job/settings.py:36
 msgid "任务启动成功"
 msgstr "task start successfully"
 
-#: plugins/common/devops/settings.py:36
+#: plugins/common/devops/settings.py:36 plugins/common/job/settings.py:37
 msgid "参数有误"
 msgstr "params error"
 
-#: plugins/common/devops/settings.py:37
+#: plugins/common/devops/settings.py:37 plugins/common/job/settings.py:38
 msgid "第三方服务异常"
 msgstr "api error"
+
+#: plugins/common/job/settings.py:18
+msgid "欢迎使用JOB平台"
+msgstr "Welcome to use JOB"
+
+#: plugins/common/job/settings.py:21
+msgid "JOB任务"
+msgstr "job task"
+
+#: plugins/common/job/settings.py:21 plugins/common/job/settings.py:33
+msgid "JOB执行方案"
+msgstr "Job plan"
+
+#: plugins/common/job/settings.py:21
+msgid "作业平台"
+msgstr "job platform"
+
+#: plugins/common/job/settings.py:21
+msgid "作业平台"
+msgstr "job platform"
+
+#: plugins/common/job/settings.py:34
+msgid "请选择JOB执行方案"
+msgstr "select job plan"

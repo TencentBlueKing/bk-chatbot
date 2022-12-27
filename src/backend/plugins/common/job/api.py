@@ -21,6 +21,12 @@ from opsbot.log import logger
 from opsbot.plugins import GenericTask
 from opsbot.models import BKExecutionLog
 from component import RedisClient, OrmClient, BKCloud
+from .settings import (
+    JOB_WELCOME_TIP, JOB_PLAN_SELECT_TIP,
+    JOB_PLAN_PARAM_PLACEHOLDER, JOB_PLAN_COMMON_PREFIX,
+    JOB_PLAN_START_SUCCESS_TIP, JOB_PLAN_PARAMS_ERROR_TIP,
+    JOB_PLAN_API_ABNORMAL_TIP
+)
 
 
 class JobTask(GenericTask):
@@ -48,8 +54,8 @@ class JobTask(GenericTask):
 
         return self._session.bot.send_template_msg('render_task_list_msg',
                                                    'JOB',
-                                                   '欢迎使用JOB平台',
-                                                   '请选择JOB执行方案',
+                                                   JOB_WELCOME_TIP,
+                                                   JOB_PLAN_SELECT_TIP,
                                                    'bk_job_plan_id',
                                                    bk_job_plans,
                                                    'bk_job_plan_select',
@@ -68,7 +74,8 @@ class JobTask(GenericTask):
             try:
                 global_var_list = [
                     {
-                        'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'
+                        'keyname': var['name'],
+                        'value': var['value'] if var['value'] else JOB_PLAN_PARAM_PLACEHOLDER
                     } for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1
                 ]
             except TypeError:
@@ -80,9 +87,14 @@ class JobTask(GenericTask):
             global_var_list = self._session.state['global_var_list']
 
         info = {'job_plan_id': job_plan_id, 'job_plan_name': job_plan_name, 'global_var_list': global_var_list}
-        return self._session.bot.send_template_msg('render_task_select_msg', 'JOB', f'JOB执行方案_{job_plan_name}',
-                                                   global_var_list, 'bk_job_plan_execute', 'bk_job_plan_update',
-                                                   'bk_job_plan_cancel', info, job_plan_name)
+        return self._session.bot.send_template_msg('render_task_select_msg',
+                                                   'JOB',
+                                                   f'{JOB_PLAN_COMMON_PREFIX}_{job_plan_name}',
+                                                   global_var_list,
+                                                   'bk_job_plan_execute',
+                                                   'bk_job_plan_update',
+                                                   'bk_job_plan_cancel',
+                                                   info, job_plan_name)
 
     async def execute_task(self, job_plan: Dict) -> bool:
         job_plan_id = job_plan['job_plan_id']
@@ -97,12 +109,12 @@ class JobTask(GenericTask):
                 global_var_list=params,
                 bk_username=self.user_id
             )
-            msg = f'{job_plan_id} {params} 任务启动成功'
+            msg = f'{job_plan_id} {params} {JOB_PLAN_START_SUCCESS_TIP}'
             return True
         except ActionFailed as e:
-            msg = f'{job_plan_id} {params} error: 参数有误 {e}'
+            msg = f'{job_plan_id} {params} error: {JOB_PLAN_PARAMS_ERROR_TIP} {e}'
         except HttpFailed as e:
-            msg = f'{job_plan_id} {params} error: 第三方服务异常 {e}'
+            msg = f'{job_plan_id} {params} error: {JOB_PLAN_API_ABNORMAL_TIP} {e}'
         finally:
             execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='JOB', bk_username=self.user_id,
                                            feature_name=job_plan_name, feature_id=str(job_plan_id),
