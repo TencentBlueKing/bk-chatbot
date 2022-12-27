@@ -26,6 +26,7 @@ from opsbot.adapter import (
     MessageTemplate as BaseMessageTemplate
 )
 from opsbot.stdlib import escape, unescape
+from i18n import _
 
 
 TEMPLATE = {
@@ -172,21 +173,21 @@ class MessageTemplate(BaseMessageTemplate):
                     'desc': 'BKCHAT'
                 },
                 'main_title': {
-                    'title': '欢迎使用蓝鲸信息流'
+                    'title': _('欢迎使用蓝鲸信息流')
                 },
                 'task_id': str(int(time.time() * 100000)),
                 'button_selection': {
                     'question_key': 'bk_biz_id',
-                    'title': '业务',
+                    'title': _('业务'),
                     'option_list': data,
                     'selected_id': bk_biz_id if bk_biz_id else ''
                 },
                 'action_menu': {
-                    'desc': '更多操作',
+                    'desc': _('更多操作'),
                     'action_list': [
-                        {'text': '查找任务', 'key': 'bk_app_task_filter'},
-                        {'text': '绑定业务', 'key': 'bk_cc_biz_bind'},
-                        {'text': '快捷键', 'key': 'bk_shortcut_list'}
+                        {'text': _('查找任务'), 'key': 'bk_app_task_filter'},
+                        {'text': _('绑定业务'), 'key': 'bk_cc_biz_bind'},
+                        {'text': _('快捷键'), 'key': 'bk_shortcut_list'}
                     ]
                 },
                 'button_list': [
