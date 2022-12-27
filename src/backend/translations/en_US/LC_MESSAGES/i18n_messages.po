@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: protocol/xwork/message.py:178
+#: protocol/xwork/message.py:178 protocol/slack/message.py:107
 msgid "欢迎使用蓝鲸信息流"
 msgstr "Welcome to use bkchat"
 
@@ -39,6 +39,7 @@ msgstr "bind business"
 
 #: protocol/xwork/message.py:192 protocol/xwork/message.py:301
 #: protocol/xwork/message.py:321 protocol/xwork/message.py:322
+#: protocol/slack/message.py:241 protocol/slack/message.py:273
 msgid "快捷键"
 msgstr "shortcut"
 
@@ -46,7 +47,7 @@ msgstr "shortcut"
 msgid "欢迎使用配置平台"
 msgstr "Welcome to use cmdb"
 
-#: protocol/xwork/message.py:237
+#: protocol/xwork/message.py:237 protocol/slack/message.py:114
 msgid "请选择业务"
 msgstr "select business"
 
@@ -55,51 +56,47 @@ msgid "提交"
 msgstr "Commit"
 
 #: protocol/xwork/message.py:259 protocol/xwork/message.py:387
+#: protocol/slack/message.py:195
 msgid "确认"
 msgstr "confirm"
 
 #: protocol/xwork/message.py:301 protocol/xwork/message.py:306
-#: protocol/xwork/message.py:307
+#: protocol/xwork/message.py:307 protocol/slack/message.py:241
+#: protocol/slack/message.py:249
 msgid "执行"
 msgstr "execute"
 
 #: protocol/xwork/message.py:301 protocol/xwork/message.py:311
-#: protocol/xwork/message.py:312
+#: protocol/xwork/message.py:312 protocol/slack/message.py:241
+#: protocol/slack/message.py:261
 msgid "修改"
 msgstr "update"
 
 #: protocol/xwork/message.py:301 protocol/xwork/message.py:316
-#: protocol/xwork/message.py:317
+#: protocol/xwork/message.py:317 protocol/slack/message.py:241
+#: protocol/slack/message.py:267
 msgid "取消"
 msgstr "cancel"
 
-#: protocol/xwork/message.py:340
+#: protocol/xwork/message.py:340 protocol/slack/message.py:295
 msgid "参数确认"
 msgstr "confirm params"
 
-#: protocol/xwork/message.py:351
+#: protocol/xwork/message.py:351 protocol/slack/message.py:322
 msgid "启动成功"
 msgstr "start successfully"
 
-#: protocol/xwork/message.py:352
+#: protocol/xwork/message.py:352 protocol/slack/message.py:323
 msgid "启动失败"
 msgstr "fail to start"
 
-#: protocol/xwork/message.py:380
+#: protocol/xwork/message.py:380 protocol/slack/message.py:345
 msgid "任务查询结果"
 msgstr "search task result"
 
-#: protocol/xwork/message.py:391
+#: protocol/xwork/message.py:391 protocol/slack/message.py:381
 msgid "未找到对应任务"
 msgstr "No matching task found"
-
-#: protocol/slack/message.py:107
-msgid "欢迎使用蓝鲸信息流"
-msgstr "Welcome to use bkchat"
-
-#: protocol/slack/message.py:114
-msgid "请选择业务"
-msgstr "select business"
 
 #: protocol/slack/message.py:114
 msgid "请选择应用"
@@ -109,33 +106,9 @@ msgstr "select app"
 msgid "业务绑定"
 msgstr "bind business"
 
-#: protocol/slack/message.py:171
-msgid "业务绑定"
-msgstr "bind business"
-
-#: protocol/slack/message.py:195
-msgid "确认"
-msgstr "confirm"
-
 #: protocol/slack/message.py:222
 msgid "请选择实例"
 msgstr "select instance"
-
-#: protocol/slack/message.py:241 protocol/slack/message.py:249
-msgid "执行"
-msgstr "execute"
-
-#: protocol/slack/message.py:241 protocol/slack/message.py:261
-msgid "修改"
-msgstr "update"
-
-#: protocol/slack/message.py:241 protocol/slack/message.py:267
-msgid "取消"
-msgstr "cancel"
-
-#: protocol/slack/message.py:241 protocol/slack/message.py:273
-msgid "快捷键"
-msgstr "shortcut"
 
 #: protocol/slack/message.py:253
 msgid "提示"
@@ -153,29 +126,9 @@ msgstr "Yes"
 msgid "否"
 msgstr "No"
 
-#: protocol/slack/message.py:295
-msgid "参数确认"
-msgstr "confirm params"
-
-#: protocol/slack/message.py:322
-msgid "启动成功"
-msgstr "start successfully"
-
-#: protocol/slack/message.py:323
-msgid "启动失败"
-msgstr "fail to start"
-
 #: protocol/slack/message.py:332
 msgid "参数"
 msgstr "params"
-
-#: protocol/slack/message.py:345
-msgid "任务查询结果"
-msgstr "search task result"
-
-#: protocol/slack/message.py:381
-msgid "未找到对应任务"
-msgstr "No matching task found"
 
 #: protocol/slack/message.py:388
 msgid "平台"
