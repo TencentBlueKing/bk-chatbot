@@ -149,7 +149,7 @@ class MessageTemplate(BaseMessageTemplate):
             text = text.replace('<warning>', '')
             text = text.replace('<info>', '')
             return text
-        content = f'>{normalize(title)}\n>{_(normalize(content))}'
+        content = f'>{normalize(title)}\n>{normalize(content)}'
         return {
             'msgtype': 'markdown',
             'markdown': {
@@ -346,6 +346,8 @@ class MessageTemplate(BaseMessageTemplate):
     @classmethod
     def render_task_execute_msg(cls, platform: str, task_name: str, task_result: bool,
                                 params: List, task_domain: str) -> Dict:
+        success_msg = _('启动成功')
+        fail_msg = _('启动失败')
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -354,7 +356,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'desc': platform
                 },
                 'main_title': {
-                    'title': _(f'{task_name}启动成功') if task_result else _(f'{task_name}启动失败')
+                    'title': f'{task_name}{success_msg}' if task_result else f'{task_name}{fail_msg}'
                 },
                 'horizontal_content_list': params,
                 'task_id': str(int(time.time() * 100000)),
