@@ -260,3 +260,11 @@ msgstr "Question"
 #: plugins/common/default/settings.py:40
 msgid "答案"
 msgstr "Answer"
+
+#: plugins/common/admin/settings.py:19 plugins/common/admin/settings.py:20
+msgid "执行统计"
+msgstr "executive stat"
+
+#: plugins/common/default/settings.py:21
+msgid "您当前执行数"
+msgstr "Your current execution count"
