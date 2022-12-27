@@ -13,12 +13,12 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-DEVOPS_PROJECT_TIP = '蓝盾项目：\n'
-DEVOPS_PIPELINE_TIP = '蓝盾流水线：'
-DEVOPS_PIPELINE_ALLOW_CMD = '是'
-DEVOPS_PIPELINE_REFUSE_CMD = '否'
-DEVOPS_PIPELINE_START_SUCCESS = '蓝盾流水线启动成功'
-DEVOPS_PIPELINE_START_FAIL = '蓝盾流水线启动失败'
-
-SESSION_FINISHED_MSG = '本次会话结束，您可以开启新的会话'
-SESSION_FINISHED_CMD = '结束'
+# DEVOPS_PROJECT_TIP = '蓝盾项目：\n'
+# DEVOPS_PIPELINE_TIP = '蓝盾流水线：'
+# DEVOPS_PIPELINE_ALLOW_CMD = '是'
+# DEVOPS_PIPELINE_REFUSE_CMD = '否'
+# DEVOPS_PIPELINE_START_SUCCESS = '蓝盾流水线启动成功'
+# DEVOPS_PIPELINE_START_FAIL = '蓝盾流水线启动失败'
+#
+# SESSION_FINISHED_MSG = '本次会话结束，您可以开启新的会话'
+# SESSION_FINISHED_CMD = '结束'

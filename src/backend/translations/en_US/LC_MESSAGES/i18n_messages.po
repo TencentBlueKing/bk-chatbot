@@ -40,7 +40,7 @@ msgstr "bind business"
 #: protocol/xwork/message.py:192 protocol/xwork/message.py:301
 #: protocol/xwork/message.py:321 protocol/xwork/message.py:322
 msgid "快捷键"
-msgstr "shortcurt"
+msgstr "shortcut"
 
 #: protocol/xwork/message.py:236
 msgid "欢迎使用配置平台"
@@ -52,7 +52,7 @@ msgstr "select business"
 
 #: protocol/xwork/message.py:245
 msgid "提交"
-msgstr "commit"
+msgstr "Commit"
 
 #: protocol/xwork/message.py:259 protocol/xwork/message.py:387
 msgid "确认"
@@ -93,6 +93,90 @@ msgstr "search task result"
 msgid "未找到对应任务"
 msgstr "No matching task found"
 
-#: plugins/common/devops/api.py:56
-msgid "欢迎使用蓝盾平台"
-msgstr "Welcome to use Devops"
+#: protocol/slack/message.py:107
+msgid "欢迎使用蓝鲸信息流"
+msgstr "Welcome to use bkchat"
+
+#: protocol/slack/message.py:114
+msgid "请选择业务"
+msgstr "select business"
+
+#: protocol/slack/message.py:114
+msgid "请选择应用"
+msgstr "select app"
+
+#: protocol/slack/message.py:171
+msgid "业务绑定"
+msgstr "bind business"
+
+#: protocol/slack/message.py:171
+msgid "业务绑定"
+msgstr "bind business"
+
+#: protocol/slack/message.py:195
+msgid "确认"
+msgstr "confirm"
+
+#: protocol/slack/message.py:222
+msgid "请选择实例"
+msgstr "select instance"
+
+#: protocol/slack/message.py:241 protocol/slack/message.py:249
+msgid "执行"
+msgstr "execute"
+
+#: protocol/slack/message.py:241 protocol/slack/message.py:261
+msgid "修改"
+msgstr "update"
+
+#: protocol/slack/message.py:241 protocol/slack/message.py:267
+msgid "取消"
+msgstr "cancel"
+
+#: protocol/slack/message.py:241 protocol/slack/message.py:273
+msgid "快捷键"
+msgstr "shortcut"
+
+#: protocol/slack/message.py:253
+msgid "提示"
+msgstr "Tip"
+
+#: protocol/slack/message.py:254
+msgid "确认要执行该任务吗"
+msgstr "Are you sure you want to run this task"
+
+#: protocol/slack/message.py:255
+msgid "是"
+msgstr "Yes"
+
+#: protocol/slack/message.py:256
+msgid "否"
+msgstr "No"
+
+#: protocol/slack/message.py:295
+msgid "参数确认"
+msgstr "confirm params"
+
+#: protocol/slack/message.py:322
+msgid "启动成功"
+msgstr "start successfully"
+
+#: protocol/slack/message.py:323
+msgid "启动失败"
+msgstr "fail to start"
+
+#: protocol/slack/message.py:332
+msgid "参数"
+msgstr "params"
+
+#: protocol/slack/message.py:345
+msgid "任务查询结果"
+msgstr "search task result"
+
+#: protocol/slack/message.py:381
+msgid "未找到对应任务"
+msgstr "No matching task found"
+
+#: protocol/slack/message.py:388
+msgid "平台"
+msgstr "Paas Link"

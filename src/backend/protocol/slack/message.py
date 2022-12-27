@@ -192,7 +192,7 @@ class MessageTemplate(BaseMessageTemplate):
                              question_key: str,
                              data: List,
                              submit_key: str,
-                             submit_text: str = '确认',
+                             submit_text: str = _('确认'),
                              render: Callable = None):
         if not data:
             return None
@@ -319,11 +319,13 @@ class MessageTemplate(BaseMessageTemplate):
             'short': False
         } for item in params]
 
+        success_msg = _('启动成功')
+        fail_msg = _('启动失败')
         return {
             'text': f'*{platform}*',
             'attachments': [
                 {
-                    'title':  _(f'{task_name}启动成功' if task_result else f'{task_name}启动失败'),
+                    'title':  _(f'{task_name}{success_msg}' if task_result else f'{task_name}{fail_msg}'),
                     'color': '3AA3E3'
                 },
                 {
