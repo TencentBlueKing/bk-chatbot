@@ -15,9 +15,17 @@ specific language governing permissions and limitations under the License.
 
 from opsbot import on_command, CommandSession
 from .api import DevOpsTask
+from .settings import (
+    DEVOPS_PROJECT_LIST_KEY, DEVOPS_PROJECT_LIST_ALIAS,
+    DEVOPS_PROJECT_SELECT_KEY, DEVOPS_PIPELINE_SELECT_KEY,
+    DEVOPS_PIPELINE_UPDATE_KEY, DEVOPS_PIPELINE_PARAM_PROMPT,
+    DEVOPS_PIPELINE_FORMAT_PROMPT, DEVOPS_PIPELINE_EXECUTE_KEY,
+    DEVOPS_PIPELINE_CANCEL_KEY, DEVOPS_PIPELINE_COMMON_PREFIX,
+    DEVOPS_PIPELINE_CANCEL_TIP
+)
 
 
-@on_command('bk_devops_project_list', aliases=('蓝盾流水线', 'bk_devops'))
+@on_command(DEVOPS_PROJECT_LIST_KEY, aliases=DEVOPS_PROJECT_LIST_ALIAS)
 async def _(session: CommandSession):
     bk_biz_id = session.bot.parse_action('parse_select', session.ctx)
     devops_task = DevOpsTask(session, bk_biz_id)
@@ -27,26 +35,26 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('bk_devops_project_select')
+@on_command(DEVOPS_PROJECT_SELECT_KEY)
 async def _(session: CommandSession):
     msg_template = await DevOpsTask(session).render_devops_pipeline_list()
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_select')
+@on_command(DEVOPS_PIPELINE_SELECT_KEY)
 async def _(session: CommandSession):
     msg_template = await DevOpsTask(session).render_devops_pipeline_detail()
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_update')
+@on_command(DEVOPS_PIPELINE_UPDATE_KEY)
 async def _(session: CommandSession):
     bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
     if not bk_devops_pipeline:
         session.state['bk_devops_pipeline'] = bk_devops_pipeline
 
     title = '<bold>CI TIP<bold>'
-    content = '请顺序输入参数，<bold>换行分隔<bold>'
+    content = f'{DEVOPS_PIPELINE_PARAM_PROMPT}，<bold>{DEVOPS_PIPELINE_FORMAT_PROMPT}<bold>'
     msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
@@ -57,7 +65,7 @@ async def _(session: CommandSession):
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_execute')
+@on_command(DEVOPS_PIPELINE_EXECUTE_KEY)
 async def _(session: CommandSession):
     bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
     flow = DevOpsTask(session)
@@ -66,10 +74,11 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_cancel')
+@on_command(DEVOPS_PIPELINE_CANCEL_KEY)
 async def _(session: CommandSession):
     bk_devops_pipeline_name = session.bot.parse_action('parse_interaction', session.ctx)
     title = '<bold>CI TIP<bold>'
-    content = f'<warning>您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...<warning>'
+    content = f'<warning>{DEVOPS_PIPELINE_COMMON_PREFIX}「{bk_devops_pipeline_name}」' \
+              f'{DEVOPS_PIPELINE_CANCEL_TIP}...<warning>'
     msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)

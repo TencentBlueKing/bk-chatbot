@@ -21,6 +21,12 @@ from opsbot.log import logger
 from opsbot.models import BKExecutionLog
 from opsbot.exceptions import ActionFailed, HttpFailed
 from component import RedisClient, OrmClient, BKCloud
+from .settings import (
+    DEVOPS_WELCOME_TIP, DEVOPS_PROJECT_SELECT_TIP,
+    DEVOPS_PIPELINE_PARAM_PLACEHOLDER, DEVOPS_PIPELINE_SELECT_TIP,
+    DEVOPS_PIPELINE_COMMON_PREFIX, DEVOPS_PIPELINE_START_SUCCESS_TIP,
+    DEVOPS_PIPELINE_PARAMS_ERROR_TIP, DEVOPS_PIPELINE_API_ABNORMAL_TIP
+)
 
 
 class DevOpsTask(GenericTask):
@@ -41,8 +47,12 @@ class DevOpsTask(GenericTask):
 
     async def _get_devops_build_start_info(self, project_id: str, pipeline_id: str):
         start_infos = await self._devops.v3_app_build_start_info(project_id, pipeline_id, self.user_id)
-        filter_infos = [{'keyname': var['id'], 'value': var['defaultValue'] if var['defaultValue'] else '待输入'}
-                        for var in start_infos.get('properties', []) if not var.get('propertyType')]
+        filter_infos = [
+            {
+                'keyname': var['id'],
+                'value': var['defaultValue'] if var['defaultValue'] else DEVOPS_PIPELINE_PARAM_PLACEHOLDER
+            } for var in start_infos.get('properties', []) if not var.get('propertyType')
+        ]
         return filter_infos
 
     async def render_devops_project_list(self):
@@ -52,8 +62,8 @@ class DevOpsTask(GenericTask):
         bk_devops_projects = await self._get_devops_project_list()
         return self._session.bot.send_template_msg('render_task_list_msg',
                                                    'CI',
-                                                   '欢迎使用蓝盾平台',
-                                                   '请选择蓝盾项目',
+                                                   DEVOPS_WELCOME_TIP,
+                                                   DEVOPS_PROJECT_SELECT_TIP,
                                                    'bk_devops_project_id',
                                                    bk_devops_projects,
                                                    'bk_devops_project_select',
@@ -74,8 +84,8 @@ class DevOpsTask(GenericTask):
         }
         return self._session.bot.send_template_msg('render_task_list_msg',
                                                    'CI',
-                                                   '欢迎使用蓝盾平台',
-                                                   f'请选择「{bk_devops_project_id}」下流水线',
+                                                   DEVOPS_WELCOME_TIP,
+                                                   f'「{bk_devops_project_id}」{DEVOPS_PIPELINE_SELECT_TIP}',
                                                    'bk_devops_pipeline_id',
                                                    bk_devops_pipelines,
                                                    'bk_devops_pipeline_select',
@@ -105,10 +115,14 @@ class DevOpsTask(GenericTask):
             'start_infos': start_infos
         }
 
-        return self._session.bot.send_template_msg('render_task_select_msg', 'CI',
-                                                   f'蓝盾流水线_{bk_devops_pipeline_name}', start_infos,
-                                                   'bk_devops_pipeline_execute', 'bk_devops_pipeline_update',
-                                                   'bk_devops_pipeline_cancel', info, bk_devops_pipeline_name)
+        return self._session.bot.send_template_msg('render_task_select_msg',
+                                                   'CI',
+                                                   f'{DEVOPS_PIPELINE_COMMON_PREFIX}_{bk_devops_pipeline_name}',
+                                                   start_infos,
+                                                   'bk_devops_pipeline_execute',
+                                                   'bk_devops_pipeline_update',
+                                                   'bk_devops_pipeline_cancel',
+                                                   info, bk_devops_pipeline_name)
 
     async def execute_task(self, bk_devops_pipeline: Dict):
         bk_devops_project_id = bk_devops_pipeline['bk_devops_project_id']
@@ -118,12 +132,12 @@ class DevOpsTask(GenericTask):
 
         try:
             await self._devops.v3_app_build_start(bk_devops_project_id, bk_devops_pipeline_id, self.user_id, **params)
-            msg = f'{bk_devops_pipeline_name} {params} 任务启动成功'
+            msg = f'{bk_devops_pipeline_name} {params} {DEVOPS_PIPELINE_START_SUCCESS_TIP}'
             return True
         except ActionFailed as e:
-            msg = f'{bk_devops_pipeline_id} {params} error: 参数有误 {e}'
+            msg = f'{bk_devops_pipeline_id} {params} error: {DEVOPS_PIPELINE_PARAMS_ERROR_TIP} {e}'
         except HttpFailed as e:
-            msg = f'{bk_devops_pipeline_id} {params} error: 第三方服务异常 {e}'
+            msg = f'{bk_devops_pipeline_id} {params} error: {DEVOPS_PIPELINE_API_ABNORMAL_TIP} {e}'
         finally:
             execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='DevOps', bk_username=self.user_id,
                                            feature_name=bk_devops_pipeline_name, feature_id=str(bk_devops_pipeline_id),
