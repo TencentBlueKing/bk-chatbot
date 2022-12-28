@@ -13,10 +13,12 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import time
-
 from opsbot import CommandSession
 from component import BKCloud
+from .settings import (
+    ITSM_WELCOME_TIP, ITSM_SERVICE_TEMPLATE_PREFIX,
+    ITSM_ClICK_TIP
+)
 
 
 class GenericIT:
@@ -38,7 +40,7 @@ class GenericIT:
 
         return self._session.bot.send_template_msg('render_ticket_service_list_msg',
                                                    'ITSM',
-                                                   '欢迎使用流程服务',
+                                                   ITSM_WELCOME_TIP,
                                                    'bk_itsm'
                                                    'bk_itsm_service_id',
                                                    'bk_itsm_select_service',
@@ -52,7 +54,8 @@ class GenericIT:
         service = await self._itsm.get_service_detail(service_id=int(service_id))
         return self._session.bot.send_template_msg('render_ticket_service_detail_msg',
                                                    'ITSM',
-                                                   f'已选择服务模版「{service["name"]}」点击填单',
+                                                   f'{ITSM_SERVICE_TEMPLATE_PREFIX}'
+                                                   f'「{service["name"]}」{ITSM_ClICK_TIP}',
                                                    service,
                                                    f'{self._bk_service.BK_ITSM_DOMAIN}#/ticket/'
                                                    f'create?service_id={service_id}')

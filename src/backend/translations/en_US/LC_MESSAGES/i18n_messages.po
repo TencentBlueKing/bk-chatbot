@@ -268,3 +268,19 @@ msgstr "executive stat"
 #: plugins/common/default/settings.py:21
 msgid "您当前执行数"
 msgstr "Your current execution count"
+
+#: plugins/common/itsm/settings.py:19
+msgid "查看服务列表"
+msgstr "List service templates"
+
+#: plugins/common/itsm/settings.py:22
+msgid "欢迎使用流程服务"
+msgstr "Welcome to user ITSM"
+
+#: plugins/common/itsm/settings.py:22
+msgid "已选择服务模版"
+msgstr "You have selected service"
+
+#: plugins/common/itsm/settings.py:23
+msgid "点击填单"
+msgstr "Click and Input info"
