@@ -22,7 +22,8 @@ from typing import Dict, List
 from opsbot import CommandSession
 from component import BKCloud, RedisClient
 from plugins.common.task.settings import (
-    TASK_SESSION_APPROVE_REQ_MSG, TASK_SESSION_APPROVE_MSG
+    TASK_APPROVE_REQ_MSG, TASK_APPROVE_MSG,
+    TASK_APPROVE_TITLE_SUFFIX, TASK_APPROVE_PINDING_MSG
 )
 
 
@@ -43,7 +44,7 @@ class Approval:
         intent_id = intent.get('id')
         key = f'opsbot_task:{cls.user_id}:{biz_id}:{intent_id}:{int(time.time())}'
         fields = [
-            {'key': 'title', 'value': f'{intent.get("biz_id")}_BKCHAT任务审批'},
+            {'key': 'title', 'value': f'{intent.get("biz_id")}_{TASK_APPROVE_TITLE_SUFFIX}'},
             {'key': 'content', 'value': content},
             {'key': 'approver', 'value': ','.join(intent['approver'])},
             {'key': 'id', 'value': base64.b64encode(bytes(key, encoding='utf-8')).decode('utf-8')},
@@ -71,11 +72,11 @@ class Approval:
             if not approver:
                 return False
 
-            await Approval.session.send('提单中...')
+            await Approval.session.send(TASK_APPROVE_PINDING_MSG)
             params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
-            content = TASK_SESSION_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"], params)
+            content = TASK_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"], params)
             await Approval.use_bk_itsm(intent, slots, content)
-            await Approval.session.send(TASK_SESSION_APPROVE_MSG.format(','.join(approver)))
+            await Approval.session.send(TASK_APPROVE_MSG.format(','.join(approver)))
             return True
 
     class Xwork(BaseBot):
@@ -88,6 +89,6 @@ class Approval:
                 return False
 
             params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
-            content = TASK_SESSION_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"], params)
+            content = TASK_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"], params)
             await Approval.use_bk_itsm(intent, slots, content)
             return True

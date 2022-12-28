@@ -63,7 +63,7 @@ msgstr "confirm"
 
 #: protocol/xwork/message.py:301 protocol/xwork/message.py:306
 #: protocol/xwork/message.py:307 protocol/slack/message.py:241
-#: protocol/slack/message.py:249
+#: protocol/slack/message.py:249 plugins/common/task/settings.py:65
 msgid "执行"
 msgstr "execute"
 
@@ -75,7 +75,7 @@ msgstr "update"
 
 #: protocol/xwork/message.py:301 protocol/xwork/message.py:316
 #: protocol/xwork/message.py:317 protocol/slack/message.py:241
-#: protocol/slack/message.py:267
+#: protocol/slack/message.py:267 plugins/common/task/settings.py:66
 msgid "取消"
 msgstr "cancel"
 
@@ -119,13 +119,13 @@ msgstr "Tip"
 msgid "确认要执行该任务吗"
 msgstr "Are you sure you want to run this task"
 
-#: protocol/slack/message.py:255
+#: protocol/slack/message.py:255 plugins/common/task/settings.py:51
 msgid "是"
-msgstr "Yes"
+msgstr "yes"
 
-#: protocol/slack/message.py:256
+#: protocol/slack/message.py:256 plugins/common/task/settings.py:52
 msgid "否"
-msgstr "No"
+msgstr "no"
 
 #: protocol/slack/message.py:332
 msgid "参数"
@@ -163,7 +163,7 @@ msgid "已取消"
 msgstr "Cancelled"
 
 #: plugins/common/devops/settings.py:33 plugins/common/job/settings.py:34
-#: plugins/common/job/settings.py:32
+#: plugins/common/sops/settings.py:32
 msgid "待输入"
 msgstr "Null"
 
@@ -172,17 +172,17 @@ msgid "请选择流水线"
 msgstr "select CI pipeline"
 
 #: plugins/common/devops/settings.py:35 plugins/common/job/settings.py:36
-#: plugins/common/job/settings.py:33
+#: plugins/common/sops/settings.py:33 plugins/common/task/settings.py:53
 msgid "任务启动成功"
 msgstr "task start successfully"
 
 #: plugins/common/devops/settings.py:36 plugins/common/job/settings.py:37
-#: plugins/common/job/settings.py:34
+#: plugins/common/sops/settings.py:34 plugins/common/task/settings.py:70
 msgid "参数有误"
 msgstr "params error"
 
 #: plugins/common/devops/settings.py:37 plugins/common/job/settings.py:38
-#: plugins/common/job/settings.py:35
+#: plugins/common/sops/settings.py:35 plugins/common/task/settings.py:71
 msgid "第三方服务异常"
 msgstr "api error"
 
@@ -318,6 +318,158 @@ msgstr "You haven't created shortcuts yet"
 msgid "选择删除"
 msgstr "Select a shortcut you want to delete"
 
-#: plugins/common/shortcut/settings.py:42
+#: plugins/common/shortcut/settings.py:42 plugins/common/task/settings.py:78
 msgid "删除"
 msgstr "delete"
+
+#: plugins/common/task/settings.py:19
+msgid "无法理解你的意图"
+msgstr "I can't understand your intent"
+
+#: plugins/common/task/settings.py:29
+msgid "请确认是该群里的意图"
+msgstr "Please confirm that it is the intent of this group"
+
+#: plugins/common/task/settings.py:24
+msgid "你没有执行权限"
+msgstr "You do not have execute permission"
+
+#: plugins/common/task/settings.py:25
+msgid "请确认是否有该意图权限"
+msgstr "Please confirm whether you have the intent permission"
+
+#: plugins/common/task/settings.py:26
+msgid "请前往控制台确认权限"
+msgstr "Please go to the Web to confirm permission"
+
+#: plugins/common/task/settings.py:30
+msgid "该技能未开启"
+msgstr "This skill is not enabled"
+
+#: plugins/common/task/settings.py:31
+msgid "请前往控制开修改该技能状态"
+msgstr "Please go to the Web to modify the skill status"
+
+#: plugins/common/task/settings.py:35
+msgid "任务查找"
+msgstr "search task"
+
+#: plugins/common/task/settings.py:35
+msgid "查找任务"
+msgstr "task search"
+
+#: plugins/common/task/settings.py:38 plugins/common/task/settings.py:64
+msgid "自定义任务"
+msgstr "self-define task"
+
+#: plugins/common/task/settings.py:38
+msgid "自定义技能"
+msgstr "self-define skill"
+
+#: plugins/common/task/settings.py:38
+msgid "技能"
+msgstr "skill"
+
+#: plugins/common/task/settings.py:43
+msgid "查看定时任务"
+msgstr "search scheduled task"
+
+#: plugins/common/task/settings.py:43
+msgid "查看定时"
+msgstr "search schedule"
+
+#: plugins/common/task/settings.py:46
+msgid "本次会话结束，您可以开启新的会话"
+msgstr "This session is over, you can start a new session"
+
+#: plugins/common/task/settings.py:47
+msgid "结束"
+msgstr "finish"
+
+#: plugins/common/task/settings.py:48
+msgid "当前业务拥有的技能"
+msgstr "The skills you have in this business"
+
+#: plugins/common/task/settings.py:49
+msgid "输入【结束】终止会话"
+msgstr "Input「finish」and terminate current session"
+
+#: plugins/common/task/settings.py:50
+msgid "您没有权限点击"
+msgstr "You have no permission to click"
+
+#: plugins/common/task/settings.py:54
+msgid "任务启动失败"
+msgstr "Task fail to start"
+
+#: plugins/common/task/settings.py:55
+msgid "任务已取消"
+msgstr "Task have been canceled"
+
+#: plugins/common/task/settings.py:56
+msgid "请顺序输入任务名称"
+msgstr "Input the task name in sequence"
+
+#: plugins/common/task/settings.py:57
+msgid "支持模糊查询"
+msgstr "support fuzzy query"
+
+#: plugins/common/task/settings.py:58
+msgid "当前业务下无技能，请联系业务运维同学进行配置"
+msgstr "There is no skill in current business, please contact operators to configure"
+
+#: plugins/common/task/settings.py:59
+msgid "请选择BKCHAT自定义技能"
+msgstr "Select BKCHAT self-define skills"
+
+#: plugins/common/task/settings.py:60
+msgid "识别到技能：{}\r\n输入 [结束] 终止会话"
+msgstr "Recognise the skill: {}\r\nInput「finish」and terminate current session"
+
+#: plugins/common/task/settings.py:61
+msgid "识别到「定时」技能：{} 执行 {}\r\n输入 [结束] 终止会话"
+msgstr "Recognise the scheduled skill: {} execute {}\r\nInput「finish」and terminate current session"
+
+#: plugins/common/task/settings.py:62
+msgid "已选择"
+msgstr "have selected"
+
+#: plugins/common/task/settings.py:63
+msgid "定时器删除成功"
+msgstr "Scheduled task has been deleted successfully"
+
+#: plugins/common/task/settings.py:67
+msgid "参数不合法，会话中断"
+msgstr "The parameter is invalid, the session is interrupted"
+
+#: plugins/common/task/settings.py:68
+msgid "「定时」任务创建成功 时间"
+msgstr "Scheduled task has been created time"
+
+#: plugins/common/task/settings.py:69
+msgid "任务链接"
+msgstr "url"
+
+#: plugins/common/task/settings.py:72
+msgid "该技能已交由{}审批"
+msgstr "This skill has been given to {} approve"
+
+#: plugins/common/task/settings.py:73
+msgid "{}的技能「{}」执行权限申请，请您审批\n执行参数: {}"
+msgstr "{}'s skill「{}」's executable permission，plz approve\nparams: {}"
+
+#: plugins/common/task/settings.py:74
+msgid "BKCHAT任务审批"
+msgstr "BKCHAT task approval"
+
+#: plugins/common/task/settings.py:75
+msgid "提单中"
+msgstr "doing..."
+
+#: plugins/common/task/settings.py:76
+msgid "BKCHAT定时任务"
+msgstr "BKCHAT scheduled task"
+
+#: plugins/common/task/settings.py:77
+msgid "当前定时任务如下"
+msgstr "The current scheduled tasks are as follows"

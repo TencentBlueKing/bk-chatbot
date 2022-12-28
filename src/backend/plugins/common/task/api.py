@@ -34,7 +34,10 @@ from .settings import (
     TASK_SESSION_FINISHED_MSG, TASK_SESSION_FINISHED_CMD,
     TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS,
     TASK_EXEC_FAIL, PATTERN_IP, EXPR_DONT_ENABLE,
-    IS_USE_SQLITE
+    IS_USE_SQLITE, TASK_SKILL_LABEL, TASK_EXECUTE_BUTTON,
+    TASK_CANCEL_BUTTON, TASK_VALIDATE_PARAMS_MSG,
+    TASK_CREATE_SCHEDULER_SUCCESS_PREFIX, TASK_URL_TIP,
+    TASK_PARAMS_ERROR_TIP, TASK_API_ABNORMAL_TIP
 )
 from .apps import (
     Approval, Scheduler, CallbackHandler, Authority
@@ -144,12 +147,19 @@ def summary_statement(intent: Dict, slots: List, other: str = '', is_click=False
     intent_name = intent.get("intent_name")
     if is_click:
         params = [{'keyname': slot['name'], 'value': slot['value']} for slot in slots]
-        statement = session.bot.send_template_msg('render_task_select_msg', 'BKCHAT', f'自定义任务_{intent_name}',
-                                                  params, 'bk_chat_task_commit', 'bk_chat_task_update',
-                                                  'bk_chat_task_cancel', intent, intent_name, ['执行', '取消'])
+        statement = session.bot.send_template_msg('render_task_select_msg',
+                                                  'BKCHAT',
+                                                  f'{TASK_SKILL_LABEL}_{intent_name}',
+                                                  params,
+                                                  'bk_chat_task_commit',
+                                                  'bk_chat_task_update',
+                                                  'bk_chat_task_cancel',
+                                                  intent,
+                                                  intent_name,
+                                                  [TASK_EXECUTE_BUTTON, TASK_CANCEL_BUTTON])
     else:
         params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
-        statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
+        statement = f'Task [{intent.get("intent_name")}] {other}\n{params}'
 
     return statement
 
@@ -179,7 +189,7 @@ async def parse_slots(slots: List, session: CommandSession):
         if _validate_pattern(slot['pattern'], param):
             slot['value'] = param
         else:
-            await session.send('参数不合法，会话中断')
+            await session.send(TASK_VALIDATE_PARAMS_MSG)
             return False
 
     return True
@@ -239,18 +249,19 @@ async def real_run(intent: Dict,
             await backend.set_timer(biz_id=intent.get('biz_id'), timer_name=intent.get('intent_name'),
                                     execute_time=timestamp, timer_status=1, timer_user=user_id,
                                     exec_data=exec_data, expression='')
-            msg = f'「定时」任务创建成功 时间： {timestamp}'
+            msg = f'{TASK_CREATE_SCHEDULER_SUCCESS_PREFIX}： {timestamp}'
         else:
             bot_id = session.bot.config.ID if session else None
             data = await BKTask(intent, slots, user_id, group_id, bot_id, bk_env).run()
-            msg = summary_statement(intent, slots, f'{TASK_EXEC_SUCCESS}\r\n任务链接：{data.get("url")}',
+            msg = summary_statement(intent, slots,
+                                    f'{TASK_EXEC_SUCCESS}\r\n{TASK_URL_TIP}：{data.get("url")}',
                                     session=session)
             response.update(data)
     except ActionFailed as e:
-        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: 参数有误 {e}'
+        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: {TASK_PARAMS_ERROR_TIP} {e}'
         logger.error(msg)
     except HttpFailed as e:
-        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: 第三方服务异常 {e}'
+        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: {TASK_API_ABNORMAL_TIP} {e}'
         logger.error(msg)
     finally:
         response['msg'] = msg

@@ -17,6 +17,10 @@ from typing import Dict
 
 from opsbot import CommandSession
 from component import BKCloud
+from plugins.common.task.settings import (
+    TASK_LIST_SCHEDULER_TITLE, TASK_LIST_SCHEDULER_PREFIX,
+    TASK_DEL_SCHEDULER_BUTTON
+)
 
 
 class Scheduler:
@@ -41,12 +45,12 @@ class Scheduler:
         data = await cls.backend.get_timer(timer_user=cls.session.ctx['msg_sender_id'])
         msg_template = cls.session.bot.send_template_msg('render_task_list_msg',
                                                          'BKCHAT',
-                                                         'BKCHAT定时任务',
-                                                         f'当前定时任务如下:',
+                                                         TASK_LIST_SCHEDULER_TITLE,
+                                                         TASK_LIST_SCHEDULER_PREFIX,
                                                          'bk_chat_timer_id',
                                                          data,
                                                          'bk_chat_timer_select',
-                                                         submit_text='删除',
+                                                         submit_text=TASK_DEL_SCHEDULER_BUTTON,
                                                          render=render_func)
         return msg_template
 

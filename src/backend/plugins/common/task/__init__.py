@@ -32,7 +32,8 @@ from .settings import (
     TASK_LIST_SCHEDULER_ALIAS, TASK_DEL_SCHEDULER_KEY,
     TASK_FILTER_QUERY_PREFIX, TASK_FILTER_QUERY_TIP,
     TASK_LIST_NULL_MSG, TASK_SKILL_SELECT_TIP, TASK_SKILL_RECOGNIZE_TIP,
-    TASK_SKILL_SCHEDULER_TIP
+    TASK_SKILL_SCHEDULER_TIP, TASK_SKILL_SELECTED_PROMPT,
+    TASK_DEL_SCHEDULER_SUCCESS_MSG
 )
 
 
@@ -119,7 +120,8 @@ async def task(session: CommandSession):
         intent = (await AppTask(session).describe_entity('intents', id=int(intent_id)))[0]
         slots = await SlotRecognition(intent).fetch_slot()
         if slots:
-            slots[0]['prompt'] = f'{user_id} 已选择：{intent["intent_name"]}\n{slots[0]["prompt"]}'
+            slots[0]['prompt'] = TASK_SKILL_SELECTED_PROMPT.format(user_id, intent["intent_name"],
+                                                                   slots[0]["prompt"])
         session.state['user_id'] = user_id
         session.state['intent'] = intent
         session.state['slots'] = slots
@@ -174,4 +176,4 @@ async def _(session: CommandSession):
         if not timer_id:
             return
     await Scheduler(session, is_callback=False).delete_scheduler(int(timer_id))
-    await session.send('定时器删除成功')
+    await session.send(TASK_DEL_SCHEDULER_SUCCESS_MSG)
