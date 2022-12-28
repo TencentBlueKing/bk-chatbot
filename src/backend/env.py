@@ -213,10 +213,10 @@ class BotDockerFile(DockerFile):
         protocol_env = self.set_protocol_env(cmdline_args)
         flow += protocol_env
         flow += self.copy()
+        flow += self.copy('src/backend/translations', './')
         flow += self.pip_install()
         flow += self.copy('.', '.')
         flow += self.set_timezone()
-        flow += self.run('cp -a src/backend/translations .\n')
         flow += self.entry_point("python", "src/backend/server.py")
 
         if not os.path.isfile('./Dockerfile'):
