@@ -29,9 +29,9 @@ msgstr "business"
 msgid "更多操作"
 msgstr "actions"
 
-#: protocol/xwork/message.py:190
+#: protocol/xwork/message.py:190 plugins/common/task/settings.py:35
 msgid "查找任务"
-msgstr "search business"
+msgstr "search task"
 
 #: protocol/xwork/message.py:191 plugins/common/default/settings.py:26
 msgid "绑定业务"
@@ -353,10 +353,6 @@ msgstr "Please go to the Web to modify the skill status"
 #: plugins/common/task/settings.py:35
 msgid "任务查找"
 msgstr "search task"
-
-#: plugins/common/task/settings.py:35
-msgid "查找任务"
-msgstr "task search"
 
 #: plugins/common/task/settings.py:38 plugins/common/task/settings.py:64
 msgid "自定义任务"
