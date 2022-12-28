@@ -412,6 +412,72 @@ class MessageTemplate(BaseMessageTemplate):
             'template_card': template
         }
 
+    @classmethod
+    def render_ticket_service_list_msg(cls,
+                                       platform: str,
+                                       title: str,
+                                       product_key: str,
+                                       question_key: str,
+                                       create_key: str,
+                                       services: List,
+                                       page: int):
+        return {
+            'card_type': 'button_interaction',
+            'source': {
+                'desc': platform
+            },
+            'main_title': {
+                'title': title
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'button_selection': {
+                'question_key': question_key,
+                'title': _('服务列表'),
+                'option_list': services[page: page+10]
+            },
+            'button_list': [
+                {
+                    "text": _("提单"),
+                    "style": 1,
+                    "key": create_key
+                },
+                {
+                    "text": _("上页"),
+                    "style": 4,
+                    "key": f"{product_key}|{page - 10}"
+                },
+                {
+                    "text": _("下页"),
+                    "style": 4,
+                    "key": f"{product_key}|{page + 10}"
+                }
+            ]
+        }
+
+    @classmethod
+    def render_ticket_service_detail_msg(cls,
+                                         platform: str,
+                                         title: str,
+                                         service: Dict,
+                                         url: str):
+        return {
+            'card_type': 'text_notice',
+            'source': {
+                'desc': platform
+            },
+            'main_title': {
+                'title': title
+            },
+            'quote_area': {
+                'quote_text': '\n'.join([field['name'] for field in service['fields']])
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'card_action': {
+                'type': 1,
+                'url': url
+            }
+        }
+
 
 class MessageParser:
     @classmethod
