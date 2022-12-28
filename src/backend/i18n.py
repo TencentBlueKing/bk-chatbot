@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 import os
 import gettext
 
-if os.getenv('IS_USE_I18N', False):
+if os.getenv('IS_USE_I18N'):
     gettext.bindtextdomain("i18n_messages", "translations/")
     gettext.textdomain("i18n_messages")
 

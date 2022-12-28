@@ -38,18 +38,22 @@ class DockerFile(abc.ABC):
     def copy(self, file: str = 'requirements.txt', dst_dir: str = './'):
         return f'COPY {file} {dst_dir}\n'
 
-    def cmd(self):
-        pass
+    def cmd(self, *args):
+        cmd = f'CMD {list(args)}'
+        return cmd.replace("'", '"')
 
     def entry_point(self, *args):
         cmd = f'ENTRYPOINT {list(args)}'
         return cmd.replace("'", '"')
 
-    @staticmethod
-    def set_timezone():
-        return 'RUN rm -f /etc/localtime && ' \
-               'ln -sv /usr/share/zoneinfo/Asia/Shanghai /etc/localtime ' \
-               '&& echo "Asia/Shanghai" > /etc/timezone\n'
+    def run(self, cmd):
+        return f'RUN {cmd}'
+
+    def set_timezone(self):
+        cmd = 'rm -f /etc/localtime ' \
+              '&& ln -sv /usr/share/zoneinfo/Asia/Shanghai /etc/localtime ' \
+              '&& echo "Asia/Shanghai" > /etc/timezone\n'
+        return self.run(cmd)
 
     @abc.abstractmethod
     def generate(self, cmdline_args: argparse.ArgumentParser):
@@ -173,7 +177,6 @@ class BotDockerFile(DockerFile):
     def generate(self, cmdline_args: argparse.ArgumentParser):
         flow = self.from_env(cmdline_args.base)
         flow += self.work_dir(cmdline_args.work_dir)
-        # flow += f'{self.env(lang="en_US.UTF-8")}\n'
         flow += f'{self.env(product=cmdline_args.product)}\n'
         flow += f'{self.env(id=cmdline_args.id)}\n'
         flow += f'{self.env(host=cmdline_args.host)}\n'
@@ -213,6 +216,7 @@ class BotDockerFile(DockerFile):
         flow += self.pip_install()
         flow += self.copy('.', '.')
         flow += self.set_timezone()
+        flow += self.run('cp -a src/backend/translations .')
         flow += self.entry_point("python", "src/backend/server.py")
 
         if not os.path.isfile('./Dockerfile'):
