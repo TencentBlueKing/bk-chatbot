@@ -31,6 +31,7 @@ EXPR_DONT_ENABLE = (
 
 SESSION_FINISHED_MSG = '本次会话结束，您可以开启新的会话'
 SESSION_FINISHED_CMD = '结束'
+SESSION_APPROVE_REQ_MSG = '{}的技能「{}」执行权限申请，请您审批\n执行参数: {}'
 SESSION_APPROVE_MSG = '该技能已交由{}审批'
 
 TASK_LIST_TIP = '当前业务拥有的技能：\n'

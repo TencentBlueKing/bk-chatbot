@@ -40,6 +40,7 @@ msgstr "bind business"
 #: protocol/xwork/message.py:192 protocol/xwork/message.py:301
 #: protocol/xwork/message.py:321 protocol/xwork/message.py:322
 #: protocol/slack/message.py:241 protocol/slack/message.py:273
+#: plugins/common/shortcut/settings.py:31 plugins/common/shortcut/settings.py:35
 msgid "快捷键"
 msgstr "shortcut"
 
@@ -288,10 +289,6 @@ msgstr "Click and Input info"
 #: plugins/common/shortcut/settings.py:31
 msgid "查看快捷键"
 msgstr "list shortcut"
-
-#: plugins/common/shortcut/settings.py:31 plugins/common/shortcut/settings.py:35
-msgid "快捷键"
-msgstr "shortcut"
 
 #: plugins/common/shortcut/settings.py:34
 msgid "欢迎使用快捷键服务"

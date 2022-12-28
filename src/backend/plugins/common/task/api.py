@@ -14,10 +14,6 @@ specific language governing permissions and limitations under the License.
 """
 
 import re
-import json
-import itertools
-import time
-import base64
 from collections import defaultdict
 from typing import (
     Dict, List, Optional, Coroutine, Union, Tuple
@@ -35,9 +31,13 @@ from component import (
     IntentRecognition, BKCloud
 )
 from .settings import (
-    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD, SESSION_APPROVE_MSG,
-    TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS, TASK_EXEC_FAIL,
-    PATTERN_IP, EXPR_DONT_ENABLE, IS_USE_SQLITE
+    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD,
+    TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS,
+    TASK_EXEC_FAIL, PATTERN_IP, EXPR_DONT_ENABLE,
+    IS_USE_SQLITE
+)
+from .apps import (
+    Approval, Scheduler, CallbackHandler, Authority
 )
 
 
@@ -256,148 +256,6 @@ async def real_run(intent: Dict,
         response['msg'] = msg
 
     return response
-
-
-class Authority:
-    """need meta"""
-    def __init__(self, session: CommandSession):
-        self._session = session
-        self._redis_client = RedisClient(env='prod')
-        self.bod_id = self._session.bot.config.ID
-        self.bk_data = GenericTool.get_biz_data(self._session, self._redis_client)
-
-    def pre_xwork(self) -> Dict:
-        biz_id = self.bk_data.get('biz_id') if self.bk_data else -1
-        return {
-            'biz_id': int(biz_id),
-            'available_user': [self._session.ctx['msg_sender_id']],
-            'bk_env': self.bk_data.get('env')
-        }
-
-    def pre_slack(self) -> Dict:
-        pass
-
-
-class Approval:
-    session = None
-    redis_client = None
-    user_id = ''
-
-    def __new__(cls, session: CommandSession):
-        cls.session = session
-        cls.user_id = session.ctx['msg_sender_id']
-        cls.redis_client = RedisClient(env='prod')
-        return cls
-
-    @classmethod
-    async def use_bk_itsm(cls, intent: Dict, slots: List):
-        biz_id = intent.get('biz_id')
-        intent_id = intent.get('id')
-        key = f'opsbot_task:{cls.user_id}:{biz_id}:{intent_id}:{int(time.time())}'
-        fields = [
-            {'key': 'title', 'value': f'{intent.get("biz_id")}_BKCHAT任务审批'},
-            {'key': 'content', 'value': summary_statement(intent, slots, '请您审批')},
-            {'key': 'approver', 'value': ','.join(intent['approver'])},
-            {'key': 'id', 'value': base64.b64encode(bytes(key, encoding='utf-8')).decode('utf-8')},
-        ]
-        itsm = BKCloud().bk_service.itsm
-        await itsm.create_ticket(creator=cls.user_id, fields=fields, service_id=116)
-        cls.redis_client.set(f'{cls.session.bot.config.ID}:{key}', json.dumps({
-            'intent': intent, 'slots': slots, 'user_id': cls.user_id,
-            'group_id': cls.session.ctx['msg_group_id']
-        }), ex=60 * 60 * 2)
-
-    @classmethod
-    def handle_approval_by_cache(cls, payload):
-        key = base64.b64decode(payload.get('id')).decode('utf-8')
-        return Approval.redis_client.get(f'{cls.session.bot.config.ID}:{key}')
-
-    class BaseBot:
-        @staticmethod
-        def handle_approval(payload: Dict):
-            return Approval.handle_approval_by_cache(payload)
-
-        @staticmethod
-        async def wait_approve(intent: Dict, slots: List):
-            approver = intent.get('approver', [])
-            if not approver:
-                return False
-
-            await Approval.session.send('提单中...')
-            await Approval.use_bk_itsm(intent, slots)
-            await Approval.session.send(SESSION_APPROVE_MSG.format(','.join(approver)))
-            return True
-
-    class Xwork(BaseBot):
-        pass
-
-    class Trigger(BaseBot):
-        @staticmethod
-        async def wait_approve(intent: Dict, slots: List):
-            if not intent.get('approver', []):
-                return False
-
-            await Approval.use_bk_itsm(intent, slots)
-            return True
-
-
-class Scheduler:
-    session = None
-    backend = None
-    keys = ['intent', 'slots', 'user_id', 'group_id']
-
-    def __new__(cls, session: CommandSession, is_callback=True):
-        cls.session = session
-        if not is_callback:
-            cls.backend = BKCloud().bk_service.backend
-        return cls
-
-    @classmethod
-    async def list_scheduler(cls):
-        def render_func(x):
-            return {
-                'id': str(x['id']),
-                'text': f'{x["biz_id"]} {x["timer_name"]} {x["execute_time"]}',
-                'is_checked': False
-            }
-        data = await cls.backend.get_timer(timer_user=cls.session.ctx['msg_sender_id'])
-        msg_template = cls.session.bot.send_template_msg('render_task_list_msg',
-                                                         'BKCHAT',
-                                                         'BKCHAT定时任务',
-                                                         f'当前定时任务如下:',
-                                                         'bk_chat_timer_id',
-                                                         data,
-                                                         'bk_chat_timer_select',
-                                                         submit_text='删除',
-                                                         render=render_func)
-        return msg_template
-
-    @classmethod
-    async def delete_scheduler(cls, timer_id: int):
-        await cls.backend.delete_timer(timer_id)
-
-    class Xwork:
-        @staticmethod
-        def handle_scheduler(payload: Dict):
-            return {k: payload.get(k) for k in Scheduler.keys if k in payload}
-
-
-class CallbackHandler(metaclass=Cached):
-    def __init__(self, session: CommandSession):
-        self.bot_cls = session.bot.type.title().replace('_', '')
-        self._session = session
-        self._handler = {
-            'handle_approval': getattr(Approval(session), self.bot_cls),
-            'handle_scheduler': getattr(Scheduler(session), self.bot_cls)
-        }
-
-    async def normalize(self, *args) -> Optional:
-        action = self._session.ctx.get('action')
-        task = getattr(self._handler.get(action), action)(*args)
-        if isinstance(task, Coroutine):
-            task = await task
-
-        return task
 
 
 class Prediction:
