@@ -284,3 +284,43 @@ msgstr "You have selected service"
 #: plugins/common/itsm/settings.py:23
 msgid "点击填单"
 msgstr "Click and Input info"
+
+#: plugins/common/shortcut/settings.py:31
+msgid "查看快捷键"
+msgstr "list shortcut"
+
+#: plugins/common/shortcut/settings.py:31 plugins/common/shortcut/settings.py:35
+msgid "快捷键"
+msgstr "shortcut"
+
+#: plugins/common/shortcut/settings.py:34
+msgid "欢迎使用快捷键服务"
+msgstr "Welcome to use Shortcut"
+
+#: plugins/common/shortcut/settings.py:36
+msgid "请输入快捷键名称"
+msgstr "Input self-define shortcut name"
+
+#: plugins/common/shortcut/settings.py:37
+msgid "最少输入8个字符, 每个人每个业务最多10个快捷键"
+msgstr "Input at least 8 characters, each person and each business can have up to 10 shortcuts"
+
+#: plugins/common/shortcut/settings.py:38
+msgid "保存成功"
+msgstr "successfully saved"
+
+#: plugins/common/shortcut/settings.py:39
+msgid "删除成功"
+msgstr "successfully deleted"
+
+#: plugins/common/shortcut/settings.py:40
+msgid "你还没有创建快捷键"
+msgstr "You haven't created shortcuts yet"
+
+#: plugins/common/shortcut/settings.py:41
+msgid "选择删除"
+msgstr "Select a shortcut you want to delete"
+
+#: plugins/common/shortcut/settings.py:42
+msgid "删除"
+msgstr "delete"

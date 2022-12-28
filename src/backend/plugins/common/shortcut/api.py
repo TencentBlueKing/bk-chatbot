@@ -19,7 +19,10 @@ from opsbot import CommandSession
 from opsbot.models import BKShortcutTask
 from opsbot.plugins import GenericTask
 from component import OrmClient, RedisClient
-from .settings import SHORTCUT_PROTO
+from .settings import (
+    SHORTCUT_PROTO, SHORTCUT_COMMON_LABEL, SHORTCUT_WELCOME_TIP,
+    SHORTCUT_DELETE_TITLE, SHORTCUT_DELETE_SUBMIT_TEXT
+)
 
 
 class ShortcutHandler(GenericTask):
@@ -60,13 +63,13 @@ class ShortcutHandler(GenericTask):
     def render_shortcut_list(self):
         shortcuts = self.find_all()
         return self._session.bot.send_template_msg('render_task_list_msg',
-                                                   '快捷键',
-                                                   '欢迎使用快捷键服务',
-                                                   '选择删除',
+                                                   SHORTCUT_COMMON_LABEL,
+                                                   SHORTCUT_WELCOME_TIP,
+                                                   SHORTCUT_DELETE_TITLE,
                                                    'bk_shortcut_id',
                                                    shortcuts,
                                                    'bk_shortcut_delete',
-                                                   submit_text='删除')
+                                                   submit_text=SHORTCUT_DELETE_SUBMIT_TEXT)
 
     def delete(self):
         shortcut_id = self._session.bot.parse_action('parse_select', self._session.ctx)
