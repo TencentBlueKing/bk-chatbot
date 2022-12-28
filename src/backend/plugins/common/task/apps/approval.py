@@ -20,9 +20,7 @@ import base64
 from typing import Dict, List
 
 from opsbot import CommandSession
-from component import (
-    BKCloud, RedisClient, Backend, ITSM, CC
-)
+from component import BKCloud, RedisClient
 from plugins.common.task.settings import (
     SESSION_APPROVE_REQ_MSG, SESSION_APPROVE_MSG
 )
