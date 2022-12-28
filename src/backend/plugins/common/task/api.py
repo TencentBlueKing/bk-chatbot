@@ -31,7 +31,7 @@ from component import (
     IntentRecognition, BKCloud
 )
 from .settings import (
-    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD,
+    TASK_SESSION_FINISHED_MSG, TASK_SESSION_FINISHED_CMD,
     TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS,
     TASK_EXEC_FAIL, PATTERN_IP, EXPR_DONT_ENABLE,
     IS_USE_SQLITE
@@ -171,8 +171,8 @@ async def parse_slots(slots: List, session: CommandSession):
         if ctx['message'].extract_plain_text().find(session.bot.config.RTX_NAME) != -1:
             session.switch(param)
 
-        if param == SESSION_FINISHED_CMD:
-            await session.send(SESSION_FINISHED_MSG)
+        if param == TASK_SESSION_FINISHED_CMD:
+            await session.send(TASK_SESSION_FINISHED_MSG)
             kill_current_session(session.ctx)
             return False
 
@@ -216,7 +216,7 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
         while True:
             is_commit, ctx = session.get('is_commit', prompt='...', **prompt)
             if is_commit not in ['bk_chat_task_cancel', 'bk_chat_task_commit',
-                                 TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
+                                 TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_SESSION_FINISHED_CMD]:
                 del session.state['is_commit']
             else:
                 break

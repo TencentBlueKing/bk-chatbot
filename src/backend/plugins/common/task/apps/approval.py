@@ -22,7 +22,7 @@ from typing import Dict, List
 from opsbot import CommandSession
 from component import BKCloud, RedisClient
 from plugins.common.task.settings import (
-    SESSION_APPROVE_REQ_MSG, SESSION_APPROVE_MSG
+    TASK_SESSION_APPROVE_REQ_MSG, TASK_SESSION_APPROVE_MSG
 )
 
 
@@ -72,10 +72,10 @@ class Approval:
                 return False
 
             await Approval.session.send('提单中...')
-            content = SESSION_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"],
-                                                     '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots]))
+            params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
+            content = TASK_SESSION_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"], params)
             await Approval.use_bk_itsm(intent, slots, content)
-            await Approval.session.send(SESSION_APPROVE_MSG.format(','.join(approver)))
+            await Approval.session.send(TASK_SESSION_APPROVE_MSG.format(','.join(approver)))
             return True
 
     class Xwork(BaseBot):
@@ -87,7 +87,7 @@ class Approval:
             if not intent.get('approver', []):
                 return False
 
-            content = SESSION_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"],
-                                                     '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots]))
+            params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
+            content = TASK_SESSION_APPROVE_REQ_MSG.format(Approval.user_id, intent["intent_name"], params)
             await Approval.use_bk_itsm(intent, slots, content)
             return True
