@@ -246,7 +246,7 @@ class MessageTemplate(BaseMessageTemplate):
         button_list = [
             {
                 "name": "operation",
-                "text": "执行",
+                "text": _("执行"),
                 "type": "button",
                 "value": f"{execute_key}|{json.dumps(data)}",
                 "confirm": {
