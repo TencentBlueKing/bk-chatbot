@@ -44,8 +44,6 @@ from common.constants import (
 
 logger = logging.getLogger("celery")
 
-BROADCAST_LADDER = [5, 10, 20, 40, 60]
-
 TASK_FINISHED_STATUS = {
     TASK_EXECUTE_STATUS_DICT[TaskExecStatus.REMOVE.value],
     TASK_EXECUTE_STATUS_DICT[TaskExecStatus.SUCCESS.value],
@@ -78,6 +76,7 @@ def task_broadcast(broadcast_id):
         extra_notice_info = broadcast_obj.extra_notice_info
         share_group_list = broadcast_obj.share_group_list
         task_platform = broadcast_obj.platform
+        broadcast_ladder_list = broadcast_obj.ladder_list
         current_step_detail = {}
         if broadcast_obj.is_stop:
             return
@@ -117,11 +116,13 @@ def task_broadcast(broadcast_id):
             if now > datetime.datetime.strptime(broadcast_obj.next_broadcast_time, "%Y-%m-%d %H:%M:%S"):
                 is_send_msg = True
                 broadcast_ladder_index = (
-                    broadcast_obj.broadcast_num - 1 if broadcast_obj.broadcast_num - 1 < len(BROADCAST_LADDER) else -1
+                    broadcast_obj.broadcast_num - 1
+                    if broadcast_obj.broadcast_num - 1 < len(broadcast_ladder_list)
+                    else -1
                 )
                 broadcast_obj.broadcast_num = broadcast_obj.broadcast_num + 1
                 broadcast_obj.next_broadcast_time = now + datetime.timedelta(
-                    minutes=BROADCAST_LADDER[broadcast_ladder_index]
+                    minutes=broadcast_ladder_list[broadcast_ladder_index]
                 )
                 broadcast_obj.save()
 
@@ -141,7 +142,7 @@ def task_broadcast(broadcast_id):
             broadcast_obj.step_id = current_step["step_id"]
             broadcast_obj.step_status = current_step["step_status"]
             broadcast_obj.broadcast_num = 1
-            broadcast_obj.next_broadcast_time = now + datetime.timedelta(minutes=BROADCAST_LADDER[0])
+            broadcast_obj.next_broadcast_time = now + datetime.timedelta(minutes=broadcast_ladder_list[0])
             broadcast_obj.save()
 
         if is_send_msg and session_info:

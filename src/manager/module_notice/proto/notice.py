@@ -133,6 +133,7 @@ class ReqPostTaskBroadStratGWViewSerializer(serializers.Serializer):
     session_info = serializers.JSONField(label="触发播报的会话ID", required=False, default={})
     extra_notice_info = serializers.ListField(label="使用bkchat通知的附加通知人和群组", required=False, default=[])
     share_group_list = serializers.ListField(label="分享播报用户通知组列表", required=False, default=[])
+    ladder_list = serializers.ListField(label="播报的时间阶梯", default=[5, 10, 20, 40, 60])
 
     is_devops_plugin = serializers.BooleanField(label="是否来自蓝盾插件启动播报", required=False, default=False)
     devops_project_id = serializers.CharField(label="蓝盾项目ID", required=False)
