@@ -13,14 +13,16 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import time
 from typing import Dict, Union
 
 from opsbot import CommandSession
 from opsbot.models import BKShortcutTask
 from opsbot.plugins import GenericTask
 from component import OrmClient, RedisClient
-from .settings import SHORTCUT_PROTO
+from .settings import (
+    SHORTCUT_PROTO, SHORTCUT_COMMON_LABEL, SHORTCUT_WELCOME_TIP,
+    SHORTCUT_DELETE_TITLE, SHORTCUT_DELETE_SUBMIT_TEXT
+)
 
 
 class ShortcutHandler(GenericTask):
@@ -55,19 +57,23 @@ class ShortcutHandler(GenericTask):
 
     async def execute_task(self, shortcut: BKShortcutTask):
         flow = SHORTCUT_PROTO[shortcut.bk_platform](self._session)
-        result = flow.execute_task(shortcut.params)
+        result = await flow.execute_task(shortcut.params)
         return getattr(flow, f'render_{shortcut.bk_platform.lower()}_execute_msg')(result, shortcut.params)
 
     def render_shortcut_list(self):
         shortcuts = self.find_all()
-        return self._session.bot.send_template_msg('render_task_list_msg', '快捷键', '欢迎使用快捷键服务', '选择删除',
-                                                   'bk_shortcut_id', shortcuts, 'bk_shortcut_delete',
-                                                   submit_text='删除')
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   SHORTCUT_COMMON_LABEL,
+                                                   SHORTCUT_WELCOME_TIP,
+                                                   SHORTCUT_DELETE_TITLE,
+                                                   'bk_shortcut_id',
+                                                   shortcuts,
+                                                   'bk_shortcut_delete',
+                                                   submit_text=SHORTCUT_DELETE_SUBMIT_TEXT)
 
     def delete(self):
-        try:
-            shortcut_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
+        shortcut_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+        if not shortcut_id:
             return None
 
         shortcut = self.orm_client.query(BKShortcutTask, 'first', id=int(shortcut_id))

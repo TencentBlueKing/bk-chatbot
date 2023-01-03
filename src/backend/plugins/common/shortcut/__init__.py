@@ -13,26 +13,31 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
-
 from opsbot import on_command, CommandSession
 from opsbot import on_natural_language, NLPSession, IntentCommand
 from .api import ShortcutHandler
+from .settings import (
+    SHORTCUT_CREATE_KEY, SHORTCUT_EXECUTE_KEY, SHORTCUT_LIST_KEY,
+    SHORTCUT_LIST_ALIAS, SHORTCUT_DELETE_KEY, SHORTCUT_COMMON_LABEL,
+    SHORTCUT_NAME_INPUT_PREFIX, SHORTCUT_NAME_FORMAT_TIP,
+    SHORTCUT_SAVE_TIP, SHORTCUT_NULL_TIP, SHORTCUT_DELETE_TIP
+)
 
 
-@on_command('bk_shortcut_create')
+@on_command(SHORTCUT_CREATE_KEY)
 async def create_bk_shortcut(session: CommandSession):
-    if 'event_key' in session.ctx:
-        _, platform, info = session.ctx['event_key'].split('|')
-        session.state['platform'] = platform
-        session.state['info'] = json.loads(info)
-    else:
+    info = session.bot.parse_action('parse_interaction', session.ctx)
+    if info is None:
         platform = session.state['platform']
         info = session.state['info']
+    else:
+        platform = info.get('platform')
+        session.state['platform'] = info.get('platform')
+        session.state['info'] = info
 
-    content = f'''>**{platform} TIP**
-            >请输入快捷键名称，**最少输入8个字符**, 每个人每个业务最多10个快捷键'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = f'<bold>{platform} TIP<bold>'
+    content = f'{SHORTCUT_NAME_INPUT_PREFIX}，<bold>{SHORTCUT_NAME_FORMAT_TIP}<bold>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     shortcut_name, _ = session.get('shortcut_name', prompt='...', **msg_template)
     sc_handler = ShortcutHandler(session, shortcut_name)
     while not sc_handler.validate_name():
@@ -40,13 +45,12 @@ async def create_bk_shortcut(session: CommandSession):
         shortcut_name, _ = session.get('shortcut_name', prompt='...', **msg_template)
 
     sc_handler.save(platform, info)
-    content = f'''>**{platform} TIP**
-                >快捷键「{shortcut_name}」保存成功'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    content = f'{SHORTCUT_COMMON_LABEL}「{shortcut_name}」{SHORTCUT_SAVE_TIP}'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)
 
 
-@on_command('bk_shortcut_execute')
+@on_command(SHORTCUT_EXECUTE_KEY)
 async def execute_bk_shortcut(session: CommandSession):
     shortcut = session.state['info']
     sc_handler = ShortcutHandler(session)
@@ -54,19 +58,23 @@ async def execute_bk_shortcut(session: CommandSession):
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_shortcut_list', aliases=('查看快捷键', '快捷键'))
+@on_command(SHORTCUT_LIST_KEY, aliases=SHORTCUT_LIST_ALIAS)
 async def list_bk_shortcut(session: CommandSession):
     msg_template = ShortcutHandler(session).render_shortcut_list()
-    msg_template and await session.send(**msg_template)
+    if not msg_template:
+        title = '<bold>BKCHAT TIP<bold>'
+        content = SHORTCUT_NULL_TIP
+        msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
+    await session.send(**msg_template)
 
 
-@on_command('bk_shortcut_delete')
+@on_command(SHORTCUT_DELETE_KEY)
 async def delete_bk_shortcut(session: CommandSession):
     sc_handler = ShortcutHandler(session)
     msg = sc_handler.delete()
-    content = f'''>**快捷键 TIP**
-                    >快捷键「{msg}」删除成功'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = f'<bold>{SHORTCUT_COMMON_LABEL} TIP<bold>'
+    content = f'{SHORTCUT_COMMON_LABEL}「{msg}」{SHORTCUT_DELETE_TIP}'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     msg_template and await session.send(**msg_template)
 
 
@@ -76,4 +84,4 @@ async def _(session: NLPSession):
     sc_handler = ShortcutHandler(session, msg)
     shortcut = sc_handler.find_one()
     if shortcut:
-        return IntentCommand(100, 'bk_shortcut_execute', args={'info': shortcut})
+        return IntentCommand(100, SHORTCUT_EXECUTE_KEY, args={'info': shortcut})

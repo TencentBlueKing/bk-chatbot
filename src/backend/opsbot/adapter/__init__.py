@@ -209,6 +209,11 @@ class MessageTemplate(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
+    def render_task_list_msg(cls):
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
     def render_task_select_msg(cls):
         raise NotImplementedError
 

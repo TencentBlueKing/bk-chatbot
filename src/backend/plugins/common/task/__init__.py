@@ -13,40 +13,46 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from typing import Coroutine
-
 from opsbot import on_command, CommandSession
-from opsbot import on_natural_language, NLPSession, IntentCommand
-from component import IntentRecognition, SlotRecognition, fetch_answer
+from component import SlotRecognition
 from plugins.common.job import JobTask
 from plugins.common.sops import SopsTask
 
 from .api import (
-    AppTask, BKTask, parse_slots, wait_commit, real_run, validate_intent,
-    Authority, Approval, Scheduler, CallbackHandler
+    AppTask, BKTask, parse_slots, wait_commit,
+    real_run, validate_intent, Authority, Approval,
+    Scheduler, CallbackHandler, Prediction
 )
 from .settings import (
-    TASK_EXEC_SUCCESS, TASK_EXEC_FAIL, TASK_LIST_TIP, TASK_FINISH_TIP,
-    TASK_AUTHORITY_TIP, TASK_EXEC_CANCEL
+    TASK_FILTER_KEY, TASK_FILTER_ALIAS, TASK_FILTER_SELECT_KEY,
+    TASK_EXEC_SUCCESS, TASK_EXEC_FAIL, TASK_LIST_TIP,
+    TASK_FINISH_TIP, TASK_AUTHORITY_TIP, TASK_EXEC_CANCEL,
+    TASK_LIST_KEY, TASK_LIST_ALIAS, TASK_EXECUTE_KEY,
+    TASK_CALLBACK_KEY, TASK_CALLBACK_ALIAS, TASK_LIST_SCHEDULER_KEY,
+    TASK_LIST_SCHEDULER_ALIAS, TASK_DEL_SCHEDULER_KEY,
+    TASK_FILTER_QUERY_PREFIX, TASK_FILTER_QUERY_TIP,
+    TASK_LIST_NULL_MSG, TASK_SKILL_SELECT_TIP, TASK_SKILL_RECOGNIZE_TIP,
+    TASK_SKILL_SCHEDULER_TIP, TASK_SKILL_SELECTED_PROMPT,
+    TASK_DEL_SCHEDULER_SUCCESS_MSG
 )
 
 
-@on_command('bk_app_task_filter', aliases=('任务查找', '查找任务'))
+@on_command(TASK_FILTER_KEY, aliases=TASK_FILTER_ALIAS)
 async def _(session: CommandSession):
-    content = f'''>**BKCHAT TIP**
-            >请顺序输入任务名称，**支持模糊查询**'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>BKCHAT TIP<bold>'
+    content = f'{TASK_FILTER_QUERY_PREFIX}，<bold>{TASK_FILTER_QUERY_TIP}<bold>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     task_name, _ = session.get('task_name', prompt='...', **msg_template)
     msg_template = await AppTask(session).render_app_task(task_name)
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_app_task_select')
+@on_command(TASK_FILTER_SELECT_KEY)
 async def _(session: CommandSession):
     try:
-        app_task = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        app_task = session.bot.parse_action('parse_select', session.ctx)
         app, task_id = app_task.split('|')
-        session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId'] = task_id
+        session.bot.parse_action('update_select', session.ctx, task_id)
     except (KeyError, ValueError):
         return None
 
@@ -58,7 +64,7 @@ async def _(session: CommandSession):
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_chat_task_list', aliases=('自定义任务', '自定义技能'))
+@on_command(TASK_LIST_KEY, aliases=TASK_LIST_ALIAS)
 async def _(session: CommandSession):
     """
     handle api call，need to add new method to protocol
@@ -69,21 +75,23 @@ async def _(session: CommandSession):
         intents = [item for item in intents if session.ctx['msg_group_id'] in item['available_group']]
 
     if not intents:
-        await session.send('当前业务下无技能，请联系业务运维同学进行配置')
+        await session.send(TASK_LIST_NULL_MSG)
         return
 
-    tasks = [
-        {
-            'id': str(intent['id']), 'text': intent['intent_name'], 'is_checked': False
-        } for intent in intents[:20]
-    ]
-    msg_template = session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', TASK_LIST_TIP,
-                                                 f'请选择BKCHAT自定义技能 {TASK_FINISH_TIP}', 'bk_chat_intent_id',
-                                                 tasks, 'bk_chat_task_execute')
+    msg_template = session.bot.send_template_msg('render_task_list_msg',
+                                                 'BKCHAT',
+                                                 TASK_LIST_TIP,
+                                                 f'{TASK_SKILL_SELECT_TIP} {TASK_FINISH_TIP}',
+                                                 'bk_chat_intent_id',
+                                                 intents,
+                                                 'bk_chat_task_execute',
+                                                 render=lambda x: {'id': str(x['id']),
+                                                                   'text': x['intent_name'],
+                                                                   'is_checked': False})
     await session.send(**msg_template)
 
 
-@on_command('bk_chat_task_execute')
+@on_command(TASK_EXECUTE_KEY)
 async def task(session: CommandSession):
     """
     support user intent config，combined with nlp/nlu，
@@ -98,23 +106,22 @@ async def task(session: CommandSession):
             slots = await SlotRecognition(intent).fetch_slot(stripped_msg)
             session.state['slots'] = slots
         if session.state.get('index'):
-            msg = f'识别到技能：{intent.get("intent_name")}\r\n输入 [结束] 终止会话'
+            msg = TASK_SKILL_RECOGNIZE_TIP.format(intent.get("intent_name"))
             if 'timer' in intent:
-                msg = f'识别到「定时」技能：{intent["timer"].get("timestamp")} 执行 ' \
-                      f'{intent.get("intent_name")}\r\n输入 [结束] 终止会话'
+                msg = TASK_SKILL_SCHEDULER_TIP.format(intent["timer"].get("timestamp"),
+                                                      intent.get("intent_name"))
             await session.send(msg)
             session.state['index'] = False
     else:
-        try:
-            intent_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-            user_id = session.ctx['msg_sender_id']
-        except KeyError:
+        intent_id = session.bot.parse_action('parse_select', session.ctx)
+        if not intent_id:
             return None
-
+        user_id = session.ctx['msg_sender_id']
         intent = (await AppTask(session).describe_entity('intents', id=int(intent_id)))[0]
         slots = await SlotRecognition(intent).fetch_slot()
         if slots:
-            slots[0]['prompt'] = f'{user_id} 已选择：{intent["intent_name"]}\n{slots[0]["prompt"]}'
+            slots[0]['prompt'] = TASK_SKILL_SELECTED_PROMPT.format(user_id, intent["intent_name"],
+                                                                   slots[0]["prompt"])
         session.state['user_id'] = user_id
         session.state['intent'] = intent
         session.state['slots'] = slots
@@ -138,7 +145,7 @@ async def task(session: CommandSession):
     session.state.clear()
 
 
-@on_command('bk_chat_task_callback', aliases=('handle_approval', 'handle_scheduler'))
+@on_command(TASK_CALLBACK_KEY, aliases=TASK_CALLBACK_ALIAS)
 async def _(session: CommandSession):
     """
     real run the cmd after deal approval and scheduler
@@ -150,7 +157,7 @@ async def _(session: CommandSession):
     await real_run(*data.values(), session)
 
 
-@on_command('bk_chat_task_list_scheduler', aliases=('查看定时任务', '查看定时'))
+@on_command(TASK_LIST_SCHEDULER_KEY, aliases=TASK_LIST_SCHEDULER_ALIAS)
 async def _(session: CommandSession):
     """
     display schedulers, the you can delete old one
@@ -159,34 +166,14 @@ async def _(session: CommandSession):
     await session.send(**msg_template)
 
 
-@on_command('bk_chat_task_delete_scheduler')
+@on_command(TASK_DEL_SCHEDULER_KEY)
 async def _(session: CommandSession):
     """
     delete scheduler
     """
     if session.is_first_run:
-        try:
-            timer_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
-            return None
+        timer_id = session.bot.parse_action('parse_select', session.ctx)
+        if not timer_id:
+            return
     await Scheduler(session, is_callback=False).delete_scheduler(int(timer_id))
-    await session.send('定时器删除成功')
-
-
-@on_natural_language
-async def _(session: NLPSession):
-    intent_filter = getattr(Authority(session), f'pre_{session.bot.type}')()
-    if isinstance(intent_filter, Coroutine):
-        intent_filter = await intent_filter
-    if not intent_filter:
-        return
-    intents = await IntentRecognition().fetch_intent(session.msg_text.strip(), **intent_filter)
-    intent = await validate_intent(intents, session)
-    if intent:
-        return IntentCommand(intent.get('similar', 0) * 100, 'bk_chat_task_execute',
-                             args={'index': True, 'intent': intent,
-                                   'slots': None, 'user_id': session.ctx['msg_sender_id']})
-
-    answers = fetch_answer(session.msg_text.strip())
-    if answers:
-        return IntentCommand(100, 'bk_chat_search_knowledge', args={'answers': answers})
+    await session.send(TASK_DEL_SCHEDULER_SUCCESS_MSG)

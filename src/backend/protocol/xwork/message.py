@@ -16,12 +16,17 @@ specific language governing permissions and limitations under the License.
 import re
 import json
 import time
-from typing import Iterable, Tuple, Union, List, Dict
+from typing import (
+    Iterable, Tuple, Union, List, Dict, Optional,
+    Callable
+)
 
 from opsbot.adapter import (
-    Message as BaseMessage, MessageSegment as BaseMessageSegment, MessageTemplate as BaseMessageTemplate
+    Message as BaseMessage, MessageSegment as BaseMessageSegment,
+    MessageTemplate as BaseMessageTemplate
 )
 from opsbot.stdlib import escape, unescape
+from i18n import _
 
 
 TEMPLATE = {
@@ -138,7 +143,13 @@ class Message(BaseMessage):
 
 class MessageTemplate(BaseMessageTemplate):
     @classmethod
-    def render_markdown_msg(cls, content: str) -> Dict:
+    def render_markdown_msg(cls, title: str, content: str) -> Dict:
+        def normalize(text: str) -> str:
+            text = text.replace('<bold>', '**')
+            text = text.replace('<warning>', '')
+            text = text.replace('<info>', '')
+            return text
+        content = f'>{normalize(title)}\n>{normalize(content)}'
         return {
             'msgtype': 'markdown',
             'markdown': {
@@ -148,6 +159,12 @@ class MessageTemplate(BaseMessageTemplate):
 
     @classmethod
     def render_welcome_msg(cls, data: List, bk_biz_id: Union[int, str]) -> Dict:
+        data = [
+            {
+                'id': str(biz['bk_biz_id']), 'text': biz['bk_biz_name'], 'is_checked': False
+            } for biz in data[:10]
+        ]
+
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -156,21 +173,21 @@ class MessageTemplate(BaseMessageTemplate):
                     'desc': 'BKCHAT'
                 },
                 'main_title': {
-                    'title': '欢迎使用蓝鲸信息流'
+                    'title': _('欢迎使用蓝鲸信息流')
                 },
                 'task_id': str(int(time.time() * 100000)),
                 'button_selection': {
                     'question_key': 'bk_biz_id',
-                    'title': '业务',
-                    'option_list': data[:10],
+                    'title': _('业务'),
+                    'option_list': data,
                     'selected_id': bk_biz_id if bk_biz_id else ''
                 },
                 'action_menu': {
-                    'desc': '更多操作',
+                    'desc': _('更多操作'),
                     'action_list': [
-                        {'text': '查找任务', 'key': 'bk_app_task_filter'},
-                        {'text': '绑定业务', 'key': 'bk_cc_biz_bind'},
-                        {'text': '快捷键', 'key': 'bk_shortcut_list'}
+                        {'text': _('查找任务'), 'key': 'bk_app_task_filter'},
+                        {'text': _('绑定业务'), 'key': 'bk_cc_biz_bind'},
+                        {'text': _('快捷键'), 'key': 'bk_shortcut_list'}
                     ]
                 },
                 'button_list': [
@@ -200,6 +217,12 @@ class MessageTemplate(BaseMessageTemplate):
 
     @classmethod
     def render_biz_list_msg(cls, data: List) -> Dict:
+        data = [
+            {
+                'id': str(biz['bk_biz_id']), 'text': biz['bk_biz_name'], 'is_checked': False
+            } for biz in data[:20]
+        ]
+
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -208,8 +231,8 @@ class MessageTemplate(BaseMessageTemplate):
                     'desc': 'CC'
                 },
                 'main_title': {
-                    'title': '欢迎使用配置平台',
-                    'desc': '请选择业务'
+                    'title': _('欢迎使用配置平台'),
+                    'desc': _('请选择业务')
                 },
                 'task_id': str(int(time.time() * 100000)),
                 'checkbox': {
@@ -217,15 +240,28 @@ class MessageTemplate(BaseMessageTemplate):
                     'option_list': data
                 },
                 'submit_button': {
-                    'text': '提交',
+                    'text': _('提交'),
                     'key': 'bk_cc_biz_select'
                 }
             }
         }
 
     @classmethod
-    def render_task_list_msg(cls, platform: str, title: str, desc: str, question_key: str,
-                             data: List, submit_key: str, submit_text: str = '确认') -> Dict:
+    def render_task_list_msg(cls,
+                             platform: str,
+                             title: str,
+                             desc: str,
+                             question_key: str,
+                             data: List,
+                             submit_key: str,
+                             submit_text: str = _('确认'),
+                             render: Callable = None) -> Dict:
+        if not data:
+            return None
+
+        if render:
+            data = [render(x) for x in data][:20]
+
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -251,29 +287,39 @@ class MessageTemplate(BaseMessageTemplate):
         }
 
     @classmethod
-    def render_task_select_msg(cls, platform: str, title: str, params: List, execute_key: str,
-                               update_key: str, cancel_key: str, data: Dict, task_name: str,
-                               action=['执行', '修改', '取消', '快捷键'], **kwargs) -> Dict:
+    def render_task_select_msg(cls,
+                               platform: str,
+                               title: str,
+                               params: List,
+                               execute_key: str,
+                               update_key: str,
+                               cancel_key: str,
+                               data: Dict,
+                               task_name: str,
+                               action=[_('执行'), _('修改'), _('取消'), _('快捷键')],
+                               **kwargs) -> Dict:
+        if isinstance(data, dict):
+            data.update({'platform': platform})
         button_map = {
-            '执行': {
-                "text": "执行",
+            _('执行'): {
+                "text": _("执行"),
                 "style": 1,
                 "key": f"{execute_key}|{json.dumps(data)}"
             },
-            '修改': {
-                "text": "修改",
+            _('修改'): {
+                "text": _("修改"),
                 "style": 2,
                 "key": f"{update_key}|{json.dumps(data)}"
             },
-            '取消': {
-                "text": "取消",
+            _('取消'): {
+                "text": _("取消"),
                 "style": 3,
                 "key": f"{cancel_key}|{task_name}"
             },
-            '快捷键': {
-                "text": "快捷键",
+            _('快捷键'): {
+                "text": _("快捷键"),
                 "style": 4,
-                "key": f"bk_shortcut_create|{platform}|{json.dumps(data)}"
+                "key": f"bk_shortcut_create|{json.dumps(data)}"
             }
         }
         button_list = [v for k, v in button_map.items() if k in action]
@@ -289,7 +335,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'title': title
                 },
                 'task_id': str(int(time.time() * 100000)),
-                'sub_title_text': '参数确认',
+                'sub_title_text': _('参数确认'),
                 'horizontal_content_list': params,
                 'button_list': button_list
             }
@@ -300,6 +346,8 @@ class MessageTemplate(BaseMessageTemplate):
     @classmethod
     def render_task_execute_msg(cls, platform: str, task_name: str, task_result: bool,
                                 params: List, task_domain: str) -> Dict:
+        success_msg = _('启动成功')
+        fail_msg = _('启动失败')
         return {
             'msgtype': 'template_card',
             'template_card': {
@@ -308,7 +356,7 @@ class MessageTemplate(BaseMessageTemplate):
                     'desc': platform
                 },
                 'main_title': {
-                    'title': f'{task_name}启动成功' if task_result else f'{task_name}启动失败'
+                    'title': f'{task_name}{success_msg}' if task_result else f'{task_name}{fail_msg}'
                 },
                 'horizontal_content_list': params,
                 'task_id': str(int(time.time() * 100000)),
@@ -327,20 +375,23 @@ class MessageTemplate(BaseMessageTemplate):
                 'desc': 'BKCHAT'
             },
             'main_title': {
-                'title': '任务查询结果'
+                'title': _('任务查询结果')
             },
             'task_id': str(int(time.time() * 100000))
         }
 
         if any(bk_app_task.values()):
             template['card_type'] = 'vote_interaction'
-            template['submit_button'] = {'text': '确认', 'key': 'bk_app_task_select'}
+            template['submit_button'] = {'text': _('确认'), 'key': 'bk_app_task_select'}
             template['checkbox'] = {'question_key': 'bk_app_task_id', 'option_list': []}
         else:
             template['card_type'] = 'text_notice'
-            template['main_title']['desc'] = '未找到对应任务'
+            template['main_title']['desc'] = _('未找到对应任务')
             template['card_action'] = {'type': 1, 'url': bk_paas_domain}
-            return template
+            return {
+                'msgtype': 'template_card',
+                'template_card': template
+            }
 
         if bk_app_task['bk_job']:
             option_list = [
@@ -356,4 +407,96 @@ class MessageTemplate(BaseMessageTemplate):
             ]
             template['checkbox']['option_list'].extend(option_list)
 
-        return template
+        return {
+            'msgtype': 'template_card',
+            'template_card': template
+        }
+
+    @classmethod
+    def render_ticket_service_list_msg(cls,
+                                       platform: str,
+                                       title: str,
+                                       product_key: str,
+                                       question_key: str,
+                                       create_key: str,
+                                       services: List,
+                                       page: int):
+        return {
+            'card_type': 'button_interaction',
+            'source': {
+                'desc': platform
+            },
+            'main_title': {
+                'title': title
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'button_selection': {
+                'question_key': question_key,
+                'title': _('服务列表'),
+                'option_list': services[page: page+10]
+            },
+            'button_list': [
+                {
+                    "text": _("提单"),
+                    "style": 1,
+                    "key": create_key
+                },
+                {
+                    "text": _("上页"),
+                    "style": 4,
+                    "key": f"{product_key}|{page - 10}"
+                },
+                {
+                    "text": _("下页"),
+                    "style": 4,
+                    "key": f"{product_key}|{page + 10}"
+                }
+            ]
+        }
+
+    @classmethod
+    def render_ticket_service_detail_msg(cls,
+                                         platform: str,
+                                         title: str,
+                                         service: Dict,
+                                         url: str):
+        return {
+            'card_type': 'text_notice',
+            'source': {
+                'desc': platform
+            },
+            'main_title': {
+                'title': title
+            },
+            'quote_area': {
+                'quote_text': '\n'.join([field['name'] for field in service['fields']])
+            },
+            'task_id': str(int(time.time() * 100000)),
+            'card_action': {
+                'type': 1,
+                'url': url
+            }
+        }
+
+
+class MessageParser:
+    @classmethod
+    def parse_select(cls, ctx: Dict) -> Optional[str]:
+        try:
+            return ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+        except KeyError:
+            return None
+
+    @classmethod
+    def parse_interaction(cls, ctx: Dict) -> Optional[Dict]:
+        if 'event_key' in ctx:
+            _, data = ctx['event_key'].split('|')
+            try:
+                return json.loads(data)
+            except json.JSONDecodeError:
+                return data
+        return None
+
+    @classmethod
+    def update_select(cls, ctx: Dict, val: str):
+        ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId'] = val

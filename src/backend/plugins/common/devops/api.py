@@ -20,30 +20,39 @@ from opsbot.plugins import GenericTask
 from opsbot.log import logger
 from opsbot.models import BKExecutionLog
 from opsbot.exceptions import ActionFailed, HttpFailed
-from component import DevOps, RedisClient, BK_DEVOPS_DOMAIN, OrmClient
+from component import RedisClient, OrmClient, BKCloud
+from .settings import (
+    DEVOPS_WELCOME_TIP, DEVOPS_PROJECT_SELECT_TIP,
+    DEVOPS_PIPELINE_PARAM_PLACEHOLDER, DEVOPS_PIPELINE_SELECT_TIP,
+    DEVOPS_PIPELINE_COMMON_PREFIX, DEVOPS_PIPELINE_START_SUCCESS_TIP,
+    DEVOPS_PIPELINE_PARAMS_ERROR_TIP, DEVOPS_PIPELINE_API_ABNORMAL_TIP
+)
 
 
 class DevOpsTask(GenericTask):
-    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
+    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None, bk_env: str = 'v7'):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
-        self._devops = DevOps()
+        self._bk_service = BKCloud(bk_env).bk_service
+        self._devops = self._bk_service.devops
 
     async def _get_devops_project_list(self):
         data = await self._devops.v3_app_project_list(self.user_id)
         data.sort(key=lambda x: x['updatedAt'], reverse=True)
-        return [{'id': str(project['projectCode']), 'text': project['projectName'], 'is_checked': False}
-                for project in data[:20]]
+        return data
 
     async def _get_devops_pipeline_list(self, project_id: str):
         data = (await self._devops.v3_app_pipeline_list(project_id, self.user_id)).get('records', [])
         data.sort(key=lambda x: x['latestBuildStartTime'], reverse=True)
-        return [{'id': f'{project_id}|{project["pipelineId"]}|{project["pipelineName"]}',
-                 'text': project['pipelineName'], 'is_checked': False} for project in data[:20]]
+        return data
 
     async def _get_devops_build_start_info(self, project_id: str, pipeline_id: str):
         start_infos = await self._devops.v3_app_build_start_info(project_id, pipeline_id, self.user_id)
-        filter_infos = [{'keyname': var['id'], 'value': var['defaultValue'] if var['defaultValue'] else '待输入'}
-                        for var in start_infos.get('properties', []) if not var.get('propertyType')]
+        filter_infos = [
+            {
+                'keyname': var['id'],
+                'value': var['defaultValue'] if var['defaultValue'] else DEVOPS_PIPELINE_PARAM_PLACEHOLDER
+            } for var in start_infos.get('properties', []) if not var.get('propertyType')
+        ]
         return filter_infos
 
     async def render_devops_project_list(self):
@@ -51,25 +60,41 @@ class DevOpsTask(GenericTask):
             return None
 
         bk_devops_projects = await self._get_devops_project_list()
-        return self._session.bot.send_template_msg('render_task_list_msg', 'CI', '欢迎使用蓝盾平台', '请选择蓝盾项目',
-                                                   'bk_devops_project_id', bk_devops_projects,
-                                                   'bk_devops_project_select')
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   'CI',
+                                                   DEVOPS_WELCOME_TIP,
+                                                   DEVOPS_PROJECT_SELECT_TIP,
+                                                   'bk_devops_project_id',
+                                                   bk_devops_projects,
+                                                   'bk_devops_project_select',
+                                                   render=lambda x: {'id': str(x['projectCode']),
+                                                                     'text': x['projectName'],
+                                                                     'is_checked': False})
 
     async def render_devops_pipeline_list(self):
-        try:
-            bk_devops_project_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-        except KeyError:
+        bk_devops_project_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+        if not bk_devops_project_id:
             return None
 
         bk_devops_pipelines = await self._get_devops_pipeline_list(bk_devops_project_id)
-        return self._session.bot.send_template_msg('render_task_list_msg', 'CI', '欢迎使用蓝盾平台',
-                                                   f'请选择「{bk_devops_project_id}」下流水线', 'bk_devops_pipeline_id',
-                                                   bk_devops_pipelines, 'bk_devops_pipeline_select')
+        render_func = lambda x: {
+            'id': f'{bk_devops_project_id}|{x["pipelineId"]}|{x["pipelineName"]}',
+            'text': x['pipelineName'],
+            'is_checked': False
+        }
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   'CI',
+                                                   DEVOPS_WELCOME_TIP,
+                                                   f'「{bk_devops_project_id}」{DEVOPS_PIPELINE_SELECT_TIP}',
+                                                   'bk_devops_pipeline_id',
+                                                   bk_devops_pipelines,
+                                                   'bk_devops_pipeline_select',
+                                                   render=render_func)
 
     async def render_devops_pipeline_detail(self):
         if self._session.is_first_run:
             try:
-                bk_devops_pipeline_info = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
+                bk_devops_pipeline_info = self._session.bot.parse_action('parse_select', self._session.ctx)
                 bk_devops_project_id, bk_devops_pipeline_id, bk_devops_pipeline_name = \
                     bk_devops_pipeline_info.split('|')
             except (KeyError, ValueError):
@@ -90,10 +115,14 @@ class DevOpsTask(GenericTask):
             'start_infos': start_infos
         }
 
-        return self._session.bot.send_template_msg('render_task_select_msg', 'DevOps',
-                                                   f'蓝盾流水线_{bk_devops_pipeline_name}', start_infos,
-                                                   'bk_devops_pipeline_execute', 'bk_devops_pipeline_update',
-                                                   'bk_devops_pipeline_cancel', info, bk_devops_pipeline_name)
+        return self._session.bot.send_template_msg('render_task_select_msg',
+                                                   'CI',
+                                                   f'{DEVOPS_PIPELINE_COMMON_PREFIX}_{bk_devops_pipeline_name}',
+                                                   start_infos,
+                                                   'bk_devops_pipeline_execute',
+                                                   'bk_devops_pipeline_update',
+                                                   'bk_devops_pipeline_cancel',
+                                                   info, bk_devops_pipeline_name)
 
     async def execute_task(self, bk_devops_pipeline: Dict):
         bk_devops_project_id = bk_devops_pipeline['bk_devops_project_id']
@@ -103,12 +132,12 @@ class DevOpsTask(GenericTask):
 
         try:
             await self._devops.v3_app_build_start(bk_devops_project_id, bk_devops_pipeline_id, self.user_id, **params)
-            msg = f'{bk_devops_pipeline_name} {params} 任务启动成功'
+            msg = f'{bk_devops_pipeline_name} {params} {DEVOPS_PIPELINE_START_SUCCESS_TIP}'
             return True
         except ActionFailed as e:
-            msg = f'{bk_devops_pipeline_id} {params} error: 参数有误 {e}'
+            msg = f'{bk_devops_pipeline_id} {params} error: {DEVOPS_PIPELINE_PARAMS_ERROR_TIP} {e}'
         except HttpFailed as e:
-            msg = f'{bk_devops_pipeline_id} {params} error: 第三方服务异常 {e}'
+            msg = f'{bk_devops_pipeline_id} {params} error: {DEVOPS_PIPELINE_API_ABNORMAL_TIP} {e}'
         finally:
             execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='DevOps', bk_username=self.user_id,
                                            feature_name=bk_devops_pipeline_name, feature_id=str(bk_devops_pipeline_id),
@@ -118,6 +147,6 @@ class DevOpsTask(GenericTask):
 
         return False
 
-    def render_devops_execute_msg(self, result: bool, bk_devops_pipeline: Dict):
+    def render_ci_execute_msg(self, result: bool, bk_devops_pipeline: Dict):
         return self.render_execute_msg('CI', result, bk_devops_pipeline['bk_devops_pipeline_name'],
-                                       bk_devops_pipeline['start_infos'], BK_DEVOPS_DOMAIN)
+                                       bk_devops_pipeline['start_infos'], self._bk_service.BK_DEVOPS_DOMAIN)

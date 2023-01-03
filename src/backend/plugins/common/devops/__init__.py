@@ -13,47 +13,49 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
-
 from opsbot import on_command, CommandSession
 from .api import DevOpsTask
+from .settings import (
+    DEVOPS_PROJECT_LIST_KEY, DEVOPS_PROJECT_LIST_ALIAS,
+    DEVOPS_PROJECT_SELECT_KEY, DEVOPS_PIPELINE_SELECT_KEY,
+    DEVOPS_PIPELINE_UPDATE_KEY, DEVOPS_PIPELINE_PARAM_PROMPT,
+    DEVOPS_PIPELINE_FORMAT_PROMPT, DEVOPS_PIPELINE_EXECUTE_KEY,
+    DEVOPS_PIPELINE_CANCEL_KEY, DEVOPS_PIPELINE_COMMON_PREFIX,
+    DEVOPS_PIPELINE_CANCEL_TIP
+)
 
 
-@on_command('bk_devops_project_list', aliases=('蓝盾流水线', 'bk_devops'))
+@on_command(DEVOPS_PROJECT_LIST_KEY, aliases=DEVOPS_PROJECT_LIST_ALIAS)
 async def _(session: CommandSession):
-    try:
-        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-    except KeyError:
-        bk_biz_id = None
-
+    bk_biz_id = session.bot.parse_action('parse_select', session.ctx)
     devops_task = DevOpsTask(session, bk_biz_id)
     msg_template = await devops_task.render_devops_project_list()
-    if msg_template and not msg_template.get('checkbox', {}).get('option_list'):
+    if not msg_template:
         msg_template = devops_task.render_null_msg('CI')
     await session.send(**msg_template)
 
 
-@on_command('bk_devops_project_select')
+@on_command(DEVOPS_PROJECT_SELECT_KEY)
 async def _(session: CommandSession):
     msg_template = await DevOpsTask(session).render_devops_pipeline_list()
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_select')
+@on_command(DEVOPS_PIPELINE_SELECT_KEY)
 async def _(session: CommandSession):
     msg_template = await DevOpsTask(session).render_devops_pipeline_detail()
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_update')
+@on_command(DEVOPS_PIPELINE_UPDATE_KEY)
 async def _(session: CommandSession):
-    if 'event_key' in session.ctx:
-        _, bk_devops_pipeline = session.ctx['event_key'].split('|')
-        session.state['bk_devops_pipeline'] = json.loads(bk_devops_pipeline)
+    bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
+    if not bk_devops_pipeline:
+        session.state['bk_devops_pipeline'] = bk_devops_pipeline
 
-    content = f'''>**CI TIP**
-        >请顺序输入参数，**换行分隔**'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    title = '<bold>CI TIP<bold>'
+    content = f'{DEVOPS_PIPELINE_PARAM_PROMPT}，<bold>{DEVOPS_PIPELINE_FORMAT_PROMPT}<bold>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
@@ -63,22 +65,20 @@ async def _(session: CommandSession):
     msg_template and await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_execute')
+@on_command(DEVOPS_PIPELINE_EXECUTE_KEY)
 async def _(session: CommandSession):
-    _, bk_devops_pipeline = session.ctx['event_key'].split('|')
-    bk_devops_pipeline = json.loads(bk_devops_pipeline)
-
+    bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
     flow = DevOpsTask(session)
     result = await flow.execute_task(bk_devops_pipeline)
-    msg_template = flow.render_devops_execute_msg(result, bk_devops_pipeline)
+    msg_template = flow.render_ci_execute_msg(result, bk_devops_pipeline)
     await session.send(**msg_template)
 
 
-@on_command('bk_devops_pipeline_cancel')
+@on_command(DEVOPS_PIPELINE_CANCEL_KEY)
 async def _(session: CommandSession):
-    _, bk_devops_pipeline_name = session.ctx['event_key'].split('|')
-    content = f'''>**CI TIP** 
-              ><font color=\"warning\">您的蓝盾流水线「{bk_devops_pipeline_name}」已取消...</font> 
-              '''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    bk_devops_pipeline_name = session.bot.parse_action('parse_interaction', session.ctx)
+    title = '<bold>CI TIP<bold>'
+    content = f'<warning>{DEVOPS_PIPELINE_COMMON_PREFIX}「{bk_devops_pipeline_name}」' \
+              f'{DEVOPS_PIPELINE_CANCEL_TIP}...<warning>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)

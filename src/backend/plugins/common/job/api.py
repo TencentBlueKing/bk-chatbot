@@ -20,20 +20,26 @@ from opsbot.exceptions import ActionFailed, HttpFailed
 from opsbot.log import logger
 from opsbot.plugins import GenericTask
 from opsbot.models import BKExecutionLog
-from component import JOB, RedisClient, BK_JOB_DOMAIN, OrmClient
+from component import RedisClient, OrmClient, BKCloud
+from .settings import (
+    JOB_WELCOME_TIP, JOB_PLAN_SELECT_TIP,
+    JOB_PLAN_PARAM_PLACEHOLDER, JOB_PLAN_COMMON_PREFIX,
+    JOB_PLAN_START_SUCCESS_TIP, JOB_PLAN_PARAMS_ERROR_TIP,
+    JOB_PLAN_API_ABNORMAL_TIP
+)
 
 
 class JobTask(GenericTask):
-    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
+    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None, bk_env: str = 'v7'):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
-        self._job = JOB()
+        self._bk_service = BKCloud(bk_env).bk_service
+        self._job = self._bk_service.job
 
     async def _get_job_plan_list(self, **params) -> List:
         data = await self._job.get_job_plan_list(**params)
         bk_job_plans = data.get('data', [])
         bk_job_plans.sort(key=lambda x: x['last_modify_time'], reverse=True)
-        return [{'id': str(job_plan['id']), 'text': job_plan['name'], 'is_checked': False}
-                for job_plan in bk_job_plans[:20]]
+        return bk_job_plans
 
     async def _get_job_plan_detail(self, **params) -> Dict:
         data = await self._job.get_job_plan_detail(**params)
@@ -46,20 +52,34 @@ class JobTask(GenericTask):
         bk_job_plans = await self._get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                      length=100, **params)
 
-        return self._session.bot.send_template_msg('render_task_list_msg', 'JOB', '欢迎使用JOB平台', '请选择JOB执行方案',
-                                                   'bk_job_plan_id', bk_job_plans, 'bk_job_plan_select')
+        return self._session.bot.send_template_msg('render_task_list_msg',
+                                                   'JOB',
+                                                   JOB_WELCOME_TIP,
+                                                   JOB_PLAN_SELECT_TIP,
+                                                   'bk_job_plan_id',
+                                                   bk_job_plans,
+                                                   'bk_job_plan_select',
+                                                   render=lambda x: {'id': x['id'],
+                                                                     'text': x['name'],
+                                                                     'is_checked': False})
 
     async def render_job_plan_detail(self):
         if self._session.is_first_run:
-            try:
-                job_plan_id = self._session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-            except KeyError:
+            job_plan_id = self._session.bot.parse_action('parse_select', self._session.ctx)
+            if not job_plan_id:
                 return None
 
             bk_job_plan_detail = await self._get_job_plan_detail(bk_username=self.user_id, bk_biz_id=self.biz_id,
                                                                  job_plan_id=int(job_plan_id))
-            global_var_list = [{'keyname': var['name'], 'value': var['value'] if var['value'] else '待输入'}
-                               for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1]
+            try:
+                global_var_list = [
+                    {
+                        'keyname': var['name'],
+                        'value': var['value'] if var['value'] else JOB_PLAN_PARAM_PLACEHOLDER
+                    } for var in bk_job_plan_detail.get('global_var_list', []) if var['type'] == 1
+                ]
+            except TypeError:
+                global_var_list = []
             job_plan_name = bk_job_plan_detail["name"]
         else:
             job_plan_id = self._session.state['job_plan_id']
@@ -67,9 +87,14 @@ class JobTask(GenericTask):
             global_var_list = self._session.state['global_var_list']
 
         info = {'job_plan_id': job_plan_id, 'job_plan_name': job_plan_name, 'global_var_list': global_var_list}
-        return self._session.bot.send_template_msg('render_task_select_msg', 'JOB', f'JOB执行方案_{job_plan_name}',
-                                                   global_var_list, 'bk_job_plan_execute', 'bk_job_plan_update',
-                                                   'bk_job_plan_cancel', info, job_plan_name)
+        return self._session.bot.send_template_msg('render_task_select_msg',
+                                                   'JOB',
+                                                   f'{JOB_PLAN_COMMON_PREFIX}_{job_plan_name}',
+                                                   global_var_list,
+                                                   'bk_job_plan_execute',
+                                                   'bk_job_plan_update',
+                                                   'bk_job_plan_cancel',
+                                                   info, job_plan_name)
 
     async def execute_task(self, job_plan: Dict) -> bool:
         job_plan_id = job_plan['job_plan_id']
@@ -78,18 +103,18 @@ class JobTask(GenericTask):
         params = [{'name': var['keyname'], 'value': var['value']} for var in global_var_list]
 
         try:
-            await JOB().execute_job_plan(
+            await self._job.execute_job_plan(
                 bk_biz_id=self.biz_id,
                 job_plan_id=int(job_plan_id),
                 global_var_list=params,
                 bk_username=self.user_id
             )
-            msg = f'{job_plan_id} {params} 任务启动成功'
+            msg = f'{job_plan_id} {params} {JOB_PLAN_START_SUCCESS_TIP}'
             return True
         except ActionFailed as e:
-            msg = f'{job_plan_id} {params} error: 参数有误 {e}'
+            msg = f'{job_plan_id} {params} error: {JOB_PLAN_PARAMS_ERROR_TIP} {e}'
         except HttpFailed as e:
-            msg = f'{job_plan_id} {params} error: 第三方服务异常 {e}'
+            msg = f'{job_plan_id} {params} error: {JOB_PLAN_API_ABNORMAL_TIP} {e}'
         finally:
             execution_log = BKExecutionLog(bk_biz_id=self.biz_id, bk_platform='JOB', bk_username=self.user_id,
                                            feature_name=job_plan_name, feature_id=str(job_plan_id),
@@ -101,4 +126,4 @@ class JobTask(GenericTask):
 
     def render_job_execute_msg(self, result, job_plan: Dict) -> Dict:
         return self.render_execute_msg('JOB', result, job_plan['job_plan_name'],
-                                       job_plan['global_var_list'], BK_JOB_DOMAIN)
+                                       job_plan['global_var_list'], self._bk_service.BK_JOB_DOMAIN)

@@ -13,13 +13,9 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from typing import Dict, List
+from typing import Dict
 
-from .base import BKApi
-from component.config import (
-    BK_APP_ID, BK_APP_SECRET, BACKEND_ROOT, PLUGIN_ROOT,
-    PLUGIN_TOKEN, BK_SUPER_USERNAME
-)
+from component.bk.api.base import BKApi
 
 
 class Backend:
@@ -27,20 +23,29 @@ class Backend:
     Backend api shortcut
     """
 
-    def __init__(self):
-        self.bk_backend_api = BKApi(BACKEND_ROOT)
+    def __init__(self, api_root: str, app_id: str, app_secret: str):
+        self.app_id = app_id
+        self.app_secret = app_secret
+        self.bk_backend_api = BKApi(api_root, app_id, app_secret)
 
     async def describe(self, entity, **params) -> Dict:
         return await self.bk_backend_api.call_action(f'api/v1/exec/admin_describe_{entity}/',
                                                      'POST', json={'data': params})
 
     async def log(self, **params) -> Dict:
-        return await self.bk_backend_api.call_action('api/v1/bot/log/create_log/', 'POST',
-                                                     headers={'App-Id': BK_APP_ID, 'App-Token': BK_APP_SECRET},
+        return await self.bk_backend_api.call_action('api/v1/task/exec/create_log/', 'POST',
+                                                     headers={'App-Id': self.app_id, 'App-Token': self.app_secret},
                                                      json={'data': params})
 
     async def chat_bind(self, **params) -> Dict:
         return await self.bk_backend_api.call_action(f'api/v1/open_chat_bind/', 'POST', json=params)
+
+    async def summary_chat_bind(self, **params) -> Dict:
+        """
+        :param params:
+        biz_id=1088&id_deleted=false
+        """
+        return await self.bk_backend_api.call_action(f'api/v1/open_chat_bind/', 'GET', params=params)
 
     async def get_youti_user_info(self, **params) -> Dict:
         return await self.bk_backend_api.call_action(f'api/v1/youti/get_user_info', 'POST', json=params)
@@ -62,7 +67,4 @@ class Backend:
 
 
 class Plugin:
-    """
-    User plugin system
-    """
     pass

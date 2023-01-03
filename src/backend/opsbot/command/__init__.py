@@ -498,8 +498,16 @@ def parse_command(bot: Bot,
         # command is empty
         return None, None
 
-    cmd_name_text, *cmd_remained = full_command.split(maxsplit=1)
-    cmd_name = _aliases.get(cmd_name_text)
+    # cmd_name_text, *cmd_remained = full_command.split(maxsplit=1)
+    # cmd_name = _aliases.get(cmd_name_text)
+    for i in range(full_command.count(' ') + 1):
+        cmd_name_text, *cmd_remained = full_command.rsplit(maxsplit=i)
+        cmd_name = _aliases.get(cmd_name_text)
+        if cmd_name:
+            break
+    else:
+        cmd_name = None
+        cmd_name_text = full_command
 
     if not cmd_name:
         for sep in bot.config.COMMAND_SEP:

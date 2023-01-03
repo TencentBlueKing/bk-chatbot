@@ -14,37 +14,43 @@ specific language governing permissions and limitations under the License.
 """
 
 import re
-import json
-import itertools
-import time
-import base64
 from collections import defaultdict
-from typing import Dict, List, Optional, Coroutine, Union
+from typing import (
+    Dict, List, Optional, Coroutine, Union, Tuple
+)
 
 from opsbot import CommandSession
 from opsbot.helpers import render_expression
 from opsbot.command import kill_current_session
 from opsbot.log import logger
 from opsbot.exceptions import ActionFailed, HttpFailed
-from opsbot.plugins import GenericTask
+from opsbot.plugins import GenericTask, GenericTool
 from opsbot.models import BKExecutionLog
 from component import (
-    JOB, SOPS, Backend, DevOps, ITSM, RedisClient, BK_PAAS_DOMAIN,
-    BK_JOB_DOMAIN, BK_DEVOPS_DOMAIN, Cached, TimeNormalizer, OrmClient
+    RedisClient, Cached, TimeNormalizer, OrmClient,
+    IntentRecognition, BKCloud
 )
 from .settings import (
-    SESSION_FINISHED_MSG, SESSION_FINISHED_CMD, SESSION_APPROVE_MSG,
-    TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS, TASK_EXEC_FAIL,
-    PATTERN_IP, EXPR_DONT_ENABLE, IS_USE_SQLITE
+    TASK_SESSION_FINISHED_MSG, TASK_SESSION_FINISHED_CMD,
+    TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_EXEC_SUCCESS,
+    TASK_EXEC_FAIL, PATTERN_IP, EXPR_DONT_ENABLE,
+    IS_USE_SQLITE, TASK_SKILL_LABEL, TASK_EXECUTE_BUTTON,
+    TASK_CANCEL_BUTTON, TASK_VALIDATE_PARAMS_MSG,
+    TASK_CREATE_SCHEDULER_SUCCESS_PREFIX, TASK_URL_TIP,
+    TASK_PARAMS_ERROR_TIP, TASK_API_ABNORMAL_TIP
+)
+from .apps import (
+    Approval, Scheduler, CallbackHandler, Authority
 )
 
 
 class AppTask(GenericTask):
-    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None):
+    def __init__(self, session: CommandSession, bk_biz_id: Union[str, int] = None, bk_env: str = 'v7'):
         super().__init__(session, bk_biz_id, RedisClient(env='prod'))
-        self._job = JOB()
-        self._sops = SOPS()
-        self._backend = Backend()
+        self._bk_cloud = BKCloud(bk_env)
+        self._backend = self._bk_cloud.bk_service.backend
+        self._job = self._bk_cloud.bk_service.job
+        self._sops = self._bk_cloud.bk_service.sops
 
     async def _get_app_task(self, task_name: str) -> Dict:
         bk_job_plans = await self._job.get_job_plan_list(bk_username=self.user_id, bk_biz_id=self.biz_id,
@@ -59,7 +65,9 @@ class AppTask(GenericTask):
 
     async def render_app_task(self, task_name: str):
         bk_app_task = await self._get_app_task(task_name)
-        return self._session.bot.send_template_msg('render_task_filter_msg', bk_app_task, BK_PAAS_DOMAIN)
+        return self._session.bot.send_template_msg('render_task_filter_msg',
+                                                   bk_app_task,
+                                                   self._bk_cloud.bk_service.BK_PAAS_DOMAIN)
 
     async def describe_entity(self, entity: str, **params):
         if 'biz_id' in params:
@@ -72,19 +80,37 @@ class BKTask:
     contain bk ci sops job platform
     intent -> task -> platform
     """
-    def __init__(self, intent: Dict, slots: List, user_id: str, group_id: str = None, bot_id: str = None):
+    def __init__(self,
+                 intent: Dict,
+                 slots: List,
+                 user_id: str,
+                 group_id: str = None,
+                 bot_id: str = None,
+                 bk_env: str = 'v7'):
         self._intent = intent
         self._slots = slots
         self._user_id = user_id
         self._group_id = group_id
         self._bot_id = bot_id or 'bkchat'
         self._executor = intent.get('updated_by') or user_id
-        self.backend = Backend()
+        self._bk_cloud = BKCloud(bk_env)
+        self.backend = self._bk_cloud.bk_service.backend
 
     async def run(self):
         tasks = await self.backend.describe('tasks', index_id=self._intent.get('id'))
         for task in tasks:
-            return await getattr(BKTask, f'_bk_{task.get("platform").lower()}')(self, task)
+            result = await getattr(BKTask, f'_bk_{task.get("platform").lower()}')(self, task)
+            try:
+                log_id = await self._log(self._intent.get('biz_id'),
+                                         result.get('platform'),
+                                         result.get('task_id'),
+                                         result.get('project_id', ''),
+                                         result.get('project_id', 'pipeline_id'))
+            except HttpFailed as e:
+                logger.error(f'upload task log error: {str(e)}')
+                log_id = -1
+            result['id'] = log_id
+            return result
 
     async def _log(self, biz_id, platform, task_id, project_id='', feature_id=''):
         if IS_USE_SQLITE:
@@ -100,67 +126,16 @@ class BKTask:
                                           intent_create_user=self._executor, params=self._slots,
                                           project_id=project_id, feature_id=feature_id, rtx=self._group_id or '')
 
-    async def _bk_job(self, task: Dict):
+    async def _bk_job(self, task: Dict) -> Dict:
         # only allow string and host(ip)
-        biz_id = self._intent.get('biz_id')
-        global_var_list = [{
-            'name': slot.get('name'), 'value': slot.get('value')
-        } for slot in self._slots if slot.get('type') == 1]
+        return await self._bk_cloud.bk_job(task, self._slots, self._intent.get('biz_id'),
+                                           self._executor, _validate_pattern, PATTERN_IP)
 
-        global_var_list.extend([{'id': slot.get('id'), 'server': {
-            'ip_list': [{'bk_cloud_id': 0, 'ip': ip} for ip in re.split('[\n\s,;]\s*', slot['value'])]
-        }} for slot in self._slots if slot.get('type') == 3 and _validate_pattern(PATTERN_IP, slot.get('value'))])
+    async def _bk_sops(self, task: Dict) -> Dict:
+        return await self._bk_cloud.bk_sops(task, self._slots, self._intent.get('biz_id'), self._executor)
 
-        response = await JOB().execute_job_plan(
-            bk_biz_id=biz_id,
-            job_plan_id=int(task.get('task_id')),
-            global_var_list=global_var_list,
-            bk_username=self._executor
-        )
-        return {
-            'url': f'{BK_JOB_DOMAIN}{task.get("biz_id")}/execute/task/{response.get("job_instance_id")}',
-            'id': (await self._log(biz_id, 1, response.get("job_instance_id"))).get('id')
-        }
-
-    async def _bk_sops(self, task: Dict):
-        biz_id = self._intent.get('biz_id')
-        source = task.get('source', {})
-        activities = [k
-            for k, v in source.get('pipeline_tree', {}).get('activities').items()
-            if v['optional']
-        ]
-        select_group = list(
-            itertools.chain(*[json.loads(node['data']) for node in task.get('activities', []) if node])
-        )
-        exclude_task_nodes_id = list(
-            set(activities).difference(set(select_group))
-        ) if select_group else []
-        constants = {slot['id']: slot['value'] for slot in self._slots}
-
-        sops = SOPS()
-        response = await sops.create_task(biz_id,
-                                          task.get('task_id'),
-                                          name=source.get('name'),
-                                          bk_username=self._executor,
-                                          exclude_task_nodes_id=exclude_task_nodes_id,
-                                          constants=constants)
-
-        await sops.start_task(biz_id, response.get('task_id'), bk_username=self._executor)
-        return {
-            'url': response.get('task_url'),
-            'id': (await self._log(biz_id, 2, response.get("task_id"))).get('id')
-        }
-
-    async def _bk_devops(self, task: Dict):
-        project_id = task.get('project_id')
-        pipeline_id = task.get('task_id')
-        params = {slot['name']: slot['value'] for slot in self._slots}
-        response = await DevOps().v3_app_build_start(project_id, pipeline_id, self._executor, **params)
-        detail_id = response.get("id")
-        return {
-            'url': f'{BK_DEVOPS_DOMAIN}console/pipeline/{project_id}/{pipeline_id}/detail/{detail_id}',
-            'id': (await self._log(self._intent.get('biz_id'), 3, detail_id, project_id, pipeline_id)).get('id')
-        }
+    async def _bk_devops(self, task: Dict) -> Dict:
+        return await self._bk_cloud.bk_devops(task, self._slots, self._intent.get('biz_id'), self._executor)
 
 
 def _validate_pattern(pattern, msg):
@@ -172,18 +147,21 @@ def summary_statement(intent: Dict, slots: List, other: str = '', is_click=False
     intent_name = intent.get("intent_name")
     if is_click:
         params = [{'keyname': slot['name'], 'value': slot['value']} for slot in slots]
-        statement = session.bot.send_template_msg('render_task_select_msg', 'BKCHAT', f'自定义任务_{intent_name}',
-                                                  params, 'bk_chat_task_execute', 'bk_chat_task_update',
-                                                  'bk_chat_task_cancel', intent, intent_name, ['执行', '取消'])
+        statement = session.bot.send_template_msg('render_task_select_msg',
+                                                  'BKCHAT',
+                                                  f'{TASK_SKILL_LABEL}_{intent_name}',
+                                                  params,
+                                                  'bk_chat_task_commit',
+                                                  'bk_chat_task_update',
+                                                  'bk_chat_task_cancel',
+                                                  intent,
+                                                  intent_name,
+                                                  [TASK_EXECUTE_BUTTON, TASK_CANCEL_BUTTON])
     else:
         params = '\n'.join([f"{slot['name']}：{slot['value']}" for slot in slots])
-        statement = f'任务[{intent.get("intent_name")}] {other}\n{params}'
+        statement = f'Task [{intent.get("intent_name")}] {other}\n{params}'
 
     return statement
-
-
-async def describe_entity(entity: str, **params):
-    return await Backend().describe(entity, **params)
 
 
 async def parse_slots(slots: List, session: CommandSession):
@@ -203,15 +181,15 @@ async def parse_slots(slots: List, session: CommandSession):
         if ctx['message'].extract_plain_text().find(session.bot.config.RTX_NAME) != -1:
             session.switch(param)
 
-        if param == SESSION_FINISHED_CMD:
-            await session.send(SESSION_FINISHED_MSG)
+        if param == TASK_SESSION_FINISHED_CMD:
+            await session.send(TASK_SESSION_FINISHED_MSG)
             kill_current_session(session.ctx)
             return False
 
         if _validate_pattern(slot['pattern'], param):
             slot['value'] = param
         else:
-            await session.send('参数不合法，会话中断')
+            await session.send(TASK_VALIDATE_PARAMS_MSG)
             return False
 
     return True
@@ -222,7 +200,6 @@ async def validate_intent(intents: List, session: CommandSession):
     find most ratio intent and validate intent
     add some other nlp method
     """
-    await Backend().predict_intent(sentence=session.msg_text.strip())
 
     if not intents:
         return None
@@ -248,37 +225,43 @@ def wait_commit(intent: Dict, slots: List, session: CommandSession):
         prompt = summary_statement(intent, slots, '', True, session)
         while True:
             is_commit, ctx = session.get('is_commit', prompt='...', **prompt)
-            if is_commit not in ['bk_chat_task_cancel', 'bk_chat_task_execute',
-                                 TASK_ALLOW_CMD, TASK_REFUSE_CMD, SESSION_FINISHED_CMD]:
+            if is_commit not in ['bk_chat_task_cancel', 'bk_chat_task_commit',
+                                 TASK_ALLOW_CMD, TASK_REFUSE_CMD, TASK_SESSION_FINISHED_CMD]:
                 del session.state['is_commit']
             else:
                 break
 
-    return is_commit in ['bk_chat_task_execute', TASK_ALLOW_CMD]
+    return is_commit in ['bk_chat_task_commit', TASK_ALLOW_CMD]
 
 
-async def real_run(intent: Dict, slots: List, user_id: str, group_id: str,
-                   session: CommandSession = None) -> Optional[Dict]:
+async def real_run(intent: Dict,
+                   slots: List,
+                   user_id: str,
+                   group_id: str,
+                   session: CommandSession = None,
+                   bk_env: str = 'v7') -> Optional[Dict]:
     response = defaultdict(dict)
     try:
         if 'timer' in intent:
             timestamp = intent.pop('timer', {}).get('timestamp')
             exec_data = {'intent': intent, 'slots': slots, 'user_id': user_id, 'group_id': group_id}
-            await Backend().set_timer(biz_id=intent.get('biz_id'), timer_name=intent.get('intent_name'),
-                                      execute_time=timestamp, timer_status=1, timer_user=user_id,
-                                      exec_data=exec_data, expression='')
-            msg = f'「定时」任务创建成功 时间： {timestamp}'
+            backend = BKCloud(bk_env).bk_service.backend
+            await backend.set_timer(biz_id=intent.get('biz_id'), timer_name=intent.get('intent_name'),
+                                    execute_time=timestamp, timer_status=1, timer_user=user_id,
+                                    exec_data=exec_data, expression='')
+            msg = f'{TASK_CREATE_SCHEDULER_SUCCESS_PREFIX}： {timestamp}'
         else:
             bot_id = session.bot.config.ID if session else None
-            data = await BKTask(intent, slots, user_id, group_id, bot_id).run()
-            msg = summary_statement(intent, slots, f'{TASK_EXEC_SUCCESS}\r\n任务链接：{data.get("url")}',
+            data = await BKTask(intent, slots, user_id, group_id, bot_id, bk_env).run()
+            msg = summary_statement(intent, slots,
+                                    f'{TASK_EXEC_SUCCESS}\r\n{TASK_URL_TIP}：{data.get("url")}',
                                     session=session)
             response.update(data)
     except ActionFailed as e:
-        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: 参数有误 {e}'
+        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: {TASK_PARAMS_ERROR_TIP} {e}'
         logger.error(msg)
     except HttpFailed as e:
-        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: 第三方服务异常 {e}'
+        msg = f'{TASK_EXEC_FAIL} {intent.get("intent_name")}, error: {TASK_API_ABNORMAL_TIP} {e}'
         logger.error(msg)
     finally:
         response['msg'] = msg
@@ -286,135 +269,31 @@ async def real_run(intent: Dict, slots: List, user_id: str, group_id: str,
     return response
 
 
-class Authority:
-    """need meta"""
+class Prediction:
     def __init__(self, session: CommandSession):
         self._session = session
-        self._redis_client = RedisClient(env='prod')
 
-    def pre_xwork(self) -> Dict:
-        if self._session.ctx['msg_from_type'] == 'single':
-            biz_id = self._redis_client.hash_get("chat_single_biz", self._session.ctx['msg_sender_id'])
-        else:
-            biz_id = self._redis_client.hash_get("chat_group_biz", self._session.ctx['msg_group_id'])
-
-        if not biz_id or str(biz_id) == '-1':
+    async def run(self, msg: str) -> Tuple:
+        intent_filter = getattr(Authority(self._session), f'pre_{self._session.bot.type}')()
+        if isinstance(intent_filter, Coroutine):
+            intent_filter = await intent_filter
+        if not intent_filter:
             return None
 
-        return {'biz_id': int(biz_id), 'available_user': [self._session.ctx['msg_sender_id']]}
+        bk_env = intent_filter.pop('bk_env', None)
+        try:
+            intents = await IntentRecognition(bk_env).fetch_intent(msg, **intent_filter)
+        except ModuleNotFoundError:
+            return None
+        intent = await validate_intent(intents, self._session)
+        if not intent:
+            return None
 
-
-class Approval:
-    session = None
-    redis_client = None
-    user_id = ''
-
-    def __new__(cls, session: CommandSession):
-        cls.session = session
-        cls.user_id = session.ctx['msg_sender_id']
-        cls.redis_client = RedisClient(env='prod')
-        return cls
-
-    @classmethod
-    async def use_bk_itsm(cls, intent: Dict, slots: List):
-        biz_id = intent.get('biz_id')
-        intent_id = intent.get('id')
-        key = f'opsbot_task:{cls.user_id}:{biz_id}:{intent_id}:{int(time.time())}'
-        fields = [
-            {'key': 'title', 'value': f'{intent.get("biz_id")}_BKCHAT任务审批'},
-            {'key': 'content', 'value': summary_statement(intent, slots, '请您审批')},
-            {'key': 'approver', 'value': ','.join(intent['approver'])},
-            {'key': 'id', 'value': base64.b64encode(bytes(key, encoding='utf-8')).decode('utf-8')},
-        ]
-        await ITSM().create_ticket(creator=cls.user_id, fields=fields, service_id=116)
-        cls.redis_client.set(key, json.dumps({
-            'intent': intent, 'slots': slots, 'user_id': cls.user_id,
-            'group_id': cls.session.ctx['msg_group_id']
-        }), ex=60 * 60 * 2)
-
-    @classmethod
-    def handle_approval_by_cache(cls, payload):
-        key = base64.b64decode(payload.get('id')).decode('utf-8')
-        return Approval.redis_client.get(key)
-
-    class BaseBot:
-        @staticmethod
-        def handle_approval(payload: Dict):
-            return Approval.handle_approval_by_cache(payload)
-
-        @staticmethod
-        async def wait_approve(intent: Dict, slots: List):
-            approver = intent.get('approver', [])
-            if not approver:
-                return False
-
-            await Approval.session.send('提单中...')
-            await Approval.use_bk_itsm(intent, slots)
-            await Approval.session.send(SESSION_APPROVE_MSG.format(','.join(approver)))
-            return True
-
-    class Xwork(BaseBot):
-        pass
-
-    class Trigger(BaseBot):
-        @staticmethod
-        async def wait_approve(intent: Dict, slots: List):
-            if not intent.get('approver', []):
-                return False
-
-            await Approval.use_bk_itsm(intent, slots)
-            return True
-
-
-class Scheduler:
-    session = None
-    backend = None
-    keys = ['intent', 'slots', 'user_id', 'group_id']
-
-    def __new__(cls, session: CommandSession, is_callback=True):
-        cls.session = session
-        if not is_callback:
-            cls.backend = Backend()
-        return cls
-
-    @classmethod
-    async def list_scheduler(cls):
-        data = await cls.backend.get_timer(timer_user=cls.session.ctx['msg_sender_id'])
-        timers = [
-            {
-                'id': str(item['id']),
-                'text': f'{item["biz_id"]} {item["timer_name"]} {item["execute_time"]}',
-                'is_checked': False
-            } for item in data[:20]
-        ]
-        msg_template = cls.session.bot.send_template_msg('render_task_list_msg', 'BKCHAT', 'BKCHAT定时任务',
-                                                         f'当前定时任务如下:', 'bk_chat_timer_id',
-                                                         timers, 'bk_chat_timer_select', submit_text='删除')
-        return msg_template
-
-    @classmethod
-    async def delete_scheduler(cls, timer_id: int):
-        await cls.backend.delete_timer(timer_id)
-
-    class Xwork:
-        @staticmethod
-        def handle_scheduler(payload: Dict):
-            return {k: payload.get(k) for k in Scheduler.keys if k in payload}
-
-
-class CallbackHandler(metaclass=Cached):
-    def __init__(self, session: CommandSession):
-        self.bot_cls = session.bot.type.title().replace('_', '')
-        self._session = session
-        self._handler = {
-            'handle_approval': getattr(Approval(session), self.bot_cls),
-            'handle_scheduler': getattr(Scheduler(session), self.bot_cls)
+        args = {
+            'index': True,
+            'intent': intent,
+            'bk_env': bk_env,
+            'slots': None,
+            'user_id': self._session.ctx['msg_sender_id']
         }
-
-    async def normalize(self, *args) -> Optional:
-        action = self._session.ctx.get('action')
-        task = getattr(self._handler.get(action), action)(*args)
-        if isinstance(task, Coroutine):
-            task = await task
-
-        return task
+        return intent.get('similar', 0) * 100, 'bk_chat_task_execute', args

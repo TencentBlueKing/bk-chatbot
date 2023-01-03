@@ -15,12 +15,7 @@ specific language governing permissions and limitations under the License.
 
 from typing import Any, Dict, List
 
-from .base import BKApi
-from component.config import (
-    BK_APP_ID, BK_APP_SECRET,
-    BK_CC_ROOT, BK_JOB_ROOT, BK_SOPS_ROOT, BK_ITSM_ROOT,
-    BK_DEVOPS_ROOT, BK_DATA_ROOT, BK_DATA_TOKEN
-)
+from component.bk.api.base import BKApi
 
 
 class CC:
@@ -28,8 +23,8 @@ class CC:
     CC api shortcut
     """
 
-    def __init__(self):
-        self.bk_cc_api = BKApi(BK_CC_ROOT)
+    def __init__(self, bk_cc_api: BKApi):
+        self.bk_cc_api = bk_cc_api
 
     async def search_business(self, **params) -> Dict:
         """
@@ -44,8 +39,8 @@ class JOB:
     JOB api shortcut
     """
 
-    def __init__(self):
-        self.bk_cc_api = BKApi(BK_JOB_ROOT)
+    def __init__(self, bk_job_api: BKApi):
+        self.bk_job_api = bk_job_api
 
     async def execute_job_plan(self, **params) -> Any:
         """
@@ -56,14 +51,14 @@ class JOB:
         bk_supplier_account
         bk_username
         """
-        return await self.bk_cc_api.call_action('jobv3/execute_job_plan/', 'POST', json=params)
+        return await self.bk_job_api.call_action('execute_job_plan/', 'POST', json=params)
 
     async def get_job_plan_list(self, **params) -> Any:
         """
         -params:
         bk_biz_id long
         """
-        return await self.bk_cc_api.call_action('jobv3/get_job_plan_list/', 'GET', params=params)
+        return await self.bk_job_api.call_action('get_job_plan_list/', 'GET', params=params)
 
     async def get_job_plan_detail(self, **params) -> Any:
         """
@@ -71,7 +66,7 @@ class JOB:
         bk_biz_id long
         job_plan_id long
         """
-        return await self.bk_cc_api.call_action('jobv3/get_job_plan_detail/', 'GET', params=params)
+        return await self.bk_job_api.call_action('get_job_plan_detail/', 'GET', params=params)
 
 
 class SOPS:
@@ -79,8 +74,8 @@ class SOPS:
     sops api shortcut
     """
 
-    def __init__(self):
-        self.bk_cc_api = BKApi(BK_SOPS_ROOT)
+    def __init__(self, bk_sops_api: BKApi):
+        self.bk_sops_api = bk_sops_api
 
     async def get_template_info(self, bk_biz_id, template_id, **params) -> Dict:
         """
@@ -88,8 +83,51 @@ class SOPS:
         template_id
         bk_biz_id
         """
-        return await self.bk_cc_api.call_action(f'get_template_info/{template_id}/{bk_biz_id}/',
+        return await self.bk_sops_api.call_action(f'get_template_info/{template_id}/{bk_biz_id}/',
                                                 'GET', params=params)
+
+    async def create_task(self, **params) -> Dict:
+        """
+        -params:
+        template_id
+        bk_biz_id
+        -body
+        constants
+        exclude_task_nodes_id
+        name
+        bk_supplier_account
+        bk_username
+        """
+        return await self.bk_sops_api.call_action(f'create_task/', 'POST', json=params)
+
+    async def start_task(self, **params) -> Dict:
+        """
+        -params:
+        task_id
+        bk_biz_id
+        -body
+        bk_supplier_account
+        bk_username
+        """
+        return await self.bk_sops_api.call_action(f'start_task/', 'POST', json=params)
+
+
+class SopsV3:
+    """
+    sops api shortcut
+    """
+
+    def __init__(self, bk_sops_api: BKApi):
+        self.bk_sops_api = bk_sops_api
+
+    async def get_template_info(self, bk_biz_id, template_id, **params) -> Dict:
+        """
+        -params:
+        template_id
+        bk_biz_id
+        """
+        return await self.bk_sops_api.call_action(f'get_template_info/{template_id}/{bk_biz_id}/',
+                                                  'GET', params=params)
 
     async def get_template_schemes(self, bk_biz_id, template_id, **params) -> Dict:
         """
@@ -97,15 +135,15 @@ class SOPS:
         template_id
         bk_biz_id
         """
-        return await self.bk_cc_api.call_action(f'get_template_schemes/{bk_biz_id}/{template_id}/',
-                                                'GET', params=params)
+        return await self.bk_sops_api.call_action(f'get_template_schemes/{bk_biz_id}/{template_id}/',
+                                                  'GET', params=params)
 
     async def get_template_list(self, bk_biz_id, **params) -> Dict:
         """
         -params:
         bk_biz_id
         """
-        return await self.bk_cc_api.call_action(f'get_template_list/{bk_biz_id}/', 'GET', params=params)
+        return await self.bk_sops_api.call_action(f'get_template_list/{bk_biz_id}/', 'GET', params=params)
 
     async def create_task(self, bk_biz_id, template_id, **params) -> Dict:
         """
@@ -119,8 +157,8 @@ class SOPS:
         bk_supplier_account
         bk_username
         """
-        return await self.bk_cc_api.call_action(f'create_task/{template_id}/{bk_biz_id}/',
-                                                'POST', json=params)
+        return await self.bk_sops_api.call_action(f'create_task/{template_id}/{bk_biz_id}/',
+                                                  'POST', json=params)
 
     async def start_task(self, bk_biz_id, task_id, **params) -> Dict:
         """
@@ -131,8 +169,12 @@ class SOPS:
         bk_supplier_account
         bk_username
         """
-        return await self.bk_cc_api.call_action(f'start_task/{task_id}/{bk_biz_id}/',
-                                                'POST', json=params)
+        return await self.bk_sops_api.call_action(f'start_task/{task_id}/{bk_biz_id}/',
+                                                  'POST', json=params)
+
+    async def get_mini_app_list(self, bk_biz_id, **params):
+        return await self.bk_sops_api.call_action(f'get_mini_app_list/{bk_biz_id}/',
+                                                  'GET', params=params)
 
 
 class DevOps:
@@ -140,16 +182,16 @@ class DevOps:
     devops api shortcut
     """
 
-    def __init__(self):
-        self.bk_devops_api = BKApi(BK_DEVOPS_ROOT)
+    def __init__(self, bk_devops_api: BKApi):
+        self.bk_devops_api = bk_devops_api
 
     async def v3_app_project_list(self, bk_username) -> List:
         return await self.bk_devops_api.call_action(f'projects/',
                                                     'GET', headers={'X-DEVOPS-UID': bk_username})
 
-    async def v3_app_pipeline_list(self, project_id, bk_username, **params) -> Dict:
+    async def v3_app_pipeline_list(self, project_id, bk_username) -> Dict:
         return await self.bk_devops_api.call_action(f'projects/{project_id}/pipelines/',
-                                                    'GET', headers={'X-DEVOPS-UID': bk_username}, params=params)
+                                                    'GET', headers={'X-DEVOPS-UID': bk_username})
 
     async def v3_app_build_start_info(self, project_id, pipeline_id, bk_username) -> Dict:
         return await self.bk_devops_api.call_action(
@@ -161,15 +203,19 @@ class DevOps:
                                                     'POST', headers={'X-DEVOPS-UID': bk_username}, json=params)
 
 
-class BKData:
+class BKBase:
     """
-    BKData api shortcut
+    BKBase api shortcut
     """
 
-    def __init__(self, method='token', token=BK_DATA_TOKEN):
-        self._auth = {'bk_app_code': BK_APP_ID, 'bk_app_secret': BK_APP_SECRET,
-                      'bkdata_authentication_method': method, 'bkdata_data_token': token}
-        self.bk_data_api = BKApi(BK_DATA_ROOT)
+    def __init__(self, api_root: str, app_id: str, app_secret: str, method='token', token=None):
+        self._auth = {
+            'bk_app_code': app_id,
+            'bk_app_secret': app_secret,
+            'bkdata_authentication_method': method,
+            'bkdata_data_token': token
+        }
+        self.bk_data_api = BKApi(api_root, app_id, app_secret)
 
     async def data_query(self, **params) -> List:
         params.update(self._auth)
@@ -181,8 +227,8 @@ class ITSM:
     ITSM ticket api shortcut
     """
 
-    def __init__(self):
-        self.bk_itsm_api = BKApi(BK_ITSM_ROOT)
+    def __init__(self, bk_itsm_api: BKApi):
+        self.bk_itsm_api = bk_itsm_api
 
     async def operate_node(self, **params) -> Dict:
         """
@@ -232,5 +278,18 @@ class ITSM:
     async def get_services(self, **params):
         return await self.bk_itsm_api.call_action('get_services/', 'GET', params=params)
 
-    async def get_service_detail(self, **params):
-        return await self.bk_itsm_api.call_action('get_service_detail/', 'GET', params=params)
+
+class JobV2:
+    def __init__(self, bk_job_v2_api: BKApi):
+        self.bk_job_v2_api = bk_job_v2_api
+
+    async def execute_job(self, **params) -> Any:
+        """
+        -params:
+        bk_biz_id
+        bk_job_id
+        global_var_list
+        steps
+        bk_username
+        """
+        return await self.bk_job_v2_api.call_action('execute_job/', 'POST', json=params)

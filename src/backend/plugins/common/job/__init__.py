@@ -13,70 +13,65 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-import json
-
 from opsbot import on_command, CommandSession
 from .api import JobTask
+from .settings import (
+    JOB_PLAN_LIST_KEY, JOB_PLAN_LIST_ALIAS,
+    JOB_PLAN_LIST_SORT_KEY, JOB_PLAN_SEARCH_KEY,
+    JOB_PLAN_SELECT_KEY, JOB_PLAN_EXECUTE_KEY,
+    JOB_PLAN_UPDATE_KEY, JOB_PLAN_CANCEL_KEY,
+    JOB_PLAN_PARAM_PROMPT, JOB_PLAN_FORMAT_PROMPT,
+    JOB_PLAN_CANCEL_TIP, JOB_PLAN_COMMON_PREFIX
+)
 
 
-@on_command('bk_job_plan_list', aliases=('JOB任务', 'JOB执行方案', '作业平台', 'bk_job'))
+@on_command(JOB_PLAN_LIST_KEY, aliases=JOB_PLAN_LIST_ALIAS)
 async def list_job_plan(session: CommandSession):
-    try:
-        bk_biz_id = session.ctx['SelectedItems']['SelectedItem']['OptionIds']['OptionId']
-    except KeyError:
-        bk_biz_id = None
-
+    bk_biz_id = session.bot.parse_action('parse_select', session.ctx)
     job_task = JobTask(session, bk_biz_id)
     msg_template = await job_task.render_job_plan_list()
-    if msg_template and not msg_template.get('checkbox', {}).get('option_list'):
+    if not msg_template:
         msg_template = job_task.render_null_msg('JOB')
     await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_sort')
+@on_command(JOB_PLAN_LIST_SORT_KEY)
 async def sort_job_plan(session: CommandSession):
     pass
 
 
-@on_command('bk_job_plan_search')
+@on_command(JOB_PLAN_SEARCH_KEY)
 async def search_job_plan(session: CommandSession):
     pass
 
 
-@on_command('bk_job_plan_select')
+@on_command(JOB_PLAN_SELECT_KEY)
 async def select_bk_job_plan(session: CommandSession):
     msg_template = await JobTask(session).render_job_plan_detail()
     if msg_template:
         await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_execute')
+@on_command(JOB_PLAN_EXECUTE_KEY)
 async def _(session: CommandSession):
-    _, job_plan = session.ctx['event_key'].split('|')
-    try:
-        job_plan = json.loads(job_plan)
-    except json.JSONDecodeError:
+    job_plan = session.bot.parse_action('parse_interaction', session.ctx)
+    if not job_plan:
         return
-
     flow = JobTask(session)
     result = await flow.execute_task(job_plan)
     msg_template = flow.render_job_execute_msg(result, job_plan)
     await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_update')
+@on_command(JOB_PLAN_UPDATE_KEY)
 async def _(session: CommandSession):
-    if 'event_key' in session.ctx:
-        _, job_plan = session.ctx['event_key'].split('|')
-        try:
-            job_plan = json.loads(job_plan)
-        except json.JSONDecodeError:
-            return
-        session.state.update(job_plan)
-
-    content = f'''>**JOB TIP**
-    >请顺序输入参数，**换行分隔**'''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    job_plan = session.bot.parse_action('parse_interaction', session.ctx)
+    if not job_plan:
+        return
+    session.state.update(job_plan)
+    title = '<bold>JOB TIP<bold>'
+    content = f'{JOB_PLAN_PARAM_PROMPT}，<bold>{JOB_PLAN_FORMAT_PROMPT}<bold>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
@@ -87,11 +82,12 @@ async def _(session: CommandSession):
         await session.send(**msg_template)
 
 
-@on_command('bk_job_plan_cancel')
+@on_command(JOB_PLAN_CANCEL_KEY)
 async def _(session: CommandSession):
-    _, bk_job_plan_name = session.ctx['event_key'].split('|')
-    content = f'''>**JOB TIP** 
-                ><font color=\"warning\">您的JOB执行方案「{bk_job_plan_name}」已取消...</font> 
-                '''
-    msg_template = session.bot.send_template_msg('render_markdown_msg', content)
+    bk_job_plan_name = session.bot.parse_action('parse_interaction', session.ctx)
+    if not bk_job_plan_name:
+        return
+    title = '<bold>JOB TIP<bold>'
+    content = f'<warning>{JOB_PLAN_COMMON_PREFIX}「{bk_job_plan_name}」{JOB_PLAN_CANCEL_TIP}...<warning>'
+    msg_template = session.bot.send_template_msg('render_markdown_msg', title, content)
     await session.send(**msg_template)

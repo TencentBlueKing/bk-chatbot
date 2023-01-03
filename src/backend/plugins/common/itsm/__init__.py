@@ -17,15 +17,19 @@ from opsbot import (
     on_command, CommandSession,
 )
 from .api import GenericIT
+from .settings import (
+    ITSM_CHECK_SERVICE_KEY, ITSM_CHECK_SERVICE_KEY,
+    ITSM_SELECT_SERVICE_KEY
+)
 
 
-@on_command('bk_itsm', aliases=('提单', '查看服务列表'))
+@on_command(ITSM_CHECK_SERVICE_KEY, aliases=ITSM_CHECK_SERVICE_KEY)
 async def _(session: CommandSession):
     msg = await GenericIT(session).render_services()
     msg and await session.send('', msgtype='template_card', template_card=msg)
 
 
-@on_command('bk_itsm_select_service')
+@on_command(ITSM_SELECT_SERVICE_KEY)
 async def _(session: CommandSession):
     msg = await GenericIT(session).render_service_detail()
     msg and await session.send('', msgtype='template_card', template_card=msg)

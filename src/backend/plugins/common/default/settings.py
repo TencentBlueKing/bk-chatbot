@@ -15,24 +15,26 @@ specific language governing permissions and limitations under the License.
 
 import os
 
-DEFAULT_SHOW_GROUP_ID_ALIAS = ('群ID', '群id', '查看企业微信ID', '查看企业微信id')
+from i18n import _
 
-DEFAULT_WELCOME_MSG = '{user} 您好，欢迎使用{name}，很高兴为您服务\n'
-DEFAULT_WELCOME_BIZ = '当前已设置常用业务为'
-DEFAULT_WELCOME_BIND = '当前未设置常用业务， 如需请点击'
-DEFAULT_WELCOME_REBIND = '重新设置请点击'
-DEFAULT_WELCOME_TIP = '目前已支持的通用技能 指引请点击'
-DEFAULT_WELCOME_TASK = '业务自定义运维工具请点击'
-DEFAULT_WELCOME_CONFIG = '配置业务技能请点击'
-DEFAULT_HELP_MSG = '如需人工帮助请咨询'
-DEFAULT_DEVOPS_MSG = '蓝盾流水线执行请点击'
-DEFAULT_GUIDE_MSG = '详细操作指引请点击'
-DEFAULT_GUIDE_URL = os.getenv('DEFAULT_GUIDE_URL', '')
-DEFAULT_BIZ_TIP = '请选择业务:'
-DEFAULT_BIZ_BIND_SUCCESS = '常用业务设置成功，业务ID'
-DEFAULT_BIZ_BIND_FAIL = '常用业务设置失败，该群已经绑定其他业务，请前往网页操作'
-
-DEFAULT_BIND_BIZ_ALIAS = ('绑定业务', '切换业务', '解绑业务', '业务绑定', '业务解绑', '业务切换')
-DEFAULT_BIND_BIZ_TIP = '查到你名下没有业务'
-DEFAULT_HELPER = os.getenv('DEFAULT_HELPER', '').split(',')
 DEFAULT_INTENT_CATEGORY = os.getenv('DEFAULT_INTENT_CATEGORY', '').split(',')
+DEFAULT_GUIDE_URL = os.getenv('DEFAULT_GUIDE_URL', '')
+DEFAULT_HELPER = os.getenv('DEFAULT_HELPER', '').split(',')
+
+DEFAULT_SHOW_GROUP_ID_ALIAS = (_('群ID'), _('群id'))
+DEFAULT_BIND_BIZ_ALIAS = (
+    _('绑定业务'), _('切换业务'), _('解绑业务'),
+    _('业务绑定'), _('业务解绑'), _('业务切换')
+)
+DEFAULT_BIND_BIZ_TIP = _('查到你名下没有业务')
+DEFAULT_QUERY_CHAT_KEY = 'bk_chat_group_id'
+DEFAULT_WELCOME_KEY = 'bk_chat_welcome'
+DEFAULT_BIND_ENV_KEY = 'bk_env_bind'
+DEFAULT_BIND_BIZ_KEY = 'bk_cc_biz_bind'
+DEFAULT_SELECT_BIZ_KEY = 'bk_cc_biz_select'
+DEFAULT_SEARCH_QA_KEY = 'bk_chat_search_knowledge'
+DEFAULT_HANDLE_CALLBACK_KEY = 'bk_chat_common_callback'
+
+DEFAULT_SEARCH_QA_RESULT = _('结果')
+DEFAULT_SEARCH_QA_QUESTION = _('问题')
+DEFAULT_SEARCH_QA_ANSWER = _('答案')

@@ -13,12 +13,25 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-DEVOPS_PROJECT_TIP = '蓝盾项目：\n'
-DEVOPS_PIPELINE_TIP = '蓝盾流水线：'
-DEVOPS_PIPELINE_ALLOW_CMD = '是'
-DEVOPS_PIPELINE_REFUSE_CMD = '否'
-DEVOPS_PIPELINE_START_SUCCESS = '蓝盾流水线启动成功'
-DEVOPS_PIPELINE_START_FAIL = '蓝盾流水线启动失败'
+from i18n import _
 
-SESSION_FINISHED_MSG = '本次会话结束，您可以开启新的会话'
-SESSION_FINISHED_CMD = '结束'
+DEVOPS_WELCOME_TIP = _('欢迎使用蓝盾平台')
+
+DEVOPS_PROJECT_LIST_KEY = 'bk_devops_project_list'
+DEVOPS_PROJECT_LIST_ALIAS = (_('蓝盾流水线'), 'bk_devops')
+DEVOPS_PROJECT_SELECT_KEY = 'bk_devops_project_select'
+DEVOPS_PROJECT_SELECT_TIP = _('请选择蓝盾项目')
+
+DEVOPS_PIPELINE_SELECT_KEY = 'bk_devops_pipeline_select'
+DEVOPS_PIPELINE_UPDATE_KEY = 'bk_devops_pipeline_update'
+DEVOPS_PIPELINE_PARAM_PROMPT = _('请顺序输入参数')
+DEVOPS_PIPELINE_FORMAT_PROMPT = _('换行分隔')
+DEVOPS_PIPELINE_EXECUTE_KEY = 'bk_devops_pipeline_execute'
+DEVOPS_PIPELINE_CANCEL_KEY = 'bk_devops_pipeline_cancel'
+DEVOPS_PIPELINE_COMMON_PREFIX = _('蓝盾流水线')
+DEVOPS_PIPELINE_CANCEL_TIP = _('已取消')
+DEVOPS_PIPELINE_PARAM_PLACEHOLDER = _('待输入')
+DEVOPS_PIPELINE_SELECT_TIP = _('请选择流水线')
+DEVOPS_PIPELINE_START_SUCCESS_TIP = _('任务启动成功')
+DEVOPS_PIPELINE_PARAMS_ERROR_TIP = _('参数有误')
+DEVOPS_PIPELINE_API_ABNORMAL_TIP = _('第三方服务异常')

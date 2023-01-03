@@ -25,16 +25,16 @@ from typing import (
 import aiohttp
 import aiofiles
 import requests
-from quart import request, abort, jsonify, render_template
+from quart import request, abort, jsonify
 from jsonschema.exceptions import ValidationError
 
 from opsbot.log import logger
-from .message import Message
-from .decryption import Decryption
 from opsbot.proxy import (
     Api as BaseApi, Proxy as BaseProxy, UnifiedApi, _deco_maker,
     ActionFailed, ApiNotAvailable, HttpFailed, NetworkError
 )
+from .message import Message
+from .decryption import Decryption
 
 
 class Proxy(BaseProxy):
@@ -137,7 +137,7 @@ class Proxy(BaseProxy):
                    message: Union[str, Dict[str, Any], List[Dict[str, Any]]],
                    **kwargs):
         payload = defaultdict(dict)
-        payload['touser'] = context['msg_sender_id']
+        payload['touser'] = context['msg_sender_code']
         payload['agentid'] = context.get('AgentID', None) or context.get('AgentId')
         if message:
             payload['text']['content'] = message

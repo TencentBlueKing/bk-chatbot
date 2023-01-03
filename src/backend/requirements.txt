@@ -55,3 +55,4 @@ packaging==21.0
 sqlalchemy==1.4.26
 jsonschema==2.5.1
 elasticsearch==7.16.1
+slack-sdk==3.19.4

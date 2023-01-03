@@ -13,24 +13,12 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-ITSM_KEY = 'bk_itsm'
-ITSM_KEYWORDS = ('itsm提单', 'ITSM提单')
+from i18n import _
 
-PLUGIN_KEY = 'bk_itsm'
-PLUGIN_INDEX_MSG = '已选择: 创建itsm单据 \n'
-PLUGIN_INDEX_EXAMPLE = 'eg: 创建itsm单据 服务 标题 正文\n'
-PLUGIN_PARAMS_MAP = {
-    'name': '单据标题',
-    'catalog': '服务',
-    'content': '正文',
-}
-PLUGIN_PARAMS_TEMPLATE = {
-    'name': '',
-    'catalog': '',
-    'content': '',
-}
+ITSM_CHECK_SERVICE_KEY = 'bk_itsm'
+ITSM_CHECK_SERVICE_ALIAS = (_('查看服务列表'), )
+ITSM_SELECT_SERVICE_KEY = 'bk_itsm_select_service'
 
-PLUGIN_ACTION = 'bk_itsm.approve'
-PLUGIN_KEYWORDS = {'itsm提单', '创建itsm单据'}
-PLUGIN_FINISHED_CMD = '结束'
-PLUGIN_FINISHED_MSG = '本次会话结束，您可以开启新的会话'
+ITSM_WELCOME_TIP = _('欢迎使用流程服务')
+ITSM_SERVICE_TEMPLATE_PREFIX = _('已选择服务模版')
+ITSM_ClICK_TIP = _('点击填单')

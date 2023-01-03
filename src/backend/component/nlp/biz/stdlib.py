@@ -23,9 +23,9 @@ import arrow
 import jieba
 import diskcache as dc
 
-from .config import BIZ_DISK_CACHE_PATH, BIZ_CORPUS_DATA_PATH
-from component import CC
+from component import BKCloud
 from component.config import BK_SUPER_USERNAME
+from .config import BIZ_DISK_CACHE_PATH, BIZ_CORPUS_DATA_PATH
 
 
 class DiskCache(dc.Cache):
@@ -103,7 +103,8 @@ class CorpusConfig:
         """
         cache biz info, reduce fetch frequency
         """
-        data = (await CC().search_business(bk_username=BK_SUPER_USERNAME, fields=self.fields)).get('info', [])
+        cc = BKCloud().bk_service.cc
+        data = (await cc.search_business(bk_username=BK_SUPER_USERNAME, fields=self.fields)).get('info', [])
         if not data:
             return
 

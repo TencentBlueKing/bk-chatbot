@@ -20,30 +20,16 @@ ALL Component Config
 Include: BK(APP_ID, APP_SECRET)
 """
 
-BK_APP_ID = os.getenv('BK_APP_ID', '')
-BK_APP_SECRET = os.getenv('BK_APP_SECRET', '')
-BK_GET_TOKEN_URL = os.getenv('BK_GET_TOKEN_URL', '')
-BK_REFRESH_TOKEN_URL = os.getenv('BK_REFRESH_TOKEN_URL', '')
-
-BK_PAAS_DOMAIN = os.getenv('BK_PAAS_DOMAIN', '')
-BK_CHAT_DOMAIN = os.getenv('BK_CHAT_DOMAIN', '')
-BK_JOB_DOMAIN = os.getenv('BK_JOB_DOMAIN', '')
-BK_SOPS_DOMAIN = os.getenv('BK_SOPS_DOMAIN', '')
-BK_DEVOPS_DOMAIN = os.getenv('BK_DEVOPS_DOMAIN', '')
-BK_ITSM_DOMAIN = os.getenv('BK_ITSM_DOMAIN', '')
-
-BK_CC_ROOT = os.getenv('BK_CC_ROOT', '')
-BK_JOB_ROOT = os.getenv('BK_JOB_ROOT', '')
-BK_SOPS_ROOT = os.getenv('BK_SOPS_ROOT', '')
-BK_DEVOPS_ROOT = os.getenv('BK_DEVOPS_ROOT', '')
-BK_DATA_ROOT = os.getenv('BK_DATA_ROOT', '')
-BK_ITSM_ROOT = os.getenv('BK_ITSM_ROOT', '')
-BACKEND_ROOT = os.getenv('BACKEND_ROOT', '')
-PLUGIN_ROOT = os.getenv('PLUGIN_ROOT', '')
-
-BK_DATA_TOKEN = os.getenv('BK_DATA_TOKEN', '')
-PLUGIN_TOKEN = os.getenv('PLUGIN_TOKEN', '')
+BK_ENV = os.getenv('BK_ENV', 'oa,iegcom,obk,intlgame').split(',')
 BK_SUPER_USERNAME = os.getenv('BK_SUPER_USERNAME', '')
+
+PLUGIN_ROOT = os.getenv('PLUGIN_ROOT', '')
+PLUGIN_TOKEN = os.getenv('PLUGIN_TOKEN', '')
+
+JIRA_ROOT = os.getenv("JIRA_ROOT", "")
+JIRA_USER_EMAIL = os.getenv('JIRA_USER_EMAIL', '')
+JIRA_TOKEN = os.getenv('JIRA_TOKEN', '')
+JIRA_DOMAIN = os.getenv('JIRA_DOMAIN', '')
 
 AES_KEY = os.getenv('DATA_AES_KEY', '')
 AES_IV = os.getenv('DATA_AES_IV', '')

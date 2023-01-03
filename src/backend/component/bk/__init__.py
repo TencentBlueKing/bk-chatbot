@@ -13,6 +13,7 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from .base import BKApi
-from .esb import CC, JOB, SOPS, DevOps, BKData, ITSM
-from .apigw import Backend, Plugin
+from component.bk.api.base import BKApi
+from component.bk.api.esb import CC, JOB, SOPS, DevOps, BKBase, ITSM
+from component.bk.api.apigw import Backend, Plugin
+from component.bk.cloud import BKCloud
