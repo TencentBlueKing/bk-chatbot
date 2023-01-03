@@ -101,8 +101,8 @@ PORT = 8888
 
 > 配置IM密钥文件
 
-- [企业微信](docs/slack/secret.md)
-- [Slack](docs/slack/secret.md)
+- [企业微信](slack/secret.md)
+- [Slack](slack/secret.md)
 
 > 配置蓝鲸API密钥和路径
 
@@ -209,8 +209,8 @@ docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 
 #### IM机器人绑定
 
-- [企业微信](docs/slack/apply.md)
-- [Slack](docs/slack/apply.md)
+- [企业微信](slack/apply.md)
+- [Slack](slack/apply.md)
 
 ### 5.机器人管理端部署
 
