@@ -497,7 +497,7 @@ def parse_command(bot: Bot,
     if not full_command:
         # command is empty
         return None, None
-    
+
     # cmd_name_text, *cmd_remained = full_command.split(maxsplit=1)
     # cmd_name = _aliases.get(cmd_name_text)
     for i in range(full_command.count(' ') + 1):
