@@ -4,4 +4,4 @@
 
 2、蓝盾CI执行， 点击 “CI” ， 弹出选择“蓝盾项目”，选择后继续选择蓝盾的”流水线“，到最终的执行
 
-<img title="" src="../resource/img/slack_usage1.png" alt="image" style="zoom: 50%;" data-align="inline" width="240">
+<img title="" src="../resource/img/slack_usage1.png" alt="image" style="zoom: 50%;" data-align="inline" width="1024">
