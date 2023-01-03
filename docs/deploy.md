@@ -99,24 +99,10 @@ PORT = 8888
 * TOKEN    用户自定义
 * AES_KEY  用户自定义
 
-> 配置企业微信密钥文件
+> 配置IM密钥文件
 
-```shell
-cd release && vim protocol/xwork/config.py
-```
-
-```shell
-"""
-Xwork configurations.
-"""
-
-CORPID = "必填"   # 企业微信所属企业ID 
-FWID = ""
-SERVICE_ID = ""
-SECRET = "必填"   # 企业微信专属密钥
-TOKEN = "必填"    # 企业微信应用自定义Token
-AES_KEY = "必填"  # 企业微信应用自定义 aes
-```
+- [企业微信](docs/slack/secret.md)
+- [Slack](docs/slack/secret.md)
 
 > 配置蓝鲸API密钥和路径
 
@@ -221,36 +207,10 @@ docker build -f release/src/backend/Dockerfile --network=host -t {namespace}:{ta
 docker run -d --name {name} -p {port}:{port} {namespace}:{tag}
 ```
 
-#### 企业微信绑定
+#### IM机器人绑定
 
-> 企业微信后台
-
-* [打开](https://work.weixin.qq.com/wework_admin)
-
-<img src="./resource/img/xwork_index.png" alt="image" style="zoom: 67%;" />
-
-> 创建应用
-
-* 进入 应用管理 -> [创建应用](https://work.weixin.qq.com/wework_admin/frame#apps/createApiApp)
-
-![image](./resource/img/xwork_app_create.png)
-
-<img src="./resource/img/xwork_app_create2.png" alt="image" style="zoom: 67%;" />
-
-> 应用管理
-
-* 点击应用
-
-<img src="./resource/img/xwork_app_manage.png" alt="image" style="zoom:67%;" />
-
-<img src="./resource/img/xwork_app_manage2.png" alt="image" style="zoom:67%;" />
-
-> 注册回调
-
-* 后台启动服务
-* 测试注册 (注：这里url要填写你后台服务部署的外网IP，确保端口开通)
-
-<img src="./resource/img/xwork_app_callback.png" alt="image" style="zoom:67%;" />
+- [企业微信](docs/slack/apply.md)
+- [Slack](docs/slack/apply.md)
 
 ### 5.机器人管理端部署
 
