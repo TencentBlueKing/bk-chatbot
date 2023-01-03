@@ -5,3 +5,7 @@
 2、蓝盾CI执行， 点击 “CI” ， 弹出选择“蓝盾项目”，选择后继续选择蓝盾的”流水线“，到最终的执行
 
 <img title="" src="../resource/img/slack_usage1.png" alt="image" style="zoom: 50%;" data-align="inline" width="1024">
+
+3、我们同时支持任务查找的功能，如下，您可自由输入你想要执行的任务，后台会给您匹配到最佳的任务。
+
+<img title="" src="../resource/img/slack_usage2.png" alt="image" style="zoom: 50%;" data-align="inline" width="1024">
