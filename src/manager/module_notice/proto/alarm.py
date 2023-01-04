@@ -32,6 +32,7 @@ BaseMetaFields = [
     "is_enabled",
     "is_translated",
     "translation_type",
+    "notify_interval",
 ]
 
 
@@ -91,6 +92,7 @@ class AlarmConfigSerializer(serializers.ModelSerializer):
         allow_empty=False,
         child=AlarmConfigSerializerAlarmStrategy(),
     )
+    notify_interval = serializers.IntegerField(label="周期回调间隔时间s")
 
     class Meta:
         model = AlarmStrategyModel

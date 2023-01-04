@@ -201,6 +201,7 @@ class AlarmConfigViewSet(BaseManageViewSet):
                 "is_enabled": data.get("is_enabled"),
                 "is_translated": data.get("is_translated"),
                 "translation_type": data.get("translation_type"),
+                "notify_interval": data.get("notify_interval"),
             }
             platform = data.get("alarm_source_type")
             config_id = SaveAction.save(int(platform), **params)
@@ -244,6 +245,7 @@ class AlarmConfigViewSet(BaseManageViewSet):
                 "is_enabled": alarm_strategy_obj.is_enabled,
                 "is_translated": alarm_strategy_obj.is_translated,
                 "translation_type": alarm_strategy_obj.translation_type,
+                "notify_interval": alarm_strategy_obj.notify_interval,
             }
             # 编辑套餐
             EditAction.edit(alarm_strategy_obj.alarm_source_type, **params)

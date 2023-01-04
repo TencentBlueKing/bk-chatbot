@@ -30,6 +30,7 @@ class Action(Strategy):
         deal_strategy_value = kwargs.get("deal_strategy_value")
         url = deal_strategy_value.get("url")
         id = kwargs.get("config_id")
+        notify_interval = kwargs.get("notify_interval", 1)  # 时间分钟
         my_content = {
             "callback_message": "{{alarm.callback_message}}",
             "config_id": "{{action.action_config_id}}",
@@ -39,7 +40,7 @@ class Action(Strategy):
                 "template_detail": {
                     "method": "POST",
                     "url": url,
-                    "notify_interval": 60,  # 告警周期（按s为单位，最小1分钟，默认1h）
+                    "notify_interval": notify_interval * 60,  # 告警周期（按s为单位，最小1分钟，默认1h）
                     "failed_retry": {
                         "is_enabled": True,  # 是否启动
                         "max_retry_times": 2,
