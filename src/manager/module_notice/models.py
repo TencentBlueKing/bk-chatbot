@@ -18,10 +18,10 @@ from enum import Enum
 from django.db import models
 from django_filters import filters
 
+from common.constants import TASK_PLATFORM_CHOICES
 from common.drf.filters import BaseOpenApiFilter
 from common.models.base import BaseModel, FormatDateTimeField
 from common.models.json import DictCharField
-from common.constants import TASK_PLATFORM_CHOICES
 
 
 class TriggerModel(BaseModel):
@@ -151,6 +151,7 @@ class AlarmStrategyModel(BaseModel):
     config_id = models.CharField("处理套餐ID", max_length=256)
     is_translated = models.BooleanField("是否翻译", default=False)
     translation_type = models.CharField("目标语言", max_length=32, default="", blank=True)
+    notify_interval = models.IntegerField("告警策略周期时间(min)", default=1)
 
     class Meta:
         db_table = "tab_alarm_strategy"
