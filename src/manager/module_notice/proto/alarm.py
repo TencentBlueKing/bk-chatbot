@@ -92,7 +92,7 @@ class AlarmConfigSerializer(serializers.ModelSerializer):
         allow_empty=False,
         child=AlarmConfigSerializerAlarmStrategy(),
     )
-    notify_interval = serializers.IntegerField(label="周期回调间隔时间s")
+    notify_interval = serializers.IntegerField(label="周期回调间隔时间(min)")
 
     class Meta:
         model = AlarmStrategyModel
