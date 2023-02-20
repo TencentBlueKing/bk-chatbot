@@ -56,7 +56,7 @@ class ReqBotCreateLogData(Serializer):
 
         id = serializers.CharField(label="参数id")
         name = serializers.CharField(label="参数名称")
-        value = serializers.CharField(label="参数值")
+        value = serializers.CharField(label="参数值", allow_blank=True)
 
     biz_id = serializers.IntegerField(label="业务ID")
     bot_type = serializers.CharField(label="机器人类型")
