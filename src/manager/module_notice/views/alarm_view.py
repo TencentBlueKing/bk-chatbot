@@ -96,7 +96,12 @@ class AlarmNoticeViewSet(BaseViewSet):
         for notice_group in config_info.get("notice_groups", []):
             im_type = notice_group.get("im")
             # 通过im获取不同
-            params: dict = getattr(original_alarm, im_type.lower())()
+            if im_type.lower() == "email":
+                params: dict = getattr(original_alarm, im_type.lower())(
+                    notice_group.get(notice_group.get("notice_group_name"))
+                )
+            else:
+                params: dict = getattr(original_alarm, im_type.lower())()
 
             # 处理headers
             headers = params.get("headers", {})

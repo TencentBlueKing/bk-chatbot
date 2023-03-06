@@ -310,3 +310,8 @@ class OriginalAlarm:
         content = self.get_text()
         params = {"msg_type": "text", "msg_param": {"content": content}}
         return params
+
+    def email(self, title):
+        content = self.get_text()
+        params = {"msg_type": "text", "msg_param": {"content": content, "title": title}}
+        return params

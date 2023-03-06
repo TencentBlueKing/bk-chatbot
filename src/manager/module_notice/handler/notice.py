@@ -105,6 +105,12 @@ class Notice:
                 },
             }
 
+        # 支持邮件
+        if self.im_type in ["EMAIL"]:
+            params = {
+                "msg_param": {"title": self.kwargs.get("group_name", "BkChat消息通知"), "content": self.msg_content},
+            }
+
         return params
 
 
