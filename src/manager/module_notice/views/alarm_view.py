@@ -97,9 +97,7 @@ class AlarmNoticeViewSet(BaseViewSet):
             im_type = notice_group.get("im")
             # 通过im获取不同
             if im_type.lower() == "email":
-                params: dict = getattr(original_alarm, im_type.lower())(
-                    notice_group.get(notice_group.get("notice_group_name"))
-                )
+                params: dict = getattr(original_alarm, im_type.lower())(notice_group.get("notice_group_name"))
             else:
                 params: dict = getattr(original_alarm, im_type.lower())()
 
