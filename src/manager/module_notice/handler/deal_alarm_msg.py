@@ -313,5 +313,5 @@ class OriginalAlarm:
 
     def email(self, title):
         content = self.get_text()
-        params = {"msg_type": "text", "msg_param": {"content": content, "title": title}}
+        params = {"msg_type": "text", "msg_param": {"content": content.replace("\n", "<br/>"), "title": title}}
         return params
