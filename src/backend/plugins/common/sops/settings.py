@@ -17,7 +17,7 @@ from i18n import _
 
 SOPS_WELCOME_TIP = _('欢迎使用标准运维')
 
-SOPS_TEMPLATE_LIST_KEY = 'bk_job_plan_list'
+SOPS_TEMPLATE_LIST_KEY = 'bk_sops_template_list'
 SOPS_TEMPLATE_LIST_ALIAS = (_('标准运维'), 'sops', 'bk_sops')
 
 SOPS_TEMPLATE_SELECT_KEY = 'bk_sops_template_select'
