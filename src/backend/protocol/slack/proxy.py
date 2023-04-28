@@ -55,7 +55,7 @@ class Proxy(BaseProxy):
 
     @classmethod
     async def _handle_url_verify(cls):
-        payload = await request.get_data()
+        payload = await request.json
         return jsonify({'challenge': payload['challenge']})
 
     @classmethod
@@ -64,8 +64,8 @@ class Proxy(BaseProxy):
         return jsonify(error='bad request', code=405)
 
     async def _handle_cmd(self):
-        data = await self._validate_parameters()
-        return jsonify(data)
+        payload = await request.json
+        return jsonify(payload)
 
     async def _handle_http(self):
         data = await self._validate_parameters()
