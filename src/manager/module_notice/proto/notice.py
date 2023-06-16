@@ -59,6 +59,7 @@ class NoticeGroupViewSerializer(serializers.ModelSerializer):
             "description",
             "created_by",
             "created_at",
+            "updated_by",
         ]
 
 
