@@ -49,7 +49,6 @@ class ReqGetIntentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Intent
         exclude = [
-            "updated_by",
             "is_deleted",
             "deleted_by",
             "deleted_at",
