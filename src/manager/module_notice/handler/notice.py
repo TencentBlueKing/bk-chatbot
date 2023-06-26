@@ -141,7 +141,7 @@ class Notice:
         return params
 
 
-def send_msg_to_notice_group(group_id_list, msg_type, msg_content, msg_param={}):
+def send_msg_to_notice_group(group_id_list, msg_type, msg_content, msg_param={}, custom_headers={}):
     notice_groups = get_notice_group_data(group_id_list)
     send_success = True
     fail_message_list = []
@@ -158,7 +158,7 @@ def send_msg_to_notice_group(group_id_list, msg_type, msg_content, msg_param={})
             msg_type,
             msg_content,
             notice_group.get("receiver"),
-            notice_group.get("headers"),
+            notice_group.get("headers").update(custom_headers),
             **kwargs,
         )
         if msg_param:
