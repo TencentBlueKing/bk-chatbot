@@ -153,7 +153,11 @@ class NoticeSendGwViewSet(BaseViewSet):
         msg_type = payload.get("msg_type")
         msg_content = payload.get("msg_content")
         msg_param = payload.get("msg_param")
-        send_result = send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content, msg_param)
+        custom_headers = {}
+        mini_template_id = request.META.get("HTTP_MINI_PROGRAM_TEMPLATE_ID")
+        if mini_template_id:
+            custom_headers.update({"MINI-PROGRAM-TEMPLATE-ID": mini_template_id})
+        send_result = send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content, msg_param, custom_headers)
         if not send_result["result"]:
             return Response(
                 {
