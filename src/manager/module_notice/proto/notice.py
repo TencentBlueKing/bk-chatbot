@@ -108,7 +108,7 @@ class ReqPostNoticeGroupSendMsgGWViewSerializer(serializers.Serializer):
     """
 
     notice_group_id_list = serializers.ListField()
-    msg_type = serializers.ChoiceField(choices=["text", "markdown"], default="text")
+    msg_type = serializers.CharField(default="text")
     msg_content = serializers.CharField(default="")
     msg_param = serializers.DictField(default={})
 
