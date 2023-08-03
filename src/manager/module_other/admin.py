@@ -25,7 +25,7 @@ from src.manager.module_other.models import (
 
 @admin.register(VersionModel)
 class VersionModelAdmin(admin.ModelAdmin):
-    fields = ["is_show", "version", "title", "context", "author"]
+    fields = ["is_show", "version", "title", "context_type", "context", "author"]
     list_display = ["is_show", "version", "title", "context", "author", "updated_at"]
     list_filter = ["is_show", "version", "title", "context", "author", "updated_at"]
     search_fields = ["is_show", "version", "title", "context", "author", "updated_at"]
