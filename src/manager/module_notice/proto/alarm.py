@@ -129,6 +129,7 @@ class ReqPutAlarmConfigSerializer(AlarmConfigSerializer):
     deal_alarm_name = serializers.CharField(label="名称", required=False)
     alarm_source_type = serializers.IntegerField(label="告警源", required=False)
     deal_strategy_type = serializers.IntegerField(label="处理策略类型", required=False)
+    notify_interval = serializers.IntegerField(label="周期回调间隔时间(min)", required=False)
 
     class Meta:
         model = AlarmStrategyModel
