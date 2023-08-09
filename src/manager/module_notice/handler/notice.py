@@ -27,6 +27,33 @@ class Notice:
         self.headers = headers
         self.kwargs = kwargs
 
+    def send_origin_msg(self, msg_param):
+        params = {
+            "im": self.im_type,
+            "msg_type": self.msg_type,
+            "msg_param": msg_param,
+            "receiver": self.receiver,
+            "headers": self.headers,
+        }
+        biz_id = self.kwargs.get("biz_id")
+        biz_info = get_biz_info(biz_id)
+        send_data = {
+            "biz_name": biz_info.get("bk_biz_name"),
+            "biz_id": biz_id,
+            "msg_source": self.kwargs.get("msg_source"),
+            "msg_data": params,
+            "msg_type": self.msg_type,
+            "msg_context": self.msg_content,
+            "im_platform": self.kwargs.get("im_platform"),
+            "group_name": self.kwargs.get("group_name"),
+            "raw_data": {},
+        }
+        _, send_result = BkChatFeature.send_msg_and_report(send_data)
+        if send_result["code"] != 0:
+            return {"result": False, "message": send_result["message"]}
+
+        return {"result": True, "message": "OK"}
+
     def send(self):
         params = {
             "im": self.im_type,
@@ -114,8 +141,11 @@ class Notice:
         return params
 
 
-def send_msg_to_notice_group(group_id_list, msg_type, msg_content):
+def send_msg_to_notice_group(group_id_list, msg_type, msg_content, msg_param={}, custom_headers={}):
     notice_groups = get_notice_group_data(group_id_list)
+    send_success = True
+    fail_message_list = []
+    fail_notice_group_id_list = []
     for notice_group in notice_groups:
         kwargs = {
             "im_platform": notice_group.get("im_platform"),
@@ -123,16 +153,29 @@ def send_msg_to_notice_group(group_id_list, msg_type, msg_content):
             "msg_source": CUSTOM,
             "group_name": notice_group.get("notice_group_name"),
         }
+        headers = notice_group.get("headers")
+        headers.update(custom_headers)
         notice = Notice(
             notice_group.get("im"),
             msg_type,
             msg_content,
             notice_group.get("receiver"),
-            notice_group.get("headers"),
-            **kwargs
+            headers,
+            **kwargs,
         )
-        send_result = notice.send()
+        if msg_param:
+            send_result = notice.send_origin_msg(msg_param)
+        else:
+            send_result = notice.send()
         if not send_result["result"]:
-            return send_result
+            send_success = False
+            fail_notice_group_id_list.append(notice_group["notice_group"])
+            fail_message_list.append(
+                f"[NoticeGroup-{notice_group['notice_group']}] send msg failed,error is {send_result['message']}"
+            )
 
-    return {"result": True, "message": "OK"}
+    return {
+        "result": send_success,
+        "message": "\n".join(fail_message_list),
+        "fail_notice_group_id_list": fail_notice_group_id_list,
+    }

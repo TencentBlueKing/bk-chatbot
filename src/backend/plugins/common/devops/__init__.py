@@ -59,7 +59,10 @@ async def _(session: CommandSession):
     params, _ = session.get('params', prompt='...', **msg_template)
     params = params.split('\n')
     for i, item in enumerate(params):
-        session.state['bk_devops_pipeline']['start_infos'][i]['value'] = item
+        try:
+            session.state['bk_devops_pipeline']['start_infos'][i]['value'] = item
+        except TypeError:
+            break
 
     msg_template = await DevOpsTask(session).render_devops_pipeline_detail()
     msg_template and await session.send(**msg_template)
