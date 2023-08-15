@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from django.db import models
 from django.db.models import Count
 from django.utils.translation import ugettext_lazy as _
@@ -29,9 +28,12 @@ class VersionModel(BaseModel):
     版本
     """
 
+    TYPE_CHOICES = [("text", "text"), ("markdown", "markdown")]
+
     is_show = models.BooleanField("是否展示")
     version = models.CharField("版本", unique=True, max_length=255)
     title = models.CharField("主题", max_length=255)
+    context_type = models.CharField("内容类型", choices=TYPE_CHOICES, max_length=32, default="text")
     context = DictCharField("内容", help_text="输入一个字符串数组")
     author = models.CharField("发版人", max_length=128)
 

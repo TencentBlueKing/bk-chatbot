@@ -118,6 +118,28 @@ class NoticeGroupGwViewSet(BaseGetViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(self, request, *args, **kwargs)
 
+    @validation(ReqGetNoticeGroupGWViewSerializer)
+    @action(detail=False, methods=["GET"])
+    def detail_list(self, request, *args, **kwargs):
+        payload = request.payload
+        biz_id = payload.get("biz_id")
+        tri_qs = TriggerModel.objects.filter(biz_id__in=[biz_id, "system"]).values("id", "im_type_id")
+        tri_map = {t["id"]: t["im_type_id"] for t in tri_qs}
+        notice_group_qs = NoticeGroupModel.objects.filter(biz_id=biz_id)
+        data = []
+        for notice_group in notice_group_qs:
+            data.append(
+                {
+                    "id": notice_group.id,
+                    "biz_id": notice_group.biz_id,
+                    "name": notice_group.name,
+                    "trigger_id": notice_group.trigger_id,
+                    "trigger_name": notice_group.trigger_name,
+                    "trigger_type": tri_map[notice_group.trigger_id],
+                }
+            )
+        return Response({"data": data})
+
 
 class NoticeSendGwViewSet(BaseViewSet):
     schema = None
@@ -130,9 +152,20 @@ class NoticeSendGwViewSet(BaseViewSet):
         notice_group_id_list = payload.get("notice_group_id_list")
         msg_type = payload.get("msg_type")
         msg_content = payload.get("msg_content")
-        send_result = send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content)
+        msg_param = payload.get("msg_param")
+        custom_headers = {}
+        mini_template_id = request.META.get("HTTP_MINI_PROGRAM_TEMPLATE_ID")
+        if mini_template_id:
+            custom_headers.update({"MINI-PROGRAM-TEMPLATE-ID": mini_template_id})
+        send_result = send_msg_to_notice_group(notice_group_id_list, msg_type, msg_content, msg_param, custom_headers)
         if not send_result["result"]:
-            return Response({"message": send_result["message"]}, exception=True)
+            return Response(
+                {
+                    "message": send_result["message"],
+                    "fail_notice_group_id_list": send_result["fail_notice_group_id_list"],
+                },
+                exception=True,
+            )
         return Response({"data": []})
 
     @action(detail=False, methods=["POST"])

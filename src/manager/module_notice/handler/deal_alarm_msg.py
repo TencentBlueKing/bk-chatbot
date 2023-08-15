@@ -311,7 +311,10 @@ class OriginalAlarm:
         params = {"msg_type": "text", "msg_param": {"content": content}}
         return params
 
-    def email(self, title):
+    def email(self):
         content = self.get_text()
-        params = {"msg_type": "text", "msg_param": {"content": content.replace("\n", "<br/>"), "title": title}}
+        title = f"{self.strategy_name} 发生告警"
+        email_title = self.content_translated(title)
+
+        params = {"msg_type": "text", "msg_param": {"content": content.replace("\n", "<br/>"), "title": email_title}}
         return params

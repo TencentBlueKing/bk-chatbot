@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 
@@ -30,7 +29,7 @@ class VersionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VersionModel
-        fields = ["id", "is_show", "version", "title", "context", "author", "updated_at"]
+        fields = ["id", "is_show", "version", "context_type", "title", "context", "author", "updated_at"]
 
 
 ############################################################
