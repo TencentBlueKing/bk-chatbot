@@ -20,6 +20,7 @@ from django.views import static
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+import version_log.config as config
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -39,6 +40,8 @@ urlpatterns = [
     url(r"^admin_opsbot/", admin.site.urls),
     url(r"^account/", include("blueapps.account.urls")),
     url(r"^i18n/", include("django.conf.urls.i18n")),
+    # 版本日志
+    url(rf"^{config.ENTRANCE_URL}", include("version_log.urls", namespace="version_log")),
     # 业务逻辑
     url(r"^", include("src.manager.urls")),  # 入口urls
     url(r"^static/(?P<path>.*)$", static.serve, {"document_root": settings.STATICFILES_DIRS[0]}, name="static"),

@@ -88,6 +88,7 @@ class ReqPostTriggerViewSerializer(TriggerViewSerializer):
     class Meta:
         model = TriggerModel
         fields = [
+            "id",
             "name",
             "biz_id",
             "im_platform",

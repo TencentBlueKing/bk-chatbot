@@ -40,6 +40,7 @@ INSTALLED_APPS += (
     "rest_framework",
     "django_filters",
     "drf_yasg",
+    "version_log",
 )
 INSTALLED_APPS += BKCHAT_INSTALLED_APPS
 
@@ -74,6 +75,8 @@ MIDDLEWARE += (
     "common.middleware.request.RequestProvider",
 )
 
+# version log config
+VERSION_LOG = {"FILE_TIME_FORMAT": "%Y-%m-%d", "LATEST_VERSION_INFORM": True}
 
 # 所有环境的日志级别可以在这里配置
 # LOG_LEVEL = 'INFO'
