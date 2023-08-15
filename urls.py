@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.views import static
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 import version_log.config as config
 
 schema_view = get_schema_view(
@@ -28,7 +29,10 @@ schema_view = get_schema_view(
         description="this is bkchat api",
     ),
     public=True,
+    permission_classes=(permissions.IsAdminUser,),
 )
+
+
 urlpatterns = [
     # 出于安全考虑，默认屏蔽admin访问路径。
     # 开启前请修改路径随机内容，降低被猜测命中几率，提升安全性
