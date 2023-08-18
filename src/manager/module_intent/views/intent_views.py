@@ -151,6 +151,25 @@ class IntentViewSet(BaseManageViewSet):
         return Response({"data": []})
 
     @action(detail=False, methods=["POST"])
+    @validation(ReqPostBatchUpdateAvailableUserSerializers)
+    def batch_update_developer(self, request, *args, **kwargs):
+        payload = request.payload
+        intent_id_list = payload.get("intent_id_list")
+        operator_type = payload.get("operator_type")
+        operator_user_set = set(payload.get("operator_user_list"))
+
+        filter_queryset = self.queryset.filter(id__in=intent_id_list)
+        update_intent_list = []
+        for intent in filter_queryset:
+            if operator_type == "add":
+                intent.available_user = list(set(intent.developer) | operator_user_set)
+            if operator_type == "delete":
+                intent.available_user = list(set(intent.developer) - operator_user_set)
+            update_intent_list.append(intent)
+        Intent.objects.bulk_update(update_intent_list, ["developer"])
+        return Response({"data": []})
+
+    @action(detail=False, methods=["POST"])
     @validation(ReqPostBatchUpdateIntentTagSerializers)
     def batch_update_intent_tag(self, request, *args, **kwargs):
         payload = request.payload
