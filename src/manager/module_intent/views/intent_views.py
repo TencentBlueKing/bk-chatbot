@@ -162,9 +162,9 @@ class IntentViewSet(BaseManageViewSet):
         update_intent_list = []
         for intent in filter_queryset:
             if operator_type == "add":
-                intent.available_user = list(set(intent.developer) | operator_user_set)
+                intent.developer = list(set(intent.developer) | operator_user_set)
             if operator_type == "delete":
-                intent.available_user = list(set(intent.developer) - operator_user_set)
+                intent.developer = list(set(intent.developer) - operator_user_set)
             update_intent_list.append(intent)
         Intent.objects.bulk_update(update_intent_list, ["developer"])
         return Response({"data": []})
