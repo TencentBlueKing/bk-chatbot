@@ -50,7 +50,7 @@ async def _(session: CommandSession):
 @on_command(DEVOPS_PIPELINE_UPDATE_KEY)
 async def _(session: CommandSession):
     bk_devops_pipeline = session.bot.parse_action('parse_interaction', session.ctx)
-    if not bk_devops_pipeline:
+    if bk_devops_pipeline:
         session.state['bk_devops_pipeline'] = bk_devops_pipeline
 
     title = '<bold>CI TIP<bold>'
