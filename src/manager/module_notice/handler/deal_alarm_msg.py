@@ -103,6 +103,8 @@ class OriginalAlarm:
         self.origin_alarm_value = origin_alarm_data.get("value")  # 异常值
         # 异常维度信息
         dimension_translation = origin_alarm.get("dimension_translation", {})
+        if not dimension_translation:
+            dimension_translation = self.info.get("event", {}).get("dimension_translation", {})
         bk_topo_node = dimension_translation.get("bk_topo_node", {})  # 业务topo
         bk_topo_node_display_value = bk_topo_node.get("display_value", [])
 
