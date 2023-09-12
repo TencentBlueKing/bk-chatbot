@@ -32,6 +32,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.IsAdminUser,),
 )
 
+config.LATEST_VERSION = "V3.0.4"
 
 urlpatterns = [
     # 出于安全考虑，默认屏蔽admin访问路径。

@@ -121,11 +121,19 @@ class Proxy(BaseProxy):
         self._server_app.run(host=host, port=port, *args, **kwargs)
 
     async def convert_to_name(self, msg_sender_id: str) -> str:
-        try:
-            r = await self._api.call_action('user/get', method='GET', params={'userid': msg_sender_id})
-            return r['alias']
-        except (HttpFailed, ActionFailed, KeyError):
-            return msg_sender_id
+        """
+        Here you need to find the relationship between wework and blueking, the convert it
+        eg:
+        1,
+            try:
+                r = await self._api.call_action('user/get', method='GET', params={'userid': msg_sender_id})
+                return r['alias']
+            except (HttpFailed, ActionFailed, KeyError):
+                return msg_sender_id
+        2,
+            return "{}@company.com".format(msg_sender_id)
+        """
+        return msg_sender_id
 
     async def get_media(self, media_id: str):
         return await self._api.call_action('media/get', method='GET', params={'media_id': media_id})
