@@ -33,7 +33,7 @@ logger = logging.getLogger("root")
 class TencentCloudClient:
     def __init__(self):
         cred = credential.Credential(TencentCloudSecretId, TencentCloudSecretKey)
-        self.client = tmt_client.TmtClient(cred, "ap-beijing")
+        self.client = tmt_client.TmtClient(cred, "ap-guangzhou")
         self.nlp_client = nlp_client.NlpClient(cred, "ap-guangzhou")
 
     def translate_text(self, source_text, target_type, source_type="zh"):
