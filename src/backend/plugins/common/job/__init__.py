@@ -67,7 +67,7 @@ async def _(session: CommandSession):
 async def _(session: CommandSession):
     job_plan = session.bot.parse_action('parse_interaction', session.ctx)
     if not job_plan:
-        return
+        job_plan = {}
     session.state.update(job_plan)
     title = '<bold>JOB TIP<bold>'
     content = f'{JOB_PLAN_PARAM_PROMPT}，<bold>{JOB_PLAN_FORMAT_PROMPT}<bold>'
