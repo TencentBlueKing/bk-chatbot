@@ -59,6 +59,11 @@ class TaskExecStatus(Enum):
     REMOVE = 5  # 执行异常
 
 
+class IntentMatchPattern(Enum):
+    LIKE = 1  # 相似度匹配
+    Exact = 2  # 完全匹配
+
+
 TASK_EXECUTE_STATUS_DICT = {
     TaskExecStatus.INIT.value: "未执行",
     TaskExecStatus.RUNNING.value: "执行中",
@@ -93,6 +98,5 @@ DEVOPS_HOST = get_env_or_raise("BKAPP_DEVOPS_HOST")
 USER_VISIT = "USER_VISIT"
 
 MAX_WORKER = 10  # 多线程执行最大线程数
-
 
 BKCHAT_CACHE_PREFIX = get_env_or_raise("BKCHAT_CACHE_PREFIX", "bkchat")
