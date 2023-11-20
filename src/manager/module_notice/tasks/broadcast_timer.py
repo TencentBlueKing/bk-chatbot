@@ -224,6 +224,14 @@ def task_broadcast(broadcast_id):
             task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
     except Exception:
         logger.exception(f"[task_broadcast-error-broadcast_id-{broadcast_id}]")
+        broadcast_obj = TaskBroadcast.objects.get(pk=broadcast_id)
+        broadcast_obj.retry_num = broadcast_obj.retry_num + 1
+        broadcast_obj.save()
+        if broadcast_obj.retry_num <= 5:
+            logger.warning(
+                f"[task_broadcast][warn][broadcast_id={broadcast_id}] will retry [{broadcast_obj.retry_num}/5]"
+            )
+            task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_id}, countdown=60)
 
 
 @task
