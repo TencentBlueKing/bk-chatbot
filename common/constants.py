@@ -61,7 +61,7 @@ class TaskExecStatus(Enum):
 
 class IntentMatchPattern(Enum):
     LIKE = 1  # 相似度匹配
-    Exact = 2  # 完全匹配
+    EXACT = 2  # 完全匹配
 
 
 TASK_EXECUTE_STATUS_DICT = {
