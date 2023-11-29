@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from django.utils.translation import ugettext_lazy as _
 
 from adapter.api.base import BaseApi, ProxyDataAPI
@@ -26,5 +25,10 @@ class _BkITSMApi(BaseApi):
         self.create_ticket = ProxyDataAPI(_("创建单据"))
         self.token_verify = ProxyDataAPI(_("token校验"))
         self.ticket_approval_result = ProxyDataAPI(_("token校验"))
+        self.get_services = ProxyDataAPI(_("服务列表查询"))
+        self.get_service_detail = ProxyDataAPI(_("服务详情查询"))
+        self.get_ticket_status = ProxyDataAPI(_("单据状态查询"))
+        self.get_ticket_info = ProxyDataAPI(_("单据详情查询"))
+
 
 BkITSMApi = _BkITSMApi()

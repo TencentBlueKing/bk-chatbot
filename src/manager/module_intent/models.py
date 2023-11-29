@@ -253,6 +253,7 @@ class ExecutionLog(BaseModel):
         SOPS = 2  # 标准运维
         DEV_OPS = 3  # 蓝盾
         DEFINE = 4  # 自定义
+        ITSM = 5  # ITSM
 
     class TaskExecStatus(Enum):
         INIT = 0  # 初始状态
