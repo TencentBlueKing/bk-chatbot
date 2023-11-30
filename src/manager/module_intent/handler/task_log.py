@@ -312,7 +312,7 @@ def itsm(task_class: PlatformTask):
     """
 
     bk_itsm = BkItsm(
-        username=task_class.obj.intent_create_user,
+        username=task_class.obj.sender,
         biz_id=task_class.obj.biz_id,
         task_id=task_class.obj.task_id,
     )
