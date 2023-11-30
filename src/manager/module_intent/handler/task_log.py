@@ -326,15 +326,16 @@ def itsm(task_class: PlatformTask):
         return {}
 
     # 查询ITSM的单据详情的详情
+    params = [{"name": p["name"], "value": p["value"]} for p in task_class.obj.params]
     if status == ExecutionLog.TaskExecStatus.SUCCESS.value:  # 成功通知
         return {
             "task_uri": bk_itsm.task_uri,
-            "param_list": bk_itsm.params,
+            "param_list": params,
         }
     update_at = bk_itsm.get_ticket_info().get("update_at")
     key = f"{task_class.obj.id}_{task_class.obj.task_id}_{status}_{update_at}"  # 通过步骤ID来进行告警
     if task_class.set_notice_cache(key, ""):
         return {
             "task_uri": bk_itsm.task_uri,
-            "param_list": bk_itsm.params,
+            "param_list": params,
         }
