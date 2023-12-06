@@ -105,7 +105,10 @@ def task_broadcast(broadcast_id):
         current_step = step_data[math.floor(len(step_data) / 2)]
 
         if task_platform == TAK_PLATFORM_SOPS:
-            current_step = [step for step in step_data if step["step_id"] == current_step_detail["step_id"]][0]
+            _current_steps = [step for step in step_data if step["step_id"] == current_step_detail["step_id"]]
+
+            if _current_steps:
+                current_step = _current_steps[0]
 
         if current_step["step_duration"] >= 60 * 60 * 24 * 3:
             broadcast_obj.is_stop = True
