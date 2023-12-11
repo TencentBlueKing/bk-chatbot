@@ -65,7 +65,7 @@ class DevOps:
         获取项目的流水线列表
         """
 
-        params = {"bk_username": bk_username, "projectId": project_id, "page": 1, "pageSize": 500}
+        params = {"bk_username": bk_username, "projectId": project_id, "page": 1, "pageSize": 1000}
 
         ret = DevOpsApi.app_pipeline_list(params=params, raw=True)
         return ret
