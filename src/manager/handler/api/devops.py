@@ -64,10 +64,20 @@ class DevOps:
         """
         获取项目的流水线列表
         """
+        max_invoke_num = 30
+        cur_page = 1
+        data = []
+        while True:
+            params = {"bk_username": bk_username, "projectId": project_id, "page": cur_page, "pageSize": 100}
+            ret = DevOpsApi.app_pipeline_list(params=params, raw=True)
+            total_pages = ret["total_pages"]
 
-        params = {"bk_username": bk_username, "projectId": project_id, "page": 1, "pageSize": 1000}
+            data += ret["data"]
+            if cur_page >= total_pages or cur_page > max_invoke_num:
+                break
 
-        ret = DevOpsApi.app_pipeline_list(params=params, raw=True)
+            cur_page += 1
+        ret["data"] = data
         return ret
 
     @classmethod
