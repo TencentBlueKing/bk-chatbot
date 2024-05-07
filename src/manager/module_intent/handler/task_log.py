@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 import traceback
 from typing import Callable
 
@@ -26,6 +25,7 @@ from src.manager.handler.api.message import Message
 from src.manager.handler.bk.bk_devops import BkDevOps
 from src.manager.handler.bk.bk_job import BkJob
 from src.manager.handler.bk.bk_sops import BkSops
+from src.manager.handler.bk.bk_itsm import BkItsm
 from src.manager.module_intent.constants import TASK_NOTICE_PREFIX, UPDATE_TASK_MAX_TIME, UPDATE_TASK_PREFIX
 from src.manager.module_intent.models import ExecutionLog
 
@@ -300,4 +300,42 @@ def dev_ops(task_class: PlatformTask):
         return {
             "task_uri": bk_devops.pipeline_url,
             "param_list": param_list,
+        }
+
+
+@TaskStatus.register(ExecutionLog.PlatformType.ITSM.value)
+def itsm(task_class: PlatformTask):
+    """
+    ITSM
+    :param obj:
+    :return:
+    """
+
+    bk_itsm = BkItsm(
+        username=task_class.obj.sender,
+        biz_id=task_class.obj.biz_id,
+        task_id=task_class.obj.task_id,
+    )
+    itsm_ret = task_class.save_task(func=bk_itsm.get_ticket_status)
+    status = itsm_ret.get("status")
+    if status not in [
+        ExecutionLog.TaskExecStatus.SUCCESS.value,
+        ExecutionLog.TaskExecStatus.FAIL.value,
+        ExecutionLog.TaskExecStatus.REMOVE.value,
+    ]:
+        return {}
+
+    # 查询ITSM的单据详情的详情
+    params = [{"name": p["name"], "value": p["value"]} for p in task_class.obj.params]
+    if status == ExecutionLog.TaskExecStatus.SUCCESS.value:  # 成功通知
+        return {
+            "task_uri": bk_itsm.task_uri,
+            "param_list": params,
+        }
+    update_at = bk_itsm.get_ticket_info().get("update_at")
+    key = f"{task_class.obj.id}_{task_class.obj.task_id}_{status}_{update_at}"  # 通过步骤ID来进行告警
+    if task_class.set_notice_cache(key, ""):
+        return {
+            "task_uri": bk_itsm.task_uri,
+            "param_list": params,
         }

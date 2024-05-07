@@ -19,7 +19,13 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_filters import filters
 
-from common.constants import CHAT_BOT_TYPE_DEFAULT, CHAT_BOT_TYPES, TAK_PLATFORM_JOB, TASK_PLATFORM_CHOICES
+from common.constants import (
+    CHAT_BOT_TYPE_DEFAULT,
+    CHAT_BOT_TYPES,
+    TAK_PLATFORM_JOB,
+    TASK_PLATFORM_CHOICES,
+    IntentMatchPattern,
+)
 from common.drf.filters import BaseOpenApiFilter
 from common.models.base import BaseModel
 from common.models.json import DictCharField
@@ -97,6 +103,7 @@ class Intent(BaseModel):
     developer = DictCharField(_("开发商"), default=[])
     approver = DictCharField(_("审批人"), default=[])
     tag_name = models.CharField(verbose_name=_("标签分类"), max_length=128, default="")
+    match_pattern = models.IntegerField(verbose_name=_("技能匹配模式"), default=IntentMatchPattern.LIKE.value)
 
     class Meta:
         db_table = "tab_intent"
@@ -246,6 +253,7 @@ class ExecutionLog(BaseModel):
         SOPS = 2  # 标准运维
         DEV_OPS = 3  # 蓝盾
         DEFINE = 4  # 自定义
+        ITSM = 5  # ITSM
 
     class TaskExecStatus(Enum):
         INIT = 0  # 初始状态

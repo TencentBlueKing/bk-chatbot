@@ -24,6 +24,7 @@ from common.http.request import get_request_user
 from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
 from src.manager.handler.api.devops import DevOps
+from src.manager.handler.api.bk_itsm import BkITSM
 from src.manager.module_biz.proto.task import (
     DescribeDevopsPipelinesStartInfo,
     DescribeJob,
@@ -231,4 +232,23 @@ class TaskViewSet(BaseViewSet):
             project_id=kwargs.get("biz_id"),
             pipeline_id=request.payload.get("pipeline_id"),
         )
+        return Response(response.get("data", []))
+
+    @swagger_auto_schema(tags=tags, operation_id="ITSM-查询服务列表")
+    @action(detail=False, methods=["GET"])
+    def describe_itsm_services(self, request, **kwargs):
+        """
+        ITSM-查询服务列表
+        """
+        response = BkITSM.get_services()
+        return Response(response.get("data", []))
+
+    @swagger_auto_schema(tags=tags, operation_id="ITSM-查询服务详情")
+    @action(detail=False, methods=["GET"])
+    def describe_itsm_service(self, request, **kwargs):
+        """
+        ITSM-查询服务详情
+        """
+        service_id = request.query_params.get("service_id")
+        response = BkITSM.get_service_detail(service_id)
         return Response(response.get("data", []))

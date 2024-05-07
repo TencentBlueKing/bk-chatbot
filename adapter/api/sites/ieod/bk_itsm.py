@@ -47,3 +47,39 @@ class _BkITSMApi:
             description=_("获取审核单据结果"),
             module=self.MODULE,
         )
+
+    @property
+    def get_services(self):
+        return DataAPI(
+            method="GET",
+            url=BK_ITSM_APIGW + "get_services/",
+            description=_("服务列表查询"),
+            module=self.MODULE,
+        )
+
+    @property
+    def get_service_detail(self):
+        return DataAPI(
+            method="GET",
+            url=BK_ITSM_APIGW + "get_service_detail/",
+            description=_("服务详情查询"),
+            module=self.MODULE,
+        )
+
+    @property
+    def get_ticket_status(self):
+        return DataAPI(
+            method="GET",
+            url=BK_ITSM_APIGW + "get_ticket_status/",
+            description=_("单据状态查询"),
+            module=self.MODULE,
+        )
+
+    @property
+    def get_ticket_info(self):
+        return DataAPI(
+            method="GET",
+            url=BK_ITSM_APIGW + "get_ticket_info/",
+            description=_("单据详情查询"),
+            module=self.MODULE,
+        )

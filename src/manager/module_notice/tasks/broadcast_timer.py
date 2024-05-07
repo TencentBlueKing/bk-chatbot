@@ -104,6 +104,12 @@ def task_broadcast(broadcast_id):
         step_data = parse_result.get("step_data")
         current_step = step_data[math.floor(len(step_data) / 2)]
 
+        if task_platform == TAK_PLATFORM_SOPS:
+            _current_steps = [step for step in step_data if step["step_id"] == current_step_detail["step_id"]]
+
+            if _current_steps:
+                current_step = _current_steps[0]
+
         if current_step["step_duration"] >= 60 * 60 * 24 * 3:
             broadcast_obj.is_stop = True
             broadcast_obj.save()
@@ -224,6 +230,14 @@ def task_broadcast(broadcast_id):
             task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_obj.id}, countdown=60)
     except Exception:
         logger.exception(f"[task_broadcast-error-broadcast_id-{broadcast_id}]")
+        broadcast_obj = TaskBroadcast.objects.get(pk=broadcast_id)
+        broadcast_obj.retry_num = broadcast_obj.retry_num + 1
+        broadcast_obj.save()
+        if broadcast_obj.retry_num <= 5:
+            logger.warning(
+                f"[task_broadcast][warn][broadcast_id={broadcast_id}] will retry [{broadcast_obj.retry_num}/5]"
+            )
+            task_broadcast.apply_async(kwargs={"broadcast_id": broadcast_id}, countdown=60)
 
 
 @task

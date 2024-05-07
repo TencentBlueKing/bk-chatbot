@@ -186,6 +186,7 @@ class TaskBroadcast(models.Model):
     step_id = models.CharField("任务当前步骤ID", max_length=256, null=True, blank=True)
     step_status = models.CharField("当前步骤状态", max_length=256, null=True, blank=True)
     is_stop = models.BooleanField("是否停止播报", default=False)
+    retry_num = models.IntegerField("播报失败重试次数", default=0)
     share_group_list = DictCharField("分享播报用户组列表", default=[])
     ladder_list = DictCharField("播报的时间阶梯", default=[5, 10, 20, 40, 60])
 
