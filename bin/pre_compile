@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pip isntall setuptools==57.0.0
+pip install setuptools==57.0.0
 echo "update requirements.txt"
 cat requirements.txt
 mkdir static
