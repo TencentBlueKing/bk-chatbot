@@ -251,6 +251,7 @@ def task_params_broadcast(broadcast_id):
         operator = broadcast_obj.start_user
         biz_id = broadcast_obj.biz_id
         task_id = broadcast_obj.task_id
+        custom_task_name = broadcast_obj.custom_task_name
         extra_notice_info = broadcast_obj.extra_notice_info
         share_group_list = broadcast_obj.share_group_list
         task_platform = broadcast_obj.platform
@@ -277,6 +278,8 @@ def task_params_broadcast(broadcast_id):
             ]
             task_url = task_info.get("task_url")
             task_name = "[标准运维] {}".format(task_info.get("name"))
+            if custom_task_name:
+                task_name = "[标准运维] {}".format(custom_task_name)
 
         if task_platform == TAK_PLATFORM_DEVOPS:
             build_info = DevOps().app_build_status(
