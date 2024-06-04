@@ -172,6 +172,7 @@ class AlarmStrategyModel(BaseModel):
 class TaskBroadcast(models.Model):
     biz_id = models.CharField("业务ID", max_length=256)
     task_id = models.CharField("任务ID", max_length=256)
+    custom_task_name = models.TextField("自定义播报任务名", null=True, blank=True)
     platform = models.CharField("任务所属平台", choices=TASK_PLATFORM_CHOICES, max_length=32)
     session_info = DictCharField("触发实时播报的信息", default={})
     extra_notice_info = DictCharField("使用bkchat推送的额外人和群组", default=[])

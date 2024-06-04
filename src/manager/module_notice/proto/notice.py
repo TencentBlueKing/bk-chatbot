@@ -129,6 +129,7 @@ class ReqPostTaskBroadStratGWViewSerializer(serializers.Serializer):
     operator = serializers.CharField(label="操作人")
     biz_id = serializers.IntegerField(label="业务ID")
     task_id = serializers.IntegerField(label="播报任务ID")
+    custom_task_name = serializers.CharField(label="自定义播报任务名", required=False, default="")
     platform = serializers.ChoiceField(
         label="任务所属平台", choices=[TAK_PLATFORM_JOB, TAK_PLATFORM_SOPS, TAK_PLATFORM_DEVOPS]
     )
