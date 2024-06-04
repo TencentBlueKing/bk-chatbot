@@ -43,6 +43,7 @@ class TaskBroadcastGwViewSet(BaseViewSet):
             "session_info": payload.get("session_info", {}),
             "platform": payload.get("platform"),
             "task_id": payload.get("task_id"),
+            "custom_task_name": payload.get("custom_task_name", ""),
             "share_group_list": payload.get("share_group_list", []),
             "extra_notice_info": payload.get("extra_notice_info", []),
             "ladder_list": payload.get("ladder_list", [5, 10, 20, 40, 60]),

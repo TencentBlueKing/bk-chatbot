@@ -72,6 +72,7 @@ def task_broadcast(broadcast_id):
         operator = broadcast_obj.start_user
         biz_id = broadcast_obj.biz_id
         task_id = broadcast_obj.task_id
+        custom_task_name = broadcast_obj.custom_task_name
         session_info = broadcast_obj.session_info
         extra_notice_info = broadcast_obj.extra_notice_info
         share_group_list = broadcast_obj.share_group_list
@@ -89,6 +90,8 @@ def task_broadcast(broadcast_id):
             task_info = SOPS().get_task_detail(operator, biz_id, task_id)
             status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
             parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
+            if custom_task_name:
+                parse_result["task_name"] = "[标准运维] {}".format(custom_task_name)
             current_step_detail = parse_result.get("current_step_detail", {})
 
         if task_platform == TAK_PLATFORM_DEVOPS:
