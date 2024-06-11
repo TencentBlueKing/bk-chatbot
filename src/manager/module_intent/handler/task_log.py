@@ -134,6 +134,7 @@ class PlatformTask:
         # 如果出现状态为成功/移除 则删除
         if self.obj.status in [
             ExecutionLog.TaskExecStatus.SUCCESS.value,
+            ExecutionLog.TaskExecStatus.FAIL.value,
             ExecutionLog.TaskExecStatus.REMOVE.value,
         ]:
             self.del_task_cache(self.obj.id)
