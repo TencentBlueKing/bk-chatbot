@@ -41,12 +41,14 @@ TAK_PLATFORM_JOB = "JOB"
 TAK_PLATFORM_SOPS = "SOPS"
 TAK_PLATFORM_DEVOPS = "DEVOPS"
 TAK_PLATFORM_DEFINE = "DEFINE"
+TAK_PLATFORM_ITSM = "ITSM"
 
 TASK_PLATFORM_CHOICES = (
     (TAK_PLATFORM_JOB, _("JOB")),
     (TAK_PLATFORM_SOPS, _("标准运维")),
     (TAK_PLATFORM_DEVOPS, _("蓝盾")),
     (TAK_PLATFORM_DEFINE, _("自定义")),
+    (TAK_PLATFORM_ITSM, _("ITSM")),
 )
 
 
@@ -57,6 +59,11 @@ class TaskExecStatus(Enum):
     FAIL = 3  # 执行失败
     SUSPENDED = 4  # 暂停
     REMOVE = 5  # 执行异常
+
+
+class IntentMatchPattern(Enum):
+    LIKE = 1  # 相似度匹配
+    EXACT = 2  # 完全匹配
 
 
 TASK_EXECUTE_STATUS_DICT = {
@@ -93,6 +100,5 @@ DEVOPS_HOST = get_env_or_raise("BKAPP_DEVOPS_HOST")
 USER_VISIT = "USER_VISIT"
 
 MAX_WORKER = 10  # 多线程执行最大线程数
-
 
 BKCHAT_CACHE_PREFIX = get_env_or_raise("BKCHAT_CACHE_PREFIX", "bkchat")

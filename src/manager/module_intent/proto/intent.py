@@ -16,6 +16,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
+from common.constants import IntentMatchPattern
 from common.drf.serializers import BaseRspSerializer
 from src.manager.module_intent.models import Intent
 from src.manager.module_intent.proto import intent_tag
@@ -66,6 +67,7 @@ class ReqPostIntentSerializer(Serializer):
     notice_discern_success = serializers.BooleanField(required=True, label="识别成功通知")
     notice_start_success = serializers.BooleanField(required=True, label="启动成功通知")
     notice_exec_success = serializers.BooleanField(required=True, label="执行成功通知")
+    match_pattern = serializers.IntegerField(label="技能匹配模式", default=IntentMatchPattern.LIKE.value)
     # 其余表需要
     utterances = serializers.ListField(label="语料信息")
 

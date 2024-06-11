@@ -65,8 +65,14 @@ class IntentViewSet(BaseManageViewSet):
         if available_group:
             request.query_params["available_group"] = f'"{self.request.payload.get("available_group")}"'
 
-        data = super().list(self, request, *args, **kwargs)
-        return data
+        response = super().list(self, request, *args, **kwargs)
+        data = response.data
+        intent_id_list = [i["id"] for i in data["data"]]
+        uqs = Utterances.objects.filter(index_id__in=intent_id_list).values("content", "index_id")
+        intent_utterances_dict = {i["index_id"]: i["content"] for i in uqs}
+        for _intent in data["data"]:
+            _intent["utterances_list"] = intent_utterances_dict.get(_intent["id"], [])
+        return response
 
     def perform_create(self, serializer):
         """

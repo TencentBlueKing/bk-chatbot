@@ -39,7 +39,7 @@ def after_app_pipeline_list(ret: dict) -> dict:
     """
     数据清理
     """
-
+    ret["total_pages"] = ret.get("data", {}).get("totalPages")
     ret["data"] = list(
         map(
             lambda x: {
