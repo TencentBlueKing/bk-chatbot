@@ -14,23 +14,26 @@ specific language governing permissions and limitations under the License.
 """
 
 import datetime
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 from celery.task import periodic_task
-
 from common.redis import RedisClient
-from src.manager.module_intent.constants import UPDATE_TASK_MAX_WORKERS, UPDATE_TASK_PREFIX, UPDATE_TASK_TIME
+from src.manager.module_intent.constants import UPDATE_TASK_MAX_WORKERS, UPDATE_TASK_PREFIX
 from src.manager.module_intent.handler.task_log import update_task_status
 
 
-@periodic_task(run_every=datetime.timedelta(seconds=UPDATE_TASK_TIME))
+@periodic_task(run_every=datetime.timedelta(seconds=10), soft_time_limit=120)
 def task_status_timer():
     """
     更新日志定时任务
     """
-    with RedisClient() as r:
-        ids = r.keys(f"{UPDATE_TASK_PREFIX}*")
 
-    # 多线程更新状态
-    with ThreadPoolExecutor(max_workers=UPDATE_TASK_MAX_WORKERS) as pool:
-        list(map(lambda x: pool.submit(update_task_status, int(x.replace(f"{UPDATE_TASK_PREFIX}", ""))), ids))
+    try:
+        with RedisClient() as r:
+            ids = r.keys(f"{UPDATE_TASK_PREFIX}*")
+        # 多线程更新状态
+        with ThreadPoolExecutor(max_workers=UPDATE_TASK_MAX_WORKERS) as pool:
+            list(map(lambda x: pool.submit(update_task_status, int(x.replace(f"{UPDATE_TASK_PREFIX}", ""))), ids))
+    except Exception:
+        traceback.print_exc()
