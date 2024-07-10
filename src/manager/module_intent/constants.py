@@ -24,6 +24,7 @@ UPDATE_TASK_MAX_WORKERS = get_env_or_raise("UPDATE_TASK_TIME", 10)  # 最大线�
 UPDATE_TASK_MAX_TIME = get_env_or_raise("UPDATE_TASK_TIME", 24 * 60 * 60)  # 任务保留时间
 UPDATE_TASK_LOG = "task_log"
 UPDATE_TASK_PREFIX = "task_log_"  # 任务redis key前缀
+UPDATE_TASK_LOCK_PREFIX = "task_log_lock_"  # 添加日志获取锁
 TASK_NOTICE_PREFIX = "task_notice"  # 机器人日志通知前缀
 
 # 任务状态中文
