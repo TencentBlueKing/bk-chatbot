@@ -17,7 +17,6 @@ import traceback
 from typing import Callable
 
 from blueapps.utils.logger import logger_celery as logger
-
 from common.design.strategy import Strategy
 from common.models.base import to_format_date
 from common.redis import RedisClient
@@ -26,7 +25,12 @@ from src.manager.handler.bk.bk_devops import BkDevOps
 from src.manager.handler.bk.bk_job import BkJob
 from src.manager.handler.bk.bk_sops import BkSops
 from src.manager.handler.bk.bk_itsm import BkItsm
-from src.manager.module_intent.constants import TASK_NOTICE_PREFIX, UPDATE_TASK_MAX_TIME, UPDATE_TASK_PREFIX
+from src.manager.module_intent.constants import (
+    TASK_NOTICE_PREFIX,
+    UPDATE_TASK_LOCK_PREFIX,
+    UPDATE_TASK_MAX_TIME,
+    UPDATE_TASK_PREFIX,
+)
 from src.manager.module_intent.models import ExecutionLog
 
 
@@ -36,9 +40,34 @@ def update_task_status(id: int) -> None:
     :param id:
     :return:
     """
+
+    def __get_lock(key):
+        """
+        获取任务状态更新锁
+        :param key:
+        :return:
+        """
+        new_key = f"{UPDATE_TASK_LOCK_PREFIX}_{key}"
+        redis_client = RedisClient()
+        return redis_client.set_nx(new_key, 1, 600)
+
+    def __del_lock(key):
+        """
+        删除任务更新锁
+        :param key:
+        :return:
+        """
+        new_key = f"{UPDATE_TASK_LOCK_PREFIX}_{key}"
+        with RedisClient() as r:
+            r.expire(new_key, 0)
+
+    task_lock = __get_lock(id)
+    if not task_lock:
+        return
     logger.info(f"更新任务ID:{id}")
     execution_log_obj: ExecutionLog = ExecutionLog.query_log(**{"id": id})
     TaskStatus.do(execution_log_obj)
+    __del_lock(id)
 
 
 class PlatformTask:
@@ -103,7 +132,6 @@ class PlatformTask:
 
         # 消息通知失败也不会再进行查询
         try:
-
             # 不通知的情况
             # 1、没有缓存
             # 2、有缓存,状态为成功并且执行通知为false
@@ -256,7 +284,9 @@ def dev_ops(task_class: PlatformTask):
         func=bk_devops.get_build_status,
     )
 
-    # 1.判断状态，2.通过状态判断是否通知 3.查询参数
+    # 1.判断状态，
+    # 2.通过状态判断是否通知
+    # 3.查询参数
     status = dev_ops_ret.get("status", "")
     if status not in [
         ExecutionLog.TaskExecStatus.SUCCESS.value,
