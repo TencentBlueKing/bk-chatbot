@@ -81,10 +81,10 @@ class AlarmConfigSerializer(serializers.ModelSerializer):
             """
             notice_groups = NoticeGroupModel.objects.filter(id__in=value).values("id")
             query_ids = list(map(lambda x: x.get("id"), notice_groups))
-            diff_ids = list(set(value).difference(set(query_ids)))
-            if len(diff_ids) > 0:
-                raise ValueError(f"不存在的通知群组ID为:{diff_ids}")
-            return value
+            # diff_ids = list(set(value).difference(set(query_ids)))
+            # if len(diff_ids) > 0:
+            #     raise ValueError(f"不存在的通知群组ID为:{diff_ids}")
+            return query_ids
 
     deal_strategy_value = AlarmConfigSerializerDealStrategyValue()
     alarm_strategy = serializers.ListField(
