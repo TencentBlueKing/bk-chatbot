@@ -119,7 +119,7 @@ class OtherPlatformAlarm:
         tasks = []
         # 遍历更新策略
         for k, v in strategy_dict.items():
-            actions = list(filter(lambda x: x.get("config_id") != self.config_id, v))
+            actions = list(filter(lambda x: str(x.get("config_id")) != str(self.config_id), v))
             # 删除策略
             if k in self.new_strategy_ids:
                 actions.append(self.action)
