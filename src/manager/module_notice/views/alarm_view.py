@@ -208,7 +208,7 @@ class AlarmConfigViewSet(BaseManageViewSet):
             # 更新数据
             serializer.validated_data["config_id"] = config_id
             serializer.save()
-            strategy_ids = list(map(lambda x: str(x.get("id")), data.get("alarm_strategy")))
+            strategy_ids = list(map(lambda x: int(x.get("id")), data.get("alarm_strategy")))
             alarm_class = OtherPlatformAlarm(
                 biz_id=data.get("biz_id"),
                 strategy_ids=strategy_ids,
