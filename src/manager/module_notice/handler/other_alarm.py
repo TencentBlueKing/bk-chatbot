@@ -15,7 +15,6 @@ specific language governing permissions and limitations under the License.
 import json
 
 from blueapps.utils.logger import logger
-
 from common.design.my_asyncio import MyAsyncio
 from src.manager.handler.api.bk_monitor import BkMonitor
 
@@ -65,13 +64,15 @@ class OtherPlatformAlarm:
         获取策略的原始套餐
         @return:
         """
+
+        strategy_ids = list(map(lambda x: str(x), self.strategy_ids))
         params = {
             "page": 1,
             "page_size": 500,
             "conditions": [
                 {
                     "key": "strategy_id",
-                    "value": self.strategy_ids,
+                    "value": strategy_ids,
                 }
             ],
             "bk_biz_id": self.biz_id,
@@ -119,7 +120,7 @@ class OtherPlatformAlarm:
         tasks = []
         # 遍历更新策略
         for k, v in strategy_dict.items():
-            actions = list(filter(lambda x: str(x.get("config_id")) != str(self.config_id), v))
+            actions = list(filter(lambda x: x.get("config_id") != self.config_id, v))
             # 删除策略
             if k in self.new_strategy_ids:
                 actions.append(self.action)
