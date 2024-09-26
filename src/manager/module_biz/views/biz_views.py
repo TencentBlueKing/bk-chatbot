@@ -58,9 +58,27 @@ class BizViewSet(BaseViewSet):
         }
         """
         username = get_request_user(request)
+
+        biz_property_filter = {
+            "condition": "OR",
+            "rules": [
+                {
+                    "field": "bk_biz_maintainer",
+                    "operator": "equal",
+                    "value": username
+                },
+                {
+                    "field": "bk_oper_plan",
+                    "operator": "equal",
+                    "value": username
+                },
+            ]
+        }
+
         data = CC().search_business(
-            bk_username=username,
+            bk_username="bk_chat",
             fields=["bk_biz_id", "bk_biz_name"],
+            biz_property_filter=biz_property_filter
         )
 
         # 历史记录替换到最前面:不管查询最近的是不是异常都不会影响查询功能
