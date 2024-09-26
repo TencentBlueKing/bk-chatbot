@@ -63,8 +63,14 @@ class BizViewSet(BaseViewSet):
             bk_username="bk_chat",
             fields=["bk_biz_id", "bk_biz_name", "bk_biz_maintainer", "bk_oper_plan"],
         )
+        filtered_data = []
+        for d in data:
+            bk_biz_maintainer = d["bk_biz_maintainer"] or ""
+            bk_oper_plan = d["bk_oper_plan"] or ""
+            if username in bk_biz_maintainer.split(",") + bk_oper_plan.split(","):
+                filtered_data.append(d)
 
-        data = [d for d in data if username in d["bk_biz_maintainer"].split(",") + d["bk_oper_plan"].split(",")]
+        data = filtered_data
 
         # 历史记录替换到最前面:不管查询最近的是不是异常都不会影响查询功能
         try:
