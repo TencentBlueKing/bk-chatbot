@@ -65,8 +65,8 @@ class BizViewSet(BaseViewSet):
         )
         filtered_data = []
         for d in data:
-            bk_biz_maintainer = d["bk_biz_maintainer"] or ""
-            bk_oper_plan = d["bk_oper_plan"] or ""
+            bk_biz_maintainer = d.get("bk_biz_maintainer") or ""
+            bk_oper_plan = d.get("bk_oper_plan") or ""
             if username in bk_biz_maintainer.split(",") + bk_oper_plan.split(","):
                 filtered_data.append(d)
 
