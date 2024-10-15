@@ -181,7 +181,7 @@ class TaskExecutionViewSet(BaseGetViewSet):
 
         execution_queryset = ExecutionLog.objects.filter(
             intent_id__in=intent_id_list,
-            status__in=[TaskExecStatus.RUNNING, TaskExecStatus.FAIL, TaskExecStatus.SUSPENDED]
+            status__in=[TaskExecStatus.RUNNING.value, TaskExecStatus.FAIL.value, TaskExecStatus.SUSPENDED.value]
         ).order_by('-created_at')[:15]
         serializer = ExecutionLogSerializer(execution_queryset, many=True)
         return Response(serializer.data)
