@@ -184,7 +184,7 @@ class TaskExecutionViewSet(BaseGetViewSet):
             status__in=[TaskExecStatus.RUNNING.value, TaskExecStatus.FAIL.value, TaskExecStatus.SUSPENDED.value]
         ).order_by('-created_at')[:15]
         serializer = ExecutionLogSerializer(execution_queryset, many=True)
-        return Response(serializer.data)
+        return Response({"data": serializer.data})
 
     @action(detail=False, methods=["POST"])
     @validation(ReqPostBotCreateLog)
