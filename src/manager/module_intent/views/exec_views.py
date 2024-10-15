@@ -16,10 +16,11 @@ import os
 import time
 
 from django.utils.decorators import method_decorator
+from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.constants import TASK_EXECUTE_STATUS_DICT
+from common.constants import TASK_EXECUTE_STATUS_DICT, TaskExecStatus
 from common.control.throttle import ChatBotThrottle
 from common.drf.validation import validation
 from common.drf.view_set import BaseGetViewSet
@@ -32,6 +33,7 @@ from src.manager.module_intent.handler.task_info import TaskDetail
 from src.manager.module_intent.handler.task_operation import Operation
 from src.manager.module_intent.handler.task_tree import Pipeline
 from src.manager.module_intent.models import ExecutionLog
+from src.manager.module_intent.models import Intent
 from src.manager.module_intent.proto.log import (
     ExecutionLogSerializer,
     ReqPostBotCreateLog,
@@ -165,6 +167,24 @@ class TaskExecutionViewSet(BaseGetViewSet):
     @login_exempt_with_perm
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
+
+    @action(detail=False, methods=["GET"])
+    def my_task_list(self, request, *args, **kwargs):
+        """
+        获取我的任务列表
+        """
+        operator = request.query_params.get("operator")
+        biz_id = request.query_params.get("biz_id")
+        intent_id_list = Intent.objects.filter(
+            (Q(available_user__contains="all") | Q(available_user__contains=operator)) & Q(biz_id=biz_id)
+        ).values_list('id', flat=True)
+
+        execution_queryset = ExecutionLog.objects.filter(
+            intent_id__in=intent_id_list,
+            status__in=[TaskExecStatus.RUNNING, TaskExecStatus.FAIL, TaskExecStatus.SUSPENDED]
+        ).order_by('-created_at')[:15]
+        serializer = ExecutionLogSerializer(execution_queryset, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=["POST"])
     @validation(ReqPostBotCreateLog)

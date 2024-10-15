@@ -79,6 +79,25 @@ class SOPS:
         return response
 
     @classmethod
+    def preview_task_tree(cls, bk_username, bk_biz_id, template_id, exclude_task_nodes_id):
+        """
+        预览模板创建后生成的任务树
+        :param bk_username:
+        :param bk_biz_id:
+        :param template_id: 模版ID
+        :param exclude_task_nodes_id: 需要移除的可选节点 ID 列表
+        :return:
+        """
+        kwargs = {
+            "bk_username": bk_username,
+            "bk_biz_id": bk_biz_id,
+            "template_id": template_id,
+            "template_source": exclude_task_nodes_id,
+        }
+        response = SopsApi.preview_task_tree(kwargs, raw=True)
+        return response
+
+    @classmethod
     def get_task_status(self, bk_username: str, bk_biz_id: int, task_id: str):
         """
         查询任务执行状态
@@ -176,7 +195,7 @@ class SOPS:
 
     @classmethod
     def node_callback(
-        cls, bk_username: str, bk_biz_id: int, task_id: str, node_id: str, action: str, callback_data=dict, scope=""
+            cls, bk_username: str, bk_biz_id: int, task_id: str, node_id: str, action: str, callback_data=dict, scope=""
     ):
         """
         节点回调
