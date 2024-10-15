@@ -23,6 +23,17 @@ class _SopsApi(object):
         )
 
     @property
+    def preview_task_tree(self):
+        return DataAPI(
+            method="POST",
+            url=SOPS_APIGATEWAY_ROOT_V2 + "/preview_task_tree/{bk_biz_id}/{template_id}/",
+            description="预览模板创建后生成的任务树",
+            url_keys=["bk_biz_id", "template_id"],
+            module=self.MODULE,
+            before_request=get_job_request_before,
+        )
+
+    @property
     def get_template_list(self):
         return DataAPI(
             method="GET",
@@ -60,5 +71,6 @@ class _SopsApi(object):
             description="查询任务节点执行详情",
             module=self.MODULE,
         )
+
 
 SopsApi = _SopsApi()

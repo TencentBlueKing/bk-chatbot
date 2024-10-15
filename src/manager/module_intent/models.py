@@ -123,6 +123,7 @@ class Intent(BaseModel):
         serial_number = filters.CharFilter(field_name="serial_number")
         developer = filters.CharFilter(field_name="developer", lookup_expr="contains")
         approver = filters.CharFilter(field_name="approver", lookup_expr="contains")
+        tag_name = filters.CharFilter(field_name="tag_name", lookup_expr="contains")
         available_user = filters.CharFilter(field_name="available_user", lookup_expr="contains")
         available_group = filters.CharFilter(field_name="available_group", lookup_expr="contains")
 

@@ -29,7 +29,7 @@ from src.manager.module_biz.proto.task import (
     DescribeDevopsPipelinesStartInfo,
     DescribeJob,
     DescribeSops,
-    DescribeSopsSchemes,
+    DescribeSopsSchemes, SopsPreviewTaskTree,
 )
 
 tags = ["任务查询"]
@@ -165,6 +165,21 @@ class TaskViewSet(BaseViewSet):
             get_request_user(request),
             int(kwargs.get("biz_id")),
             int(request.payload.get("id", -1)),
+        )
+        return JsonResponse(response)
+
+    @swagger_auto_schema(tags=tags, query_serializer=SopsPreviewTaskTree(), operation_id="预览模板创建后生成的任务")
+    @action(detail=False, methods=["POST"])
+    @validation(SopsPreviewTaskTree)
+    def sops_preview_task_tree(self, request, **kwargs):
+        """
+        预览模板创建后生成的任务树
+        """
+        response = SOPS().preview_task_tree(
+            get_request_user(request),
+            kwargs.get("biz_id"),
+            request.payload.get("template_id"),
+            request.payload.get("exclude_task_nodes_id")
         )
         return JsonResponse(response)
 
