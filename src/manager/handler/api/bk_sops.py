@@ -92,7 +92,7 @@ class SOPS:
             "bk_username": bk_username,
             "bk_biz_id": bk_biz_id,
             "template_id": template_id,
-            "template_source": exclude_task_nodes_id,
+            "exclude_task_nodes_id": exclude_task_nodes_id,
         }
         response = SopsApi.preview_task_tree(kwargs, raw=True)
         return response
