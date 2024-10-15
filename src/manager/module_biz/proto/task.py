@@ -39,7 +39,7 @@ class SopsPreviewTaskTree(Serializer):
     """
     biz_id = serializers.CharField(required=True, label="业务ID")
     template_id = serializers.CharField(required=True, label="流程模版ID")
-    exclude_task_nodes_id = serializers.ListSerializer(required=True, allow_empty=True,
+    exclude_task_nodes_id = serializers.ListSerializer(required=True, child=serializers.CharField, allow_empty=True,
                                                        label="需要移除的可选节点 ID 列表")
 
 
