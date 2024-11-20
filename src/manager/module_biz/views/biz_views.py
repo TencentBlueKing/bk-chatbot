@@ -14,10 +14,12 @@ specific language governing permissions and limitations under the License.
 """
 import os
 
+from blueapps.utils.logger import logger
 from iam import IAM, Request, Subject, Action
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.conf import settings
+
 
 from common.control.throttle import ChatBotThrottle
 from common.drf.generic import BaseViewSet
@@ -75,4 +77,5 @@ class BizViewSet(BaseViewSet):
             fields=["bk_biz_id", "bk_biz_name"],
         )
 
+        logger.info(f"describe_biz {username} get biz list {data}")
         return Response(data)
