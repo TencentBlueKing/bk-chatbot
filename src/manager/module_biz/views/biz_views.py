@@ -20,7 +20,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.conf import settings
 
-
 from common.control.throttle import ChatBotThrottle
 from common.drf.generic import BaseViewSet
 from common.http.request import get_request_user
@@ -69,13 +68,15 @@ class BizViewSet(BaseViewSet):
             None
         )
         policies = iam_ins._do_policy_query(iam_request)
-        policies["value"] = policies["value"] if isinstance(policies["value"], list) else [policies["value"]]
-        bk_biz_id_list = [int(biz_id) for biz_id in policies["value"]]
+        logger.info(f"iam_describe_biz {username} get policies -> {policies}")
+        _bk_biz_id_list = policies["value"] if isinstance(policies["value"], list) else [policies["value"]]
+        bk_biz_id_list = [int(biz_id) for biz_id in _bk_biz_id_list]
+        logger.info(f"iam_describe_biz {username} get bk_biz_id_list -> {bk_biz_id_list}")
         data = CC().search_business(
             bk_username="bk_chat",
             biz_ids=bk_biz_id_list,
             fields=["bk_biz_id", "bk_biz_name"],
         )
 
-        logger.info(f"describe_biz {username} get biz list {data}")
+        logger.info(f"iam_describe_biz {username} get biz list {data}")
         return Response(data)
