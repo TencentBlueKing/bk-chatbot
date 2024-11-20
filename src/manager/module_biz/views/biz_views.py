@@ -12,20 +12,19 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import os
 
-import json
-import traceback
-
-from blueapps.utils.logger import logger
+from iam import IAM, Request, Subject, Action
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.conf import settings
 
-from common.constants import USER_VISIT
 from common.control.throttle import ChatBotThrottle
 from common.drf.generic import BaseViewSet
 from common.http.request import get_request_user
-from common.redis import RedisClient
 from src.manager.handler.api.bk_cc import CC
+
+BK_API_URL_TMPL = os.getenv("BK_API_URL_TMPL")
 
 
 class BizViewSet(BaseViewSet):
@@ -58,32 +57,22 @@ class BizViewSet(BaseViewSet):
         }
         """
         username = get_request_user(request)
-
+        iam_ins = IAM(settings.APP_CODE, settings.SECRET_KEY,
+                      bk_apigateway_url=f"{BK_API_URL_TMPL.format(api_name='bk-iam')}/prod")
+        iam_request = Request(
+            "bkchat_saas",
+            Subject("user", username),
+            Action("biz_management"),
+            [],
+            None
+        )
+        policies = iam_ins._do_policy_query(iam_request)
+        policies["value"] = policies["value"] if isinstance(policies["value"], list) else [policies["value"]]
+        bk_biz_id_list = [int(biz_id) for biz_id in policies["value"]]
         data = CC().search_business(
             bk_username="bk_chat",
-            fields=["bk_biz_id", "bk_biz_name", "bk_biz_maintainer", "bk_oper_plan"],
+            biz_ids=bk_biz_id_list,
+            fields=["bk_biz_id", "bk_biz_name"],
         )
-        filtered_data = []
-        for d in data:
-            bk_biz_maintainer = d.get("bk_biz_maintainer") or ""
-            bk_oper_plan = d.get("bk_oper_plan") or ""
-            if username in bk_biz_maintainer.split(",") + bk_oper_plan.split(","):
-                filtered_data.append(d)
-
-        data = filtered_data
-
-        # 历史记录替换到最前面:不管查询最近的是不是异常都不会影响查询功能
-        try:
-            key = f"{USER_VISIT}_{username}"
-            record_biz_id = RedisClient().get(key)
-            for biz_index in range(len(data)):
-                biz = data[biz_index]
-                if biz.get("bk_biz_id") == record_biz_id:
-                    data.pop(biz_index)
-                    data.insert(0, biz)
-                    break
-        except Exception:  # pylint: disable=broad-except
-            logger.error(json.dumps({"message": traceback.format_exc()}))
-            return
 
         return Response(data)
