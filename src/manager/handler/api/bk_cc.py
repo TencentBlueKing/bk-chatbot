@@ -13,7 +13,6 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-
 from adapter.api import CCApi
 from common.requests.batch import batch_request
 
@@ -48,7 +47,7 @@ class CC:
         biz_property_filter = kwargs.get("biz_property_filter")
         if biz_property_filter:
             params.setdefault("biz_property_filter", biz_property_filter)
-        data = CCApi.search_business(params)
+        data = CCApi.search_business(params, request_cookies=False)
         info = data.get("info", [])
         return info
 
