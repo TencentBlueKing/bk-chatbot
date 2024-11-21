@@ -32,11 +32,13 @@ def task_status_timer():
     _task_id = str(uuid.uuid4())
     logger.info(f"[{_task_id}]task_status_timer start task")
     try:
+        redis_client = RedisClient()
+        get_lock_ok = redis_client.set_nx("task_status_timer", 1, 600)
+        if not get_lock_ok:
+            logger.info(f"[{_task_id}]task_status_timer get lock fail,skip")
+            return
+
         with RedisClient() as r:
-            get_lock_ok = r.set_nx("task_status_timer", 1, 300)
-            if not get_lock_ok:
-                logger.info(f"[{_task_id}]task_status_timer get lock fail,skip")
-                return
             ids = r.keys(f"{UPDATE_TASK_PREFIX}*")
         logger.info(f"[{_task_id}]task_status_timer get lock and get cache with success, ids: {ids}")
         # 多线程更新状态
