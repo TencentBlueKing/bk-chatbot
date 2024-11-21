@@ -34,10 +34,10 @@ def task_status_timer():
     try:
         with RedisClient() as r:
             ids = r.keys(f"{UPDATE_TASK_PREFIX}*")
-        logger.info(f"[{_task_id}]task_status_timer get lock and get cache with success, ids: {ids}")
+        logger.info(f"[{_task_id}]task_status_timer get cache with success, ids: {ids}")
         # 多线程更新状态
         with ThreadPoolExecutor(max_workers=UPDATE_TASK_MAX_WORKERS) as pool:
             list(map(lambda x: pool.submit(update_task_status, int(x.replace(f"{UPDATE_TASK_PREFIX}", ""))), ids))
-        logger.info(f"[{_task_id}]task_status_timer start finish")
+        logger.info(f"[{_task_id}]task_status_timer finish")
     except Exception:
         logger.exception(f"[{_task_id}]task_status_timer error")
