@@ -20,7 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 from blueapps.utils.logger import logger_celery as logger
 from celery.task import periodic_task
 from common.redis import RedisClient
-from src.manager.module_intent.constants import UPDATE_TASK_MAX_WORKERS, UPDATE_TASK_PREFIX
+from src.manager.module_intent.constants import UPDATE_TASK_MAX_WORKERS, UPDATE_TASK_PREFIX, UPDATE_TASK_LOCK_PREFIX
 from src.manager.module_intent.handler.task_log import update_task_status
 
 
@@ -34,7 +34,9 @@ def task_status_timer():
     try:
         with RedisClient() as r:
             ids = r.keys(f"{UPDATE_TASK_PREFIX}*")
+        ids = [_id for _id in ids if UPDATE_TASK_LOCK_PREFIX not in _id]
         logger.info(f"[{_task_id}]task_status_timer get cache with success, ids: {ids}")
+
         # 多线程更新状态
         with ThreadPoolExecutor(max_workers=UPDATE_TASK_MAX_WORKERS) as pool:
             list(map(lambda x: pool.submit(update_task_status, int(x.replace(f"{UPDATE_TASK_PREFIX}", ""))), ids))
