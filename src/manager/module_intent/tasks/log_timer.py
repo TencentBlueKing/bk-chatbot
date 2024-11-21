@@ -32,18 +32,12 @@ def task_status_timer():
     _task_id = str(uuid.uuid4())
     logger.info(f"[{_task_id}]task_status_timer start task")
     try:
-        redis_client = RedisClient()
-        get_lock_ok = redis_client.set_nx("task_status_timer", 1, 25)
-        if not get_lock_ok:
-            logger.info(f"[{_task_id}]task_status_timer get lock fail,skip")
-            return
-
         with RedisClient() as r:
             ids = r.keys(f"{UPDATE_TASK_PREFIX}*")
-        logger.info(f"[{_task_id}]task_status_timer get lock and get cache with success, ids: {ids}")
+        logger.info(f"[{_task_id}]task_status_timer get cache with success, ids: {ids}")
         # 多线程更新状态
         with ThreadPoolExecutor(max_workers=UPDATE_TASK_MAX_WORKERS) as pool:
             list(map(lambda x: pool.submit(update_task_status, int(x.replace(f"{UPDATE_TASK_PREFIX}", ""))), ids))
-        logger.info(f"[{_task_id}]task_status_timer start finish")
+        logger.info(f"[{_task_id}]task_status_timer finish")
     except Exception:
         logger.exception(f"[{_task_id}]task_status_timer error")
