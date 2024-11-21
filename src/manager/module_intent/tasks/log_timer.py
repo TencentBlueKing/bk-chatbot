@@ -24,12 +24,12 @@ from src.manager.module_intent.constants import UPDATE_TASK_MAX_WORKERS, UPDATE_
 from src.manager.module_intent.handler.task_log import update_task_status
 
 
-@periodic_task(run_every=datetime.timedelta(seconds=10), soft_time_limit=120)
+@periodic_task(run_every=datetime.timedelta(seconds=30), soft_time_limit=300)
 def task_status_timer():
     """
     更新日志定时任务
     """
-    logger.info("start task")
+    logger.info("task_status_timer start task")
     try:
         with RedisClient() as r:
             ids = r.keys(f"{UPDATE_TASK_PREFIX}*")
