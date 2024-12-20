@@ -20,9 +20,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.conf import settings
 
+from common.constants import USER_VISIT
 from common.control.throttle import ChatBotThrottle
 from common.drf.generic import BaseViewSet
 from common.http.request import get_request_user
+from common.redis import RedisClient
 from src.manager.handler.api.bk_cc import CC
 
 BK_API_URL_TMPL = os.getenv("BK_API_URL_TMPL")
@@ -77,6 +79,20 @@ class BizViewSet(BaseViewSet):
             biz_ids=bk_biz_id_list,
             fields=["bk_biz_id", "bk_biz_name"],
         )
+
+        # 历史记录替换到最前面:不管查询最近的是不是异常都不会影响查询功能
+        try:
+            key = f"{USER_VISIT}_{username}"
+            record_biz_id = RedisClient().get(key)
+            for biz_index in range(len(data)):
+                biz = data[biz_index]
+                if biz.get("bk_biz_id") == record_biz_id:
+                    data.pop(biz_index)
+                    data.insert(0, biz)
+                    break
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("get biz list error")
+            return
 
         logger.info(f"iam_describe_biz {username} get biz list {data}")
         return Response(data)
