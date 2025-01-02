@@ -12,9 +12,10 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
-from src.manager.module_notice.constants import CUSTOM
+
 from src.manager.handler.api.bk_chat import BkChatFeature
 from src.manager.module_biz.handlers.biz_cache import get_biz_info
+from src.manager.module_notice.constants import CUSTOM
 from src.manager.module_notice.handler.notice_cache import get_notice_group_data
 
 
@@ -134,8 +135,9 @@ class Notice:
 
         # 支持邮件
         if self.im_type in ["EMAIL"]:
+            email_content = self.msg_content.replace("\n", "<br/>")
             params = {
-                "msg_param": {"title": self.kwargs.get("group_name", "BkChat消息通知"), "content": self.msg_content},
+                "msg_param": {"title": self.kwargs.get("group_name", "BkChat消息通知"), "content": email_content},
             }
 
         return params
