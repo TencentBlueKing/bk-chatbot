@@ -250,3 +250,55 @@ class BkMonitor:
         """
         result = BkMonitorApi.delete_action_config(kwargs)
         return result
+
+    @classmethod
+    def get_dashboard_directory_tree(cls, bk_biz_id):
+        """
+        获取仪表盘目录树
+        @return:
+        """
+        params = {
+            "bk_biz_id": bk_biz_id,
+            "filter_no_permission": True,
+        }
+        result = BkMonitorApi.get_dashboard_directory_tree(params=params)
+        return result
+
+    @classmethod
+    def get_dashboard_detail(cls, bk_biz_id, dashboard_uid):
+        """
+        获取仪表盘详情
+        @return:
+        """
+        params = {
+            "bk_biz_id": bk_biz_id,
+            "dashboard_uid": dashboard_uid
+        }
+        result = BkMonitorApi.get_dashboard_detail(params=params)
+        return result
+
+    @classmethod
+    def start_render_image_task(cls, options):
+        """
+        启动图片渲染任务
+        @return:
+        """
+        kwargs = {
+            "type": "dashboard",
+            "options": options
+        }
+
+        result = BkMonitorApi.start_render_image_task(kwargs)
+        return result
+
+    @classmethod
+    def get_render_image_task_result(cls, task_id):
+        """
+        获取图片渲染结果
+        @return:
+        """
+        params = {
+            "task_id": task_id
+        }
+        result = BkMonitorApi.get_render_image_task_result(params=params)
+        return result

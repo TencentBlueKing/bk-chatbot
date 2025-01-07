@@ -88,5 +88,41 @@ class _BkMonitorApi:
             module=self.MODULE,
         )
 
+    @property
+    def get_dashboard_directory_tree(self):
+        return DataAPI(
+            method="GET",
+            url=MONITOR_APIGATEWAY_ROOT + "get_dashboard_directory_tree",
+            description=_("获取仪表盘目录树"),
+            module=self.MODULE,
+        )
+
+    @property
+    def get_dashboard_detail(self):
+        return DataAPI(
+            method="GET",
+            url=MONITOR_APIGATEWAY_ROOT + "get_dashboard_detail",
+            description=_("获取仪表盘详情"),
+            module=self.MODULE,
+        )
+
+    @property
+    def start_render_image_task(self):
+        return DataAPI(
+            method="POST",
+            url=MONITOR_APIGATEWAY_ROOT + "start_render_image_task",
+            description=_("启动图片渲染任务"),
+            module=self.MODULE,
+        )
+
+    @property
+    def get_render_image_task_result(self):
+        return DataAPI(
+            method="GET",
+            url=MONITOR_APIGATEWAY_ROOT + "get_render_image_task_result",
+            description=_("获取图片渲染结果"),
+            module=self.MODULE,
+        )
+
 
 BkMonitorApi = _BkMonitorApi()

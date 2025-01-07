@@ -194,6 +194,20 @@ class RspGetNoticeLogViewSerializer(BaseRspSerializer):
     data = RspGetNoticeLogData()
 
 
+class ReqPostBkMonitorDashboardGwViewSetSerializer(serializers.Serializer):
+    """
+    请求发送监控仪表盘
+    """
+
+    sender = serializers.CharField(label="发送人")
+    source = serializers.CharField(label="发送群/人id")
+    intent_name = serializers.CharField(label="技能名称")
+    biz_id = serializers.IntegerField(label="业务ID")
+    dashboard_uid = serializers.CharField(label="仪表盘ID")
+    panel_id = serializers.CharField(label="面板ID", allow_blank=True)
+    variables = serializers.DictField(label="用户设置的变量值")
+
+
 #######################################
 
 

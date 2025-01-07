@@ -22,6 +22,7 @@ from src.manager.module_notice.views.alarm_view import (
     AlarmViewSet,
 )
 from src.manager.module_notice.views.broadcast_views import TaskBroadcastGwViewSet
+from src.manager.module_notice.views.bkm_dashboard import BkMonitorDashboardGwViewSet
 from src.manager.module_notice.views.chat_views import ChatReplyGwViewSet
 from src.manager.module_notice.views.notice_view import (
     NoticeGroupGwViewSet,
@@ -44,6 +45,7 @@ router.register(r"alarm", AlarmViewSet, basename="alarm")  # 告警
 router.register(r"alarm", AlarmNoticeViewSet, basename="alarm_notice")  # 告警
 router.register(r"config/alarm", AlarmConfigViewSet, basename="alarm_config")  # 告警
 router.register(r"gw_task_broadcast", TaskBroadcastGwViewSet, basename="gw_task_broadcast")  # 发送通知
+router.register(r"gw_bkm_dashboard", BkMonitorDashboardGwViewSet, basename="gw_bkm_dashboard")  # 监控仪表盘发送
 router.register(r"gw_chat", ChatReplyGwViewSet, basename="gw_chat")  # 闲聊获取结果
 
 urlpatterns = (url(r"^", include(router.urls)),)
