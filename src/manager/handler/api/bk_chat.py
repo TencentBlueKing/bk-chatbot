@@ -12,11 +12,27 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import re
 import json
+import logging
+import requests
 from typing import Any
+
+from django.conf import settings
 
 from adapter.api import BkChatApi
 from common.utils.my_time import mk_now_time
+
+logger = logging.getLogger("root")
+
+
+def check_wecom_group(text):
+    pattern = r"ww\d+"
+    result = re.search(pattern, text)
+    if result:
+        return True
+    else:
+        return False
 
 
 def set_im_headers(params):
@@ -119,6 +135,58 @@ class BkChat:
             "value": value,
         }
         return BkChatApi.msg_push(params=params)
+
+    @classmethod
+    def file_send_service(cls, receiver_list, file_name, image_base64, msg_type="image"):
+        """
+        发送文件(新)
+        @return:
+        """
+        url = settings.BK_CHAT_APIGW + "plugin/api/rest/file/send/"
+        single_receiver_list = [r for r in receiver_list if not check_wecom_group(r)]
+        group_receiver_list = [r for r in receiver_list if check_wecom_group(r)]
+
+        headers = {
+            "Content-Type": "application/json",
+            "X-Bkapi-Authorization": json.dumps(
+                {
+                    "bk_app_code": settings.APP_CODE,
+                    "bk_app_secret": settings.SECRET_KEY,
+                }
+            ),
+        }
+
+        data = {
+            "file_name": file_name,
+            "im_type": "WEWORK",
+            "msg_type": msg_type,
+            "buff": image_base64,
+        }
+        if single_receiver_list:
+            data.update(
+                {
+                    "receiver": {
+                        "receiver_type": "single",
+                        "receiver_ids": single_receiver_list,
+                    },
+                }
+            )
+            result = requests.post(url, json=data, headers=headers).json()
+            if not result["result"]:
+                logger.error(result)
+
+        if group_receiver_list:
+            data.update(
+                {
+                    "receiver": {
+                        "receiver_type": "group",
+                        "receiver_ids": group_receiver_list,
+                    },
+                }
+            )
+            result = requests.post(url, json=data, headers=headers).json()
+            if not result["result"]:
+                logger.error(result)
 
 
 class BkChatFeature(BkChat):

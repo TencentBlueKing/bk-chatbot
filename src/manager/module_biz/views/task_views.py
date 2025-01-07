@@ -12,6 +12,8 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
+import json
+
 from django.http import JsonResponse
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
@@ -25,6 +27,7 @@ from src.manager.handler.api.bk_job import JOB
 from src.manager.handler.api.bk_sops import SOPS
 from src.manager.handler.api.devops import DevOps
 from src.manager.handler.api.bk_itsm import BkITSM
+from src.manager.handler.api.bk_monitor import BkMonitor
 from src.manager.module_biz.proto.task import (
     DescribeDevopsPipelinesStartInfo,
     DescribeJob,
@@ -267,3 +270,73 @@ class TaskViewSet(BaseViewSet):
         service_id = request.query_params.get("service_id")
         response = BkITSM.get_service_detail(service_id)
         return Response(response.get("data", []))
+
+    @swagger_auto_schema(tags=tags, operation_id="BkMonitor-查询仪表盘目录树")
+    @action(detail=False, methods=["GET"])
+    def describe_bkmonitor_dashboards(self, request, biz_id, **kwargs):
+        """
+        BKMONITOR-查询仪表盘目录树
+        """
+        result = BkMonitor.get_dashboard_directory_tree(biz_id)
+        data = []
+        for c in result:
+            _dashboards = [{"title": f"{c['title']}/{d['title']}", "uid": d["uid"]} for d in c["dashboards"]]
+            data.extend(_dashboards)
+        return Response(data)
+
+    @swagger_auto_schema(tags=tags, operation_id="BkMonitor-查询仪表盘详情")
+    @action(detail=False, methods=["GET"])
+    def describe_bkmonitor_dashboard(self, request, biz_id, **kwargs):
+        """
+        BkMonitor-查询仪表盘详情
+        """
+        dashboard_uid = request.query_params.get("dashboard_uid")
+        result = BkMonitor.get_dashboard_detail(biz_id, dashboard_uid)
+        dashboard_info = json.loads(result["data"])
+        panels = [{"title": p["title"], "id": p["id"]} for p in dashboard_info.get("panels", []) if p["type"] != "row"]
+        variables = []
+        for t in dashboard_info.get("templating", {}).get("list", []):
+            variables.append({
+                "key": t["name"],
+                "name": f"[仪表盘变量]{t['name']}",
+                "tips": f"请设置[仪表盘变量]{t['name']}"
+            })
+
+        variables.extend([
+            {
+                "key": "__sys__use_dashboard_default",
+                "name": "[通用]使用仪表盘变量默认值",
+                "tips": "如果使用仪表盘变量默认值，则无须设置仪表盘变量，将以蓝鲸监控仪表盘默认值为准",
+                "default": "是"
+            },
+            {
+                "key": "__sys__width",
+                "name": "[通用]宽度",
+                "tips": "请设置图片宽度, 单位px",
+                "default": 800,
+            },
+            {
+                "key": "__sys__to_now_hours",
+                "name": "[通用]时间范围",
+                "tips": "请设置查看最近几小时的仪表盘",
+                "default": 6,
+            },
+            {
+                "key": "__sys__scale",
+                "name": "[通用]像素密度",
+                "tips": "请设置图片像素密度，默认2, 最大4, 越大越清晰，但是图片大小也越大",
+                "default": 2,
+            },
+            {
+                "key": "__sys__height",
+                "name": "[通用]高度",
+                "tips": "仅在panel_id不为空时有效",
+                "default": 500,
+            }
+
+        ])
+        data = {
+            "variables": variables,
+            "panels": panels,
+        }
+        return Response(data)
