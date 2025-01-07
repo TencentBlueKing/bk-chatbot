@@ -299,7 +299,8 @@ class TaskViewSet(BaseViewSet):
             variables.append({
                 "key": t["name"],
                 "name": f"[仪表盘变量]{t['name']}",
-                "tips": f"请设置[仪表盘变量]{t['name']}"
+                "tips": f"如需自定义{t['name']}，请将<[通用]使用仪表盘变量默认值>设置为否",
+                "default": "使用仪表盘变量默认值"
             })
 
         variables.extend([
