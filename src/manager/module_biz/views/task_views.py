@@ -293,7 +293,7 @@ class TaskViewSet(BaseViewSet):
         dashboard_uid = request.query_params.get("dashboard_uid")
         result = BkMonitor.get_dashboard_detail(biz_id, dashboard_uid)
         dashboard_info = json.loads(result["data"])
-        panels = [{"title": p["title"], "id": p["id"]} for p in dashboard_info.get("panels", []) if p["type"] != "row"]
+        panels = BkMonitor.get_all_panels(dashboard_info.get("panels", []))
         variables = []
         for t in dashboard_info.get("templating", {}).get("list", []):
             variables.append({

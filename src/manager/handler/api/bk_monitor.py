@@ -302,3 +302,18 @@ class BkMonitor:
         }
         result = BkMonitorApi.get_render_image_task_result(params=params)
         return result
+
+    @staticmethod
+    def get_all_panels(raw_panels):
+        panels = []
+
+        def _get_panels(_raw_panels):
+            for r_p in _raw_panels:
+                if r_p["type"] != "row":
+                    panels.append({"title": r_p["title"], "id": r_p["id"]})
+                else:
+                    _get_panels(r_p.get("panels", []))
+
+        _get_panels(raw_panels)
+
+        return panels
