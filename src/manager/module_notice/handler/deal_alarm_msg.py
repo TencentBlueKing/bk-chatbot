@@ -124,24 +124,32 @@ class OriginalAlarm:
             )
         )
 
-        # 云区域
-        self.bk_target_cloud_id = dimension_translation.get("bk_target_cloud_id", {}).get("value")
-        # 目标IP
-        self.bk_target_ip = dimension_translation.get("bk_target_ip", {}).get("value")
-        # 设备名称
-        self.device_name = dimension_translation.get("device_name", {}).get("value")
-        # 主机名
-        self.hostname = dimension_translation.get("hostname", {}).get("value")
-
-        # 告警维度
-        if self.hostname:
-            self.alarm_dimension += f",主机名={self.hostname}"
-        if self.bk_target_cloud_id:
-            self.alarm_dimension += f"云区域ID={self.bk_target_cloud_id}"
-        if self.bk_target_ip:
-            self.alarm_dimension += f",目标IP={self.bk_target_ip}"
-        if self.device_name:
-            self.alarm_dimension += f",设备名={self.device_name}"
+        # # 云区域
+        # self.bk_target_cloud_id = dimension_translation.get("bk_target_cloud_id", {}).get("value")
+        # # 目标IP
+        # self.bk_target_ip = dimension_translation.get("bk_target_ip", {}).get("value")
+        # # 设备名称
+        # self.device_name = dimension_translation.get("device_name", {}).get("value")
+        # # 主机名
+        # self.hostname = dimension_translation.get("hostname", {}).get("value")
+        #
+        # # 告警维度
+        # if self.hostname:
+        #     self.alarm_dimension += f"主机名={self.hostname}"
+        # if self.bk_target_cloud_id:
+        #     self.alarm_dimension += f"云区域ID={self.bk_target_cloud_id}"
+        # if self.bk_target_ip:
+        #     self.alarm_dimension += f",目标IP={self.bk_target_ip}"
+        # if self.device_name:
+        #     self.alarm_dimension += f",设备名={self.device_name}"
+        alarm_dimension_list = []
+        for k, v in dimension_translation.items():
+            if k in ["bk_topo_node", "bk_host_id"]:
+                continue
+            if v.get("value", None):
+                alarm_dimension_list.append(f'{v.get("display_name")}={v.get("value")}')
+        if len(alarm_dimension_list) > 0:
+            self.alarm_dimension = ",".join(alarm_dimension_list)
 
         # 如果出现alarm_dimension为空通过获取所有key,value进行操作
         if not self.alarm_dimension:
