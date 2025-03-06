@@ -146,7 +146,7 @@ class OriginalAlarm:
         for k, v in dimension_translation.items():
             if k in ["bk_topo_node", "bk_host_id"]:
                 continue
-            if v.get("value"):
+            if v.get("value", None):
                 alarm_dimension_list.append(f'{v.get("display_name")}={v.get("value")}')
         if len(alarm_dimension_list) > 0:
             self.alarm_dimension = ",".join(alarm_dimension_list)
