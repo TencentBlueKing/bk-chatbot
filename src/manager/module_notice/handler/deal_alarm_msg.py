@@ -60,6 +60,7 @@ class OriginalAlarm:
         self.bk_target_ip = None  # 告警目标IP
         self.bk_target_cloud_id = None  # 云区域
         self.device_name = None  # 设备名称
+        self.hostname = None  # 主机名
         self.is_translated = kwargs.get("is_translated", False)  # 是否翻译
         self.translation_type = kwargs.get("translation_type", "")  # 翻译目标语言
         self._text = ""
@@ -129,7 +130,12 @@ class OriginalAlarm:
         self.bk_target_ip = dimension_translation.get("bk_target_ip", {}).get("value")
         # 设备名称
         self.device_name = dimension_translation.get("device_name", {}).get("value")
+        # 主机名
+        self.hostname = dimension_translation.get("hostname", {}).get("value")
+
         # 告警维度
+        if self.hostname:
+            self.alarm_dimension += f",主机名={self.hostname}"
         if self.bk_target_cloud_id:
             self.alarm_dimension += f"云区域ID={self.bk_target_cloud_id}"
         if self.bk_target_ip:
