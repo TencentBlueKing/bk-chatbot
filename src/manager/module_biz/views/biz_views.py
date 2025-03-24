@@ -75,7 +75,7 @@ class BizViewSet(BaseViewSet):
         bk_biz_id_list = [int(biz_id) for biz_id in _bk_biz_id_list]
         logger.info(f"iam_describe_biz {username} get bk_biz_id_list -> {bk_biz_id_list}")
         data = CC().search_business(
-            bk_username="bk_chat",
+            bk_username="bkchat",
             biz_ids=bk_biz_id_list,
             fields=["bk_biz_id", "bk_biz_name"],
         )
