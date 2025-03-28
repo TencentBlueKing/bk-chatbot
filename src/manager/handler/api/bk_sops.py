@@ -195,7 +195,7 @@ class SOPS:
 
     @classmethod
     def node_callback(
-            cls, bk_username: str, bk_biz_id: int, task_id: str, node_id: str, action: str, callback_data=dict, scope=""
+        cls, bk_username: str, bk_biz_id: int, task_id: str, node_id: str, action: str, callback_data=dict, scope=""
     ):
         """
         节点回调

@@ -17,9 +17,7 @@ import json
 from blueapps.utils.logger import logger
 from rest_framework import permissions
 
-from common.http.request import get_request_user
 from common.redis import RedisClient
-from src.manager.handler.api.bk_cc import CC
 
 
 def record_user_visited(func):

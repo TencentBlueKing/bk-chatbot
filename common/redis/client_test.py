@@ -25,13 +25,13 @@ class FakeRedis(FakeStrictRedis):
         return True
 
     def get(self, key):
-        return super(FakeRedis, self).get(key)
+        return super().get(key)
 
     def hash_set(self, name, key, val):
         return super().hset(name, key, val)
 
     def hash_get(self, name, key):
-        return super(FakeRedis, self).hget(name, key)
+        return super().hget(name, key)
 
     def __enter__(self):
         return self

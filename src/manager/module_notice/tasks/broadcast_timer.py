@@ -91,7 +91,7 @@ def task_broadcast(broadcast_id):
             status_info = SOPS().get_task_status(operator, biz_id, task_id).get("data")
             parse_result = parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False)
             if custom_task_name:
-                parse_result["task_name"] = "[标准运维] {}".format(custom_task_name)
+                parse_result["task_name"] = f"[标准运维] {custom_task_name}"
             current_step_detail = parse_result.get("current_step_detail", {})
 
         if task_platform == TAK_PLATFORM_DEVOPS:
@@ -279,7 +279,7 @@ def task_params_broadcast(broadcast_id):
             task_url = task_info.get("task_url")
             task_name = "[标准运维] {}".format(task_info.get("name"))
             if custom_task_name:
-                task_name = "[标准运维] {}".format(custom_task_name)
+                task_name = f"[标准运维] {custom_task_name}"
 
         if task_platform == TAK_PLATFORM_DEVOPS:
             build_info = DevOps().app_build_status(

@@ -45,7 +45,7 @@ Generic permission management: implement the permission control of robot intenti
 - [bk DevOps online video tutorial(In Chinese)](https://cloud.tencent.com/developer/edu/major-100008)
 
 - Contact us, bk-chatbot technical communication QQ group: 639855706
-  
+
   <img src="docs/resource/img/qq_group.png" alt="image" style="float:left;zoom: 50%;" />
 
 ## BlueKing Community

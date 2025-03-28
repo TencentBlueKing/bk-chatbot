@@ -60,15 +60,12 @@ class BizViewSet(BaseViewSet):
         }
         """
         username = get_request_user(request)
-        iam_ins = IAM(settings.APP_CODE, settings.SECRET_KEY,
-                      bk_apigateway_url=f"{BK_API_URL_TMPL.format(api_name='bk-iam')}/prod")
-        iam_request = Request(
-            "bkchat_saas",
-            Subject("user", username),
-            Action("biz_management"),
-            [],
-            None
+        iam_ins = IAM(
+            settings.APP_CODE,
+            settings.SECRET_KEY,
+            bk_apigateway_url=f"{BK_API_URL_TMPL.format(api_name='bk-iam')}/prod",
         )
+        iam_request = Request("bkchat_saas", Subject("user", username), Action("biz_management"), [], None)
         policies = iam_ins._do_policy_query(iam_request)
         logger.info(f"iam_describe_biz {username} get policies -> {policies}")
         _bk_biz_id_list = policies["value"] if isinstance(policies["value"], list) else [policies["value"]]

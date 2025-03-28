@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 TencentBlueKing is pleased to support the open source community by making
 蓝鲸智云PaaS平台社区版 (BlueKing PaaSCommunity Edition) available.
@@ -34,7 +32,7 @@ DJANGO_CONF_MODULE = f"config.{ENVIRONMENT}"
 try:
     _module = __import__(DJANGO_CONF_MODULE, globals(), locals(), ["*"])
 except ImportError as e:
-    raise ImportError("Could not import config '%s' (Is it on sys.path?): %s" % (DJANGO_CONF_MODULE, e))
+    raise ImportError(f"Could not import config '{DJANGO_CONF_MODULE}' (Is it on sys.path?): {e}")
 
 for _setting in dir(_module):
     if _setting == _setting.upper():

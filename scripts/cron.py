@@ -24,44 +24,44 @@ from component import BizMapper, Plugin, RedisClient
 
 JOBS = [
     {
-        'action': 'refresh_corpus',
-        'trigger': 'interval',
-        'interval': 60 * 60 * 1,
+        "action": "refresh_corpus",
+        "trigger": "interval",
+        "interval": 60 * 60 * 1,
     },
     {
-        'action': 'reload_plugins',
-        'trigger': 'interval',
-        'interval': 10,
-    }
+        "action": "reload_plugins",
+        "trigger": "interval",
+        "interval": 10,
+    },
 ]
 
 
 class Monitor:
     def __init__(self):
-        self._scheduler = Scheduler(jobstores={'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')})
+        self._scheduler = Scheduler(jobstores={"default": SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")})
         self._loop = asyncio.get_event_loop()
 
     @classmethod
     async def reload_plugins(cls):
-        redis_client = RedisClient(env='prod')
-        plugin = Plugin(version='v2')
+        redis_client = RedisClient(env="prod")
+        plugin = Plugin(version="v2")
         data = await plugin.list()
         is_reload = False
         for item in data:
-            node = await plugin.list(key=item['key'])
-            md5 = redis_client.hash_get('plugins:md5', item['key'])
-            if md5 and node and node.get('md5') == md5:
+            node = await plugin.list(key=item["key"])
+            md5 = redis_client.hash_get("plugins:md5", item["key"])
+            if md5 and node and node.get("md5") == md5:
                 continue
 
             logger.warn(f'LOAD PLUGIN: {node.get("name")} {md5} {node["md5"]}')
             is_reload = True
             try:
-                redis_client.hash_set('plugins:md5', item['key'], node['md5'])
+                redis_client.hash_set("plugins:md5", item["key"], node["md5"])
             except KeyError:
-                logger.error(f'PLUGIN md5 missing: {node}')
+                logger.error(f"PLUGIN md5 missing: {node}")
 
         if is_reload:
-            os.system('sh control restart')
+            os.system("sh control restart")
 
     @classmethod
     async def refresh_corpus(cls):
@@ -70,7 +70,7 @@ class Monitor:
 
     def deploy(self):
         for job in JOBS:
-            self._scheduler.add_job(getattr(Monitor, job['action']), 'interval', seconds=job['interval'])
+            self._scheduler.add_job(getattr(Monitor, job["action"]), "interval", seconds=job["interval"])
 
     def start(self):
         self._scheduler.start()

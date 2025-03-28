@@ -53,19 +53,18 @@ def dashboard_send(payload):
             "width": width,
             "start_time": start_time,
             "end_time": end_time,
-            "scale": scale
+            "scale": scale,
         }
         if panel_id:
-            options.update({
-                "height": height,
-                "panel_id": panel_id
-            })
+            options.update({"height": height, "panel_id": panel_id})
 
         if not use_dashboard_default:
             _variables = {k: v.split(",") for k, v in variables.items() if not k.startswith("__sys__") and v}
-            options.update({
-                "variables": _variables,
-            })
+            options.update(
+                {
+                    "variables": _variables,
+                }
+            )
 
         result = BkMonitor.start_render_image_task(options)
         task_id = result["task_id"]
@@ -89,7 +88,7 @@ def dashboard_send(payload):
 
         response = requests.get(image_url)
         response.raise_for_status()
-        image_base64 = base64.b64encode(response.content).decode('utf-8')
+        image_base64 = base64.b64encode(response.content).decode("utf-8")
         BkChat.file_send_service([source], image_url.split("?")[0].split("/")[-1], image_base64)
 
     except Exception as e:

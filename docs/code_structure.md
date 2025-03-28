@@ -48,10 +48,10 @@
 ├── module_api       #各类api包含job，sops，devops等
 ├── module_biz       #业务配置与蓝鲸cmdb平台打通
 ├── module_index
-├── module_inside    
+├── module_inside
 ├── module_intent    #意图配置
 ├── module_nlp       #语料管理模块
-├── module_other     
+├── module_other
 ├── module_plugin    #公共插件管理模块
 ├── module_timer     #定时器模块与job打通
 ├── runtime.txt
@@ -71,5 +71,5 @@
 ├── plugins        #插件模块
 ├── protocol       #im协议模块
 ├── requirements.txt
-└── server.py      
+└── server.py
 ```
