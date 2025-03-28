@@ -270,10 +270,7 @@ class BkMonitor:
         获取仪表盘详情
         @return:
         """
-        params = {
-            "bk_biz_id": bk_biz_id,
-            "dashboard_uid": dashboard_uid
-        }
+        params = {"bk_biz_id": bk_biz_id, "dashboard_uid": dashboard_uid}
         result = BkMonitorApi.get_dashboard_detail(params=params)
         return result
 
@@ -283,10 +280,7 @@ class BkMonitor:
         启动图片渲染任务
         @return:
         """
-        kwargs = {
-            "type": "dashboard",
-            "options": options
-        }
+        kwargs = {"type": "dashboard", "options": options}
 
         result = BkMonitorApi.start_render_image_task(kwargs)
         return result
@@ -297,9 +291,7 @@ class BkMonitor:
         获取图片渲染结果
         @return:
         """
-        params = {
-            "task_id": task_id
-        }
+        params = {"task_id": task_id}
         result = BkMonitorApi.get_render_image_task_result(params=params)
         return result
 

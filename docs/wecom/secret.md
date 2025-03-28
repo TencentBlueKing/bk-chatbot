@@ -13,7 +13,7 @@ cd release && vim protocol/xwork/config.py
 Xwork configurations.
 """
 
-CORPID = "必填"   # 企业微信所属企业ID 
+CORPID = "必填"   # 企业微信所属企业ID
 FWID = ""
 SERVICE_ID = ""
 SECRET = "必填"   # 企业微信专属密钥

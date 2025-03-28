@@ -33,4 +33,3 @@
   <img src="./resource/img/createskills5.jpg" alt="image" style="zoom:50%;" />
 
   执行成功后，你可以到标准运维页面查看任务执行记录
-

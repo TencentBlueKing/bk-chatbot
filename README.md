@@ -49,7 +49,7 @@ bk-chatbot 有两项核心服务，一为插件集成服务：目前默认集成
 - [蓝鲸 DevOps 在线视频教程](https://cloud.tencent.com/developer/edu/major-100008)
 
 - 联系我们，加入 bk-chatbot 交流群：639855706
-  
+
   <img src="docs/resource/img/qq_group.png" alt="image" style="float:left;zoom: 50%;" />
 
 ## BlueKing Community
@@ -67,4 +67,4 @@ bk-chatbot 有两项核心服务，一为插件集成服务：目前默认集成
 
 ### License
 
-bk-chatbot基于 MIT 协议， 详细请参考 [LICENSE](https://github.com/TencentBlueKing/bk-chatbot/tree/master/LICENSE) 
+bk-chatbot基于 MIT 协议， 详细请参考 [LICENSE](https://github.com/TencentBlueKing/bk-chatbot/tree/master/LICENSE)

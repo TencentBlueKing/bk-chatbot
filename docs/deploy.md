@@ -132,7 +132,7 @@ BK_SOPS_DOMAIN = ""        # 社区版标准运维域名
 BK_DEVOPS_DOMAIN = ""      # 社区版蓝盾域名
 BK_ITSM_DOMAIN = ""        # 社区版流程系统域名
 
-BK_CC_ROOT = ""            # 访问蓝鲸cc的根路径 你的domain + /api/c/compapi/v2/cc/  
+BK_CC_ROOT = ""            # 访问蓝鲸cc的根路径 你的domain + /api/c/compapi/v2/cc/
 BK_JOB_ROOT = ""           # 访问蓝鲸JOB的根路径 你的domain + /api/c/compapi/v2/jobv3/
 BK_SOPS_ROOT = ""          # 访问蓝鲸SOPS的根路径 你的domain + /api/c/compapi/v2/sops/
 BK_DEVOPS_ROOT = ""        # 访问蓝盾的根路径
@@ -260,7 +260,7 @@ pip install -r requirements.txt          # python环境依赖下载
 * 启动web服务
 
 ```shell
-gunicorn wsgi -w 4 
+gunicorn wsgi -w 4
 ```
 
 * 启动celery
@@ -275,8 +275,7 @@ python manage.py celery beat -l info
 > 社区版HOST配置
 
 ```shell
-{你社区版nginx所在服务器} {你自定义的域名} 
+{你社区版nginx所在服务器} {你自定义的域名}
 ```
 
 > bk-chatbot 后台服务启动地址跟企业微信回调地址一致 否则收不到消息
-

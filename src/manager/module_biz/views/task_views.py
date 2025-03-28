@@ -32,7 +32,8 @@ from src.manager.module_biz.proto.task import (
     DescribeDevopsPipelinesStartInfo,
     DescribeJob,
     DescribeSops,
-    DescribeSopsSchemes, SopsPreviewTaskTree,
+    DescribeSopsSchemes,
+    SopsPreviewTaskTree,
 )
 
 tags = ["任务查询"]
@@ -182,7 +183,7 @@ class TaskViewSet(BaseViewSet):
             get_request_user(request),
             kwargs.get("biz_id"),
             request.payload.get("template_id"),
-            request.payload.get("exclude_task_nodes_id")
+            request.payload.get("exclude_task_nodes_id"),
         )
         return JsonResponse(response)
 
@@ -296,46 +297,49 @@ class TaskViewSet(BaseViewSet):
         panels = BkMonitor.get_all_panels(dashboard_info.get("panels", []))
         variables = []
         for t in dashboard_info.get("templating", {}).get("list", []):
-            variables.append({
-                "key": t["name"],
-                "name": f"[仪表盘变量]{t['name']}",
-                "tips": f"如需自定义{t['name']}，请将<[通用]使用仪表盘变量默认值>设置为否",
-                "default": "使用仪表盘变量默认值"
-            })
+            variables.append(
+                {
+                    "key": t["name"],
+                    "name": f"[仪表盘变量]{t['name']}",
+                    "tips": f"如需自定义{t['name']}，请将<[通用]使用仪表盘变量默认值>设置为否",
+                    "default": "使用仪表盘变量默认值",
+                }
+            )
 
-        variables.extend([
-            {
-                "key": "__sys__use_dashboard_default",
-                "name": "[通用]使用仪表盘变量默认值",
-                "tips": "如果使用仪表盘变量默认值，则无须设置仪表盘变量，将以蓝鲸监控仪表盘默认值为准",
-                "default": "是"
-            },
-            {
-                "key": "__sys__width",
-                "name": "[通用]宽度",
-                "tips": "请设置图片宽度, 单位px",
-                "default": 800,
-            },
-            {
-                "key": "__sys__to_now_hours",
-                "name": "[通用]时间范围",
-                "tips": "请设置查看最近几小时的仪表盘",
-                "default": 6,
-            },
-            {
-                "key": "__sys__scale",
-                "name": "[通用]像素密度",
-                "tips": "请设置图片像素密度，默认2, 最大4, 越大越清晰，但是图片大小也越大",
-                "default": 2,
-            },
-            {
-                "key": "__sys__height",
-                "name": "[通用]高度",
-                "tips": "仅在panel_id不为空时有效",
-                "default": 500,
-            }
-
-        ])
+        variables.extend(
+            [
+                {
+                    "key": "__sys__use_dashboard_default",
+                    "name": "[通用]使用仪表盘变量默认值",
+                    "tips": "如果使用仪表盘变量默认值，则无须设置仪表盘变量，将以蓝鲸监控仪表盘默认值为准",
+                    "default": "是",
+                },
+                {
+                    "key": "__sys__width",
+                    "name": "[通用]宽度",
+                    "tips": "请设置图片宽度, 单位px",
+                    "default": 800,
+                },
+                {
+                    "key": "__sys__to_now_hours",
+                    "name": "[通用]时间范围",
+                    "tips": "请设置查看最近几小时的仪表盘",
+                    "default": 6,
+                },
+                {
+                    "key": "__sys__scale",
+                    "name": "[通用]像素密度",
+                    "tips": "请设置图片像素密度，默认2, 最大4, 越大越清晰，但是图片大小也越大",
+                    "default": 2,
+                },
+                {
+                    "key": "__sys__height",
+                    "name": "[通用]高度",
+                    "tips": "仅在panel_id不为空时有效",
+                    "default": 500,
+                },
+            ]
+        )
         data = {
             "variables": variables,
             "panels": panels,

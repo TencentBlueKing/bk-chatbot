@@ -37,9 +37,11 @@ class SopsPreviewTaskTree(Serializer):
     """
     标准运维预览任务树
     """
+
     template_id = serializers.CharField(required=True, label="流程模版ID")
-    exclude_task_nodes_id = serializers.ListSerializer(required=True, child=serializers.CharField(), allow_empty=True,
-                                                       label="需要移除的可选节点 ID 列表")
+    exclude_task_nodes_id = serializers.ListSerializer(
+        required=True, child=serializers.CharField(), allow_empty=True, label="需要移除的可选节点 ID 列表"
+    )
 
 
 class DescribeSopsSchemes(Serializer):

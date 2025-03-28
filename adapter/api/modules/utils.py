@@ -1,14 +1,6 @@
 # -*- coding: utf-8 -*-
-import json
 import sys
 from django.conf import settings
-from django.utils import translation
-
-from adapter.utils import build_auth_args
-
-# from adapter.utils.local import get_request
-from blueapps.utils import get_request
-
 
 def _clean_auth_info_uin(auth_info):
     if "uin" in auth_info:
