@@ -42,11 +42,11 @@ def dashboard_send(payload):
         use_dashboard_default = variables.get("__sys__use_dashboard_default", "是") == "是"
         width = int(variables.get("__sys__width", 800))
         height = int(variables.get("__sys__height", 500))
-        to_now_hours = int(variables.get("__sys__to_now_hours", 6))
+        to_now_hours = float(variables.get("__sys__to_now_hours", 6))
         scale = int(variables.get("__sys__scale", 2))
 
         end_time = int(time.time())
-        start_time = end_time - to_now_hours * 60 * 60
+        start_time = end_time - int(to_now_hours * 60 * 60)
         options = {
             "bk_biz_id": int(payload.get("biz_id")),
             "dashboard_uid": payload.get("dashboard_uid"),
