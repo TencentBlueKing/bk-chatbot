@@ -161,8 +161,8 @@ class AlarmNoticeViewSet(BaseViewSet):
         """
         payload = request.payload
         callback_message: dict = json.loads(payload.get("callback_message"))  # 原始告警数据
-        params = callback_message.setdefault("config_id", payload.get("config_id"))
-        return self.__notice(params)
+        callback_message.setdefault("config_id", payload.get("config_id"))
+        return self.__notice(callback_message)
 
 
 @method_decorator(name="list", decorator=alarm_config_list_docs)  # 文档装饰器
