@@ -20,6 +20,7 @@ from blueapps.utils.logger import logger_celery as logger
 from common.design.strategy import Strategy
 from common.models.base import to_format_date
 from common.redis import RedisClient
+from common.requests.ai_hours import report_task_data
 from src.manager.handler.api.message import Message
 from src.manager.handler.bk.bk_devops import BkDevOps
 from src.manager.handler.bk.bk_job import BkJob
@@ -137,9 +138,9 @@ class PlatformTask:
             # 2、有缓存,状态为成功并且执行通知为false
             # 3、触发器不同步
             if (
-                self.get_task_cache(self.obj.id)
-                and self.obj.sender != "trigger"
-                and (self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success)
+                    self.get_task_cache(self.obj.id)
+                    and self.obj.sender != "trigger"
+                    and (self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success)
             ):
                 params = {
                     "log_id": self.obj.id,
@@ -166,6 +167,22 @@ class PlatformTask:
             ExecutionLog.TaskExecStatus.REMOVE.value,
         ]:
             self.del_task_cache(self.obj.id)
+            report_task_data({
+                "task_uuid": self.obj.task_uuid,
+                "biz_id": self.obj.biz_id,
+                "intent_id": self.obj.intent_id,
+                "intent_name": self.obj.intent_name,
+                "intent_create_user": self.obj.intent_create_user,
+                "sender": self.obj.sender,
+                "created_at": to_format_date(self.obj.created_at),
+                "updated_at": to_format_date(self.obj.updated_at),
+                "platform": self.obj.platform,
+                "task_id": self.obj.task_id,
+                "project_id": self.obj.project_id,
+                "feature_id": self.obj.feature_id,
+                "params": self.obj.params,
+                "status": self.obj.status
+            })
 
 
 class TaskStatus(Strategy):
