@@ -1,7 +1,7 @@
 import os
 import requests
 
-from blueapps.utils.logger import logger
+from blueapps.utils.logger import logger_celery as logger
 
 AI_HOURS_REPORT_URL = os.getenv("AI_HOURS_REPORT_URL")
 AI_HOURS_REPORT_TOKEN = os.getenv("AI_HOURS_REPORT_TOKEN")
