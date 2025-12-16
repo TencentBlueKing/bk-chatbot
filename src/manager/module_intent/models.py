@@ -104,6 +104,8 @@ class Intent(BaseModel):
     approver = DictCharField(_("审批人"), default=[])
     tag_name = models.CharField(verbose_name=_("标签分类"), max_length=128, default="")
     match_pattern = models.IntegerField(verbose_name=_("技能匹配模式"), default=IntentMatchPattern.LIKE.value)
+    service_catalogue = models.CharField(_("服务目录"), default="", max_length=128)
+
 
     class Meta:
         db_table = "tab_intent"

@@ -68,6 +68,8 @@ class ReqPostIntentSerializer(Serializer):
     notice_start_success = serializers.BooleanField(required=True, label="启动成功通知")
     notice_exec_success = serializers.BooleanField(required=True, label="执行成功通知")
     match_pattern = serializers.IntegerField(label="技能匹配模式", default=IntentMatchPattern.LIKE.value)
+    service_catalogue = serializers.CharField(label="服务目录", default="")
+
     # 其余表需要
     utterances = serializers.ListField(label="语料信息")
 
