@@ -20,7 +20,7 @@ from blueapps.utils.logger import logger_celery as logger
 from common.design.strategy import Strategy
 from common.models.base import to_format_date
 from common.redis import RedisClient
-from common.requests.ai_hours import report_task_data
+from src.manager.module_intent.handler.ai_hours import report_task_data
 from src.manager.handler.api.message import Message
 from src.manager.handler.bk.bk_devops import BkDevOps
 from src.manager.handler.bk.bk_job import BkJob
@@ -116,6 +116,8 @@ class PlatformTask:
             status = task_info.get("status")
             self.obj.status = status
             self.obj.save()
+            if status in [ExecutionLog.TaskExecStatus.SUCCESS.value, ExecutionLog.TaskExecStatus.FAIL.value]:
+                report_task_data(self.obj)
             return task_info
         except Exception as e:  # pylint: disable=broad-except
             # 异常删除缓存信息
@@ -167,24 +169,6 @@ class PlatformTask:
             ExecutionLog.TaskExecStatus.REMOVE.value,
         ]:
             self.del_task_cache(self.obj.id)
-            task_data = {
-                "task_uuid": self.obj.task_uuid,
-                "biz_id": self.obj.biz_id,
-                "intent_id": self.obj.intent_id,
-                "intent_name": self.obj.intent_name,
-                "intent_create_user": self.obj.intent_create_user,
-                "sender": self.obj.sender,
-                "created_at": to_format_date(self.obj.created_at),
-                "updated_at": to_format_date(self.obj.updated_at),
-                "platform": self.obj.platform,
-                "task_id": self.obj.task_id,
-                "project_id": self.obj.project_id,
-                "feature_id": self.obj.feature_id,
-                "params": self.obj.params,
-                "status": self.obj.status
-            }
-            logger.info(f"report_task_data({task_data})")
-            report_task_data(task_data)
 
 
 class TaskStatus(Strategy):
