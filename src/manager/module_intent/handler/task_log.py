@@ -167,7 +167,7 @@ class PlatformTask:
             ExecutionLog.TaskExecStatus.REMOVE.value,
         ]:
             self.del_task_cache(self.obj.id)
-            report_task_data({
+            task_data = {
                 "task_uuid": self.obj.task_uuid,
                 "biz_id": self.obj.biz_id,
                 "intent_id": self.obj.intent_id,
@@ -182,7 +182,9 @@ class PlatformTask:
                 "feature_id": self.obj.feature_id,
                 "params": self.obj.params,
                 "status": self.obj.status
-            })
+            }
+            logger.info(f"report_task_data({task_data})")
+            report_task_data(task_data)
 
 
 class TaskStatus(Strategy):
