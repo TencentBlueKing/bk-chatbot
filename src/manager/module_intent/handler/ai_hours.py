@@ -25,7 +25,7 @@ def report_task_data(task):
             "intent_create_user": task.intent_create_user,
             "sender": task.sender,
             "created_at": task.created_at,
-            "updated_at": task.updated_at,
+            "updated_at": to_format_date(task.updated_at),
             "platform": task.platform,
             "task_id": task.task_id,
             "project_id": task.project_id,
