@@ -28,6 +28,7 @@ class IntentSerializer(serializers.ModelSerializer):
     available_group = serializers.ListField(required=False, label="可执行群组")
     developer = serializers.ListField(required=False, default=[], label="开发商")
     approver = serializers.ListField(required=False, default=[], label="审批人")
+    service_catalogue = serializers.CharField(label="服务目录", default="", allow_null=True, allow_blank=True)
 
     class Meta:
         model = Intent
