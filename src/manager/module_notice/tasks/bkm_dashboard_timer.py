@@ -92,10 +92,10 @@ def dashboard_send(payload):
         BkChat.file_send_service([source], image_url.split("?")[0].split("/")[-1], image_base64)
 
     except Exception as e:
-        logger.exception(f"[{trace_id}][dashboard_send] error")
+        logger.exception(f"[{trace_id}][dashboard_send] error  {str(e)}")
         error_msg = f"""<font color="#2151d1">{sender}</font>, 您的任务 [**{intent_name}**] <font color="#E53935">执行失败</font>
 <font color="#858585"> TraceId</font>: {trace_id}
-<font color="#858585"> 错误信息</font>: {str(e)}
+<font color="#858585"> 发生预期外的报错,请联系管理员</font>
 """
         kwargs = {
             "im": "WEWORK",
