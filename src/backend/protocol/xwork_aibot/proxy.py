@@ -32,7 +32,7 @@ from .decryption import WXBizJsonMsgCrypt
 class Proxy(BaseProxy):
     def __init__(self, api_root: Optional[str], api_config: Dict):
         super().__init__(message_class=Message,
-                         api_class=UnifiedApi(http_api=HttpApi(api_root, api_config)))
+                         api_class=UnifiedApi())
         self._server_app.route('/callback', methods=['POST', 'GET'])(self._handle_http)
         self.S_TOKEN = os.getenv("BKAPP_WXAIBOT_TOKEN")
         self.S_ENCODING_AES_KEY = os.getenv("BKAPP_WXAIBOT_ENCODING_AES_KEY")
@@ -60,11 +60,11 @@ class Proxy(BaseProxy):
 
         else:
             crypt = WXBizJsonMsgCrypt(self.S_TOKEN, self.S_ENCODING_AES_KEY, "")
-            msg_signature = request.GET.get("msg_signature")
-            timestamp = request.GET.get("timestamp")
-            nonce = request.GET.get("nonce")
-
-            post_data = json.loads(request.body.decode("utf-8"))
+            msg_signature = request.args.get("msg_signature")
+            timestamp = request.args.get("timestamp")
+            nonce = request.args.get("nonce")
+            body = await request.get_data()
+            post_data = json.loads(body.decode("utf-8"))
             logger.info(
                 f"请求消息回调 {post_data}, msg_signature={msg_signature}, timestamp={timestamp}, nonce={nonce}")
             ret, decrypt_post_json_data = crypt.DecryptMsg(post_data, msg_signature, timestamp, nonce)
@@ -73,14 +73,14 @@ class Proxy(BaseProxy):
                 return jsonify({"error": "解密失败"}, status=500)
             post_json = json.loads(decrypt_post_json_data)
             logger.info(f"企微发送的消息\n=============\n{post_json}")
-            return_msg = self._reply_wxaibot({
+            return_msg = {
                 "msgtype": "stream",
                 "stream": {
                     "id": f"stream_queue_{uuid.uuid4().hex}",
                     "finish": True,
                     "content": post_json['text']['content'],
                 }
-            })
+            }
             ret, wxbot_encrypt_msg = crypt.EncryptMsg(json.dumps(return_msg, ensure_ascii=False), nonce, timestamp)
             logger.info(f"返回的消息\n=============\n{return_msg}")
             return Response(response=wxbot_encrypt_msg, content_type="text/plain")

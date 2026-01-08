@@ -42,3 +42,22 @@ class Bot(BaseBot, XworkAibotProxy):
         self.protocol_config = {k: v for k, v in XworkAibotConfig.__dict__.items()}
         XworkAibotProxy.__init__(self, self.config.API_ROOT, self.protocol_config)
         self.asgi.debug = self.config.DEBUG
+
+    async def call_api(self, *args, **kwargs):
+        pass
+
+    async def check_permission(self, *args, **kwargs):
+        pass
+
+    async def handle_event(self, *args, **kwargs):
+        pass
+
+    async def handle_message(self, *args, **kwargs):
+        pass
+
+    async def send(self, *args, **kwargs):
+        pass
+
+    @property
+    def type(self) -> str:
+        return "xwork_aibot"
