@@ -83,7 +83,7 @@ class Proxy(BaseProxy):
             })
             ret, wxbot_encrypt_msg = crypt.EncryptMsg(json.dumps(return_msg, ensure_ascii=False), nonce, timestamp)
             logger.info(f"返回的消息\n=============\n{return_msg}")
-            return Response(content=wxbot_encrypt_msg, content_type="text/plain")
+            return Response(response=wxbot_encrypt_msg, content_type="text/plain")
 
     def run(self, host=None, port=None, *args, **kwargs):
         self._server_app.run(host=host, port=port, *args, **kwargs)
