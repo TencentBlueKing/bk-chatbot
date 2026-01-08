@@ -68,9 +68,9 @@ class Proxy(BaseProxy):
             logger.info(
                 f"请求消息回调 {post_data}, msg_signature={msg_signature}, timestamp={timestamp}, nonce={nonce}")
             ret, decrypt_post_json_data = crypt.DecryptMsg(post_data, msg_signature, timestamp, nonce)
-            if ret != 0:
-                logger.error("消息内容解密失败")
-                return jsonify({"error": "解密失败"}, status=500)
+            # if ret != 0:
+            #     logger.error("消息内容解密失败")
+            #     return jsonify({"error": "解密失败"}, status=500)
             post_json = json.loads(decrypt_post_json_data)
             logger.info(f"企微发送的消息\n=============\n{post_json}")
             return_msg = {
