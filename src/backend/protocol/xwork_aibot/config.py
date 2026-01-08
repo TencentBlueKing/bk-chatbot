@@ -13,31 +13,8 @@ either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 """
 
-from os import path, getenv
-from typing import List, Dict
+import os
 
-import opsbot
-try:
-    import config as CONFIG
-except ModuleNotFoundError:
-    CONFIG = None
-
-PRODUCT = getenv('PRODUCT', 'xwork')
-PLUGINS = getenv('PLUGINS', '').split(',')
-
-
-class Server:
-    def __init__(self, bot_product: str, plugins: List, config: Dict = None):
-        self.bot_product = bot_product
-        self._plugins = plugins
-        self._config = config
-
-    def run(self):
-        opsbot.init_db()
-        opsbot.init(self.bot_product, self._config)
-        for plugin in self._plugins:
-            opsbot.load_plugins(path.join(path.dirname(__file__), 'plugins', plugin), f'plugins.{plugin}')
-        opsbot.run()
-
-
-Server(PRODUCT, PLUGINS, CONFIG).run()
+TOKEN = os.getenv('BKAPP_WXAIBOT_TOKEN', '')
+ENCODING_AES_KEY = os.getenv('BKAPP_WXAIBOT_ENCODING_AES_KEY', '')
+RECEIVE_ID = os.getenv('BKAPP_WXAIBOT_RECEIVE_ID', '')
