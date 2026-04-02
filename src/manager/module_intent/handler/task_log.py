@@ -16,6 +16,7 @@ specific language governing permissions and limitations under the License.
 import traceback
 from typing import Callable
 
+from django.db import close_old_connections
 from blueapps.utils.logger import logger_celery as logger
 from common.design.strategy import Strategy
 from common.models.base import to_format_date
@@ -62,13 +63,17 @@ def update_task_status(id: int) -> None:
         with RedisClient() as r:
             r.expire(new_key, 0)
 
-    task_lock = __get_lock(id)
-    if not task_lock:
-        return
-    logger.info(f"更新任务ID:{id}")
-    execution_log_obj: ExecutionLog = ExecutionLog.query_log(**{"id": id})
-    TaskStatus.do(execution_log_obj)
-    __del_lock(id)
+    try:
+        close_old_connections()  # 清理线程中可能残留的旧/失效连接
+        task_lock = __get_lock(id)
+        if not task_lock:
+            return
+        logger.info(f"更新任务ID:{id}")
+        execution_log_obj: ExecutionLog = ExecutionLog.query_log(**{"id": id})
+        TaskStatus.do(execution_log_obj)
+        __del_lock(id)
+    finally:
+        close_old_connections()  # 确保线程结束时关闭数据库连接，防止连接泄漏
 
 
 class PlatformTask:
