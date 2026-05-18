@@ -17,7 +17,7 @@ specific language governing permissions and limitations under the License.
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 
-from manager.module_api.enums import UpdateAvailableUserAction
+from src.manager.module_api.enums import UpdateAvailableUserAction
 from src.manager.module_api.proto import api_tag
 from src.manager.module_intent.models import Intent
 
