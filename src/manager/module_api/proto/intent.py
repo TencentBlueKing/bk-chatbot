@@ -17,8 +17,26 @@ specific language governing permissions and limitations under the License.
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import serializers
 
+from manager.module_api.enums import UpdateAvailableUserAction
 from src.manager.module_api.proto import api_tag
 from src.manager.module_intent.models import Intent
+
+
+class IntentListByBizSerializer(serializers.Serializer):
+    """根据 biz_id 查询意图列表请求序列化器"""
+
+    biz_id = serializers.IntegerField(required=True, label="业务ID")
+
+
+class IntentAvailableUserSerializer(serializers.Serializer):
+    """修改意图可执行用户序列化器"""
+
+    action = serializers.ChoiceField(required=True, label="操作类型", choices=[e.value for e in UpdateAvailableUserAction])
+    available_user = serializers.ListField(
+        child=serializers.CharField(),
+        required=True,
+        label="要添加或删除的用户列表",
+    )
 
 
 class IntentGWSerializer(serializers.ModelSerializer):
@@ -44,4 +62,16 @@ intent_update_docs = swagger_auto_schema(
     tags=api_tag,
     operation_id="意图管理-修改",
     # request_body=ReqPostIntentSerializer,
+)
+
+intent_gw_update_available_user_docs = swagger_auto_schema(
+    tags=api_tag,
+    operation_id="意图管理(网关)-添加、删除可执行用户",
+    request_body=IntentAvailableUserSerializer,
+)
+
+intent_gw_list_docs = swagger_auto_schema(
+    tags=api_tag,
+    operation_id="意图管理(网关)-根据业务ID查询列表",
+    query_serializer=IntentListByBizSerializer,
 )
