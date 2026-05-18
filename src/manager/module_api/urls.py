@@ -30,6 +30,7 @@ router = routers.DefaultRouter()
 router.register(r"bkmonitor", bkmonitor_views.BkMonitorViewSet, basename="bkmonitor")
 router.register(r"cmdb", cmdb_views.CmdbViewSet, basename="cmdb")
 router.register(r"admin/intent", intent_view.IntentViewSet, basename="intent_api")
+router.register(r"gw/intent", intent_view.GwIntentViewSet, basename="intent_gw_api")
 router.register(r"biz/variable", biz_variable_views.BizVariableViewSet, basename="biz_variable_api")
 
 urlpatterns = (

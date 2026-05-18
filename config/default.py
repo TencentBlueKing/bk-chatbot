@@ -41,6 +41,7 @@ INSTALLED_APPS += (
     "django_filters",
     "drf_yasg",
     "version_log",
+    "apigw_manager.apigw",
 )
 INSTALLED_APPS += BKCHAT_INSTALLED_APPS
 
@@ -73,6 +74,7 @@ MIDDLEWARE += (
     "common.middleware.request.CommonMiddleware",
     "common.middleware.visit.VisitMiddleware",
     "common.middleware.request.RequestProvider",
+    "apigw_manager.apigw.authentication.ApiGatewayJWTUserMiddleware",
 )
 
 # version log config
@@ -216,3 +218,5 @@ wtMKeQnF2Ktl08EbVVuqBiEZLKqBqBWQC3zTRb65c+oiWzzS9J/J+i9z9dxc2rGk
 kQIDAQAB
 -----END PUBLIC KEY-----
 """
+
+BK_API_URL_TMPL = os.getenv("BK_API_URL_TMPL")
