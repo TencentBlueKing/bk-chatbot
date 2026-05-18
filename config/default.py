@@ -74,7 +74,12 @@ MIDDLEWARE += (
     "common.middleware.request.CommonMiddleware",
     "common.middleware.visit.VisitMiddleware",
     "common.middleware.request.RequestProvider",
+    "apigw_manager.apigw.authentication.ApiGatewayJWTGenericMiddleware",
     "apigw_manager.apigw.authentication.ApiGatewayJWTUserMiddleware",
+)
+
+AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + (
+    "apigw_manager.apigw.authentication.UserModelBackend",
 )
 
 # version log config
@@ -181,6 +186,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "apigw_manager.drf.authentication.ApiGatewayJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ],
