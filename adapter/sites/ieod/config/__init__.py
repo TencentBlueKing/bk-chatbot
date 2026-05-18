@@ -30,3 +30,8 @@ NODEMAN_APIGW = get_env_or_raise("NODEMAN_APIGW")  # 节点管理
 DEVOPS_APIGW = get_env_or_raise("DEVOPS_APIGW")  # 蓝盾
 MONITOR_URL = get_env_or_raise("MONITOR_URL")  # 蓝鲸监控
 CSTONE_ESB_URL = get_env_or_raise("CSTONE_ESB_URL")  # 云石
+ITSM_FLEX_APIGW = get_env_or_raise("ITSM_FLEX_APIGW")
+
+
+# ITSM Flex 服务目录缓存时间（秒），默认 24 小时
+ITSM_FLEX_SERVICE_CATALOGUE_TTL = int(os.getenv("BKAPP_ITSM_FLEX_SERVICE_CATALOGUE_TTL", 60 * 60 * 24))

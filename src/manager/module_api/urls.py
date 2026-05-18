@@ -22,6 +22,7 @@ from src.manager.module_api.views import (
     bkmonitor_views,
     cmdb_views,
     intent_view,
+    itsm_views,
 )
 
 router = routers.DefaultRouter()
@@ -32,6 +33,7 @@ router.register(r"cmdb", cmdb_views.CmdbViewSet, basename="cmdb")
 router.register(r"admin/intent", intent_view.IntentViewSet, basename="intent_api")
 router.register(r"gw/intent", intent_view.GwIntentViewSet, basename="intent_gw_api")
 router.register(r"biz/variable", biz_variable_views.BizVariableViewSet, basename="biz_variable_api")
+router.register(r"itsm", itsm_views.ItsmViewSet, basename="itsm_api")
 
 urlpatterns = (
     url(r"^exec/admin_describe_intents", admin_views.admin_describe_intents),
