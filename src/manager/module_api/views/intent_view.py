@@ -23,7 +23,7 @@ from rest_framework.response import Response
 
 from common.drf.view_set import BaseUpdateViewSet
 from common.perm.permission import check_permission
-from manager.module_api.enums import UpdateAvailableUserAction
+from src.manager.module_api.enums import UpdateAvailableUserAction
 from src.manager.module_api.proto.intent import (
     IntentAvailableUserSerializer,
     IntentGWSerializer,
