@@ -127,7 +127,7 @@ class PlatformTask:
         except Exception as e:  # pylint: disable=broad-except
             # 异常删除缓存信息
             traceback.print_exc()
-            logger.error(f"更新日志状态异常:{e}")
+            logger.error(f"更新日志状态异常 id={self.obj.id} task_id={self.obj.task_id} task_uuid={self.obj.task_uuid}: {e}")
             self.del_task_cache(self.obj.id)
             raise e
 
@@ -145,9 +145,9 @@ class PlatformTask:
             # 2、有缓存,状态为成功并且执行通知为false
             # 3、触发器不同步
             if (
-                    self.get_task_cache(self.obj.id)
-                    and self.obj.sender != "trigger"
-                    and (self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success)
+                self.get_task_cache(self.obj.id)
+                and self.obj.sender != "trigger"
+                and (self.obj.status != ExecutionLog.TaskExecStatus.SUCCESS.value or self.obj.notice_exec_success)
             ):
                 params = {
                     "log_id": self.obj.id,
