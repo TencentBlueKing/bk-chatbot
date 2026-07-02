@@ -18,6 +18,7 @@ from typing import Callable
 
 from django.db import close_old_connections
 from blueapps.utils.logger import logger_celery as logger
+from adapter.common.exceptions import ApiRequestError
 from common.design.strategy import Strategy
 from common.models.base import to_format_date
 from common.redis import RedisClient
@@ -124,10 +125,19 @@ class PlatformTask:
             if status in [ExecutionLog.TaskExecStatus.SUCCESS.value, ExecutionLog.TaskExecStatus.FAIL.value]:
                 report_task_data(self.obj)
             return task_info
-        except Exception as e:  # pylint: disable=broad-except
-            # 异常删除缓存信息
+        except ApiRequestError as e:
+            # 网络连接异常（超时、DNS解析失败等），保留缓存以便后续重试
             traceback.print_exc()
-            logger.error(f"更新日志状态异常 id={self.obj.id} task_id={self.obj.task_id} task_uuid={self.obj.task_uuid}: {e}")
+            logger.error(
+                f"更新日志状态网络异常 id={self.obj.id} task_id={self.obj.task_id}" f" task_uuid={self.obj.task_uuid}: {e}"
+            )
+            raise e
+        except Exception as e:  # pylint: disable=broad-except
+            # 其他异常删除缓存信息
+            traceback.print_exc()
+            logger.error(
+                f"更新日志状态异常 id={self.obj.id} task_id={self.obj.task_id}" f" task_uuid={self.obj.task_uuid}: {e}"
+            )
             self.del_task_cache(self.obj.id)
             raise e
 

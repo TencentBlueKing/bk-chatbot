@@ -36,6 +36,10 @@ RUN_MODE = "STAGING"
 
 # 预发布环境数据库可以在这里配置
 # 默认 default 请不要修改，如果使用了外部数据库，请联系【蓝鲸助手】授权
+
+# 数据库连接池复用（秒），避免每次请求重建 MySQL 连接
+DATABASES["default"]["CONN_MAX_AGE"] = 300
+
 BK_STATIC_URL = STATIC_URL + "dist"
 
 
