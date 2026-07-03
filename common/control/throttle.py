@@ -23,6 +23,16 @@ from common.redis import RedisClient
 
 RECORD = {"127.0.0.1": [1576141582]}
 
+# 模块级 RedisClient 单例，避免每次请求都创建新的连接池
+_throttle_redis_client = None
+
+
+def _get_throttle_redis_client():
+    global _throttle_redis_client
+    if _throttle_redis_client is None:
+        _throttle_redis_client = RedisClient()
+    return _throttle_redis_client
+
 
 class ChatBotThrottle(BaseThrottle):
     ctime = time.time
@@ -31,9 +41,12 @@ class ChatBotThrottle(BaseThrottle):
         # 允许1秒20次
         self.num_request = num
         self.times_request = times
-        self.redis_client = RedisClient()
         self.view_key = None
         self.ident = None
+
+    @property
+    def redis_client(self):
+        return _get_throttle_redis_client()
 
     def get_ident(self, request):
         """
