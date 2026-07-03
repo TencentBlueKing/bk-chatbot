@@ -39,6 +39,8 @@ class RedisClient:
             port=self.port,
             db=db,
             decode_responses=True,
+            socket_connect_timeout=3,
+            socket_timeout=5,
         )
 
     def get(self, key):
