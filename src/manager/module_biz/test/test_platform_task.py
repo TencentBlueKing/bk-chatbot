@@ -5,6 +5,8 @@ from copy import deepcopy
 
 import pytest
 
+from src.manager.module_notice.handler.deal_boardcast_msg import OriginalBroadcast
+
 
 @pytest.fixture(scope="module")
 def parse_sops_pipeline_tree():
@@ -195,6 +197,51 @@ def test_unfolds_short_parallel_subprocess_when_runtime_children_are_empty(parse
     assert result["total_step_num"] == 5
 
 
+def test_supplements_short_parallel_subprocess_outside_five_step_window(parse_sops_pipeline_tree):
+    long_pipeline = linear_pipeline(
+        service("long-child-1", "long child 1"),
+        service("long-child-2", "long child 2"),
+        service("long-child-3", "long child 3"),
+        service("long-child-4", "long child 4"),
+        service("long-child-5", "long child 5"),
+    )
+    short_pipeline = linear_pipeline(
+        service("short-child-1", "short child 1"), service("short-child-2", "short child 2")
+    )
+    pipeline = parallel_pipeline(
+        subprocess("long", "long subprocess", long_pipeline),
+        subprocess("short", "short subprocess", short_pipeline),
+    )
+    status = task_status(
+        "RUNNING",
+        {
+            "long": {
+                "state": "RUNNING",
+                "children": {"long-child-1": {"state": "RUNNING", "children": {}}},
+            },
+            "short": {"state": "FINISHED", "children": {}},
+        },
+    )
+
+    result = parse_sops_pipeline_tree(task_info(pipeline), status, is_parse_all=False)
+
+    assert [step["step_name"] for step in result["step_data"]] == [
+        "long subprocess",
+        "long child 1",
+        "long child 2",
+        "long child 3",
+    ]
+    assert [step["step_name"] for step in result["else_executing_step_list"]] == [
+        "short subprocess",
+        "short child 1",
+        "short child 2",
+    ]
+    broadcast_text = OriginalBroadcast(result).text_content
+    assert "short subprocess" in broadcast_text
+    assert "short child 1" in broadcast_text
+    assert "short child 2" in broadcast_text
+
+
 def test_empty_runtime_children_keep_five_step_window_safe(parse_sops_pipeline_tree):
     child_pipeline = linear_pipeline(
         service("child-1", "child 1"),
@@ -209,7 +256,28 @@ def test_empty_runtime_children_keep_five_step_window_safe(parse_sops_pipeline_t
     result = parse_sops_pipeline_tree(task_info(pipeline), status, is_parse_all=False)
 
     assert [step["step_name"] for step in result["step_data"]] == ["subprocess", "child 1", "child 2"]
+    assert [step["step_name"] for step in result["else_executing_step_list"]] == [
+        "child 3",
+        "child 4",
+        "child 5",
+    ]
     assert len(result["step_data"]) <= 5
+
+
+def test_does_not_supplement_unstarted_subprocess(parse_sops_pipeline_tree):
+    child_pipeline = linear_pipeline(
+        service("child-1", "child 1"),
+        service("child-2", "child 2"),
+        service("child-3", "child 3"),
+        service("child-4", "child 4"),
+        service("child-5", "child 5"),
+    )
+    pipeline = linear_pipeline(subprocess("sub", "subprocess", child_pipeline))
+    status = task_status("RUNNING", {"sub": {"state": "CREATED", "children": {}}})
+
+    result = parse_sops_pipeline_tree(task_info(pipeline), status, is_parse_all=False)
+
+    assert result["else_executing_step_list"] == []
 
 
 def test_successful_task_still_filters_nodes_without_runtime_status(parse_sops_pipeline_tree):
@@ -229,9 +297,7 @@ def test_successful_task_still_filters_nodes_without_runtime_status(parse_sops_p
         ("REVOKED", "执行终止"),
     ],
 )
-def test_unfinished_special_states_generate_broadcast_result(
-    parse_sops_pipeline_tree, state, expected_status
-):
+def test_unfinished_special_states_generate_broadcast_result(parse_sops_pipeline_tree, state, expected_status):
     pipeline = linear_pipeline(service("node", "node"))
     status = task_status(state, {"node": {"state": state, "children": {}}})
 
