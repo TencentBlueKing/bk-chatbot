@@ -219,3 +219,24 @@ def test_successful_task_still_filters_nodes_without_runtime_status(parse_sops_p
     result = parse_sops_pipeline_tree(task_info(pipeline), status, is_parse_all=True)
 
     assert [step["step_name"] for step in result["step_data"]] == ["executed"]
+
+
+@pytest.mark.parametrize(
+    "state, expected_status",
+    [
+        ("SUSPENDED", "暂停"),
+        ("NODE_SUSPENDED", "暂停"),
+        ("REVOKED", "执行终止"),
+    ],
+)
+def test_unfinished_special_states_generate_broadcast_result(
+    parse_sops_pipeline_tree, state, expected_status
+):
+    pipeline = linear_pipeline(service("node", "node"))
+    status = task_status(state, {"node": {"state": state, "children": {}}})
+
+    result = parse_sops_pipeline_tree(task_info(pipeline), status, is_parse_all=False)
+
+    assert result["task_status"] == expected_status
+    assert result["current_step_num"] == 1
+    assert result["step_data"][0]["step_status"] == expected_status

@@ -22,6 +22,7 @@ sops_instance_status_map = {
     "FAILED": TaskExecStatus.FAIL.value,  # 失败
     "FINISHED": TaskExecStatus.SUCCESS.value,  # 已完成
     "SUSPENDED": TaskExecStatus.SUSPENDED.value,  # 暂停
+    "NODE_SUSPENDED": TaskExecStatus.SUSPENDED.value,  # 节点暂停
     "REVOKED": TaskExecStatus.REMOVE.value,  # 已终止
 }
 
