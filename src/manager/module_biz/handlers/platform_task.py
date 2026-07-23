@@ -196,6 +196,7 @@ def parse_sops_node_order(pipeline_tree):
 def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
     pipeline_tree = task_info.get("pipeline_tree")
     parse_result = [None]
+    supplemental_subprocess_steps = []
     current_step_detail = {"plugin_code": "", "step_id": ""}
 
     def _unfold_pipeline_tree(pipeline_data, status_data, parse_data, parent_step_index_list, cur_step_detail):
@@ -278,27 +279,36 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             parse_data.append(current_parse_data)
             if node["type"] == "SubProcess":
-                if node_status_info.get("children"):
-                    _unfold_pipeline_tree(
-                        node["pipeline"],
-                        node_status_info.get("children"),
-                        parse_data,
-                        current_step_index_list,
-                        current_step_detail,
-                    )
+                subprocess_step_start = len(parse_data) - 1
+                subprocess_children = node_status_info.get("children") or {}
+                _unfold_pipeline_tree(
+                    node["pipeline"],
+                    subprocess_children,
+                    parse_data,
+                    current_step_index_list,
+                    current_step_detail,
+                )
+                # A fast subprocess may finish before its runtime child tree is available.
+                if (
+                    node_id in status_data
+                    and node_status_info.get("state") != "CREATED"
+                    and not subprocess_children
+                ):
+                    supplemental_subprocess_steps.extend(parse_data[subprocess_step_start:])
 
-    _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [], current_step_detail)
+    _unfold_pipeline_tree(pipeline_tree, status_info.get("children") or {}, parse_result, [], current_step_detail)
     running_index = parse_result[0]
     parse_result = parse_result[1:]
     total_step_num = len(parse_result)
     task_state = sops_instance_status_map[status_info.get("state")]
+    current_step_num = 0
     if task_state in TASK_STATUS_INIT:
         current_step_num = 0
     elif task_state in TASK_STATUS_SUCCESS:
         current_step_num = total_step_num
     else:
         for index, item in enumerate(parse_result):
-            if item["step_status"] in {"执行中", "执行失败"}:
+            if item["step_status"] in {"执行中", "执行失败", "暂停", "执行终止"}:
                 current_step_num = index + 1
                 break
 
@@ -307,10 +317,17 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
         if task_state in TASK_STATUS_INIT:
             parse_result = parse_result[:5]
         if task_state in TASK_STATUS_UNFINISHED:
+            if running_index is None:
+                running_index = max(current_step_num - 1, 0)
             _start = running_index - 2 if running_index - 2 > 0 else 0
             _end = running_index + 3
-            for step in parse_result[_end:]:
-                if step["step_status"] in {"执行中", "执行失败"}:
+            supplemental_step_ids = {id(step) for step in supplemental_subprocess_steps}
+            for index, step in enumerate(parse_result):
+                if _start <= index < _end:
+                    continue
+                if (
+                    index >= _end and step["step_status"] in {"执行中", "执行失败"}
+                ) or id(step) in supplemental_step_ids:
                     else_executing_step_list.append(step)
             parse_result = parse_result[_start:_end]
         if task_state in TASK_STATUS_SUCCESS:
