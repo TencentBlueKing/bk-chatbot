@@ -278,27 +278,27 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
 
             parse_data.append(current_parse_data)
             if node["type"] == "SubProcess":
-                if node_status_info.get("children"):
-                    _unfold_pipeline_tree(
-                        node["pipeline"],
-                        node_status_info.get("children"),
-                        parse_data,
-                        current_step_index_list,
-                        current_step_detail,
-                    )
+                _unfold_pipeline_tree(
+                    node["pipeline"],
+                    node_status_info.get("children") or {},
+                    parse_data,
+                    current_step_index_list,
+                    current_step_detail,
+                )
 
-    _unfold_pipeline_tree(pipeline_tree, status_info.get("children"), parse_result, [], current_step_detail)
+    _unfold_pipeline_tree(pipeline_tree, status_info.get("children") or {}, parse_result, [], current_step_detail)
     running_index = parse_result[0]
     parse_result = parse_result[1:]
     total_step_num = len(parse_result)
     task_state = sops_instance_status_map[status_info.get("state")]
+    current_step_num = 0
     if task_state in TASK_STATUS_INIT:
         current_step_num = 0
     elif task_state in TASK_STATUS_SUCCESS:
         current_step_num = total_step_num
     else:
         for index, item in enumerate(parse_result):
-            if item["step_status"] in {"执行中", "执行失败"}:
+            if item["step_status"] in {"执行中", "执行失败", "暂停", "执行终止"}:
                 current_step_num = index + 1
                 break
 
@@ -307,6 +307,8 @@ def parse_sops_pipeline_tree(task_info, status_info, is_parse_all=False):
         if task_state in TASK_STATUS_INIT:
             parse_result = parse_result[:5]
         if task_state in TASK_STATUS_UNFINISHED:
+            if running_index is None:
+                running_index = max(current_step_num - 1, 0)
             _start = running_index - 2 if running_index - 2 > 0 else 0
             _end = running_index + 3
             for step in parse_result[_end:]:
